@@ -7,17 +7,17 @@ import (
 	"github.com/jaronnie/worktab/worktabd/internal/rest/static"
 )
 
-func Router(e *gin.Engine) *gin.Engine {
+func Router(g *gin.Engine) *gin.Engine {
 	// redirect 到 /@manage
-	e.GET("/", func(ctx *gin.Context) {
+	g.GET("/", func(ctx *gin.Context) {
 		ctx.Redirect(302, "/@manage")
 	})
 
-	ui := e.Group("/@manage")
+	ui := g.Group("/@manage")
 	static.Static(ui, public.Public)
 
-	apiV1 := e.Group("/api/v1")
+	apiV1 := g.Group("/api/v1")
 	api.ApiRouter(apiV1)
 
-	return e
+	return g
 }

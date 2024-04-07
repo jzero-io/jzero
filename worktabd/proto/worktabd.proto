@@ -4,8 +4,6 @@ package worktabdpb;
 
 option go_package = "./worktabdpb";
 
-import "google/api/annotations.proto";
-
 message Container {
     string id = 1;
 }
@@ -18,16 +16,7 @@ message ServerVersionResponse {
   
 
 service worktabd {
-    rpc ServerVersion(Empty) returns(ServerVersionResponse) {
-        option (google.api.http) = {
-            post: "/api/v1/version"
-            body: "*"
-          };
-    };
-    rpc container(Empty) returns(Container) {
-        option (google.api.http) = {
-            post: "/api/v1/container"
-            body: "*"
-          };
-    };
+    rpc ServerVersion(Empty) returns(ServerVersionResponse) {};
+
+    rpc container(Empty) returns(Container) {};
 }

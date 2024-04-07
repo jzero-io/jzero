@@ -1,26 +1,21 @@
 package worktabd
 
 import (
-	"context"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	adapter "github.com/gwatts/gin-adapter"
 	"github.com/spf13/viper"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 
 	"github.com/jaronnie/worktab/worktabd/internal/config"
 	"github.com/jaronnie/worktab/worktabd/internal/rest"
-	"github.com/jaronnie/worktab/worktabd/internal/rest/middlewares"
 	"github.com/jaronnie/worktab/worktabd/internal/server"
 	"github.com/jaronnie/worktab/worktabd/internal/svc"
 	"github.com/jaronnie/worktab/worktabd/worktabdpb"
@@ -45,8 +40,6 @@ func StartworktabdZrpcServer(configFile string) {
 }
 
 func StartworktabdGatewayServer() {
-	mux := runtime.NewServeMux()
-
 	httpAddress := viper.GetString("ListenOnHTTP")
 	grpcAddress := viper.GetString("ListenOn")
 	sock := viper.GetString("ListenOnSocket")
@@ -58,26 +51,18 @@ func StartworktabdGatewayServer() {
 		grpcAddress = "0.0.0.0:9603"
 	}
 
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	if err := worktabdpb.RegisterWorktabdHandlerFromEndpoint(context.Background(), mux, grpcAddress, opts); err != nil {
-		panic(err)
-	}
-
 	g := gin.New()
 
-	// wrap grpc gateway handler
-	handler := adapter.Wrap(func(h http.Handler) http.Handler {
-		return mux
-	})
-
-	// gin rest server
+	// load gin handler
 	g = rest.Router(g)
-	g.Use(middlewares.Cors(g))
-	g.Use(handler)
 
+	s := &http.Server{
+		Addr:    httpAddress,
+		Handler: g,
+	}
 	fmt.Printf("Starting http server at %s...\n", httpAddress)
 	go func() {
-		if err := g.Run(httpAddress); err != nil {
+		if err := s.ListenAndServe(); err != nil {
 			panic(err)
 		}
 	}()

@@ -26,5 +26,7 @@ func NewServerVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ser
 func (l *ServerVersionLogic) ServerVersion(in *worktabdpb.Empty) (*worktabdpb.ServerVersionResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &worktabdpb.ServerVersionResponse{}, nil
+	return &worktabdpb.ServerVersionResponse{
+		Version: "v1",
+	}, nil
 }
