@@ -20,7 +20,6 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	Worktabd_ServerVersion_FullMethodName = "/worktabdpb.worktabd/ServerVersion"
-	Worktabd_Container_FullMethodName     = "/worktabdpb.worktabd/container"
 )
 
 // WorktabdClient is the client API for Worktabd service.
@@ -28,7 +27,6 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorktabdClient interface {
 	ServerVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ServerVersionResponse, error)
-	Container(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Container, error)
 }
 
 type worktabdClient struct {
@@ -48,21 +46,11 @@ func (c *worktabdClient) ServerVersion(ctx context.Context, in *Empty, opts ...g
 	return out, nil
 }
 
-func (c *worktabdClient) Container(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Container, error) {
-	out := new(Container)
-	err := c.cc.Invoke(ctx, Worktabd_Container_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // WorktabdServer is the server API for Worktabd service.
 // All implementations must embed UnimplementedWorktabdServer
 // for forward compatibility
 type WorktabdServer interface {
 	ServerVersion(context.Context, *Empty) (*ServerVersionResponse, error)
-	Container(context.Context, *Empty) (*Container, error)
 	mustEmbedUnimplementedWorktabdServer()
 }
 
@@ -72,9 +60,6 @@ type UnimplementedWorktabdServer struct {
 
 func (UnimplementedWorktabdServer) ServerVersion(context.Context, *Empty) (*ServerVersionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ServerVersion not implemented")
-}
-func (UnimplementedWorktabdServer) Container(context.Context, *Empty) (*Container, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Container not implemented")
 }
 func (UnimplementedWorktabdServer) mustEmbedUnimplementedWorktabdServer() {}
 
@@ -107,24 +92,6 @@ func _Worktabd_ServerVersion_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Worktabd_Container_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WorktabdServer).Container(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Worktabd_Container_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorktabdServer).Container(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Worktabd_ServiceDesc is the grpc.ServiceDesc for Worktabd service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -135,10 +102,6 @@ var Worktabd_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ServerVersion",
 			Handler:    _Worktabd_ServerVersion_Handler,
-		},
-		{
-			MethodName: "container",
-			Handler:    _Worktabd_Container_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

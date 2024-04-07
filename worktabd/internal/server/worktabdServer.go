@@ -26,8 +26,3 @@ func (s *WorktabdServer) ServerVersion(ctx context.Context, in *worktabdpb.Empty
 	l := logic.NewServerVersionLogic(ctx, s.svcCtx)
 	return l.ServerVersion(in)
 }
-
-func (s *WorktabdServer) Container(ctx context.Context, in *worktabdpb.Empty) (*worktabdpb.Container, error) {
-	l := logic.NewContainerLogic(ctx, s.svcCtx)
-	return l.Container(in)
-}

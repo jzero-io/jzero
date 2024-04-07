@@ -1,0 +1,15 @@
+Name = "worktabd.rpc"
+ListenOn = "0.0.0.0:8000"
+Key = "worktabd.rpc"
+Mode = "dev"
+
+[Gateway]
+Name = "gateway"
+Port = 8001
+
+  [[Gateway.Upstreams]]
+  Name = "rpc-server"
+  ProtoSets = [ "worktabd.pb" ]
+
+    [Gateway.Upstreams.Grpc]
+    Endpoints = [ "0.0.0.0:8000" ]

@@ -13,13 +13,11 @@ import (
 )
 
 type (
-	Container             = worktabdpb.Container
 	Empty                 = worktabdpb.Empty
 	ServerVersionResponse = worktabdpb.ServerVersionResponse
 
 	Worktabd interface {
 		ServerVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ServerVersionResponse, error)
-		Container(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Container, error)
 	}
 
 	defaultWorktabd struct {
@@ -36,9 +34,4 @@ func NewWorktabd(cli zrpc.Client) Worktabd {
 func (m *defaultWorktabd) ServerVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ServerVersionResponse, error) {
 	client := worktabdpb.NewWorktabdClient(m.cli.Conn())
 	return client.ServerVersion(ctx, in, opts...)
-}
-
-func (m *defaultWorktabd) Container(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Container, error) {
-	client := worktabdpb.NewWorktabdClient(m.cli.Conn())
-	return client.Container(ctx, in, opts...)
 }

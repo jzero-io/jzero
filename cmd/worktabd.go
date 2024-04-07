@@ -17,13 +17,7 @@ var worktabdCmd = &cobra.Command{
 	Short: "worktabd daemon",
 	Long:  `worktabd daemon`,
 	Run: func(cmd *cobra.Command, args []string) {
-		go func() {
-			worktabd.StartworktabdZrpcServer(cfgFile)
-		}()
-
-		go func() {
-			worktabd.StartworktabdGatewayServer()
-		}()
+		worktabd.StartWorktabDaemon(cfgFile)
 
 		select {}
 	},

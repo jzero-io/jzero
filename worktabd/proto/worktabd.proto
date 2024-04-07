@@ -2,21 +2,20 @@ syntax = "proto3";
 
 package worktabdpb;
 
-option go_package = "./worktabdpb";
+import "google/api/annotations.proto";
 
-message Container {
-    string id = 1;
-}
+option go_package = "./worktabdpb";
 
 message Empty {}
   
 message ServerVersionResponse {
       string version = 1;
 }
-  
 
 service worktabd {
-    rpc ServerVersion(Empty) returns(ServerVersionResponse) {};
-
-    rpc container(Empty) returns(Container) {};
+    rpc ServerVersion(Empty) returns(ServerVersionResponse) {
+        option (google.api.http) = {
+            get: "/gateway/v1.0/version"
+        };
+    };
 }
