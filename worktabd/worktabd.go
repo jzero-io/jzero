@@ -19,7 +19,8 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/jaronnie/worktab/worktabd/internal/config"
-	"github.com/jaronnie/worktab/worktabd/internal/router"
+	"github.com/jaronnie/worktab/worktabd/internal/rest"
+	"github.com/jaronnie/worktab/worktabd/internal/rest/middlewares"
 	"github.com/jaronnie/worktab/worktabd/internal/server"
 	"github.com/jaronnie/worktab/worktabd/internal/svc"
 	"github.com/jaronnie/worktab/worktabd/worktabdpb"
@@ -69,18 +70,14 @@ func StartworktabdGatewayServer() {
 		return mux
 	})
 
-	// load gin handler
-	g = router.Load(g)
-
+	// gin rest server
+	g = rest.Router(g)
+	g.Use(middlewares.Cors(g))
 	g.Use(handler)
 
-	s := &http.Server{
-		Addr:    httpAddress,
-		Handler: g,
-	}
 	fmt.Printf("Starting http server at %s...\n", httpAddress)
 	go func() {
-		if err := s.ListenAndServe(); err != nil {
+		if err := g.Run(httpAddress); err != nil {
 			panic(err)
 		}
 	}()
