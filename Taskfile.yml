@@ -1,0 +1,27 @@
+version: "3"
+
+tasks:
+  proto:
+    cmds:
+      - sh ./scripts/gencode.sh
+  install:
+    deps:
+      - build
+    cmds:
+      - cp dist/worktab_{{OS}}_{{ARCH}}/worktab $GOBIN
+    silent: true
+  fmt:
+    cmds:
+      - sh scripts/goimports.sh {{ if empty .CLI_ARGS }}all{{ else }}git{{ end }}
+    silent: true
+  build:
+    cmds:
+      - goreleaser build --snapshot --single-target --rm-dist
+    silent: true
+  release:
+    cmds:
+      - goreleaser release --rm-dist
+    silent: true
+  httpsdk:
+    cmds:
+    - ./scripts/httpsdk.sh debug
