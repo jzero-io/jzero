@@ -61,13 +61,9 @@ func gwAddRoutes(gw *gateway.Server) *gateway.Server {
 	return gw
 }
 
-// TODO: bug fix
+// // TODO: bug fix
 // func startworktabdRestServer(c config.Config) {
 // 	httpAddress := fmt.Sprintf("0.0.0.0:%s", viper.GetString("Gateway.Port"))
-
-// 	if httpAddress == "" {
-// 		httpAddress = "0.0.0.0:8090"
-// 	}
 
 // 	g := gin.New()
 // 	// wrap grpc gateway handler
