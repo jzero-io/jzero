@@ -14,6 +14,8 @@ import (
 	"github.com/jaronnie/worktab/worktabd/internal/server"
 	"github.com/jaronnie/worktab/worktabd/internal/svc"
 	"github.com/jaronnie/worktab/worktabd/worktabdpb"
+
+	"github.com/jaronnie/worktab/worktabd/internal/rest/routers"
 )
 
 func StartWorktabDaemon(cfgFile string) {
@@ -42,6 +44,9 @@ func startworktabdZrpcServer(c config.Config) {
 	// s.Start()
 
 	gw := gateway.MustNewServer(c.Gateway)
+	// gw add routes
+	gwAddRoutes(gw)
+
 	group := service.NewServiceGroup()
 	group.Add(s)
 	group.Add(gw)
@@ -51,6 +56,12 @@ func startworktabdZrpcServer(c config.Config) {
 	group.Start()
 }
 
+func gwAddRoutes(gw *gateway.Server) *gateway.Server {
+	gw.AddRoutes(routers.SetRoutes())
+	return gw
+}
+
+// TODO: bug fix
 // func startworktabdRestServer(c config.Config) {
 // 	httpAddress := fmt.Sprintf("0.0.0.0:%s", viper.GetString("Gateway.Port"))
 

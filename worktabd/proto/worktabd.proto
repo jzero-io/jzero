@@ -15,7 +15,7 @@ message ServerVersionResponse {
 service worktabd {
     rpc ServerVersion(Empty) returns(ServerVersionResponse) {
         option (google.api.http) = {
-            get: "/gateway/v1.0/version"
+            get: "/api/v1.0/version"
         };
     };
 }
