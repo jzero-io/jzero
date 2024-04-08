@@ -4,7 +4,6 @@ package routers
 
 import (
 	"io/fs"
-	"log"
 	"net/http"
 
 	"github.com/jaronnie/worktab/public"
@@ -22,30 +21,19 @@ func SetRoutes() []rest.Route {
 		},
 	})
 
-	routers = append(routers, rest.Route{
-		Method: "GET",
-		Path:   "/",
-		Handler: func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, "/ui/", http.StatusMovedPermanently)
-		},
-	})
-
-	// 添加静态文件服务路由
-	staticHandler, err := fs.Sub(public.Public, "dist")
-	if err != nil {
-		log.Fatal("Unable to load static files: ", err)
-	}
+	staticFS, _ := public.RootAssets()
 
 	routers = append(routers, rest.Route{
-		Method: "GET",
-		Path:   "/ui",
-		Handler: func(w http.ResponseWriter, r *http.Request) {
-			// 将 staticHandler 转换为 http.Handler
-			// 使用 http.StripPrefix 去除路由前缀
-			// 并将请求重定向到静态文件服务处理器
-			http.StripPrefix("/ui", http.FileServer(http.FS(staticHandler))).ServeHTTP(w, r)
-		},
+		Method:  "GET",
+		Path:    "/",
+		Handler: dirhandler("/", staticFS),
 	})
-
 	return routers
+}
+
+func dirhandler(patern string, fs fs.FS) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		handler := http.StripPrefix(patern, http.FileServer(http.FS(fs)))
+		handler.ServeHTTP(w, req)
+	}
 }

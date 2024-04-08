@@ -1,6 +1,13 @@
 package public
 
-import "embed"
+import (
+	"embed"
+	"io/fs"
+)
 
-//go:embed dist
-var Public embed.FS
+//go:embed all:dist
+var assets embed.FS
+
+func RootAssets() (fs.FS, error) {
+	return fs.Sub(assets, "dist")
+}
