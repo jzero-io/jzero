@@ -1,27 +1,40 @@
 package handler
 
 import (
+	"github.com/jaronnie/worktab/public"
+	"github.com/zeromicro/go-zero/rest"
 	"io/fs"
 	"net/http"
+	"strings"
 
-	"github.com/jaronnie/worktab/public"
 	"github.com/jaronnie/worktab/worktabd/internal/svc"
 )
 
 func HealthHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("success"))
+		_, _ = w.Write([]byte("success"))
 	}
 }
 
-func StaticFSHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func registerStaticEmbedHandler(server *rest.Server, serverCtx *svc.ServiceContext) {
+	// related: https://blog.csdn.net/keytounix/article/details/108424389
+	dirLevel := []string{":1", ":2", ":3", ":4", ":5", ":6", ":7", ":8"}
+	pattern := "/"
 	staticFS, _ := public.RootAssets()
-	return dirhandler("/", staticFS)
+	for i := 1; i < len(dirLevel); i++ {
+		path := "/" + strings.Join(dirLevel[:i], "/")
+		server.AddRoute(
+			rest.Route{
+				Method:  http.MethodGet,
+				Path:    path,
+				Handler: dirHandler(pattern, staticFS),
+			})
+	}
 }
 
-func dirhandler(patern string, fs fs.FS) http.HandlerFunc {
+func dirHandler(pattern string, fs fs.FS) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		handler := http.StripPrefix(patern, http.FileServer(http.FS(fs)))
+		handler := http.StripPrefix(pattern, http.FileServer(http.FS(fs)))
 		handler.ServeHTTP(w, req)
 	}
 }

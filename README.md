@@ -8,5 +8,5 @@ worktab worktabd
 
 ## TODO
 
-- [ ] fix static embed files
+- [x] fix static embed files
 - [x] Add go-zero api feature

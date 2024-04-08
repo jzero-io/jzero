@@ -21,11 +21,11 @@ func StartWorktabDaemon(cfgFile string) {
 	var c config.Config
 	conf.MustLoad(cfgFile, &c)
 	go func() {
-		startworktabdZrpcServer(c)
+		startWorktabdZrpcServer(c)
 	}()
 }
 
-func startworktabdZrpcServer(c config.Config) {
+func startWorktabdZrpcServer(c config.Config) {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {

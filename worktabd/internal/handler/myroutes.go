@@ -5,20 +5,19 @@ package handler
 import (
 	"github.com/jaronnie/worktab/worktabd/internal/svc"
 	"github.com/zeromicro/go-zero/rest"
+	"net/http"
 )
 
 func RegisterMyHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	// register static embed handler
+	registerStaticEmbedHandler(server, serverCtx)
+
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				Method:  "GET",
+				Method:  http.MethodGet,
 				Path:    "/api/v1.0/health",
 				Handler: HealthHandler(serverCtx),
-			},
-			{
-				Method:  "GET",
-				Path:    "/",
-				Handler: StaticFSHandler(serverCtx),
 			},
 		},
 	)
