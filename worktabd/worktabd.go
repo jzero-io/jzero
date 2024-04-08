@@ -15,8 +15,6 @@ import (
 	"github.com/jaronnie/worktab/worktabd/internal/server"
 	"github.com/jaronnie/worktab/worktabd/internal/svc"
 	"github.com/jaronnie/worktab/worktabd/worktabdpb"
-
-	"github.com/jaronnie/worktab/worktabd/internal/rest/routers"
 )
 
 func StartWorktabDaemon(cfgFile string) {
@@ -40,7 +38,7 @@ func startworktabdZrpcServer(c config.Config) {
 
 	gw := gateway.MustNewServer(c.Gateway)
 	// gw add routes
-	gwAddRoutes(gw)
+	gwAddRoutes(gw, ctx)
 
 	// gw add api routes
 	handler.RegisterHandlers(gw.Server, ctx)
@@ -54,7 +52,7 @@ func startworktabdZrpcServer(c config.Config) {
 	group.Start()
 }
 
-func gwAddRoutes(gw *gateway.Server) *gateway.Server {
-	gw.AddRoutes(routers.SetRoutes())
+func gwAddRoutes(gw *gateway.Server, serverCtx *svc.ServiceContext) *gateway.Server {
+	gw.AddRoutes(handler.MyRoutes(serverCtx))
 	return gw
 }
