@@ -24,10 +24,6 @@ func StartWorktabDaemon(cfgFile string) {
 	go func() {
 		startworktabdZrpcServer(c)
 	}()
-
-	// go func() {
-	// 	startworktabdRestServer(c)
-	// }()
 }
 
 func startworktabdZrpcServer(c config.Config) {
@@ -40,8 +36,6 @@ func startworktabdZrpcServer(c config.Config) {
 			reflection.Register(grpcServer)
 		}
 	})
-	// fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
-	// s.Start()
 
 	gw := gateway.MustNewServer(c.Gateway)
 	// gw add routes
@@ -60,23 +54,3 @@ func gwAddRoutes(gw *gateway.Server) *gateway.Server {
 	gw.AddRoutes(routers.SetRoutes())
 	return gw
 }
-
-// // TODO: bug fix
-// func startworktabdRestServer(c config.Config) {
-// 	httpAddress := fmt.Sprintf("0.0.0.0:%s", viper.GetString("Gateway.Port"))
-
-// 	g := gin.New()
-// 	// wrap grpc gateway handler
-// 	handler := adapter.Wrap(func(h http.Handler) http.Handler {
-// 		return gateway.MustNewServer(c.Gateway)
-// 	})
-
-// 	g.Use(handler)
-
-// 	fmt.Printf("Starting rest server at %s...\n", httpAddress)
-// 	go func() {
-// 		if err := g.Run(fmt.Sprintf(":%d", c.Gateway.Port)); err != nil {
-// 			panic(err)
-// 		}
-// 	}()
-// }
