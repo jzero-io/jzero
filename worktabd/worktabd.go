@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/jaronnie/worktab/worktabd/internal/config"
+	"github.com/jaronnie/worktab/worktabd/internal/handler"
 	"github.com/jaronnie/worktab/worktabd/internal/server"
 	"github.com/jaronnie/worktab/worktabd/internal/svc"
 	"github.com/jaronnie/worktab/worktabd/worktabdpb"
@@ -40,6 +41,9 @@ func startworktabdZrpcServer(c config.Config) {
 	gw := gateway.MustNewServer(c.Gateway)
 	// gw add routes
 	gwAddRoutes(gw)
+
+	// gw add api routes
+	handler.RegisterHandlers(gw.Server, ctx)
 
 	group := service.NewServiceGroup()
 	group.Add(s)
