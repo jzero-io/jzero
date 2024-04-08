@@ -7,19 +7,19 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
-func MyRoutes(serverCtx *svc.ServiceContext) []rest.Route {
-	var routers []rest.Route
-
-	routers = append(routers, rest.Route{
-		Method:  "GET",
-		Path:    "/api/v1.0/health",
-		Handler: HealthHandler(serverCtx),
-	})
-
-	routers = append(routers, rest.Route{
-		Method:  "GET",
-		Path:    "/",
-		Handler: StaticFSHandler(serverCtx),
-	})
-	return routers
+func RegisterMyHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  "GET",
+				Path:    "/api/v1.0/health",
+				Handler: HealthHandler(serverCtx),
+			},
+			{
+				Method:  "GET",
+				Path:    "/",
+				Handler: StaticFSHandler(serverCtx),
+			},
+		},
+	)
 }

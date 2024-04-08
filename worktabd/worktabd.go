@@ -38,7 +38,7 @@ func startworktabdZrpcServer(c config.Config) {
 
 	gw := gateway.MustNewServer(c.Gateway)
 	// gw add routes
-	gwAddRoutes(gw, ctx)
+	handler.RegisterMyHandlers(gw.Server, ctx)
 
 	// gw add api routes
 	handler.RegisterHandlers(gw.Server, ctx)
@@ -50,9 +50,4 @@ func startworktabdZrpcServer(c config.Config) {
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	fmt.Printf("Starting gateway server at %s:%d...\n", c.Gateway.Host, c.Gateway.Port)
 	group.Start()
-}
-
-func gwAddRoutes(gw *gateway.Server, serverCtx *svc.ServiceContext) *gateway.Server {
-	gw.AddRoutes(handler.MyRoutes(serverCtx))
-	return gw
 }
