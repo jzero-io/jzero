@@ -8,5 +8,7 @@ worktab worktabd
 
 ## TODO
 
-- [x] fix static embed files
+- [x] Fix static embed files
 - [x] Add go-zero api feature
+- [x] Support muti proto, muti service
+- [ ] Support muti api, muti service
