@@ -8,8 +8,21 @@ type Response {
 	Message string `json:"message"`
 }
 
+@server (
+	prefix: /api/v1
+	group:  credentialapi
+)
 service worktabd {
-	@handler ApiHandler
-	get /from/:name (Request) returns (Response)
+	@handler CredentialNameHandler
+	get /credential/:name (Request) returns (Response)
+}
+
+@server (
+	prefix: /api/v1
+	group:  machineapi
+)
+service worktabd {
+	@handler MachineNameHandler
+	get /machine/:name (Request) returns (Response)
 }
 

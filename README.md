@@ -11,4 +11,5 @@ worktab worktabd
 - [x] Fix static embed files
 - [x] Add go-zero api feature
 - [x] Support muti proto, muti service
-- [ ] Support muti api, muti service
+- [x] Support api ~~muti api,~~ muti service
+
