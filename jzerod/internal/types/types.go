@@ -9,7 +9,11 @@ type UploadResponse struct {
 	Code int `json:"code"`
 }
 
-type Request struct {
+type ParamRequest struct {
+	Name string `form:"name"`
+}
+
+type PathRequest struct {
 	Name string `path:"name"`
 }
 

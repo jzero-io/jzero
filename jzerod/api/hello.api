@@ -1,7 +1,11 @@
 syntax = "v1"
 
-type request {
+type pathRequest {
     Name string `path:"name"`
+}
+
+type paramRequest {
+    Name string `form:"name"`
 }
 
 type response {
@@ -13,6 +17,9 @@ type response {
     group: hello
 )
 service jzerod {
-    @handler HelloHandler
-    get /hello (request) returns (response)
+    @handler HelloPathHandler
+    get /hello/:name (pathRequest) returns (response)
+
+    @handler HelloParamHandler
+    get /hello (paramRequest) returns (response)
 }

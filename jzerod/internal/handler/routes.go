@@ -33,7 +33,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodGet,
 				Path:    "/hello",
-				Handler: hello.HelloHandler(serverCtx),
+				Handler: hello.HelloParamHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/hello/:name",
+				Handler: hello.HelloPathHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),
