@@ -1,14 +1,17 @@
 version: "3"
 
 tasks:
-  proto:
+  gencode:
     cmds:
       - sh ./scripts/gencode.sh
+  run:
+    cmds:
+      - go run main.go jzerod --config jzero.toml
   install:
     deps:
       - build
     cmds:
-      - cp dist/worktab_{{OS}}_{{ARCH}}/worktab $GOBIN
+      - cp dist/worktab_{{OS}}_{{ARCH}}/jzero $GOBIN
     silent: true
   fmt:
     cmds:

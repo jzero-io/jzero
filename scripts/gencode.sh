@@ -1,22 +1,22 @@
 ## TODO: 
 ## 1. auto gen by dir proto
 ## 2. auto register rpc server
-## 3. auto modify worktab.toml
+## 3. auto modify jzero.toml
 
 # rpc
-goctl rpc protoc worktabd/proto/credential.proto  -I./worktabd/proto --go_out=./worktabd --go-grpc_out=./worktabd  --zrpc_out=./worktabd --client=false -m --home .template
-rm worktabd/credential.go
+goctl rpc protoc jzerod/proto/credential.proto  -I./jzerod/proto --go_out=./jzerod --go-grpc_out=./jzerod  --zrpc_out=./jzerod --client=false -m --home .template
+rm jzerod/credential.go
 
 # rpc
-goctl rpc protoc worktabd/proto/machine.proto  -I./worktabd/proto --go_out=./worktabd --go-grpc_out=./worktabd  --zrpc_out=./worktabd --client=false -m --home .template
-rm worktabd/machine.go
+goctl rpc protoc jzerod/proto/machine.proto  -I./jzerod/proto --go_out=./jzerod --go-grpc_out=./jzerod  --zrpc_out=./jzerod --client=false -m --home .template
+rm jzerod/machine.go
 
 # api
-goctl api go --api worktabd/api/worktabd.api --dir ./worktabd --home .template
+goctl api go --api jzerod/api/jzerod.api --dir ./jzerod --home .template
 
 ## rm etc
-rm -rf worktabd/etc
+rm -rf jzerod/etc
 
 # gen proto descriptor
-protoc --include_imports -I./worktabd/proto --descriptor_set_out=credential.pb worktabd/proto/credential.proto
-protoc --include_imports -I./worktabd/proto --descriptor_set_out=machine.pb worktabd/proto/machine.proto
+protoc --include_imports -I./jzerod/proto --descriptor_set_out=credential.pb jzerod/proto/credential.proto
+protoc --include_imports -I./jzerod/proto --descriptor_set_out=machine.pb jzerod/proto/machine.proto

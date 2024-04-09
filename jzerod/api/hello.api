@@ -1,0 +1,18 @@
+syntax = "v1"
+
+type request {
+    Name string `path:"name"`
+}
+
+type response {
+    Message string
+}
+
+@server(
+    prefix: /api/v1
+    group: hello
+)
+service jzerod {
+    @handler HelloHandler
+    get /hello (request) returns (response)
+}

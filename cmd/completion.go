@@ -18,13 +18,13 @@ var completionCmd = &cobra.Command{
 
 Bash:
 
-$ source <(worktab completion bash)
+$ source <(jzero completion bash)
 
 # To load completions for each session, execute once:
 Linux:
-  $ worktab completion bash > /etc/bash_completion.d/worktab
+  $ jzero completion bash > /etc/bash_completion.d/jzero
 MacOS:
-  $ worktab completion bash > /usr/local/etc/bash_completion.d/worktab
+  $ jzero completion bash > /usr/local/etc/bash_completion.d/jzero
 
 Zsh:
 
@@ -34,16 +34,16 @@ Zsh:
 $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
 # To load completions for each session, execute once:
-$ worktab completion zsh > "${fpath[1]}/_worktab"
+$ jzero completion zsh > "${fpath[1]}/_worktab"
 
 # You will need to start a new shell for this setup to take effect.
 
 Fish:
 
-$ worktab completion fish | source
+$ jzero completion fish | source
 
 # To load completions for each session, execute once:
-$ worktab completion fish > ~/.config/fish/completions/worktab.fish
+$ jzero completion fish > ~/.config/fish/completions/jzero.fish
 `,
 	DisableFlagsInUseLine: true,
 	ValidArgs:             []string{"bash", "zsh", "fish"},

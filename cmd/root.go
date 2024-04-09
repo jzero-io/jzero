@@ -17,7 +17,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "worktab",
+	Use:   "jzero",
 	Short: "work table",
 	Long:  `work table.`,
 	// Uncomment the following line if your bare application
@@ -41,7 +41,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.worktab.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.jzero.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -58,10 +58,10 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".worktab" (without extension).
+		// Search config in home directory with name ".jzero" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("toml")
-		viper.SetConfigName(".worktab")
+		viper.SetConfigName(".jzero")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

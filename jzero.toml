@@ -1,0 +1,15 @@
+Name = "jzerod.rpc"
+ListenOn = "0.0.0.0:8000"
+Key = "jzerod.rpc"
+Mode = "dev"
+
+[Gateway]
+Name = "gateway"
+Port = 8001
+
+  [[Gateway.Upstreams]]
+  Name = "rpc-server"
+  ProtoSets = [ "credential.pb", "machine.pb" ]
+
+    [Gateway.Upstreams.Grpc]
+    Endpoints = [ "0.0.0.0:8000" ]

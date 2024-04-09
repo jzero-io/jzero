@@ -1,4 +1,4 @@
-module github.com/jaronnie/worktab
+module github.com/jaronnie/jzero
 
 go 1.22.1
 

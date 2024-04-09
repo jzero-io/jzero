@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/jaronnie/worktab/cmd"
+	"github.com/jaronnie/jzero/cmd"
 )
 
 func main() {

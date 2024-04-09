@@ -1,0 +1,11 @@
+syntax = "v1"
+
+info (
+	title:   "jzero api"
+	author:  "jaronnie"
+	email:   "jaron@jaronnie.com"
+	version: "v1"
+)
+
+import "file.api"
+import "hello.api"

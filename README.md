@@ -1,15 +1,33 @@
-# worktab
+# jzero
 
-work table
+基于 go-zero 框架项目的代码设计
+
+## 技术栈
+
+* cobra 实现命令行管理
+* go-zero 提供 grpc 和 http 请求等
+
+## 特性
+
+* 支持将 grpc 通过 gateway 转化为 http 请求, 并支持自定义 http 请求
+* 同时支持在项目中使用 grpc 和 api
+* 支持多 proto 多 service(多人开发友好)
+* 加入开发中的各种案例请求
 
 ```shell
-worktab worktabd
+# gencode
+task gencode
+
+# run
+task run
 ```
 
 ## TODO
 
 - [x] Fix static embed files
 - [x] Add go-zero api feature
-- [x] Support muti proto, muti service
-- [x] Support api ~~muti api,~~ muti service
+- [x] Support multi proto, multi service
+- [x] Support api ~~multi api,~~ multi service
+- [x] Warp rpc and api Response
+- [ ] gencode 修改 toml 配置文件自动加入 pb 文件, 通过 ast 语法解析树支持自动注册 server
 
