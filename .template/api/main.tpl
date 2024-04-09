@@ -1,1 +1,1 @@
-package {{.serviceName}}
+package worktabd
