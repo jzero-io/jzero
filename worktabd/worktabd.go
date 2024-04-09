@@ -12,9 +12,11 @@ import (
 
 	"github.com/jaronnie/worktab/worktabd/internal/config"
 	"github.com/jaronnie/worktab/worktabd/internal/handler"
-	"github.com/jaronnie/worktab/worktabd/internal/server"
+	credentialsvr "github.com/jaronnie/worktab/worktabd/internal/server/credential"
+	machinesvr "github.com/jaronnie/worktab/worktabd/internal/server/machine"
 	"github.com/jaronnie/worktab/worktabd/internal/svc"
-	"github.com/jaronnie/worktab/worktabd/worktabdpb"
+	"github.com/jaronnie/worktab/worktabd/pb/credentialpb"
+	"github.com/jaronnie/worktab/worktabd/pb/machinepb"
 )
 
 func StartWorktabDaemon(cfgFile string) {
@@ -29,7 +31,8 @@ func startWorktabdZrpcServer(c config.Config) {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		worktabdpb.RegisterWorktabdServer(grpcServer, server.NewWorktabdServer(ctx))
+		credentialpb.RegisterCredentialServer(grpcServer, credentialsvr.NewCredentialServer(ctx))
+		machinepb.RegisterMachineServer(grpcServer, machinesvr.NewMachineServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package machinepb;
+
+import "google/api/annotations.proto";
+
+option go_package = "./pb/machinepb";
+
+message Empty {}
+  
+message MachineVersionResponse {
+      string version = 1;
+}
+
+service machine {
+    rpc MachineVersion(Empty) returns(MachineVersionResponse) {
+        option (google.api.http) = {
+            get: "/api/v1.0/machine/version"
+        };
+    };
+}
+
+
+service machinev2 {
+    rpc MachineVersion(Empty) returns(MachineVersionResponse) {
+        option (google.api.http) = {
+            get: "/api/v2.0/machine/version"
+        };
+    };
+}
