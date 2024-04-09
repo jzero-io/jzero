@@ -36,6 +36,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: hello.HelloParamHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodPost,
+				Path:    "/hello",
+				Handler: hello.HelloPostHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodGet,
 				Path:    "/hello/:name",
 				Handler: hello.HelloPathHandler(serverCtx),

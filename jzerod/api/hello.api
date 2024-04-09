@@ -8,6 +8,10 @@ type paramRequest {
     Name string `form:"name"`
 }
 
+type postRequest {
+    Name string `json:"name"`
+}
+
 type response {
     Message string
 }
@@ -22,4 +26,7 @@ service jzerod {
 
     @handler HelloParamHandler
     get /hello (paramRequest) returns (response)
+
+    @handler HelloPostHandler
+    post /hello (postRequest) returns (response)
 }

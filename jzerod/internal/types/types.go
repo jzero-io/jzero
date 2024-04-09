@@ -17,6 +17,10 @@ type PathRequest struct {
 	Name string `path:"name"`
 }
 
+type PostRequest struct {
+	Name string `json:"name"`
+}
+
 type Response struct {
 	Message string
 }
