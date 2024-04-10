@@ -1,5 +1,4 @@
 tools
-*.pb
 .vscode
 .idea
 filedata
