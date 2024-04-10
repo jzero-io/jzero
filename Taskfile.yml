@@ -6,12 +6,12 @@ tasks:
       - sh ./scripts/gencode.sh
   run:
     cmds:
-      - go run main.go jzerod --config jzero.toml
+      - go run main.go jzerod --config config/config.toml
   install:
     deps:
       - build
     cmds:
-      - cp dist/worktab_{{OS}}_{{ARCH}}/jzero $GOBIN
+      - cp dist/jzero_{{OS}}_{{ARCH}}_v1/jzero $GOBIN
     silent: true
   fmt:
     cmds:

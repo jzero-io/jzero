@@ -3,3 +3,5 @@ tools
 .vscode
 .idea
 filedata
+dist
+dist/

@@ -1,7 +1,7 @@
 ## TODO: 
 ## 1. auto gen by dir proto
 ## 2. auto register rpc server
-## 3. auto modify jzero.toml
+## 3. auto modify config.toml
 
 # rpc
 goctl rpc protoc jzerod/proto/credential.proto  -I./jzerod/proto --go_out=./jzerod --go-grpc_out=./jzerod  --zrpc_out=./jzerod --client=false -m --home .template
@@ -18,5 +18,5 @@ goctl api go --api jzerod/api/jzerod.api --dir ./jzerod --home .template
 rm -rf jzerod/etc
 
 # gen proto descriptor
-protoc --include_imports -I./jzerod/proto --descriptor_set_out=credential.pb jzerod/proto/credential.proto
-protoc --include_imports -I./jzerod/proto --descriptor_set_out=machine.pb jzerod/proto/machine.proto
+protoc --include_imports -I./jzerod/proto --descriptor_set_out=protosets/credential.pb jzerod/proto/credential.proto
+protoc --include_imports -I./jzerod/proto --descriptor_set_out=protosets/machine.pb jzerod/proto/machine.proto

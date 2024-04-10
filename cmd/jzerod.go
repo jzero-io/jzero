@@ -11,8 +11,8 @@ import (
 	"github.com/jaronnie/jzero/jzerod"
 )
 
-// worktabdCmd represents the jzerod command
-var worktabdCmd = &cobra.Command{
+// jzerodCmd represents the jzerod command
+var jzerodCmd = &cobra.Command{
 	Use:   "jzerod",
 	Short: "jzerod daemon",
 	Long:  `jzerod daemon`,
@@ -24,5 +24,5 @@ var worktabdCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(worktabdCmd)
+	rootCmd.AddCommand(jzerodCmd)
 }
