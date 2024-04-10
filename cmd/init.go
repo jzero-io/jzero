@@ -6,12 +6,12 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
-	"bytes"
 	"fmt"
+	"github.com/jaronnie/genius"
 	"github.com/jaronnie/jzero/config"
 	"github.com/jaronnie/jzero/protosets"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 )
@@ -43,20 +43,22 @@ var initCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 
-		v := viper.New()
-		v.SetConfigType("toml")
-		err = v.ReadConfig(bytes.NewBuffer(file))
+		g, err := genius.NewFromToml(file)
 		cobra.CheckErr(err)
 
-		oldProtoSets := v.GetStringSlice("Gateway.Upstreams.0.ProtoSets")
+		oldProtoSetsI := g.Get("Gateway.Upstreams.0.ProtoSets")
+		oldProtoSets := cast.ToStringSlice(oldProtoSetsI)
 		var newProtoSets []string
 
 		for _, protoSet := range oldProtoSets {
 			newProtoSets = append(newProtoSets, filepath.Join(home, ".jzero", protoSet))
 		}
-		v.Set("Gateway.Upstreams.0.ProtoSets", newProtoSets)
+		err = g.Set("Gateway.Upstreams.0.ProtoSets", newProtoSets)
+		cobra.CheckErr(err)
 
-		err = v.WriteConfigAs(filepath.Join(home, ".jzero", "config.toml"))
+		toml, err := g.EncodeToToml()
+		cobra.CheckErr(err)
+		err = os.WriteFile(filepath.Join(home, ".jzero", "config.toml"), toml, 0644)
 		cobra.CheckErr(err)
 
 		fmt.Println("init success")
