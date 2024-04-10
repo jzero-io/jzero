@@ -14,6 +14,18 @@
 * 支持多 proto 多 service(多人开发友好)
 * 加入开发中的各种案例请求
 
+## 安装
+
+```shell
+go install github.com/jaronnie/jzero@latest
+# 初始化
+jzero init
+# 启动服务
+jzero jzerod
+```
+
+## 开发
+
 ```shell
 # gencode
 task gencode
