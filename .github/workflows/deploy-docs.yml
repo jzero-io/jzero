@@ -17,6 +17,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Change to docs dir
+        run: |
+          cd docs
+
       - name: Set node
         uses: actions/setup-node@v3
         with:
@@ -25,7 +29,6 @@ jobs:
 
       - name: Install deps
         run: |
-          cd docs
           corepack enable
           npm ci
 
