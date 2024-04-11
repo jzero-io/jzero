@@ -14,8 +14,8 @@ import (
 // jzerodCmd represents the jzerod command
 var jzerodCmd = &cobra.Command{
 	Use:   "jzerod",
-	Short: "jzerod daemon",
-	Long:  `jzerod daemon`,
+	Short: "jzero daemon",
+	Long:  `jzero daemon`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jzerod.StartJzeroDaemon(cfgFile)
 

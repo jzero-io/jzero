@@ -19,8 +19,8 @@ import (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "jzerod init",
-	Long:  `jzerod init`,
+	Short: "jzero init",
+	Long:  `jzero init`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Find home directory.
 		home, err := os.UserHomeDir()

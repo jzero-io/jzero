@@ -50,5 +50,6 @@ grpcurl -plaintext localhost:8000 credentialpb.credential/CredentialVersion
 - [x] Support multi proto, multi service
 - [x] Support api ~~multi api,~~ multi service
 - [x] Warp rpc and api Response
-- [ ] gencode 修改 toml 配置文件自动加入 pb 文件, 通过 ast 语法解析树支持自动注册 server
+- [ ] Support jzero gen
+- [ ] Support jzero new
 
