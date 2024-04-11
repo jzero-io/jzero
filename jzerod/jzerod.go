@@ -13,7 +13,9 @@ import (
 	"github.com/jaronnie/jzero/jzerod/internal/config"
 	"github.com/jaronnie/jzero/jzerod/internal/handler"
 	credentialsvr "github.com/jaronnie/jzero/jzerod/internal/server/credential"
+	credentialsvrv2 "github.com/jaronnie/jzero/jzerod/internal/server/credentialv2"
 	machinesvr "github.com/jaronnie/jzero/jzerod/internal/server/machine"
+	machinesvrv2 "github.com/jaronnie/jzero/jzerod/internal/server/machinev2"
 	"github.com/jaronnie/jzero/jzerod/internal/svc"
 	"github.com/jaronnie/jzero/jzerod/pb/credentialpb"
 	"github.com/jaronnie/jzero/jzerod/pb/machinepb"
@@ -32,7 +34,9 @@ func startWorktabdZrpcServer(c config.Config) {
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		credentialpb.RegisterCredentialServer(grpcServer, credentialsvr.NewCredentialServer(ctx))
+		credentialpb.RegisterCredentialv2Server(grpcServer, credentialsvrv2.NewCredentialv2Server(ctx))
 		machinepb.RegisterMachineServer(grpcServer, machinesvr.NewMachineServer(ctx))
+		machinepb.RegisterMachinev2Server(grpcServer, machinesvrv2.NewMachinev2Server(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
