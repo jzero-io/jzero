@@ -25,6 +25,7 @@ jobs:
 
       - name: Install deps
         run: |
+          cd docs
           corepack enable
           npm ci
 
