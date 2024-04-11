@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -54,6 +55,7 @@ func startJzerodZrpcServer(c config.Config) {
 
 	// listen unix
 	sock := "./jzero.sock"
+	_ = os.Remove(sock)
 	unixListener, err := net.Listen("unix", sock)
 	if err != nil {
 		panic(err)
