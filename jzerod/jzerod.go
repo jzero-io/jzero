@@ -2,6 +2,8 @@ package jzerod
 
 import (
 	"fmt"
+	"net"
+	"net/http"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -21,15 +23,15 @@ import (
 	"github.com/jaronnie/jzero/jzerod/pb/machinepb"
 )
 
-func StartWorktabDaemon(cfgFile string) {
+func StartJzeroDaemon(cfgFile string) {
 	var c config.Config
 	conf.MustLoad(cfgFile, &c)
 	go func() {
-		startWorktabdZrpcServer(c)
+		startJzerodZrpcServer(c)
 	}()
 }
 
-func startWorktabdZrpcServer(c config.Config) {
+func startJzerodZrpcServer(c config.Config) {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
@@ -49,6 +51,18 @@ func startWorktabdZrpcServer(c config.Config) {
 
 	// gw add api routes
 	handler.RegisterHandlers(gw.Server, ctx)
+
+	// listen unix
+	sock := "./jzero.sock"
+	unixListener, err := net.Listen("unix", sock)
+	if err != nil {
+		panic(err)
+	}
+	go func() {
+		if err := http.Serve(unixListener, gw); err != nil {
+			panic(err)
+		}
+	}()
 
 	group := service.NewServiceGroup()
 	group.Add(s)

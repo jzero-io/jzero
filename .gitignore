@@ -3,3 +3,4 @@ tools
 .idea
 filedata
 dist
+.sock

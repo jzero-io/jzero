@@ -11,6 +11,7 @@
 
 * 支持将 grpc 通过 gateway 转化为 http 请求, 并支持自定义 http 请求
 * 同时支持在项目中使用 grpc 和 api
+* 支持监听 unix socket
 * 支持多 proto 多 service(多人开发友好)
 * 加入开发中的各种案例请求
 
@@ -32,6 +33,14 @@ task gencode
 
 # run
 task run
+
+# test
+# unix
+curl -s --unix-socket ./jzero.sock http://localhost:8001/api/v1.0/credential/version
+# gateway
+http://localhost:8001/api/v1.0/credential/version
+# grpc
+grpcurl -plaintext localhost:8000 credentialpb.credential/CredentialVersion
 ```
 
 ## TODO

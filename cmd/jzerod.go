@@ -17,7 +17,7 @@ var jzerodCmd = &cobra.Command{
 	Short: "jzerod daemon",
 	Long:  `jzerod daemon`,
 	Run: func(cmd *cobra.Command, args []string) {
-		jzerod.StartWorktabDaemon(cfgFile)
+		jzerod.StartJzeroDaemon(cfgFile)
 
 		select {}
 	},
