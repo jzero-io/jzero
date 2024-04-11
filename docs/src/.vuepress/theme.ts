@@ -3,7 +3,7 @@ import navbar from "./navbar.js";
 import sidebar from "./sidebar.js";
 
 export default hopeTheme({
-  hostname: "https://jzero.jaronnie.com",
+  hostname: "https://jaronnie.github.io/jzero",
 
   author: {
     name: "jaronnie",
