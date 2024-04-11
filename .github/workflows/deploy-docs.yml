@@ -24,17 +24,12 @@ jobs:
           cache: npm
           cache-dependency-path: docs/pnpm-lock.yaml
 
-      - name: Install deps
-        run: |
-          cd docs
-          corepack enable
-          npm ci
-
       - name: Build Docs
         env:
           NODE_OPTIONS: --max_old_space_size=8192
         run: |-
           cd docs
+          npm i
           npm run docs:build
           > src/.vuepress/dist/.nojekyll
 
