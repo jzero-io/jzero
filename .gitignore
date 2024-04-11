@@ -4,3 +4,4 @@ tools
 filedata
 dist
 .sock
+node_modules
