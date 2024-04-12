@@ -26,7 +26,7 @@ ENV TZ Asia/Shanghai
 WORKDIR /app
 COPY --from=builder /app/jzero /app/jzero
 COPY --from=builder /build/config /app/config
-COPY --from=builder /build/protosets /app/protosets
+COPY --from=builder /build/.protosets /app/.protosets
 
 EXPOSE 8001 8002
 
