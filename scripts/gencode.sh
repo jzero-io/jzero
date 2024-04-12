@@ -19,5 +19,5 @@ rm -rf daemon/etc
 rm daemon/jzerod.go
 
 # gen proto descriptor
-protoc --include_imports -I./daemon/proto --descriptor_set_out=protosets/credential.pb daemon/proto/credential.proto
-protoc --include_imports -I./daemon/proto --descriptor_set_out=protosets/machine.pb daemon/proto/machine.proto
+protoc --include_imports -I./daemon/proto --descriptor_set_out=.protosets/credential.pb daemon/proto/credential.proto
+protoc --include_imports -I./daemon/proto --descriptor_set_out=.protosets/machine.pb daemon/proto/machine.proto

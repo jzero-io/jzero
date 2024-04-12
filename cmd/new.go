@@ -190,6 +190,9 @@ service daemon {
 }
 `
 
+var credentialProtoTpl = `
+`
+
 // newCmd represents the new command
 var newCmd = &cobra.Command{
 	Use:   "new",

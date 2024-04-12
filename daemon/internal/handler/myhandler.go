@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/jaronnie/jzero/public"
+	"github.com/jaronnie/jzero/embedx"
 	"github.com/zeromicro/go-zero/rest"
 	"io/fs"
 	"net/http"
@@ -20,7 +20,7 @@ func registerStaticEmbedHandler(server *rest.Server, serverCtx *svc.ServiceConte
 	// related: https://blog.csdn.net/keytounix/article/details/108424389
 	dirLevel := []string{":1", ":2", ":3", ":4", ":5", ":6", ":7", ":8"}
 	pattern := "/"
-	staticFS, _ := public.RootAssets()
+	staticFS, _ := embedx.RootWeb()
 	for i := 1; i < len(dirLevel); i++ {
 		path := "/" + strings.Join(dirLevel[:i], "/")
 		server.AddRoute(

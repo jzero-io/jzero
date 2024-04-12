@@ -24,7 +24,7 @@ Sampler = 1.0
 
   [[Gateway.Upstreams]]
   Name = "rpc-server"
-  ProtoSets = [ "protosets/credential.pb", "protosets/machine.pb" ]
+  ProtoSets = [ ".protosets/credential.pb", ".protosets/machine.pb" ]
 
     [Gateway.Upstreams.Grpc]
     Endpoints = [ "0.0.0.0:8000" ]

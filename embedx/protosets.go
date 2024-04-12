@@ -1,6 +1,5 @@
-package protosets
+package embedx
 
 import "embed"
 
-//go:embed *.pb
 var Protosets embed.FS

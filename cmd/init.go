@@ -8,8 +8,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/jaronnie/genius"
-	"github.com/jaronnie/jzero/config"
-	"github.com/jaronnie/jzero/protosets"
+	"github.com/jaronnie/jzero/embedx"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"os"
@@ -27,19 +26,19 @@ var initCmd = &cobra.Command{
 		cobra.CheckErr(err)
 
 		// Check $HOME/.jzero/protosets
-		err = os.MkdirAll(filepath.Join(home, ".jzero", "protosets"), 0755)
+		err = os.MkdirAll(filepath.Join(home, ".jzero", ".protosets"), 0755)
 		cobra.CheckErr(err)
 
-		file, err := config.Config.ReadFile("config.toml")
+		file, err := embedx.Config.ReadFile("config.toml")
 		cobra.CheckErr(err)
 
 		// write protosets
-		dir, err := protosets.Protosets.ReadDir(".")
+		dir, err := embedx.Protosets.ReadDir(".protosets")
 		cobra.CheckErr(err)
 		for _, d := range dir {
-			pb, err := protosets.Protosets.ReadFile(d.Name())
+			pb, err := embedx.Protosets.ReadFile(filepath.Join(".protosets", d.Name()))
 			cobra.CheckErr(err)
-			err = os.WriteFile(filepath.Join(home, ".jzero", "protosets", d.Name()), pb, 0644)
+			err = os.WriteFile(filepath.Join(home, ".jzero", ".protosets", d.Name()), pb, 0644)
 			cobra.CheckErr(err)
 		}
 
