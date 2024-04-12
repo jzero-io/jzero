@@ -15,7 +15,7 @@ func ReadTemplateFile(filename string) []byte {
 }
 
 func WriteTemplateDir(sourceDir, targetDir string) error {
-	err := os.MkdirAll(targetDir, os.ModePerm)
+	err := os.MkdirAll(targetDir, 0o755)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func writeTemplateDirRecursive(sourceDir, targetDir string) error {
 		targetPath := filepath.Join(targetDir, entry.Name())
 
 		if entry.IsDir() {
-			err := os.MkdirAll(targetPath, os.ModePerm)
+			err := os.MkdirAll(targetPath, 0o755)
 			if err != nil {
 				return err
 			}
@@ -54,7 +54,7 @@ func writeTemplateDirRecursive(sourceDir, targetDir string) error {
 				return err
 			}
 
-			err = os.WriteFile(targetPath, data, os.ModePerm)
+			err = os.WriteFile(targetPath, data, 0o644)
 			if err != nil {
 				return err
 			}

@@ -51,7 +51,7 @@ func start(c config.Config) {
 
 	gw := gateway.MustNewServer(c.Gateway)
 	// gw add routes
-	handler.RegisterMyHandlers(gw.Server, ctx)
+	// handler.RegisterMyHandlers(gw.Server, ctx)
 
 	// gw add api routes
 	handler.RegisterHandlers(gw.Server, ctx)

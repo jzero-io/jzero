@@ -40,6 +40,13 @@ func gen(cmd *cobra.Command, args []string) error {
 
 			fileBase := v.Name()[0 : len(v.Name())-len(path.Ext(v.Name()))]
 			_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", fileBase)))
+
+			// # gen proto descriptor
+			//protoc --include_imports -I./daemon/proto --descriptor_set_out=.protosets/xx.pb daemon/proto/xx.proto
+			_ = os.MkdirAll(filepath.Join(wd, ".protosets"), 0o755)
+			protocCommand := fmt.Sprintf("protoc --include_imports -I./daemon/proto --descriptor_set_out=.protosets/%s.pb daemon/proto/%s.proto", fileBase, fileBase)
+			_, err = Run(protocCommand, wd)
+
 		}
 	}
 	_ = os.RemoveAll(filepath.Join(wd, "daemon", "etc"))
@@ -54,8 +61,8 @@ func gen(cmd *cobra.Command, args []string) error {
 	_, err = Run(command, wd)
 	cobra.CheckErr(err)
 	_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", v.Get("APP"))))
-
 	_ = os.RemoveAll(filepath.Join(wd, "daemon", "etc"))
+
 	return nil
 }
 
