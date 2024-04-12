@@ -54,6 +54,8 @@ func gen(cmd *cobra.Command, args []string) error {
 	_, err = Run(command, wd)
 	cobra.CheckErr(err)
 	_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", v.Get("APP"))))
+
+	_ = os.RemoveAll(filepath.Join(wd, "daemon", "etc"))
 	return nil
 }
 
