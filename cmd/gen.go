@@ -11,7 +11,7 @@ import (
 
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
-	Use:   "new",
+	Use:   "gen",
 	Short: "jzero gen code",
 	Long:  `jzero gen code`,
 	Run:   func(cmd *cobra.Command, args []string) {},

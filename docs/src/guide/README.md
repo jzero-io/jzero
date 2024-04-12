@@ -10,7 +10,7 @@ go install github.com/jaronnie/jzero@latest
 # 初始化
 jzero init
 # 启动服务
-jzero jzerod
+jzero daemon
 ```
 
 ## 开发

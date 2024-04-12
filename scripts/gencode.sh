@@ -4,19 +4,20 @@
 ## 3. auto modify config.toml
 
 # rpc
-goctl rpc protoc jzerod/proto/credential.proto  -I./jzerod/proto --go_out=./jzerod --go-grpc_out=./jzerod  --zrpc_out=./jzerod --client=false -m --home .template
-rm jzerod/credential.go
+goctl rpc protoc daemon/proto/credential.proto  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false -m --home .template
+rm daemon/credential.go
 
 # rpc
-goctl rpc protoc jzerod/proto/machine.proto  -I./jzerod/proto --go_out=./jzerod --go-grpc_out=./jzerod  --zrpc_out=./jzerod --client=false -m --home .template
-rm jzerod/machine.go
+goctl rpc protoc daemon/proto/machine.proto  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false -m --home .template
+rm daemon/machine.go
 
 # api
-goctl api go --api jzerod/api/jzerod.api --dir ./jzerod --home .template
+goctl api go --api daemon/api/jzerod.api --dir ./daemon --home .template
 
 ## rm etc
-rm -rf jzerod/etc
+rm -rf daemon/etc
+rm daemon/jzerod.go
 
 # gen proto descriptor
-protoc --include_imports -I./jzerod/proto --descriptor_set_out=protosets/credential.pb jzerod/proto/credential.proto
-protoc --include_imports -I./jzerod/proto --descriptor_set_out=protosets/machine.pb jzerod/proto/machine.proto
+protoc --include_imports -I./daemon/proto --descriptor_set_out=protosets/credential.pb daemon/proto/credential.proto
+protoc --include_imports -I./daemon/proto --descriptor_set_out=protosets/machine.pb daemon/proto/machine.proto

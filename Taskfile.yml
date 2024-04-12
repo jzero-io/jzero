@@ -6,7 +6,7 @@ tasks:
       - sh ./scripts/gencode.sh
   run:
     cmds:
-      - go run main.go jzerod --config config/config.toml
+      - go run main.go daemon --config config/config.toml
   install:
     deps:
       - build
