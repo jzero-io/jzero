@@ -4,15 +4,15 @@
 ## 3. auto modify config.toml
 
 # rpc
-goctl rpc protoc daemon/proto/credential.proto  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false -m --home .template
+goctl rpc protoc daemon/proto/credential.proto  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false -m --home .template/go-zero
 rm daemon/credential.go
 
 # rpc
-goctl rpc protoc daemon/proto/machine.proto  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false -m --home .template
+goctl rpc protoc daemon/proto/machine.proto  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false -m --home .template/go-zero
 rm daemon/machine.go
 
 # api
-goctl api go --api daemon/api/jzero.api --dir ./daemon --home .template
+goctl api go --api daemon/api/jzero.api --dir ./daemon --home .template/go-zero
 
 ## rm etc
 rm -rf daemon/etc

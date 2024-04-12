@@ -8,7 +8,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	sprig "github.com/Masterminds/sprig/v3"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/jaronnie/jzero/embedx"
 	"github.com/spf13/cobra"
 	"os"
@@ -52,7 +52,7 @@ func init() {
 	newCmd.Flags().StringVarP(&APP, "app", "", "", "set app name")
 }
 
-func newProject(cmd *cobra.Command, args []string) error {
+func newProject(_ *cobra.Command, _ []string) error {
 	// mkdir output
 	err := os.MkdirAll(Dir, os.ModePerm)
 	cobra.CheckErr(err)
@@ -114,6 +114,10 @@ func newProject(cmd *cobra.Command, args []string) error {
 	}, embedx.ReadTemplateFile("jzero/config.toml.tpl"))
 	err = os.WriteFile(filepath.Join(Dir, "config.toml"), configFile, os.ModePerm)
 	cobra.CheckErr(err)
+
+	// write .template
+	//err = embedx.WriteTemplateDir("go-zero", filepath.Join(Dir, ".template", "go-zero"))
+	//cobra.CheckErr(err)
 
 	// run go mod tidy
 	_, err = Run("go mod tidy", Dir)
