@@ -86,7 +86,10 @@ func newProject(_ *cobra.Command, _ []string) error {
 	err = os.MkdirAll(filepath.Join(Dir, "daemon"), os.ModePerm)
 	cobra.CheckErr(err)
 	// touch daemon/daemon.go
-	daemonFile, err := ParseTemplate(map[string]interface{}{}, embedx.ReadTemplateFile("jzero/daemon/daemon.go.tpl"))
+	daemonFile, err := ParseTemplate(map[string]interface{}{
+		"Module": Module,
+		"APP":    APP,
+	}, embedx.ReadTemplateFile("jzero/daemon/daemon.go.tpl"))
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "daemon.go"), daemonFile, os.ModePerm)
 	cobra.CheckErr(err)
 	// mkdir api, proto dir
@@ -119,8 +122,6 @@ func newProject(_ *cobra.Command, _ []string) error {
 	//err = embedx.WriteTemplateDir("go-zero", filepath.Join(Dir, ".template", "go-zero"))
 	//cobra.CheckErr(err)
 
-	// run go mod tidy
-	_, err = Run("go mod tidy", Dir)
 	cobra.CheckErr(err)
 	return nil
 }

@@ -24,18 +24,16 @@ import (
 	"github.com/jaronnie/jzero/daemon/pb/machinepb"
 )
 
-func StartJzeroDaemon(cfgFile string) {
+func Start(cfgFile string) {
 	var c config.Config
 	conf.MustLoad(cfgFile, &c)
 	go func() {
-		startJzerodZrpcServer(c)
+		start(c)
 	}()
 }
 
-func startJzerodZrpcServer(c config.Config) {
-	ctx := svc.NewServiceContext(c)
-
-	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
+func getZrpcServer(c config.Config, ctx *svc.ServiceContext) *zrpc.RpcServer {
+	return zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		credentialpb.RegisterCredentialServer(grpcServer, credentialsvr.NewCredentialServer(ctx))
 		credentialpb.RegisterCredentialv2Server(grpcServer, credentialsvrv2.NewCredentialv2Server(ctx))
 		machinepb.RegisterMachineServer(grpcServer, machinesvr.NewMachineServer(ctx))
@@ -45,6 +43,11 @@ func startJzerodZrpcServer(c config.Config) {
 			reflection.Register(grpcServer)
 		}
 	})
+}
+
+func start(c config.Config) {
+	ctx := svc.NewServiceContext(c)
+	s := getZrpcServer(c, ctx)
 
 	gw := gateway.MustNewServer(c.Gateway)
 	// gw add routes

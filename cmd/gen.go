@@ -13,6 +13,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // genCmd represents the gen command
@@ -24,6 +25,7 @@ var genCmd = &cobra.Command{
 }
 
 func gen(cmd *cobra.Command, args []string) error {
+	time.Sleep(time.Second * 15)
 	wd, err := os.Getwd()
 	cobra.CheckErr(err)
 	// read proto dir
@@ -34,7 +36,7 @@ func gen(cmd *cobra.Command, args []string) error {
 			continue
 		}
 		if strings.HasSuffix(v.Name(), "proto") {
-			command := fmt.Sprintf("goctl rpc protoc daemon/proto/%s  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false -m --home .template/go-zero", v.Name())
+			command := fmt.Sprintf("goctl rpc protoc daemon/proto/%s  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false -m", v.Name())
 			_, err = Run(command, wd)
 			cobra.CheckErr(err)
 
@@ -47,9 +49,10 @@ func gen(cmd *cobra.Command, args []string) error {
 	// read api file
 	v := viper.New()
 	v.SetConfigFile(filepath.Join(wd, "config.toml"))
+	v.SetConfigType("toml")
 	err = v.ReadInConfig()
 	cobra.CheckErr(err)
-	command := fmt.Sprintf("goctl api go --api daemon/api/%s.api --dir ./daemon --home .template/go-zero", v.GetString("APP"))
+	command := fmt.Sprintf("goctl api go --api daemon/api/%s.api --dir ./daemon", v.GetString("APP"))
 	_, err = Run(command, wd)
 	cobra.CheckErr(err)
 	_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", v.Get("APP"))))
