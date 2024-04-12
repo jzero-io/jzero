@@ -106,6 +106,12 @@ func newProject(_ *cobra.Command, _ []string) error {
 	}, embedx.ReadTemplateFile("jzero/daemon/api/hello.api.tpl"))
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "api", "hello.api"), helloApiFile, os.ModePerm)
 	cobra.CheckErr(err)
+	// touch daemon/api/file.api
+	fileApiFile, err := ParseTemplate(map[string]interface{}{
+		"APP": APP,
+	}, embedx.ReadTemplateFile("jzero/daemon/api/file.api.tpl"))
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "api", "file.api"), fileApiFile, os.ModePerm)
+	cobra.CheckErr(err)
 
 	// write proto dir
 	err = embedx.WriteTemplateDir("jzero/daemon/proto", filepath.Join(Dir, "daemon", "proto"))

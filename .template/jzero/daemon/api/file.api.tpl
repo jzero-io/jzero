@@ -12,7 +12,7 @@ type UploadResponse {
 	prefix: /api/v1
 	group:  file
 )
-service jzerod {
+service {{ .APP }} {
 	@handler DownloadHandler
 	get /static/:file(DownloadRequest)
 

@@ -13,7 +13,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 // genCmd represents the gen command
@@ -25,7 +24,6 @@ var genCmd = &cobra.Command{
 }
 
 func gen(cmd *cobra.Command, args []string) error {
-	time.Sleep(time.Second * 15)
 	wd, err := os.Getwd()
 	cobra.CheckErr(err)
 	// read proto dir
