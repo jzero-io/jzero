@@ -14,6 +14,8 @@
 * 支持监听 unix socket
 * 支持多 proto 多 service(多人开发友好)
 * 加入开发中的各种案例请求
+* 一键创建项目
+* 一键生成各种代码
 
 ## 安装
 
@@ -21,15 +23,25 @@
 go install github.com/jaronnie/jzero@latest
 # 初始化
 jzero init
-# 启动服务
+# 启动样例服务
 jzero daemon
+```
+
+## 一键创建项目
+
+```shell
+jzero new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
+cd app1
+jzero gen
+go mod tidy
+go run main.go --config config.toml
 ```
 
 ## 开发
 
 ```shell
 # gencode
-task gencode
+jzero gen
 
 # run
 task run
@@ -50,6 +62,6 @@ grpcurl -plaintext localhost:8000 credentialpb.credential/CredentialVersion
 - [x] Support multi proto, multi service
 - [x] Support api ~~multi api,~~ multi service
 - [x] Warp rpc and api Response
-- [ ] Support jzero gen
-- [ ] Support jzero new
+- [x] Support jzero gen
+- [x] Support jzero new
 

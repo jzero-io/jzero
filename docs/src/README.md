@@ -18,3 +18,23 @@ title: 首页
 * 支持监听 unix socket
 * 支持多 proto 多 service(多人开发友好)
 * 加入开发中的各种案例请求
+
+## 快速开始
+
+```shell
+# 安装 goctl
+go install github.com/zeromicro/go-zero/tools/goctl@latest
+# 一键安装相关工具
+goctl env check --install --verbose --force
+# 安装 jzero
+go install github.com/jaronnie/jzero@latest
+# 一键创建项目
+jzero new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
+cd app1
+# 一键生成代码
+jzero gen
+# 下载依赖
+go mod tidy
+# 启动项目
+go run main.go --config config.toml
+```
