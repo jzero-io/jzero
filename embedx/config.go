@@ -1,5 +1,7 @@
 package embedx
 
-import "embed"
+import (
+	"embed"
+)
 
 var Config embed.FS

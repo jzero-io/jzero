@@ -20,7 +20,7 @@ type response {
     prefix: /api/v1
     group: hello
 )
-service jzero {
+service {{ .APP }} {
     @handler HelloPathHandler
     get /hello/:name (pathRequest) returns (response)
 

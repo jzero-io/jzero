@@ -6,6 +6,9 @@ import (
 	"github.com/jaronnie/jzero/embedx"
 )
 
+//go:embed .template
+var template embed.FS
+
 //go:embed .protosets/*.pb
 var protosets embed.FS
 
@@ -19,5 +22,6 @@ func main() {
 	embedx.Web = web
 	embedx.Protosets = protosets
 	embedx.Config = config
+	embedx.Template = template
 	cmd.Execute()
 }

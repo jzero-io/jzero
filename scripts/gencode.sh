@@ -12,11 +12,11 @@ goctl rpc protoc daemon/proto/machine.proto  -I./daemon/proto --go_out=./daemon 
 rm daemon/machine.go
 
 # api
-goctl api go --api daemon/api/jzerod.api --dir ./daemon --home .template
+goctl api go --api daemon/api/jzero.api --dir ./daemon --home .template
 
 ## rm etc
 rm -rf daemon/etc
-rm daemon/jzerod.go
+rm daemon/jzero.go
 
 # gen proto descriptor
 protoc --include_imports -I./daemon/proto --descriptor_set_out=.protosets/credential.pb daemon/proto/credential.proto
