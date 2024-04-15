@@ -3,5 +3,5 @@ tools
 .idea
 filedata
 dist
-.sock
+*.sock
 node_modules

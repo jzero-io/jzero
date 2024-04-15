@@ -3,7 +3,7 @@ package main
 import (
 	"embed"
 	"github.com/jaronnie/jzero/cmd"
-	"github.com/jaronnie/jzero/embedx"
+	"github.com/jaronnie/jzero/embeded"
 )
 
 //go:embed .template
@@ -19,9 +19,9 @@ var config embed.FS
 var web embed.FS
 
 func main() {
-	embedx.Web = web
-	embedx.Protosets = protosets
-	embedx.Config = config
-	embedx.Template = template
+	embeded.Web = web
+	embeded.Protosets = protosets
+	embeded.Config = config
+	embeded.Template = template
 	cmd.Execute()
 }

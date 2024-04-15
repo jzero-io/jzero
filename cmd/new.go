@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Masterminds/sprig/v3"
-	"github.com/jaronnie/jzero/embedx"
+	"github.com/jaronnie/jzero/embeded"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
@@ -62,7 +62,7 @@ func newProject(_ *cobra.Command, _ []string) error {
 	// touch main.go
 	mainFile, err := ParseTemplate(map[string]interface{}{
 		"Module": Module,
-	}, embedx.ReadTemplateFile("jzero/main.go.tpl"))
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "main.go.tpl")))
 	err = os.WriteFile(filepath.Join(Dir, "main.go"), mainFile, 0o644)
 	cobra.CheckErr(err)
 	// mkdir cmd dir
@@ -72,14 +72,14 @@ func newProject(_ *cobra.Command, _ []string) error {
 	rootCmdFile, err := ParseTemplate(map[string]interface{}{
 		"Module": Module,
 		"APP":    APP,
-	}, embedx.ReadTemplateFile("jzero/cmd/root.go.tpl"))
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "cmd", "root.go.tpl")))
 	err = os.WriteFile(filepath.Join(Dir, "cmd", "root.go"), rootCmdFile, 0o644)
 	cobra.CheckErr(err)
 	// touch cmd/daemon.go
 	daemonCmdFile, err := ParseTemplate(map[string]interface{}{
 		"Module": Module,
 		"APP":    APP,
-	}, embedx.ReadTemplateFile("jzero/cmd/daemon.go.tpl"))
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "cmd", "daemon.go.tpl")))
 	err = os.WriteFile(filepath.Join(Dir, "cmd", "daemon.go"), daemonCmdFile, 0o644)
 	cobra.CheckErr(err)
 	// mkdir daemon dir
@@ -89,7 +89,7 @@ func newProject(_ *cobra.Command, _ []string) error {
 	daemonFile, err := ParseTemplate(map[string]interface{}{
 		"Module": Module,
 		"APP":    APP,
-	}, embedx.ReadTemplateFile("jzero/daemon/daemon.go.tpl"))
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "daemon.go.tpl")))
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "daemon.go"), daemonFile, 0o644)
 	cobra.CheckErr(err)
 	// mkdir api, proto dir
@@ -98,53 +98,53 @@ func newProject(_ *cobra.Command, _ []string) error {
 	err = os.MkdirAll(filepath.Join(Dir, "daemon", "api"), 0o755)
 	cobra.CheckErr(err)
 	// touch daemon/api/{{.APP}}.api
-	err = os.WriteFile(filepath.Join(Dir, "daemon", "api", APP+".api"), embedx.ReadTemplateFile("jzero/daemon/api/jzero.api.tpl"), 0o644)
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "api", APP+".api"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "api", "jzero.api.tpl")), 0o644)
 	cobra.CheckErr(err)
 	// touch daemon/api/hello.api
 	helloApiFile, err := ParseTemplate(map[string]interface{}{
 		"APP": APP,
-	}, embedx.ReadTemplateFile("jzero/daemon/api/hello.api.tpl"))
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "api", "hello.api.tpl")))
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "api", "hello.api"), helloApiFile, 0o644)
 	cobra.CheckErr(err)
 	// touch daemon/api/file.api
 	fileApiFile, err := ParseTemplate(map[string]interface{}{
 		"APP": APP,
-	}, embedx.ReadTemplateFile("jzero/daemon/api/file.api.tpl"))
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "api", "file.api.tpl")))
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "api", "file.api"), fileApiFile, 0o644)
 	cobra.CheckErr(err)
 
 	// write proto dir
-	err = embedx.WriteTemplateDir("jzero/daemon/proto", filepath.Join(Dir, "daemon", "proto"))
+	err = embeded.WriteTemplateDir(filepath.Join("jzero", "daemon", "proto"), filepath.Join(Dir, "daemon", "proto"))
 	cobra.CheckErr(err)
 
 	// write config.toml
 	configFile, err := ParseTemplate(map[string]interface{}{
 		"APP": APP,
-	}, embedx.ReadTemplateFile("jzero/config.toml.tpl"))
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "config.toml.tpl")))
 	err = os.WriteFile(filepath.Join(Dir, "config.toml"), configFile, 0o644)
 	cobra.CheckErr(err)
 
 	// write .template
-	//err = embedx.WriteTemplateDir("go-zero", filepath.Join(Dir, ".template", "go-zero"))
+	//err = embeded.WriteTemplateDir("go-zero", filepath.Join(Dir, ".template", "go-zero"))
 	//cobra.CheckErr(err)
 
 	// write daemon/internal/config/config.go
 	_ = os.MkdirAll(filepath.Join(Dir, "daemon", "internal", "config"), 0o755)
-	err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "config", "config.go"), embedx.ReadTemplateFile("jzero/daemon/internal/config/config.go.tpl"), 0o644)
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "config", "config.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "internal", "config", "config.go.tpl")), 0o644)
 	cobra.CheckErr(err)
 	//
 	//// write daemon/internal/handler/myroutes.go
 	//_ = os.MkdirAll(filepath.Join(Dir, "daemon", "internal", "handler"), 0o755)
 	//myroutesFile, err := ParseTemplate(map[string]interface{}{
 	//	"Module": Module,
-	//}, embedx.ReadTemplateFile("jzero/daemon/internal/handler/myroutes.go.tpl"))
+	//}, embeded.ReadTemplateFile("jzero/daemon/internal/handler/myroutes.go.tpl"))
 	//err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "handler", "myroutes.go"), myroutesFile, 0o644)
 	//cobra.CheckErr(err)
 	//
 	//// write daemon/internal/handler/myhandler.go
 	//myhandlerFile, err := ParseTemplate(map[string]interface{}{
 	//	"Module": Module,
-	//}, embedx.ReadTemplateFile("jzero/daemon/internal/handler/myhandler.go.tpl"))
+	//}, embeded.ReadTemplateFile("jzero/daemon/internal/handler/myhandler.go.tpl"))
 	//err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "handler", "myhandler.go"), myhandlerFile, 0o644)
 	//cobra.CheckErr(err)
 

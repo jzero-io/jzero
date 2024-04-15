@@ -1,4 +1,4 @@
-package embedx
+package embeded
 
 import (
 	"embed"
@@ -10,7 +10,11 @@ import (
 var Template embed.FS
 
 func ReadTemplateFile(filename string) []byte {
-	data, _ := Template.ReadFile(filepath.Join(".template", filename))
+	path := filepath.ToSlash(filepath.Join(".template", filename))
+	data, err := Template.ReadFile(path)
+	if err != nil {
+		return nil
+	}
 	return data
 }
 
@@ -29,7 +33,7 @@ func WriteTemplateDir(sourceDir, targetDir string) error {
 }
 
 func writeTemplateDirRecursive(sourceDir, targetDir string) error {
-	entries, err := Template.ReadDir(filepath.Join(".template", sourceDir))
+	entries, err := Template.ReadDir(filepath.ToSlash(filepath.Join(".template", sourceDir)))
 	if err != nil {
 		return err
 	}
@@ -49,7 +53,7 @@ func writeTemplateDirRecursive(sourceDir, targetDir string) error {
 				return err
 			}
 		} else {
-			data, err := Template.ReadFile(filepath.Join(".template", sourcePath))
+			data, err := Template.ReadFile(filepath.ToSlash(filepath.Join(".template", sourcePath)))
 			if err != nil {
 				return err
 			}
