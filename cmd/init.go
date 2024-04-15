@@ -7,12 +7,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jaronnie/genius"
-	"github.com/jaronnie/jzero/embeded"
-	"github.com/spf13/cast"
-	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
+
+	"github.com/jaronnie/genius"
+	"github.com/spf13/cast"
+	"github.com/spf13/cobra"
+
+	"github.com/jaronnie/jzero/embeded"
 )
 
 // initCmd represents the init command

@@ -8,9 +8,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/Masterminds/sprig/v3"
-	"github.com/jaronnie/jzero/embeded"
-	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -18,7 +15,11 @@ import (
 	"strings"
 	"text/template"
 
+	sprig "github.com/Masterminds/sprig/v3"
 	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+
+	"github.com/jaronnie/jzero/embeded"
 )
 
 // newCmd represents the new command

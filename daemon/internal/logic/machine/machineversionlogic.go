@@ -3,10 +3,10 @@ package machinelogic
 import (
 	"context"
 
+	"github.com/zeromicro/go-zero/core/logx"
+
 	"github.com/jaronnie/jzero/daemon/internal/svc"
 	"github.com/jaronnie/jzero/daemon/pb/machinepb"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type MachineVersionLogic struct {

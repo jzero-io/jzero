@@ -3,10 +3,11 @@ package file
 import (
 	"net/http"
 
+	"github.com/zeromicro/go-zero/rest/httpx"
+
 	"github.com/jaronnie/jzero/daemon/internal/logic/file"
 	"github.com/jaronnie/jzero/daemon/internal/svc"
 	"github.com/jaronnie/jzero/daemon/internal/types"
-	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func DownloadHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

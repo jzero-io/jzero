@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/zeromicro/go-zero/core/logx"
+
 	"github.com/jaronnie/jzero/daemon/internal/svc"
 	"github.com/jaronnie/jzero/daemon/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type DownloadLogic struct {

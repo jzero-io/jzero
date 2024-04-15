@@ -3,10 +3,10 @@ package credentiallogic
 import (
 	"context"
 
+	"github.com/zeromicro/go-zero/core/logx"
+
 	"github.com/jaronnie/jzero/daemon/internal/svc"
 	"github.com/jaronnie/jzero/daemon/pb/credentialpb"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type CredentialVersionLogic struct {
