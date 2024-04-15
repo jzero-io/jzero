@@ -14,12 +14,23 @@ title: 首页
 ## 特性
 
 * 支持将 grpc 通过 gateway 转化为 http 请求, 并支持自定义 http 请求
-* 同时支持在项目中使用 grpc 和 api
+* 同时支持在项目中使用 grpc, grpc-gateway, api
 * 支持监听 unix socket
 * 支持多 proto 多 service(多人开发友好)
-* 加入开发中的各种案例请求
+* 一键创建项目(jzero new)
+* 一键生成各种代码(jzero gen)
 
-## 快速开始
+## 安装
+
+```shell
+go install github.com/jaronnie/jzero@latest
+# 初始化
+jzero init
+# 启动样例服务
+jzero daemon
+```
+
+## 一键创建项目
 
 ```shell
 # 安装 goctl
@@ -36,5 +47,24 @@ jzero gen
 # 下载依赖
 go mod tidy
 # 启动项目
-go run main.go --config config.toml
+go run main.go daemon --config config.toml
 ```
+
+## 开发
+
+```shell
+# gencode
+jzero gen
+
+# run
+go run main.go daemon --config config.toml
+
+# test
+# gateway
+curl http://localhost:8001/api/v1.0/credential/version
+# grpc
+grpcurl -plaintext localhost:8000 credentialpb.credential/CredentialVersion
+# api
+curl http://localhost:8001/api/v1/hello/me
+```
+
