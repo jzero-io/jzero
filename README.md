@@ -18,6 +18,8 @@
 
 ## 快速开始
 
+[详细文档点击这里](https://jzero.jaronnie.com)
+
 ```shell
 # 安装 goctl
 go install github.com/zeromicro/go-zero/tools/goctl@latest

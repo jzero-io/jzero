@@ -6,7 +6,7 @@ export default defineUserConfig({
 
   lang: "zh-CN",
   title: "Jzero Framework",
-  description: "vuepress-theme-hope 的文档演示",
+  description: "Jzero docs",
 
   theme,
 
