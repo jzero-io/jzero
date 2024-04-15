@@ -133,22 +133,20 @@ func newProject(_ *cobra.Command, _ []string) error {
 	_ = os.MkdirAll(filepath.Join(Dir, "daemon", "internal", "config"), 0o755)
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "config", "config.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "internal", "config", "config.go.tpl")), 0o644)
 	cobra.CheckErr(err)
-	//
-	//// write daemon/internal/handler/myroutes.go
-	//_ = os.MkdirAll(filepath.Join(Dir, "daemon", "internal", "handler"), 0o755)
-	//myroutesFile, err := ParseTemplate(map[string]interface{}{
-	//	"Module": Module,
-	//}, embeded.ReadTemplateFile("jzero/daemon/internal/handler/myroutes.go.tpl"))
-	//err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "handler", "myroutes.go"), myroutesFile, 0o644)
-	//cobra.CheckErr(err)
-	//
-	//// write daemon/internal/handler/myhandler.go
-	//myhandlerFile, err := ParseTemplate(map[string]interface{}{
-	//	"Module": Module,
-	//}, embeded.ReadTemplateFile("jzero/daemon/internal/handler/myhandler.go.tpl"))
-	//err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "handler", "myhandler.go"), myhandlerFile, 0o644)
-	//cobra.CheckErr(err)
 
+	// write daemon/internal/handler/myroutes.go
+	_ = os.MkdirAll(filepath.Join(Dir, "daemon", "internal", "handler"), 0o755)
+	myroutesFile, err := ParseTemplate(map[string]interface{}{
+		"Module": Module,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "internal", "handler", "myroutes.go.tpl")))
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "handler", "myroutes.go"), myroutesFile, 0o644)
+	cobra.CheckErr(err)
+
+	// write daemon/internal/handler/myhandler.go
+	myhandlerFile, err := ParseTemplate(map[string]interface{}{
+		"Module": Module,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "internal", "handler", "myhandler.go.tpl")))
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "handler", "myhandler.go"), myhandlerFile, 0o644)
 	cobra.CheckErr(err)
 	return nil
 }

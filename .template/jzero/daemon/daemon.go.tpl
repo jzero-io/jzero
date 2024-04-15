@@ -2,9 +2,6 @@ package daemon
 
 import (
 	"fmt"
-	"net"
-	"net/http"
-	"os"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -16,9 +13,9 @@ import (
 	"{{ .Module }}/daemon/internal/config"
 	"{{ .Module }}/daemon/internal/handler"
 	credentialsvr "{{ .Module }}/daemon/internal/server/credential"
-	credentialsvrv2 "{{ .Module }}/daemon/internal/server/credentialv2"
+	credentialv2svr "{{ .Module }}/daemon/internal/server/credentialv2"
 	machinesvr "{{ .Module }}/daemon/internal/server/machine"
-	machinesvrv2 "{{ .Module }}/daemon/internal/server/machinev2"
+	machinev2svr "{{ .Module }}/daemon/internal/server/machinev2"
 	"{{ .Module }}/daemon/internal/svc"
 	"{{ .Module }}/daemon/pb/credentialpb"
 	"{{ .Module }}/daemon/pb/machinepb"
@@ -35,9 +32,9 @@ func Start(cfgFile string) {
 func getZrpcServer(c config.Config, ctx *svc.ServiceContext) *zrpc.RpcServer {
 	return zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		credentialpb.RegisterCredentialServer(grpcServer, credentialsvr.NewCredentialServer(ctx))
-		credentialpb.RegisterCredentialv2Server(grpcServer, credentialsvrv2.NewCredentialv2Server(ctx))
+		credentialpb.RegisterCredentialv2Server(grpcServer, credentialv2svr.NewCredentialv2Server(ctx))
 		machinepb.RegisterMachineServer(grpcServer, machinesvr.NewMachineServer(ctx))
-		machinepb.RegisterMachinev2Server(grpcServer, machinesvrv2.NewMachinev2Server(ctx))
+		machinepb.RegisterMachinev2Server(grpcServer, machinev2svr.NewMachinev2Server(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
@@ -51,23 +48,10 @@ func start(c config.Config) {
 
 	gw := gateway.MustNewServer(c.Gateway)
 	// gw add routes
-	// handler.RegisterMyHandlers(gw.Server, ctx)
+	handler.RegisterMyHandlers(gw.Server, ctx)
 
 	// gw add api routes
 	handler.RegisterHandlers(gw.Server, ctx)
-
-	// listen unix
-	sock := "./{{ .APP }}.sock"
-	_ = os.Remove(sock)
-	unixListener, err := net.Listen("unix", sock)
-	if err != nil {
-		panic(err)
-	}
-	go func() {
-		if err := http.Serve(unixListener, gw); err != nil {
-			panic(err)
-		}
-	}()
 
 	group := service.NewServiceGroup()
 	group.Add(s)
