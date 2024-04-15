@@ -16,17 +16,7 @@
 * 一键创建项目(jzero new)
 * 一键生成各种代码(jzero gen)
 
-## 安装
-
-```shell
-go install github.com/jaronnie/jzero@latest
-# 初始化
-jzero init
-# 启动样例服务
-jzero daemon
-```
-
-## 一键创建项目
+## 快速开始
 
 ```shell
 # 安装 goctl
@@ -46,15 +36,9 @@ go mod tidy
 go run main.go daemon --config config.toml
 ```
 
-## 开发
+## 验证
 
 ```shell
-# gencode
-jzero gen
-
-# run
-go run main.go daemon --config config.toml
-
 # test
 # gateway
 curl http://localhost:8001/api/v1.0/credential/version
