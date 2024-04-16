@@ -93,6 +93,15 @@ func newProject(_ *cobra.Command, _ []string) error {
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "daemon.go.tpl")))
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "daemon.go"), daemonFile, 0o644)
 	cobra.CheckErr(err)
+
+	// touch daemon/zrpc.go
+	zrpcFile, err := ParseTemplate(map[string]interface{}{
+		"Module": Module,
+		"APP":    APP,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "zrpc.go.tpl")))
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "zrpc.go"), zrpcFile, 0o644)
+	cobra.CheckErr(err)
+
 	// mkdir api, proto dir
 	err = os.MkdirAll(filepath.Join(Dir, "daemon", "proto"), 0o755)
 	cobra.CheckErr(err)

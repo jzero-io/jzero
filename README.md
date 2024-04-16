@@ -59,5 +59,5 @@ curl http://localhost:8001/api/v1/hello/me
 - [x] Warp rpc and api Response
 - [x] Support jzero gen
 - [x] Support jzero new
-- [ ] jzero gen support auto register service to zrpc server and update gateway.UpStream.0.ProtoSets
+- [x] jzero gen support auto register service to zrpc server and update gateway.UpStream.0.ProtoSets
 
