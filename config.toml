@@ -1,31 +1,19 @@
 APP = "jzero"
-Name = "jzero.rpc"
-ListenOn = "0.0.0.0:8000"
 Key = "jzero.rpc"
+ListenOn = "0.0.0.0:8000"
 Mode = "dev"
+Name = "jzero.rpc"
 
 [DevServer]
-Enabled = true
-
-#[Telemetry]
-#Name = "jzero"
-#Endpoint = "http://127.0.0.1:14268/api/traces"
-#Batcher = "jaeger"
-#Sampler = 1.0
+  Enabled = true
 
 [Gateway]
-Name = "jzero.gw"
-Port = 8001
-
-#[Gateway.Telemetry]
-#Name = "jzero"
-#Endpoint = "http://127.0.0.1:14268/api/traces"
-#Batcher = "jaeger"
-#Sampler = 1.0
+  Name = "jzero.gw"
+  Port = 8001
 
   [[Gateway.Upstreams]]
-  Name = "jzero.gw"
-  ProtoSets = [ ".protosets/credential.pb", ".protosets/machine.pb" ]
+    Name = "jzero.gw"
+    ProtoSets = [".protosets/credential.pb", ".protosets/machine.pb"]
 
     [Gateway.Upstreams.Grpc]
-    Endpoints = [ "0.0.0.0:8000" ]
+      Endpoints = ["0.0.0.0:8000"]

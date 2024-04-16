@@ -6,7 +6,7 @@ package server
 import (
 	"context"
 
-	credentiallogic "github.com/jaronnie/jzero/daemon/internal/logic/credential"
+	"github.com/jaronnie/jzero/daemon/internal/logic/credential"
 	"github.com/jaronnie/jzero/daemon/internal/svc"
 	"github.com/jaronnie/jzero/daemon/pb/credentialpb"
 )

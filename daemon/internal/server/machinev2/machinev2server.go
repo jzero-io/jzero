@@ -6,7 +6,7 @@ package server
 import (
 	"context"
 
-	machinev2logic "github.com/jaronnie/jzero/daemon/internal/logic/machinev2"
+	"github.com/jaronnie/jzero/daemon/internal/logic/machinev2"
 	"github.com/jaronnie/jzero/daemon/internal/svc"
 	"github.com/jaronnie/jzero/daemon/pb/machinepb"
 )
