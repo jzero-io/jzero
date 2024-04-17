@@ -1,4 +1,4 @@
-FROM golang:alpine
+FROM arm64v8/golang:alpine
 
 ENV CGO_ENABLED 0
 ENV GOPROXY https://goproxy.io,direct
@@ -10,7 +10,7 @@ RUN goctl env check --install --verbose --force
 ENV TZ Asia/Shanghai
 
 WORKDIR /app
-COPY dist/jzero_linux_amd64_v1/jzero /app/jzero
+COPY dist/jzero_linux_arm64/jzero /app/jzero
 COPY config.toml /app/config.toml
 COPY .protosets /app/.protosets
 
