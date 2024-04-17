@@ -7,23 +7,9 @@ Mode = "dev"
 [DevServer]
 Enabled = true
 
-# Grpc 链路追踪
-# [Telemetry]
-# Name = "{{ .APP }}"
-# Endpoint = "http://127.0.0.1:14268/api/traces"
-# Batcher = "jaeger"
-# Sampler = 1.0
-
 [Gateway]
 Name = "{{ .APP }}.gw"
 Port = 8001
-
-# Gateway 链路追踪
-# [Gateway.Telemetry]
-# Name = "{{ .APP }}"
-# Endpoint = "http://127.0.0.1:14268/api/traces"
-# Batcher = "jaeger"
-# Sampler = 1.0
 
   [[Gateway.Upstreams]]
   Name = "{{ .APP }}.gw"
