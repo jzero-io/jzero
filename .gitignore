@@ -5,3 +5,4 @@ filedata
 dist
 *.sock
 node_modules
+web
