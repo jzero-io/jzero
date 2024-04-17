@@ -4,7 +4,11 @@ icon: home
 title: 首页
 ---
 
-基于 go-zero 框架项目的代码设计
+基于 go-zero 框架定制的企业级后端代码框架
+
+<div style="text-align: center;">
+  <img src="https://oss.jaronnie.com/jzero.jpg" style="width: 33%;" alt=""/>
+</div>
 
 ## 技术栈
 
