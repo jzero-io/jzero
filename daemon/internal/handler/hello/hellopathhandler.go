@@ -8,6 +8,8 @@ import (
 	"github.com/jaronnie/jzero/daemon/internal/logic/hello"
 	"github.com/jaronnie/jzero/daemon/internal/svc"
 	"github.com/jaronnie/jzero/daemon/internal/types"
+
+	"github.com/jaronnie/jzero/daemon/pkg/response"
 )
 
 func HelloPathHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
@@ -20,10 +22,6 @@ func HelloPathHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		l := hello.NewHelloPathLogic(r.Context(), svcCtx)
 		resp, err := l.HelloPath(&req)
-		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
-		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
-		}
+		response.Response(w, resp, err)
 	}
 }

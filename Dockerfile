@@ -25,9 +25,9 @@ ENV TZ Asia/Shanghai
 
 WORKDIR /app
 COPY --from=builder /app/jzero /app/jzero
-COPY --from=builder /build/config /app/config
+COPY --from=builder /build/config.toml /app/config.toml
 COPY --from=builder /build/.protosets /app/.protosets
 
 EXPOSE 8001 8002
 
-CMD ["./jzero", "jzerod", "--config", "config/config.toml"]
+CMD ["./jzero", "jzerod", "--config", "config.toml"]

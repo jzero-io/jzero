@@ -65,7 +65,7 @@ func gen(_ *cobra.Command, _ []string) error {
 			continue
 		}
 		if strings.HasSuffix(v.Name(), "proto") {
-			command := fmt.Sprintf("goctl rpc protoc daemon/proto/%s  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false -m", v.Name())
+			command := fmt.Sprintf("goctl rpc protoc daemon/proto/%s  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false --home %s -m", v.Name(), filepath.Join(wd, ".template", "go-zero"))
 			_, err = Run(command, wd)
 			cobra.CheckErr(err)
 
@@ -119,7 +119,7 @@ func gen(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 
 	// 生成 api 代码
-	command := fmt.Sprintf("goctl api go --api daemon/api/%s.api --dir ./daemon", cast.ToString(g.Get("APP")))
+	command := fmt.Sprintf("goctl api go --api daemon/api/%s.api --dir ./daemon --home %s", cast.ToString(g.Get("APP")), filepath.Join(wd, ".template", "go-zero"))
 	_, err = Run(command, wd)
 	cobra.CheckErr(err)
 

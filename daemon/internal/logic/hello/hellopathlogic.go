@@ -2,6 +2,7 @@ package hello
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/zeromicro/go-zero/core/logx"
 
@@ -24,7 +25,7 @@ func NewHelloPathLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HelloPa
 }
 
 func (l *HelloPathLogic) HelloPath(req *types.PathRequest) (resp *types.Response, err error) {
-	// todo: add your logic here and delete this line
-
+	resp = &types.Response{}
+	resp.Message = fmt.Sprintf("Hello %s. I am Path", req.Name)
 	return
 }

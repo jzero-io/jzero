@@ -135,8 +135,19 @@ func newProject(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 
 	// write .template
-	//err = embeded.WriteTemplateDir("go-zero", filepath.Join(Dir, ".template", "go-zero"))
-	//cobra.CheckErr(err)
+	err = embeded.WriteTemplateDir("go-zero", filepath.Join(Dir, ".template", "go-zero"))
+	cobra.CheckErr(err)
+	// replace .template/go-zero/api/handler.tpl
+	// 暂时特殊处理: https://github.com/zeromicro/go-zero/pull/4071
+	newHandlerBytes := bytes.ReplaceAll(embeded.ReadTemplateFile(filepath.Join(filepath.Join("go-zero", "api", "handler.tpl"))), []byte("github.com/jaronnie/jzero"), []byte(Module))
+	err = os.WriteFile(filepath.Join(Dir, ".template", "go-zero", "api", "handler.tpl"), newHandlerBytes, 0o644)
+	cobra.CheckErr(err)
+
+	// write daemon/pkg/response/response.go
+	err = os.MkdirAll(filepath.Join(Dir, "daemon", "pkg", "response"), 0o755)
+	cobra.CheckErr(err)
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "pkg", "response", "response.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "pkg", "response", "response.go.tpl")), 0o644)
+	cobra.CheckErr(err)
 
 	// write daemon/internal/config/config.go
 	_ = os.MkdirAll(filepath.Join(Dir, "daemon", "internal", "config"), 0o755)

@@ -26,6 +26,6 @@ func NewHelloPostLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HelloPo
 
 func (l *HelloPostLogic) HelloPost(req *types.PostRequest) (resp *types.Response, err error) {
 	resp = &types.Response{}
-	resp.Message = fmt.Sprintf("Hello %s", req.Name)
+	resp.Message = fmt.Sprintf("Hello %s. I am Post", req.Name)
 	return
 }
