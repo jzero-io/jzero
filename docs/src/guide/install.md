@@ -10,6 +10,8 @@ order: 2
 
 ```shell
 go install github.com/zeromicro/go-zero/tools/goctl@latest
+
+goctl --version
 ```
 
 ## 安装 proto 相关工具
@@ -22,4 +24,6 @@ goctl env check --install --verbose --force
 
 ```shell
 go install github.com/jaronnie/jzero@latest
+
+jzero version
 ```

@@ -7,22 +7,41 @@ import (
 	"github.com/jaronnie/jzero/embeded"
 )
 
-//go:embed .template
-var template embed.FS
+// embeded
+var (
+	//go:embed .template
+	template embed.FS
 
-//go:embed .protosets/*.pb
-var protosets embed.FS
+	//go:embed .protosets/*.pb
+	protosets embed.FS
 
-//go:embed config.toml
-var config embed.FS
+	//go:embed config.toml
+	config embed.FS
 
-//go:embed all:web
-var web embed.FS
+	//go:embed all:web
+	web embed.FS
+)
+
+// ldflags
+var (
+	version string
+	commit  string
+	date    string
+)
 
 func main() {
-	embeded.Web = web
-	embeded.Protosets = protosets
-	embeded.Config = config
-	embeded.Template = template
+	{
+		embeded.Web = web
+		embeded.Protosets = protosets
+		embeded.Config = config
+		embeded.Template = template
+	}
+
+	{
+		cmd.Version = version
+		cmd.Date = date
+		cmd.Commit = commit
+	}
+
 	cmd.Execute()
 }

@@ -1,9 +1,6 @@
 version: "3"
 
 tasks:
-  gencode:
-    cmds:
-      - sh ./scripts/gencode.sh
   run:
     cmds:
       - go run main.go daemon --config config.toml
@@ -19,7 +16,7 @@ tasks:
     silent: true
   build:
     cmds:
-      - goreleaser build --snapshot --single-target --rm-dist
+      - goreleaser build --snapshot --single-target --clean
     silent: true
   release:
     cmds:
