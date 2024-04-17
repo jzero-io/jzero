@@ -12,7 +12,9 @@ export default hopeTheme({
 
   iconAssets: "fontawesome-with-brands",
 
-  logo: "https://oss.jaronnie.com/avatar.png",
+  // made by https://gopherize.me
+  // favicon.ico made by https://www.bitbug.net
+  logo: "https://oss.jaronnie.com/jzero.jpg",
 
   repo: "jaronnie/jzero",
 
