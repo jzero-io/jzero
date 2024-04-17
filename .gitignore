@@ -6,3 +6,4 @@ dist
 *.sock
 node_modules
 web
+docs/package-lock.json
