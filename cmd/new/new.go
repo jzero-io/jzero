@@ -127,5 +127,30 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "internal", "handler", "myhandler.go.tpl")))
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "handler", "myhandler.go"), myhandlerFile, 0o644)
 	cobra.CheckErr(err)
+
+	// write Dockerfile
+	dockerFile, err := templatex.ParseTemplate(map[string]interface{}{
+		"APP": APP,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "Dockerfile.tpl")))
+	err = os.WriteFile(filepath.Join(Dir, "Dockerfile"), dockerFile, 0o644)
+	cobra.CheckErr(err)
+
+	// write Dockerfile-arm64
+	dockerArm64File, err := templatex.ParseTemplate(map[string]interface{}{
+		"APP": APP,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "Dockerfile-arm64.tpl")))
+	err = os.WriteFile(filepath.Join(Dir, "Dockerfile-arm64"), dockerArm64File, 0o644)
+	cobra.CheckErr(err)
+
+	// write .goreleaser.yaml
+	goreleaserBytes := embeded.ReadTemplateFile(filepath.Join("jzero", "goreleaser.yaml.tpl"))
+	newGoreleaserBytes := bytes.ReplaceAll(goreleaserBytes, []byte("{{ .APP }}"), []byte(APP))
+	err = os.WriteFile(filepath.Join(Dir, ".goreleaser.yaml"), newGoreleaserBytes, 0o644)
+	cobra.CheckErr(err)
+
+	// write Taskfile.yml
+	err = os.WriteFile(filepath.Join(Dir, "Taskfile.yml"), embeded.ReadTemplateFile(filepath.Join("jzero", "Taskfile.yml.tpl")), 0o644)
+	cobra.CheckErr(err)
+
 	return nil
 }
