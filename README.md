@@ -21,39 +21,7 @@
 * 一键生成各种代码(jzero gen)
 * 一键编译各种平台的二进制并打包成镜像
 
-## 快速开始
-
-[详细文档点击这里](https://jzero.jaronnie.com)
-
-```shell
-# 安装 goctl
-go install github.com/zeromicro/go-zero/tools/goctl@latest
-# 一键安装相关工具
-goctl env check --install --verbose --force
-# 安装 jzero
-go install github.com/jaronnie/jzero@latest
-# 一键创建项目
-jzero new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
-cd app1
-# 一键生成代码
-jzero gen
-# 下载依赖
-go mod tidy
-# 启动项目
-go run main.go daemon --config config.toml
-```
-
-## 验证
-
-```shell
-# test
-# gateway
-curl http://localhost:8001/api/v1.0/credential/version
-# grpc
-grpcurl -plaintext localhost:8000 credentialpb.credential/CredentialVersion
-# api
-curl http://localhost:8001/api/v1/hello/me
-```
+## [快速开始](https://jzero.jaronnie.com/#快速开始)
 
 ## RoadMap
 
@@ -65,4 +33,5 @@ curl http://localhost:8001/api/v1/hello/me
 - [x] Support jzero gen
 - [x] Support jzero new
 - [x] jzero gen support auto register service to zrpc server and update gateway.UpStream.0.ProtoSets
+- [x] Support using docker to create project and gen code
 

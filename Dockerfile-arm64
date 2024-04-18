@@ -6,6 +6,7 @@ ENV GOPROXY https://goproxy.io,direct
 RUN apk add tzdata ca-certificates curl bash
 RUN go install github.com/zeromicro/go-zero/tools/goctl@latest
 RUN goctl env check --install --verbose --force
+RUN chmod +x /go/bin/protoc
 
 ENV TZ Asia/Shanghai
 
