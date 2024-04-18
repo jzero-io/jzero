@@ -6,8 +6,9 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
-	"github.com/jaronnie/jzero/cmd/gen"
 	"github.com/spf13/cobra"
+
+	"github.com/jaronnie/jzero/cmd/gen"
 )
 
 // genCmd represents the gen command

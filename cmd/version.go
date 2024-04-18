@@ -7,10 +7,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cast"
-	"github.com/spf13/cobra"
 	"runtime"
 	"time"
+
+	"github.com/spf13/cast"
+	"github.com/spf13/cobra"
 )
 
 var (

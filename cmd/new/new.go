@@ -3,12 +3,14 @@ package new
 import (
 	"bytes"
 	"fmt"
-	"github.com/jaronnie/jzero/daemon/pkg/templatex"
-	"github.com/jaronnie/jzero/embeded"
-	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"os"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
+	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+
+	"github.com/jaronnie/jzero/daemon/pkg/templatex"
+	"github.com/jaronnie/jzero/embeded"
 )
 
 var (

@@ -2,8 +2,9 @@ package templatex
 
 import (
 	"bytes"
-	"github.com/Masterminds/sprig/v3"
 	"text/template"
+
+	sprig "github.com/Masterminds/sprig/v3"
 )
 
 // ParseTemplate template

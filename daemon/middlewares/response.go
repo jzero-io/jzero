@@ -3,10 +3,11 @@ package middlewares
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"net/http"
 )
 
 type Body struct {

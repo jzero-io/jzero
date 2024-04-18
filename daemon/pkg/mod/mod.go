@@ -2,9 +2,10 @@ package mod
 
 import (
 	"encoding/json"
+	"os"
+
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
-	"os"
 )
 
 // GetGoMod is used to determine whether workDir is a go module project through command `go list -json -m`

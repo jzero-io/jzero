@@ -2,19 +2,21 @@ package gen
 
 import (
 	"fmt"
-	"github.com/jaronnie/genius"
-	"github.com/jaronnie/jzero/daemon/pkg/mod"
-	"github.com/jaronnie/jzero/daemon/pkg/stringx"
-	"github.com/jaronnie/jzero/daemon/pkg/templatex"
-	"github.com/jaronnie/jzero/embeded"
-	"github.com/spf13/cast"
-	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
-	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/jaronnie/genius"
+	"github.com/spf13/cast"
+	"github.com/spf13/cobra"
+	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
+
+	"github.com/jaronnie/jzero/daemon/pkg/mod"
+	"github.com/jaronnie/jzero/daemon/pkg/stringx"
+	"github.com/jaronnie/jzero/daemon/pkg/templatex"
+	"github.com/jaronnie/jzero/embeded"
 )
 
 var (

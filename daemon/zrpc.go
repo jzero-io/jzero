@@ -9,20 +9,18 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/jaronnie/jzero/daemon/internal/config"
-	"github.com/jaronnie/jzero/daemon/internal/svc"
-
 	credentialsvr "github.com/jaronnie/jzero/daemon/internal/server/credential"
 	credentialv2svr "github.com/jaronnie/jzero/daemon/internal/server/credentialv2"
 	machinesvr "github.com/jaronnie/jzero/daemon/internal/server/machine"
 	machinev2svr "github.com/jaronnie/jzero/daemon/internal/server/machinev2"
-
+	"github.com/jaronnie/jzero/daemon/internal/svc"
 	"github.com/jaronnie/jzero/daemon/pb/credentialpb"
 	"github.com/jaronnie/jzero/daemon/pb/machinepb"
 )
 
 func getZrpcServer(c config.Config, ctx *svc.ServiceContext) *zrpc.RpcServer {
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-	    
+
 		credentialpb.RegisterCredentialServer(grpcServer, credentialsvr.NewCredentialServer(ctx))
 		credentialpb.RegisterCredentialv2Server(grpcServer, credentialv2svr.NewCredentialv2Server(ctx))
 		machinepb.RegisterMachineServer(grpcServer, machinesvr.NewMachineServer(ctx))
