@@ -3,10 +3,12 @@ FROM golang:alpine
 ENV CGO_ENABLED 0
 ENV GOPROXY https://goproxy.io,direct
 
-RUN apk add tzdata ca-certificates curl bash
-RUN go install github.com/zeromicro/go-zero/tools/goctl@latest
-RUN goctl env check --install --verbose --force
-RUN chmod +x /go/bin/protoc
+RUN apk update --no-cache \
+    && apk add --no-cache tzdata ca-certificates curl bash protoc
+
+RUN go install github.com/zeromicro/go-zero/tools/goctl@latest \
+  && go install google.golang.org/protobuf/cmd/protoc-gen-go@latest \
+  && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 ENV TZ Asia/Shanghai
 
