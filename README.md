@@ -14,7 +14,7 @@
 ## 特性
 
 * 支持将 grpc 通过 gateway 转化为 http 请求, 并支持自定义 http 请求
-* 同时支持在项目中使用 grpc, grpc-gateway, api
+* 同时支持在项目中使用 grpc, grpc-gateway, api, 并统一包装 http 返回体
 * 支持监听 unix socket
 * 支持多 proto 多 service(多人开发友好)
 * 一键创建项目(jzero new)

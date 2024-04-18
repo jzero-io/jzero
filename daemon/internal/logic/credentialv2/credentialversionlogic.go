@@ -24,7 +24,7 @@ func NewCredentialVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *CredentialVersionLogic) CredentialVersion(in *credentialpb.Empty) (*credentialpb.CredentialVersionResponse, error) {
-	// todo: add your logic here and delete this line
-
-	return &credentialpb.CredentialVersionResponse{}, nil
+	return &credentialpb.CredentialVersionResponse{
+		Version: "v2.0",
+	}, nil
 }

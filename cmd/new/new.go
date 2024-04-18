@@ -92,26 +92,26 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	err = os.WriteFile(filepath.Join(Dir, "config.toml"), configFile, 0o644)
 	cobra.CheckErr(err)
 
-	// write .template
-	err = embeded.WriteTemplateDir("go-zero", filepath.Join(Dir, ".template", "go-zero"))
-	cobra.CheckErr(err)
-	// replace .template/go-zero/api/handler.tpl
-	// 暂时特殊处理: https://github.com/zeromicro/go-zero/pull/4071
-	newHandlerBytes := bytes.ReplaceAll(embeded.ReadTemplateFile(filepath.Join(filepath.Join("go-zero", "api", "handler.tpl"))), []byte("github.com/jaronnie/jzero"), []byte(Module))
-	err = os.WriteFile(filepath.Join(Dir, ".template", "go-zero", "api", "handler.tpl"), newHandlerBytes, 0o644)
-	cobra.CheckErr(err)
-
-	// write daemon/pkg/response/response.go
-	err = os.MkdirAll(filepath.Join(Dir, "daemon", "pkg", "response"), 0o755)
-	cobra.CheckErr(err)
-	err = os.WriteFile(filepath.Join(Dir, "daemon", "pkg", "response", "response.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "pkg", "response", "response.go.tpl")), 0o644)
-	cobra.CheckErr(err)
-
+	// ################# start gen config ###################
 	// write daemon/internal/config/config.go
 	err = os.MkdirAll(filepath.Join(Dir, "daemon", "internal", "config"), 0o755)
 	cobra.CheckErr(err)
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "config", "config.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "internal", "config", "config.go.tpl")), 0o644)
 	cobra.CheckErr(err)
+	// ################# end gen config ###################
+
+	// ################# start gen middlewares ###################
+	// write daemon/middlewares/response.go
+	err = os.MkdirAll(filepath.Join(Dir, "daemon", "middlewares"), 0o755)
+	cobra.CheckErr(err)
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "middlewares", "response.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "middlewares", "response.go.tpl")), 0o644)
+	cobra.CheckErr(err)
+
+	// write daemon/middlewares/errors.go
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "middlewares", "errors.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "middlewares", "errors.go.tpl")), 0o644)
+	cobra.CheckErr(err)
+
+	// ################# end gen middlewares ###################
 
 	// write daemon/internal/handler/myroutes.go
 	_ = os.MkdirAll(filepath.Join(Dir, "daemon", "internal", "handler"), 0o755)

@@ -3,13 +3,10 @@ package hello
 import (
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
-
 	"github.com/jaronnie/jzero/daemon/internal/logic/hello"
 	"github.com/jaronnie/jzero/daemon/internal/svc"
 	"github.com/jaronnie/jzero/daemon/internal/types"
-
-	"github.com/jaronnie/jzero/daemon/pkg/response"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func HelloPostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
@@ -22,6 +19,10 @@ func HelloPostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		l := hello.NewHelloPostLogic(r.Context(), svcCtx)
 		resp, err := l.HelloPost(&req)
-		response.Response(w, resp, err)
+		if err != nil {
+			httpx.ErrorCtx(r.Context(), w, err)
+		} else {
+			httpx.OkJsonCtx(r.Context(), w, resp)
+		}
 	}
 }

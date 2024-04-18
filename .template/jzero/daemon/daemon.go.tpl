@@ -6,10 +6,12 @@ import (
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/gateway"
+	"github.com/zeromicro/go-zero/rest/httpx"
 
 	"{{ .Module }}/daemon/internal/config"
 	"{{ .Module }}/daemon/internal/handler"
 	"{{ .Module }}/daemon/internal/svc"
+	"{{ .Module }}/daemon/middlewares"
 )
 
 func Start(cfgFile string) {
@@ -25,10 +27,17 @@ func start(c config.Config) {
 	s := getZrpcServer(c, ctx)
 
 	gw := gateway.MustNewServer(c.Gateway)
-	// gw add routes
+
+	// add middlewares
+	gw.Use(middlewares.WrapResponse)
+
+	// error handler
+	httpx.SetErrorHandler(middlewares.GrpcErrorHandler)
+
+	// gw add your routes
 	handler.RegisterMyHandlers(gw.Server, ctx)
 
-	// gw add api routes
+	// gw add go-zero api framework routes
 	handler.RegisterHandlers(gw.Server, ctx)
 
 	group := service.NewServiceGroup()
