@@ -17,9 +17,14 @@ import (
 	"strings"
 )
 
-type ImportLines []string
+var (
+	WorkingDir string
+)
 
-type RegisterLines []string
+type (
+	ImportLines   []string
+	RegisterLines []string
+)
 
 func (l ImportLines) String() string {
 	return "\n\n\t" + strings.Join(l, "\n\t")
@@ -30,6 +35,12 @@ func (l RegisterLines) String() string {
 }
 
 func Gen(c *cobra.Command, _ []string) error {
+	// change dir
+	if WorkingDir != "" {
+		err := os.Chdir(WorkingDir)
+		cobra.CheckErr(err)
+	}
+
 	wd, err := os.Getwd()
 	cobra.CheckErr(err)
 

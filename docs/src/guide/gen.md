@@ -10,10 +10,27 @@ jzero 会自动检测对应文件夹下的内容, 然后进行自动生成, 使�
 
 ## 生成代码
 
-```shell
+::: tip jzero version >= v0.7.4 可使用 Docker 生成代码
+:::
+
+::: code-tabs#shell
+
+@tab jzero
+
+```bash
 cd app1
 jzero gen
 ```
+
+@tab Docker
+
+```bash
+docker run --rm \
+  -v ./app1:/app/app1 jaronnie/jzero:latest \
+  gen -w app1
+```
+:::
+
 
 ## 下载依赖
 

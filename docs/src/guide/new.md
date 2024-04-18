@@ -4,9 +4,23 @@ icon: clone
 order: 3
 ---
 
-```shell
+::: code-tabs#shell
+
+@tab jzero
+
+```bash
 jzero new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
 ```
+
+@tab Docker
+
+```bash
+docker run --rm \
+  -v ./app1:/app/app1 jaronnie/jzero:latest \
+  new --module=github.com/jaronnie/app1 \
+  --dir=./app1 --app=app1
+```
+:::
 
 flag 解释:
 

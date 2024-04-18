@@ -4,21 +4,19 @@ tasks:
   run:
     cmds:
       - go run main.go daemon --config config.toml
-  install:
-    deps:
-      - build
-    cmds:
-      - cp dist/jzero_{{OS}}_{{ARCH}}_v1/jzero $GOBIN
-    silent: true
-  fmt:
-    cmds:
-      - sh scripts/goimports.sh {{ if empty .CLI_ARGS }}all{{ else }}git{{ end }}
-    silent: true
   build:
     cmds:
       - goreleaser build --snapshot --single-target --clean
     silent: true
-  release:
+  build:all:
     cmds:
-      - goreleaser release --rm-dist
+      - goreleaser build --snapshot --clean
+    silent: true
+  build:amd64:
+    cmds:
+      - GOOS=linux GOARCH=amd64 goreleaser build --snapshot --single-target --clean
+    silent: true
+  build:arm64:
+    cmds:
+      - GOOS=linux GOARCH=arm64 goreleaser build --snapshot --single-target --clean
     silent: true
