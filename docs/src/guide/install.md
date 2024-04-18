@@ -51,6 +51,15 @@ go install github.com/go-task/task/v3/cmd/task@latest
 
 ## Docker
 
+::: code-tabs#shell
+
+@tab Docker(amd64)
 ```shell
 docker pull jaronnie/jzero:latest
 ```
+
+@tab Docker(arm64)
+```shell
+docker pull jaronnie/jzero:latest-arm64
+```
+:::

@@ -22,11 +22,19 @@ cd app1
 jzero gen
 ```
 
-@tab Docker
+@tab Docker(amd64)
 
 ```bash
 docker run --rm \
   -v ./app1:/app/app1 jaronnie/jzero:latest \
+  gen -w app1
+```
+
+@tab Docker(arm64)
+
+```bash
+docker run --rm \
+  -v ./app1:/app/app1 jaronnie/jzero:latest-arm64 \
   gen -w app1
 ```
 :::
