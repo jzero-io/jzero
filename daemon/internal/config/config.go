@@ -5,6 +5,8 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
+var C Config
+
 type Config struct {
 	zrpc.RpcServerConf
 	Gateway gateway.GatewayConf
@@ -14,4 +16,5 @@ type Config struct {
 
 type JzeroConfig struct {
 	ListenOnUnixSocket string `json:",optional"`
+	GrpcMaxConns       int    `json:",default=10000"`
 }

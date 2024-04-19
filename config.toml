@@ -6,6 +6,7 @@ Name = "jzero.rpc"
 
 [Jzero]
 ListenOnUnixSocket = "./jzero.sock"
+GrpcMaxConns = 100
 
 [Log]
   ServiceName = "jzero"
@@ -18,6 +19,7 @@ ListenOnUnixSocket = "./jzero.sock"
 [Gateway]
   Name = "jzero.gw"
   Port = 8001
+  MaxConns = 100
 
   [[Gateway.Upstreams]]
     Name = "jzero.gw"

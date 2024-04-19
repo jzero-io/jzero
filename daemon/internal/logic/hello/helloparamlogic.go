@@ -3,6 +3,7 @@ package hello
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 
@@ -25,6 +26,7 @@ func NewHelloParamLogic(ctx context.Context, svcCtx *svc.ServiceContext) *HelloP
 }
 
 func (l *HelloParamLogic) HelloParam(req *types.ParamRequest) (resp *types.Response, err error) {
+	time.Sleep(50 * time.Millisecond)
 	resp = &types.Response{}
 	resp.Message = fmt.Sprintf("Hello %s. I am Param", req.Name)
 	return
