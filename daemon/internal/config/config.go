@@ -8,4 +8,10 @@ import (
 type Config struct {
 	zrpc.RpcServerConf
 	Gateway gateway.GatewayConf
+
+	Jzero JzeroConfig
+}
+
+type JzeroConfig struct {
+	ListenOnUnixSocket string `json:",optional"`
 }

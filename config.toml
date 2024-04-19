@@ -4,6 +4,14 @@ ListenOn = "0.0.0.0:8000"
 Mode = "dev"
 Name = "jzero.rpc"
 
+[Jzero]
+ListenOnUnixSocket = "./jzero.sock"
+
+[Log]
+  ServiceName = "jzero"
+  Mode = "console"
+  encoding = "plain"
+
 [DevServer]
   Enabled = true
 

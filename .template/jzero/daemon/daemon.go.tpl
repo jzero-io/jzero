@@ -2,6 +2,9 @@ package daemon
 
 import (
 	"fmt"
+	"net"
+    "net/http"
+    "os"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -39,6 +42,22 @@ func start(c config.Config) {
 
 	// gw add go-zero api framework routes
 	handler.RegisterHandlers(gw.Server, ctx)
+
+	// listen unix
+	if c.{{ .APP | FirstUpper }}.ListenOnUnixSocket != "" {
+	    sock := c.{{ .APP | FirstUpper }}.ListenOnUnixSocket
+	    _ = os.Remove(sock)
+	    unixListener, err := net.Listen("unix", sock)
+	    if err != nil {
+		    panic(err)
+	    }
+	    go func() {
+	        fmt.Printf("Starting unix server at %s...\n", c.{{ .APP | FirstUpper }}.ListenOnUnixSocket)
+		    if err := http.Serve(unixListener, gw); err != nil {
+			    panic(err)
+		    }
+	    }()
+	}
 
 	group := service.NewServiceGroup()
 	group.Add(s)

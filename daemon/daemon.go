@@ -41,17 +41,20 @@ func start(c config.Config) {
 	handler.RegisterHandlers(gw.Server, ctx)
 
 	// listen unix
-	sock := "./jzero.sock"
-	_ = os.Remove(sock)
-	unixListener, err := net.Listen("unix", sock)
-	if err != nil {
-		panic(err)
-	}
-	go func() {
-		if err := http.Serve(unixListener, gw); err != nil {
+	if c.Jzero.ListenOnUnixSocket != "" {
+		sock := c.Jzero.ListenOnUnixSocket
+		_ = os.Remove(sock)
+		unixListener, err := net.Listen("unix", sock)
+		if err != nil {
 			panic(err)
 		}
-	}()
+		go func() {
+			fmt.Printf("Starting unix server at %s...\n", c.Jzero.ListenOnUnixSocket)
+			if err := http.Serve(unixListener, gw); err != nil {
+				panic(err)
+			}
+		}()
+	}
 
 	group := service.NewServiceGroup()
 	group.Add(s)

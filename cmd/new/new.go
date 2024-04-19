@@ -88,17 +88,21 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 
 	// write config.toml
-	configFile, err := templatex.ParseTemplate(map[string]interface{}{
+	configTomlFile, err := templatex.ParseTemplate(map[string]interface{}{
 		"APP": APP,
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "config.toml.tpl")))
-	err = os.WriteFile(filepath.Join(Dir, "config.toml"), configFile, 0o644)
+	err = os.WriteFile(filepath.Join(Dir, "config.toml"), configTomlFile, 0o644)
 	cobra.CheckErr(err)
 
 	// ################# start gen config ###################
 	// write daemon/internal/config/config.go
 	err = os.MkdirAll(filepath.Join(Dir, "daemon", "internal", "config"), 0o755)
 	cobra.CheckErr(err)
-	err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "config", "config.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "internal", "config", "config.go.tpl")), 0o644)
+
+	configGoFile, err := templatex.ParseTemplate(map[string]interface{}{
+		"APP": APP,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "internal", "config", "config.go.tpl")))
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "internal", "config", "config.go"), configGoFile, 0o644)
 	cobra.CheckErr(err)
 	// ################# end gen config ###################
 

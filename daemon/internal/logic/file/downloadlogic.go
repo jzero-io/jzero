@@ -29,7 +29,9 @@ func NewDownloadLogic(ctx context.Context, svcCtx *svc.ServiceContext, writer io
 }
 
 func (l *DownloadLogic) Download(req *types.DownloadRequest) error {
-	logx.Infof("download %s", req.File)
+	l.Logger.Infof("download req: %s", req.File)
+	l.Logger.Error("test fail")
+
 	body, err := os.ReadFile(filepath.Join("./filedata", req.File))
 	if err != nil {
 		return err

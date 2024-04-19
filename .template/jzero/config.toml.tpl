@@ -4,6 +4,11 @@ ListenOn = "0.0.0.0:8000"
 Key = "{{ .APP }}.rpc"
 Mode = "dev"
 
+[Log]
+  ServiceName = "{{ .APP }}"
+  Mode = "console"
+  encoding = "plain"
+
 [DevServer]
 Enabled = true
 

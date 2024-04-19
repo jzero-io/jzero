@@ -5,6 +5,8 @@ import (
 	"text/template"
 
 	sprig "github.com/Masterminds/sprig/v3"
+
+	"github.com/jaronnie/jzero/daemon/pkg/stringx"
 )
 
 // ParseTemplate template
@@ -31,4 +33,6 @@ func RegisterFuncMap() template.FuncMap {
 	return gfm
 }
 
-var registerFuncMap = map[string]interface{}{}
+var registerFuncMap = map[string]interface{}{
+	"FirstUpper": stringx.FirstUpper,
+}
