@@ -10,7 +10,7 @@ tag:
 
 :::tip jzero 支持多 proto 进行管理 proto(goctl 原生工具不支持).
 
-jzero 在自动生成代码的时候会自动识别 daemon/proto 下的文件并自动注册到 zrpc 上.
+jzero 在自动生成代码的时候会自动识别 daemon/desc/proto 下的文件并自动注册到 zrpc 上.
 :::
 
 jzero 框架的理念是:

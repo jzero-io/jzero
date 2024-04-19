@@ -69,22 +69,22 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 
 	// mkdir api, proto dir
-	err = os.MkdirAll(filepath.Join(Dir, "daemon", "proto"), 0o755)
+	err = os.MkdirAll(filepath.Join(Dir, "daemon", "desc", "proto"), 0o755)
 	cobra.CheckErr(err)
-	err = os.MkdirAll(filepath.Join(Dir, "daemon", "api"), 0o755)
+	err = os.MkdirAll(filepath.Join(Dir, "daemon", "desc", "api"), 0o755)
 	cobra.CheckErr(err)
-	// touch daemon/api/{{.APP}}.api
-	err = os.WriteFile(filepath.Join(Dir, "daemon", "api", APP+".api"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "api", "jzero.api.tpl")), 0o644)
+	// touch daemon/desc/api/{{.APP}}.api
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "desc", "api", APP+".api"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "desc", "api", "jzero.api.tpl")), 0o644)
 	cobra.CheckErr(err)
-	// touch daemon/api/hello.api
+	// touch daemon/desc/api/hello.api
 	helloApiFile, err := templatex.ParseTemplate(map[string]interface{}{
 		"APP": APP,
-	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "api", "hello.api.tpl")))
-	err = os.WriteFile(filepath.Join(Dir, "daemon", "api", "hello.api"), helloApiFile, 0o644)
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "desc", "api", "hello.api.tpl")))
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "desc", "api", "hello.api"), helloApiFile, 0o644)
 	cobra.CheckErr(err)
 
 	// write proto dir
-	err = embeded.WriteTemplateDir(filepath.Join("jzero", "daemon", "proto"), filepath.Join(Dir, "daemon", "proto"))
+	err = embeded.WriteTemplateDir(filepath.Join("jzero", "daemon", "desc", "proto"), filepath.Join(Dir, "daemon", "desc", "proto"))
 	cobra.CheckErr(err)
 
 	// write config.toml

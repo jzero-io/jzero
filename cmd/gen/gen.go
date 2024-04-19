@@ -50,7 +50,7 @@ func Gen(c *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 
 	// read proto dir
-	ds, err := os.ReadDir(filepath.Join(wd, "daemon", "proto"))
+	ds, err := os.ReadDir(filepath.Join(wd, "daemon", "desc", "proto"))
 	cobra.CheckErr(err)
 
 	var protosets []string
@@ -63,7 +63,7 @@ func Gen(c *cobra.Command, _ []string) error {
 			continue
 		}
 		if strings.HasSuffix(v.Name(), "proto") {
-			command := fmt.Sprintf("goctl rpc protoc daemon/proto/%s  -I./daemon/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false --home %s -m", v.Name(), filepath.Join(wd, ".template", "go-zero"))
+			command := fmt.Sprintf("goctl rpc protoc daemon/desc/proto/%s  -I./daemon/desc/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false --home %s -m", v.Name(), filepath.Join(wd, ".template", "go-zero"))
 			_, err = execx.Run(command, wd)
 			cobra.CheckErr(err)
 
@@ -71,9 +71,8 @@ func Gen(c *cobra.Command, _ []string) error {
 			_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", fileBase)))
 
 			// # gen proto descriptor
-			//protoc --include_imports -I./daemon/proto --descriptor_set_out=.protosets/xx.pb daemon/proto/xx.proto
 			_ = os.MkdirAll(filepath.Join(wd, ".protosets"), 0o755)
-			protocCommand := fmt.Sprintf("protoc --include_imports -I./daemon/proto --descriptor_set_out=.protosets/%s.pb daemon/proto/%s.proto", fileBase, fileBase)
+			protocCommand := fmt.Sprintf("protoc --include_imports -I./daemon/desc/proto --descriptor_set_out=.protosets/%s.pb daemon/desc/proto/%s.proto", fileBase, fileBase)
 			_, err = execx.Run(protocCommand, wd)
 			cobra.CheckErr(err)
 
@@ -81,7 +80,7 @@ func Gen(c *cobra.Command, _ []string) error {
 
 			// parse proto
 			protoParser := rpcparser.NewDefaultProtoParser()
-			parse, err := protoParser.Parse(filepath.Join(wd, "daemon", "proto", v.Name()), true)
+			parse, err := protoParser.Parse(filepath.Join(wd, "daemon", "desc", "proto", v.Name()), true)
 			cobra.CheckErr(err)
 			for _, s := range parse.Service {
 				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/daemon/internal/server/%s"`, s.Name, moduleStruct.Path, s.Name))
@@ -117,7 +116,7 @@ func Gen(c *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 
 	// 生成 api 代码
-	command := fmt.Sprintf("goctl api go --api daemon/api/%s.api --dir ./daemon --home %s", cast.ToString(g.Get("APP")), filepath.Join(wd, ".template", "go-zero"))
+	command := fmt.Sprintf("goctl api go --api daemon/desc/api/%s.api --dir ./daemon --home %s", cast.ToString(g.Get("APP")), filepath.Join(wd, ".template", "go-zero"))
 	_, err = execx.Run(command, wd)
 	cobra.CheckErr(err)
 
