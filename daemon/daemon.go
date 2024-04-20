@@ -30,7 +30,7 @@ func start() {
 	s := getZrpcServer(config.C, ctx)
 
 	middlewares.RateLimit = syncx.NewLimit(config.C.Jzero.GrpcMaxConns)
-	s.AddUnaryInterceptors(middlewares.GrpcRateLimit)
+	s.AddUnaryInterceptors(middlewares.GrpcRateLimitInterceptors)
 
 	gw := gateway.MustNewServer(config.C.Gateway)
 

@@ -117,6 +117,10 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "middlewares", "errors.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "middlewares", "errors.go.tpl")), 0o644)
 	cobra.CheckErr(err)
 
+	// write daemon/middlewares/grpc_rate_limit.go
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "middlewares", "grpc_rate_limit.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "middlewares", "grpc_rate_limit.go.tpl")), 0o644)
+	cobra.CheckErr(err)
+
 	// ################# end gen middlewares ###################
 
 	// write daemon/internal/handler/myroutes.go
