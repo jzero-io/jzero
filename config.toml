@@ -5,7 +5,7 @@ Mode = "dev"
 Name = "jzero.rpc"
 
 [Jzero]
-ListenOnUnixSocket = "./jzero.sock"
+  ListenOnUnixSocket = "./jzero.sock"
 
 [Log]
   ServiceName = "jzero"

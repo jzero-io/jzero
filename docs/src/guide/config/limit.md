@@ -15,7 +15,7 @@ tag:
 MaxConns = 100
 
 # 替换成自己的 App 名称
-[Jzero]
+[App1]
 GrpcMaxConns = 100
 ```
 
