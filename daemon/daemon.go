@@ -21,6 +21,8 @@ import (
 func Start(cfgFile string) {
 	conf.MustLoad(cfgFile, &config.C)
 	go func() {
+		// print log to console if Log.Mode is file or volume
+		middlewares.PrintLogToConsole(config.C)
 		start()
 	}()
 }

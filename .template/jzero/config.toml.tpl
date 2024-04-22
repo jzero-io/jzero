@@ -6,8 +6,13 @@ Mode = "dev"
 
 [Log]
   ServiceName = "{{ .APP }}"
-  Mode = "console"
+  Level = "info"
+  Mode = "file"
   encoding = "plain"
+  KeepDays = 30
+  MaxBackups = 7
+  MaxSize = 50
+  Rotation = "size"
 
 [DevServer]
 Enabled = true

@@ -121,6 +121,14 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	err = os.WriteFile(filepath.Join(Dir, "daemon", "middlewares", "grpc_rate_limit.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "middlewares", "grpc_rate_limit.go.tpl")), 0o644)
 	cobra.CheckErr(err)
 
+	// write daemon/middlewares/logs.go
+	logsMiddlewareFile, err := templatex.ParseTemplate(map[string]interface{}{
+		"APP":    APP,
+		"Module": Module,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "middlewares", "logs.go.tpl")))
+	err = os.WriteFile(filepath.Join(Dir, "daemon", "middlewares", "logs.go"), logsMiddlewareFile, 0o644)
+	cobra.CheckErr(err)
+
 	// ################# end gen middlewares ###################
 
 	// write daemon/internal/handler/myroutes.go
