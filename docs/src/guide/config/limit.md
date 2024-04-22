@@ -14,6 +14,7 @@ tag:
 [Gateway]
 MaxConns = 100
 
+# 替换成自己的 App 名称
 [Jzero]
 GrpcMaxConns = 100
 ```
@@ -37,7 +38,50 @@ https://github.com/zeromicro/go-zero/issues/4097
 
 ```shell
 # test rpc
-# TODO
+ghz --insecure -c 110 -n 110  \
+  --call credentialpb.credential.CredentialVersion \
+  0.0.0.0:8000
+  
+$ ghz --insecure -c 110 -n 110  \
+  --call credentialpb.credential.CredentialVersion \
+  0.0.0.0:8000
+
+Summary:
+  Count:	110
+  Total:	117.02 ms
+  Slowest:	106.65 ms
+  Fastest:	51.92 ms
+  Average:	77.79 ms
+  Requests/sec:	940.03
+
+Response time histogram:
+  51.918  [1]  |∎∎
+  57.391  [4]  |∎∎∎∎∎∎∎∎∎
+  62.865  [3]  |∎∎∎∎∎∎∎
+  68.339  [8]  |∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎
+  73.813  [9]  |∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎
+  79.286  [6]  |∎∎∎∎∎∎∎∎∎∎∎∎∎∎
+  84.760  [11] |∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎
+  90.234  [12] |∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎
+  95.707  [17] |∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎
+  101.181 [16] |∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎
+  106.655 [13] |∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎∎
+
+Latency distribution:
+  10 % in 65.12 ms
+  25 % in 73.70 ms
+  50 % in 88.74 ms
+  75 % in 96.70 ms
+  90 % in 102.15 ms
+  95 % in 104.78 ms
+  99 % in 105.13 ms
+
+Status code distribution:
+  [Unavailable]   10 responses
+  [OK]            100 responses
+
+Error distribution:
+  [10]   rpc error: code = Unavailable desc = concurrent connections over limit
 
 # test api
 hey -z 1s -c 120 -q 1 'http://localhost:8001/api/v1/hello/you'
@@ -87,9 +131,7 @@ Status code distribution:
 
 
 # test gateway
-# 用 hey 工具来进行压测，压测 90 个并发，执行 1 秒
-hey -z 1s -c 90 -q 1 'http://localhost:8001/api/v1.0/credential/version'
-# 加大并发量为 120
+# 用 hey 工具来进行压测，压测 120 个并发，执行 1 秒, 有 20 个被限流
 hey -z 1s -c 120 -q 1 'http://localhost:8001/api/v1.0/credential/version'
 
 Summary:
