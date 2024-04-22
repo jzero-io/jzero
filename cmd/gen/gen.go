@@ -37,6 +37,7 @@ func (l RegisterLines) String() string {
 }
 
 func Gen(c *cobra.Command, _ []string) error {
+
 	// change dir
 	if WorkingDir != "" {
 		err := os.Chdir(WorkingDir)
@@ -45,6 +46,18 @@ func Gen(c *cobra.Command, _ []string) error {
 
 	wd, err := os.Getwd()
 	cobra.CheckErr(err)
+
+	// read api file
+	configBytes, err := os.ReadFile(filepath.Join(wd, "config.toml"))
+	cobra.CheckErr(err)
+	g, err := genius.NewFromToml(configBytes)
+	cobra.CheckErr(err)
+
+	// 删除无用文件夹
+	defer func() {
+		_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
+		_ = os.RemoveAll(filepath.Join(wd, "daemon", "etc"))
+	}()
 
 	moduleStruct, err := mod.GetGoMod(wd)
 	cobra.CheckErr(err)
@@ -90,13 +103,7 @@ func Gen(c *cobra.Command, _ []string) error {
 		}
 	}
 
-	// read api file
-	configBytes, err := os.ReadFile(filepath.Join(wd, "config.toml"))
-	cobra.CheckErr(err)
-
 	// 修改 config.toml protosets 内容
-	g, err := genius.NewFromToml(configBytes)
-	cobra.CheckErr(err)
 	err = g.Set("Gateway.Upstreams.0.ProtoSets", protosets)
 	cobra.CheckErr(err)
 	toml, err := g.EncodeToToml()
@@ -120,9 +127,19 @@ func Gen(c *cobra.Command, _ []string) error {
 	_, err = execx.Run(command, wd)
 	cobra.CheckErr(err)
 
-	// 删除无用文件夹
-	_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
-	_ = os.RemoveAll(filepath.Join(wd, "daemon", "etc"))
+	// 检测是否包含 sql
+	sqlDir := filepath.Join(wd, "daemon", "desc", "sql")
+	if f, err := os.Stat(sqlDir); err == nil && f.IsDir() {
+		fs, err := os.ReadDir(sqlDir)
+		cobra.CheckErr(err)
+		for _, f := range fs {
+			if !f.IsDir() && strings.HasSuffix(f.Name(), ".sql") {
+				command := fmt.Sprintf("goctl model mysql ddl --src daemon/desc/sql/%s --dir ./daemon/model --home %s", f.Name(), filepath.Join(wd, ".template", "go-zero"))
+				_, err = execx.Run(command, wd)
+				cobra.CheckErr(err)
+			}
+		}
+	}
 
 	return nil
 }

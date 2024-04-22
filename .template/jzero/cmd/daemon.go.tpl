@@ -13,7 +13,6 @@ var daemonCmd = &cobra.Command{
 	Long:  "{{ .APP }} daemon",
 	Run: func(cmd *cobra.Command, args []string) {
 		daemon.Start(cfgFile)
-		select {}
 	},
 }
 

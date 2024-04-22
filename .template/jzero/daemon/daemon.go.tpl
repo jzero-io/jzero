@@ -3,8 +3,11 @@ package daemon
 import (
 	"fmt"
 	"net"
-    "net/http"
-    "os"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -19,56 +22,83 @@ import (
 )
 
 func Start(cfgFile string) {
-	conf.MustLoad(cfgFile, &config.C)
-	go func() {
-	    // print log to console if Log.Mode is file or volume
-	    middlewares.PrintLogToConsole(config.C)
-		start()
-	}()
+	var c config.Config
+	conf.MustLoad(cfgFile, &c)
+
+	ctx := svc.NewServiceContext(c)
+	start(ctx)
 }
 
-func start() {
-	ctx := svc.NewServiceContext(config.C)
-	s := getZrpcServer(config.C, ctx)
+func start(ctx *svc.ServiceContext) {
+	// print log to console if Log.Mode is file or volume
+	middlewares.PrintLogToConsole(ctx.Config)
 
-	middlewares.RateLimit = syncx.NewLimit(config.C.{{ .APP | FirstUpper }}.GrpcMaxConns)
-    s.AddUnaryInterceptors(middlewares.GrpcRateLimitInterceptors)
+	s := getZrpcServer(ctx.Config, ctx)
 
-	gw := gateway.MustNewServer(config.C.Gateway)
+	middlewares.RateLimit = syncx.NewLimit(ctx.Config.{{ .APP | FirstUpper }}.GrpcMaxConns)
+	s.AddUnaryInterceptors(middlewares.GrpcRateLimitInterceptors)
 
-	// add middlewares
+	gw := gateway.MustNewServer(ctx.Config.Gateway)
+
 	gw.Use(middlewares.WrapResponse)
-
-	// error handler
 	httpx.SetErrorHandler(middlewares.GrpcErrorHandler)
 
-	// gw add your routes
+	// gw add routes
 	handler.RegisterMyHandlers(gw.Server, ctx)
 
-	// gw add go-zero api framework routes
+	// gw add api routes
 	handler.RegisterHandlers(gw.Server, ctx)
 
 	// listen unix
-	if config.C.{{ .APP | FirstUpper }}.ListenOnUnixSocket != "" {
-	    sock := config.C.{{ .APP | FirstUpper }}.ListenOnUnixSocket
-	    _ = os.Remove(sock)
-	    unixListener, err := net.Listen("unix", sock)
-	    if err != nil {
-		    panic(err)
-	    }
-	    go func() {
-	        fmt.Printf("Starting unix server at %s...\n", config.C.{{ .APP | FirstUpper }}.ListenOnUnixSocket)
-		    if err := http.Serve(unixListener, gw); err != nil {
-			    panic(err)
-		    }
-	    }()
+	var unixListener net.Listener
+	var err error
+	if ctx.Config.{{ .APP | FirstUpper }}.ListenOnUnixSocket != "" {
+		sock := ctx.Config.{{ .APP | FirstUpper }}.ListenOnUnixSocket
+		unixListener, err = net.Listen("unix", sock)
+		if err != nil {
+			panic(err)
+		}
+		go func() {
+			fmt.Printf("Starting unix server at %s...\n", ctx.Config.{{ .APP | FirstUpper }}.ListenOnUnixSocket)
+			if err := http.Serve(unixListener, gw); err != nil {
+				return
+			}
+		}()
 	}
 
 	group := service.NewServiceGroup()
 	group.Add(s)
 	group.Add(gw)
 
-	fmt.Printf("Starting rpc server at %s...\n", config.C.ListenOn)
-	fmt.Printf("Starting gateway server at %s:%d...\n", config.C.Gateway.Host, config.C.Gateway.Port)
-	group.Start()
+	go func() {
+		fmt.Printf("Starting rpc server at %s...\n", ctx.Config.ListenOn)
+		fmt.Printf("Starting gateway server at %s:%d...\n", ctx.Config.Gateway.Host, ctx.Config.Gateway.Port)
+		group.Start()
+	}()
+
+	signalHandler(ctx, group, unixListener)
+}
+
+func signalHandler(ctx *svc.ServiceContext, serviceGroup *service.ServiceGroup, unixListener net.Listener) {
+	// signal handler
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+	for {
+		s := <-c
+		switch s {
+		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
+			fmt.Println("Waiting 1 second...\nStopping rpc server and gateway server")
+			time.Sleep(time.Second)
+			serviceGroup.Stop()
+			if ctx.Config.{{ .APP | FirstUpper }}.ListenOnUnixSocket != "" {
+				fmt.Println("Stopping unix server")
+				unixListener.Close()
+				_ = os.Remove(ctx.Config.{{ .APP | FirstUpper }}.ListenOnUnixSocket)
+			}
+			return
+		case syscall.SIGHUP:
+		default:
+			return
+		}
+	}
 }
