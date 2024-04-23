@@ -2,21 +2,23 @@ package gen
 
 import (
 	"fmt"
-	"os"
-	"path"
-	"path/filepath"
-	"strings"
-
 	"github.com/jaronnie/genius"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"os"
+	"os/signal"
+	"path"
+	"path/filepath"
+	"strings"
+	"syscall"
 
 	"github.com/jaronnie/jzero/daemon/pkg/mod"
 	"github.com/jaronnie/jzero/daemon/pkg/stringx"
@@ -78,11 +80,15 @@ func Gen(_ *cobra.Command, _ []string) error {
 	moduleStruct, err := mod.GetGoMod(wd)
 	cobra.CheckErr(err)
 
-	// 删除无用文件夹
+	// 正常删除无用文件夹
 	defer func() {
 		_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
 		_ = os.RemoveAll(filepath.Join(wd, "daemon", "etc"))
+		os.Exit(-1)
 	}()
+
+	// 异常删除无用文件夹
+	go extraFileHandler(g, wd)
 
 	for _, v := range protoDir {
 		if v.IsDir() {
@@ -223,4 +229,26 @@ func check(g *genius.Genius, wd string, protoDir []os.DirEntry, apiFilePath stri
 	}
 
 	return nil
+}
+
+func extraFileHandler(g *genius.Genius, wd string) {
+	// signal handler
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+	for {
+		s := <-c
+		switch s {
+		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
+			_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
+			_ = os.RemoveAll(filepath.Join(wd, "daemon", "etc"))
+			os.Exit(-1)
+		case syscall.SIGHUP:
+		default:
+			return
+		}
+	}
+}
+
+func init() {
+	logx.Disable()
 }

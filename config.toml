@@ -29,11 +29,11 @@ Name = "jzero.rpc"
     Username = "root"
 
 [Log]
+  ServiceName = "jzero"
   KeepDays = 30
   Level = "info"
   MaxBackups = 7
-  MaxSize = 50
+  MaxSize = 50 # 50MB
   Mode = "file"
   Rotation = "size"
-  ServiceName = "jzero"
   encoding = "plain"

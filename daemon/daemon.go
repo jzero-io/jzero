@@ -33,11 +33,6 @@ func Start(cfgFile string) {
 		c.Jzero.Mysql.Database)
 
 	conn := sqlx.NewSqlConn("mysql", dsn)
-	_, err := conn.Exec("select 1 = 1")
-	if err != nil {
-		panic(err)
-	}
-
 	ctx := svc.NewServiceContext(c, conn)
 	start(ctx)
 }
@@ -48,6 +43,12 @@ func start(ctx *svc.ServiceContext) {
 
 	// 保持与以往的版本兼容
 	s := getZrpcServer(ctx.Config, ctx)
+
+	// verify sql conn
+	_, err := ctx.SqlConn.Exec("select 1 = 1")
+	if err != nil {
+		panic(err)
+	}
 
 	middlewares.RateLimit = syncx.NewLimit(ctx.Config.Jzero.GrpcMaxConns)
 	s.AddUnaryInterceptors(middlewares.GrpcRateLimitInterceptors)
@@ -65,7 +66,6 @@ func start(ctx *svc.ServiceContext) {
 
 	// listen unix
 	var unixListener net.Listener
-	var err error
 	if ctx.Config.Jzero.ListenOnUnixSocket != "" {
 		sock := ctx.Config.Jzero.ListenOnUnixSocket
 		unixListener, err = net.Listen("unix", sock)
