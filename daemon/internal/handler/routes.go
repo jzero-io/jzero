@@ -4,11 +4,11 @@ package handler
 import (
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest"
-
 	file "github.com/jaronnie/jzero/daemon/internal/handler/file"
 	hello "github.com/jaronnie/jzero/daemon/internal/handler/hello"
 	"github.com/jaronnie/jzero/daemon/internal/svc"
+
+	"github.com/zeromicro/go-zero/rest"
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
