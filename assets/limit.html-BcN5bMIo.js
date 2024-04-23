@@ -1,4 +1,4 @@
-import{_ as n}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as s,c as a,b as e}from"./app-XTgfneDh.js";const p={},t=e(`<p>修改 config.toml, 增加以下配置, 设置最大 qps 100</p><div class="language-toml line-numbers-mode" data-ext="toml" data-title="toml"><pre class="language-toml"><code><span class="token punctuation">[</span><span class="token table class-name">Gateway</span><span class="token punctuation">]</span>
+import{_ as n}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as s,c as a,b as e}from"./app-B53AV2XO.js";const p={},t=e(`<p>修改 config.toml, 增加以下配置, 设置最大 qps 100</p><div class="language-toml line-numbers-mode" data-ext="toml" data-title="toml"><pre class="language-toml"><code><span class="token punctuation">[</span><span class="token table class-name">Gateway</span><span class="token punctuation">]</span>
 <span class="token key property">MaxConns</span> <span class="token punctuation">=</span> <span class="token number">100</span>
 
 <span class="token comment"># 替换成自己的 App 名称</span>
