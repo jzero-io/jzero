@@ -1,13 +1,19 @@
 package svc
 
-import "github.com/jaronnie/jzero/daemon/internal/config"
+import (
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+
+	"github.com/jaronnie/jzero/daemon/internal/config"
+)
 
 type ServiceContext struct {
-	Config config.Config
+	Config  config.Config
+	SqlConn sqlx.SqlConn
 }
 
-func NewServiceContext(c config.Config) *ServiceContext {
+func NewServiceContext(c config.Config, sqlConn sqlx.SqlConn) *ServiceContext {
 	return &ServiceContext{
-		Config: c,
+		Config:  c,
+		SqlConn: sqlConn,
 	}
 }

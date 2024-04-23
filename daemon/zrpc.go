@@ -9,22 +9,20 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/jaronnie/jzero/daemon/internal/config"
-	credentialsvr "github.com/jaronnie/jzero/daemon/internal/server/credential"
-	credentialv2svr "github.com/jaronnie/jzero/daemon/internal/server/credentialv2"
-	machinesvr "github.com/jaronnie/jzero/daemon/internal/server/machine"
-	machinev2svr "github.com/jaronnie/jzero/daemon/internal/server/machinev2"
 	"github.com/jaronnie/jzero/daemon/internal/svc"
-	"github.com/jaronnie/jzero/daemon/pb/credentialpb"
-	"github.com/jaronnie/jzero/daemon/pb/machinepb"
+
+	credentialsvr "github.com/jaronnie/jzero/daemon/internal/server/credential"
+	machinesvr "github.com/jaronnie/jzero/daemon/internal/server/machine"
+
+	"github.com/jaronnie/jzero/daemon/internal/pb/credentialpb"
+	"github.com/jaronnie/jzero/daemon/internal/pb/machinepb"
 )
 
 func getZrpcServer(c config.Config, ctx *svc.ServiceContext) *zrpc.RpcServer {
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-
+	    
 		credentialpb.RegisterCredentialServer(grpcServer, credentialsvr.NewCredentialServer(ctx))
-		credentialpb.RegisterCredentialv2Server(grpcServer, credentialv2svr.NewCredentialv2Server(ctx))
 		machinepb.RegisterMachineServer(grpcServer, machinesvr.NewMachineServer(ctx))
-		machinepb.RegisterMachinev2Server(grpcServer, machinev2svr.NewMachinev2Server(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

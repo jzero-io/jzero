@@ -6,6 +6,9 @@ title: 首页
 
 基于 go-zero 框架定制的企业级后端代码框架
 
+::: tip 目前还在定制规范中, 不能保证兼容性. 待 v1.0 后保证兼容性
+:::
+
 <div style="text-align: center;">
   <img src="https://oss.jaronnie.com/jzero.jpg" style="width: 33%;" alt=""/>
 </div>

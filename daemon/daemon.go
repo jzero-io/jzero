@@ -11,6 +11,7 @@ import (
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/core/syncx"
 	"github.com/zeromicro/go-zero/gateway"
 	"github.com/zeromicro/go-zero/rest/httpx"
@@ -25,7 +26,19 @@ func Start(cfgFile string) {
 	var c config.Config
 	conf.MustLoad(cfgFile, &c)
 
-	ctx := svc.NewServiceContext(c)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		c.Jzero.Mysql.Username,
+		c.Jzero.Mysql.Password,
+		c.Jzero.Mysql.Address,
+		c.Jzero.Mysql.Database)
+
+	conn := sqlx.NewSqlConn("mysql", dsn)
+	_, err := conn.Exec("select 1 = 1")
+	if err != nil {
+		panic(err)
+	}
+
+	ctx := svc.NewServiceContext(c, conn)
 	start(ctx)
 }
 

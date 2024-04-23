@@ -7,8 +7,8 @@ import (
 	"context"
 
 	machinelogic "github.com/jaronnie/jzero/daemon/internal/logic/machine"
+	"github.com/jaronnie/jzero/daemon/internal/pb/machinepb"
 	"github.com/jaronnie/jzero/daemon/internal/svc"
-	"github.com/jaronnie/jzero/daemon/pb/machinepb"
 )
 
 type MachineServer struct {

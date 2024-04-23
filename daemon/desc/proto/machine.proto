@@ -19,12 +19,3 @@ service machine {
         };
     };
 }
-
-
-service machinev2 {
-    rpc MachineVersion(Empty) returns(MachineVersionResponse) {
-        option (google.api.http) = {
-            get: "/api/v2.0/machine/version"
-        };
-    };
-}

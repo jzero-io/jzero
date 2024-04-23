@@ -4,14 +4,6 @@ type pathRequest {
     Name string `path:"name"`
 }
 
-type paramRequest {
-    Name string `form:"name"`
-}
-
-type postRequest {
-    Name string `json:"name"`
-}
-
 type response {
     Message string
 }
@@ -23,10 +15,4 @@ type response {
 service {{ .APP }} {
     @handler HelloPathHandler
     get /hello/:name (pathRequest) returns (response)
-
-    @handler HelloParamHandler
-    get /hello (paramRequest) returns (response)
-
-    @handler HelloPostHandler
-    post /hello (postRequest) returns (response)
 }

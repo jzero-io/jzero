@@ -7,8 +7,8 @@ import (
 	"context"
 
 	credentiallogic "github.com/jaronnie/jzero/daemon/internal/logic/credential"
+	"github.com/jaronnie/jzero/daemon/internal/pb/credentialpb"
 	"github.com/jaronnie/jzero/daemon/internal/svc"
-	"github.com/jaronnie/jzero/daemon/pb/credentialpb"
 )
 
 type CredentialServer struct {
@@ -25,4 +25,9 @@ func NewCredentialServer(svcCtx *svc.ServiceContext) *CredentialServer {
 func (s *CredentialServer) CredentialVersion(ctx context.Context, in *credentialpb.Empty) (*credentialpb.CredentialVersionResponse, error) {
 	l := credentiallogic.NewCredentialVersionLogic(ctx, s.svcCtx)
 	return l.CredentialVersion(in)
+}
+
+func (s *CredentialServer) CreateCredential(ctx context.Context, in *credentialpb.CreateCredentialRequest) (*credentialpb.CreateCredentialResponse, error) {
+	l := credentiallogic.NewCreateCredentialLogic(ctx, s.svcCtx)
+	return l.CreateCredential(in)
 }

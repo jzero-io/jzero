@@ -4,26 +4,13 @@ ListenOn = "0.0.0.0:8000"
 Mode = "dev"
 Name = "jzero.rpc"
 
-[Jzero]
-  ListenOnUnixSocket = "./jzero.sock"
-
-[Log]
-  ServiceName = "jzero"
-  Level = "info"
-  Mode = "file"
-  encoding = "plain"
-  KeepDays = 30
-  MaxBackups = 7
-  MaxSize = 50
-  Rotation = "size"
-
 [DevServer]
   Enabled = true
 
 [Gateway]
+  MaxConns = 100
   Name = "jzero.gw"
   Port = 8001
-  MaxConns = 100
 
   [[Gateway.Upstreams]]
     Name = "jzero.gw"
@@ -31,3 +18,22 @@ Name = "jzero.rpc"
 
     [Gateway.Upstreams.Grpc]
       Endpoints = ["0.0.0.0:8000"]
+
+[Jzero]
+  ListenOnUnixSocket = "./jzero.sock"
+
+  [Jzero.Mysql]
+    Address = "127.0.0.1:33060"
+    Database = "jzero"
+    Password = "123456"
+    Username = "root"
+
+[Log]
+  KeepDays = 30
+  Level = "info"
+  MaxBackups = 7
+  MaxSize = 50
+  Mode = "file"
+  Rotation = "size"
+  ServiceName = "jzero"
+  encoding = "plain"

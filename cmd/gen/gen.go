@@ -76,7 +76,7 @@ func Gen(c *cobra.Command, _ []string) error {
 			continue
 		}
 		if strings.HasSuffix(v.Name(), "proto") {
-			command := fmt.Sprintf("goctl rpc protoc daemon/desc/proto/%s  -I./daemon/desc/proto --go_out=./daemon --go-grpc_out=./daemon  --zrpc_out=./daemon --client=false --home %s -m", v.Name(), filepath.Join(wd, ".template", "go-zero"))
+			command := fmt.Sprintf("goctl rpc protoc daemon/desc/proto/%s  -I./daemon/desc/proto --go_out=./daemon/internal --go-grpc_out=./daemon/internal  --zrpc_out=./daemon --client=false --home %s -m", v.Name(), filepath.Join(wd, ".template", "go-zero"))
 			_, err = execx.Run(command, wd)
 			cobra.CheckErr(err)
 
@@ -99,7 +99,7 @@ func Gen(c *cobra.Command, _ []string) error {
 				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/daemon/internal/server/%s"`, s.Name, moduleStruct.Path, s.Name))
 				registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%sServer(ctx))", filepath.Base(parse.GoPackage), stringx.FirstUpper(s.Name), s.Name, stringx.FirstUpper(s.Name)))
 			}
-			pbImports = append(pbImports, fmt.Sprintf(`"%s/daemon/%s"`, moduleStruct.Path, strings.TrimPrefix(parse.GoPackage, "./")))
+			pbImports = append(pbImports, fmt.Sprintf(`"%s/daemon/internal/%s"`, moduleStruct.Path, strings.TrimPrefix(parse.GoPackage, "./")))
 		}
 	}
 
@@ -134,7 +134,7 @@ func Gen(c *cobra.Command, _ []string) error {
 		cobra.CheckErr(err)
 		for _, f := range fs {
 			if !f.IsDir() && strings.HasSuffix(f.Name(), ".sql") {
-				command := fmt.Sprintf("goctl model mysql ddl --src daemon/desc/sql/%s --dir ./daemon/model --home %s", f.Name(), filepath.Join(wd, ".template", "go-zero"))
+				command := fmt.Sprintf("goctl model mysql ddl --src daemon/desc/sql/%s --dir ./daemon/internal/model/%s --home %s", f.Name(), f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))], filepath.Join(wd, ".template", "go-zero"))
 				_, err = execx.Run(command, wd)
 				cobra.CheckErr(err)
 			}
