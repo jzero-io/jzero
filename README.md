@@ -1,10 +1,13 @@
 # jzero
 
-基于 go-zero 框架定制的企业级后端代码框架 jzero
+[![GitHub release](https://img.shields.io/github/release/jaronnie/jzero.svg?style=flat-square)](https://github.com/jaronnie/jzero/releases/latest)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jaronnie/jzero?style=flat-square)](https://goreportcard.com/report/github.com/jaronnie/jzero)
 
-<div style="text-align: center;">
-  <img src="https://oss.jaronnie.com/jzero.jpg" style="width: 33%;" alt=""/>
-</div>
+<p align="center">
+<img align="center" width="150px" src="https://oss.jaronnie.com/jzero.jpg">
+</p>
+
+基于 go-zero 框架定制的企业级后端代码框架 jzero
 
 ## 特性
 
