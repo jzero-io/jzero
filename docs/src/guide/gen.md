@@ -4,14 +4,11 @@ icon: code
 order: 4
 ---
 
-jzero gen 根据 daemon/desc/api 和 daemon/desc/proto 文件生成代码. 生成代码的逻辑是调用 goctl 工具完成.
+jzero gen 根据 daemon/desc/api, daemon/desc/proto, daemon/desc/sql 文件夹下的文件生成代码. 生成代码的逻辑是调用 goctl 工具完成.
 
 jzero 会自动检测对应文件夹下的内容, 然后进行自动生成, 使用者无需关心.
 
 ## 生成代码
-
-::: tip jzero version >= v0.7.4 可使用 Docker 生成代码
-:::
 
 ::: code-tabs#shell
 
