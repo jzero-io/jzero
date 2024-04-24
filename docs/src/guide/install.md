@@ -49,17 +49,11 @@ jzero version
 
 ## 安装 goreleaser
 
-::: tip  jzero version >= v0.7.3 引入 .goreleaser.yaml
-:::
-
 ```shell
 go install github.com/goreleaser/goreleaser@latest
 ```
 
 ## 安装 task
-
-::: tip  jzero version >= v0.7.3 引入 Taskfile.yml
-:::
 
 ```shell
 go install github.com/go-task/task/v3/cmd/task@latest

@@ -18,9 +18,6 @@ tag:
 
 [安装 task](../install.md#安装-task)
 
-::: tip  jzero version >= v0.7.3 引入 Dockerfile 和 Dockerfile-arm64
-:::
-
 ## 编译 linux/amd64 镜像
 
 ```shell

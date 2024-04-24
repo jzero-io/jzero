@@ -8,10 +8,6 @@ tag:
   - Guide
 ---
 
-::: tip jzero version > v0.8.0 支持在日志模式为 file 或者 volume 的情况下仍然输出到控制台
-默认 LogToConsole 值为 true. 如果需要关闭, 可以设置为 false.
-:::
-
 ```toml
 [Log]
 ServiceName = "app1"
