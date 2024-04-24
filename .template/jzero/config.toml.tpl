@@ -23,7 +23,7 @@ Port = 8001
 
   [[Gateway.Upstreams]]
   Name = "{{ .APP }}.gw"
-  ProtoSets = [ ".protosets/credential.pb", ".protosets/machine.pb" ]
+  ProtoSets = [ ".protosets/credential.pb" ]
 
     [Gateway.Upstreams.Grpc]
     Endpoints = [ "0.0.0.0:8000" ]
