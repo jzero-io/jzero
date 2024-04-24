@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	Credential_CredentialVersion_FullMethodName = "/credentialpb.credential/CredentialVersion"
 	Credential_CreateCredential_FullMethodName  = "/credentialpb.credential/CreateCredential"
+	Credential_CredentialList_FullMethodName    = "/credentialpb.credential/CredentialList"
 )
 
 // CredentialClient is the client API for Credential service.
@@ -29,6 +30,7 @@ const (
 type CredentialClient interface {
 	CredentialVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*CredentialVersionResponse, error)
 	CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*CreateCredentialResponse, error)
+	CredentialList(ctx context.Context, in *CredentialListRequest, opts ...grpc.CallOption) (*CredentialListResponse, error)
 }
 
 type credentialClient struct {
@@ -57,12 +59,22 @@ func (c *credentialClient) CreateCredential(ctx context.Context, in *CreateCrede
 	return out, nil
 }
 
+func (c *credentialClient) CredentialList(ctx context.Context, in *CredentialListRequest, opts ...grpc.CallOption) (*CredentialListResponse, error) {
+	out := new(CredentialListResponse)
+	err := c.cc.Invoke(ctx, Credential_CredentialList_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CredentialServer is the server API for Credential service.
 // All implementations must embed UnimplementedCredentialServer
 // for forward compatibility
 type CredentialServer interface {
 	CredentialVersion(context.Context, *Empty) (*CredentialVersionResponse, error)
 	CreateCredential(context.Context, *CreateCredentialRequest) (*CreateCredentialResponse, error)
+	CredentialList(context.Context, *CredentialListRequest) (*CredentialListResponse, error)
 	mustEmbedUnimplementedCredentialServer()
 }
 
@@ -75,6 +87,9 @@ func (UnimplementedCredentialServer) CredentialVersion(context.Context, *Empty) 
 }
 func (UnimplementedCredentialServer) CreateCredential(context.Context, *CreateCredentialRequest) (*CreateCredentialResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCredential not implemented")
+}
+func (UnimplementedCredentialServer) CredentialList(context.Context, *CredentialListRequest) (*CredentialListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CredentialList not implemented")
 }
 func (UnimplementedCredentialServer) mustEmbedUnimplementedCredentialServer() {}
 
@@ -125,6 +140,24 @@ func _Credential_CreateCredential_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Credential_CredentialList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CredentialListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CredentialServer).CredentialList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Credential_CredentialList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CredentialServer).CredentialList(ctx, req.(*CredentialListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Credential_ServiceDesc is the grpc.ServiceDesc for Credential service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,6 +172,10 @@ var Credential_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateCredential",
 			Handler:    _Credential_CreateCredential_Handler,
+		},
+		{
+			MethodName: "CredentialList",
+			Handler:    _Credential_CredentialList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

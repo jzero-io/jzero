@@ -46,7 +46,7 @@ func (l *CreateCredentialLogic) CreateCredential(in *credentialpb.CreateCredenti
 	}
 
 	return &credentialpb.CreateCredentialResponse{
-		Id:   id,
+		Id:   int32(id),
 		Name: one.Name,
 		Type: int32(one.Type),
 	}, err

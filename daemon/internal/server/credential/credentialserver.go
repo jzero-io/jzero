@@ -31,3 +31,8 @@ func (s *CredentialServer) CreateCredential(ctx context.Context, in *credentialp
 	l := credentiallogic.NewCreateCredentialLogic(ctx, s.svcCtx)
 	return l.CreateCredential(in)
 }
+
+func (s *CredentialServer) CredentialList(ctx context.Context, in *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error) {
+	l := credentiallogic.NewCredentialListLogic(ctx, s.svcCtx)
+	return l.CredentialList(in)
+}
