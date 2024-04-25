@@ -16,14 +16,19 @@ type Generator interface {
 
 var langGenerator = map[string]NewFunc{}
 
-type NewFunc func(language string) (Generator, error)
+type Target struct {
+	Language string
+	APP      string
+}
 
-func New(language string) (Generator, error) {
-	f, ok := langGenerator[language]
+type NewFunc func(target Target) (Generator, error)
+
+func New(target Target) (Generator, error) {
+	f, ok := langGenerator[target.Language]
 	if !ok {
-		return nil, errors.New("language not support")
+		return nil, errors.Errorf("language %s not support", target.Language)
 	}
-	return f(language)
+	return f(target)
 }
 
 func Register(language string, f NewFunc) {

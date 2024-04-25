@@ -1,7 +1,9 @@
 package gensdk
 
 import (
+	"github.com/jaronnie/genius"
 	"github.com/jaronnie/jzero/cmd/gensdk/generator"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"os"
@@ -14,6 +16,14 @@ var (
 )
 
 func GenSdk(cmd *cobra.Command, args []string) error {
+	wd, err := os.Getwd()
+	cobra.CheckErr(err)
+	configBytes, err := os.ReadFile(filepath.Join(wd, "config.toml"))
+	cobra.CheckErr(err)
+
+	g, err := genius.NewFromToml(configBytes)
+	cobra.CheckErr(err)
+
 	if Dir != "" {
 		if !pathx.FileExists(Dir) {
 			if err := os.MkdirAll(Dir, 0o755); err != nil {
@@ -22,12 +32,17 @@ func GenSdk(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	g, err := generator.New(Language)
+	target := generator.Target{
+		Language: Language,
+		APP:      cast.ToString(g.Get("APP")),
+	}
+
+	gen, err := generator.New(target)
 	if err != nil {
 		return err
 	}
 
-	files, err := g.Gen()
+	files, err := gen.Gen()
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-
 	"github.com/jaronnie/jzero/cmd"
 	"github.com/jaronnie/jzero/embeded"
 )
