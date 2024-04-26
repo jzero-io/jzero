@@ -21,6 +21,7 @@ type Target struct {
 	Language string
 	APP      string
 	Module   string
+	Dir      string
 }
 
 type NewFunc func(target Target) (Generator, error)

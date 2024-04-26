@@ -38,6 +38,7 @@ func GenSdk(cmd *cobra.Command, args []string) error {
 		Language: Language,
 		APP:      cast.ToString(g.Get("APP")),
 		Module:   Module,
+		Dir:      Dir,
 	}
 
 	gen, err := generator.New(target)

@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"path/filepath"
+	"strings"
+
+	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 
 	"github.com/jaronnie/jzero/daemon/pkg/templatex"
 	"github.com/jaronnie/jzero/embeded"
@@ -40,16 +43,21 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	}
 	apiSpecs = append(apiSpecs, apiSpec)
 
-	fds, err := protoParser.ParseFiles("credential.proto", "machine.proto")
+	var goImportPaths []string
+
+	fds, err := protoParser.ParseFiles("credential.proto")
 	if err != nil {
 		return nil, err
+	}
+
+	for _, fd := range fds {
+		goImportPaths = append(goImportPaths, fmt.Sprintf("%s/model/%s", g.target.Module, strings.TrimPrefix(*fd.GetFileOptions().GoPackage, "./")))
 	}
 
 	rhis, err := jparser.Parse(fds, apiSpecs)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(rhis)
 
 	var files []*GeneratedFile
 
@@ -126,9 +134,12 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 
 	// gen typed/resource.go
 	resourceGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
-		"GoModule": g.target.Module,
-		"Scope":    "jzero",
-		"Resource": "credential",
+		"GoModule":           g.target.Module,
+		"Scope":              "jzero",
+		"Resource":           "credential",
+		"HTTPInterfaces":     rhis["jzero"]["credential"],
+		"IsWarpHTTPResponse": true,
+		"GoImportPaths":      goImportPaths,
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "client", "client-go", "typed", "resource.go.tpl")))
 	if err != nil {
 		return nil, err
@@ -137,6 +148,9 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 		Path:    filepath.Join("typed", "jzero", "credential.go"),
 		Content: *bytes.NewBuffer(resourceGoBytes),
 	})
+
+	// go mod init
+	_, err = execx.Run(fmt.Sprintf("go mod init %s", g.target.Module), g.target.Dir)
 
 	return files, nil
 }

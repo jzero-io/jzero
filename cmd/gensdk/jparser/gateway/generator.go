@@ -2,12 +2,13 @@ package gateway
 
 import (
 	"fmt"
-	"github.com/jaronnie/jzero/cmd/gensdk/vars"
-	"github.com/jhump/protoreflect/desc"
-
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/jaronnie/jzero/cmd/gensdk/vars"
+	"github.com/jaronnie/jzero/daemon/pkg/stringx"
+	"github.com/jhump/protoreflect/desc"
 
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
@@ -65,7 +66,7 @@ func CreateQueryParams(method *desc.MethodDescriptor) []*vars.QueryParam {
 			if field.UnwrapField().Kind() == protoreflect.MessageKind {
 				q := &vars.QueryParam{
 					// Field:  field,
-					GoName: fmt.Sprintf("%s.", field.GetName()),
+					GoName: stringx.FirstUpper(fmt.Sprintf("%s.", field.GetName())),
 					Name:   fmt.Sprintf("%s.", field.GetName()),
 				}
 				f(q, field.GetMessageType().GetFields())
@@ -73,7 +74,7 @@ func CreateQueryParams(method *desc.MethodDescriptor) []*vars.QueryParam {
 			}
 			queryParams = append(queryParams, &vars.QueryParam{
 				// Field:  field,
-				GoName: fmt.Sprintf("%s%s", parent.GoName, field.GetName()),
+				GoName: stringx.FirstUpper(fmt.Sprintf("%s%s", parent.GoName, field.GetName())),
 				Name:   fmt.Sprintf("%s%s", parent.Name, field.GetName()),
 			})
 		}

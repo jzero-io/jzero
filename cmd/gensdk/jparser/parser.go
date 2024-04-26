@@ -1,12 +1,15 @@
 package jparser
 
 import (
-	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+
+	"github.com/jaronnie/jzero/daemon/pkg/stringx"
+
 	"github.com/jaronnie/jzero/cmd/gensdk/jparser/api"
 	"github.com/jaronnie/jzero/cmd/gensdk/jparser/gateway"
 	"github.com/jaronnie/jzero/cmd/gensdk/vars"
-	"net/http"
-	"net/url"
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
@@ -14,22 +17,30 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func Parse(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) (vars.ResourceHTTPInterfaceMap, error) {
-	resources := make(vars.ResourceHTTPInterfaceMap)
+func Parse(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) (vars.ScopeResourceHTTPInterfaceMap, error) {
+	scopeResourceHTTPInterfaceMap := make(vars.ScopeResourceHTTPInterfaceMap)
+	resourceHTTPInterfaceMap := make(map[vars.Resource][]*vars.HTTPInterface)
 
 	interfaces, err := genHTTPInterfaces(fds, apiSpecs)
 	if err != nil {
 		return nil, err
 	}
-	for _, i := range interfaces {
-		fmt.Println(i.Method, i.Resource, i.MethodName, i.URL)
+
+	var credentialInterfaces []*vars.HTTPInterface
+	for _, iface := range interfaces {
+		if iface.Resource == "credential" {
+			credentialInterfaces = append(credentialInterfaces, iface)
+		}
 	}
 
-	return resources, nil
+	resourceHTTPInterfaceMap["credential"] = credentialInterfaces
+	scopeResourceHTTPInterfaceMap["jzero"] = resourceHTTPInterfaceMap
+
+	return scopeResourceHTTPInterfaceMap, nil
 }
 
-func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]vars.HTTPInterface, error) {
-	var httpInterfaces []vars.HTTPInterface
+func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]*vars.HTTPInterface, error) {
+	var httpInterfaces []*vars.HTTPInterface
 
 	for _, fd := range fds {
 		services := fd.GetServices()
@@ -64,13 +75,15 @@ func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]
 						requestBodyName = method.GetInputType().GetName()
 					}
 					httpInterface.RequestBody = &vars.RequestBody{
-						Name:        requestBodyName,
-						BodyName:    rule.Body,
-						Type:        "proto",
-						MessageName: method.GetInputType().GetName(),
+						RealBodyName: requestBodyName,
+						Name:         stringx.FirstUpper(method.GetInputType().GetName()),
+						Body:         rule.Body,
+						Type:         "proto",
+						Package:      strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./"),
 					}
 					httpInterface.ResponseBody = &vars.ResponseBody{
-						Name: method.GetOutputType().GetName(),
+						Name:    stringx.FirstUpper(method.GetOutputType().GetName()),
+						Package: strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./"),
 					}
 				}
 				httpInterface.MethodName = method.GetName()
@@ -84,7 +97,7 @@ func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]
 				queryParams := gateway.CreateQueryParams(method)
 				httpInterface.QueryParams = queryParams
 
-				httpInterfaces = append(httpInterfaces, httpInterface)
+				httpInterfaces = append(httpInterfaces, &httpInterface)
 			}
 		}
 	}
@@ -103,7 +116,10 @@ func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]
 				}
 				if route.RequestType != nil {
 					httpInterface.RequestBody = &vars.RequestBody{
-						Name: route.RequestType.Name(),
+						Name:         route.RequestType.Name(),
+						RealBodyName: route.RequestType.Name(),
+						Package:      "types",
+						Type:         "api",
 					}
 				}
 				if route.ResponseType != nil {
@@ -120,7 +136,7 @@ func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]
 				queryParams := api.CreateQueryParams(&route)
 				httpInterface.QueryParams = queryParams
 
-				httpInterfaces = append(httpInterfaces, httpInterface)
+				httpInterfaces = append(httpInterfaces, &httpInterface)
 			}
 		}
 	}

@@ -1,13 +1,14 @@
 package vars
 
 type (
-	Scope                    string
-	Resource                 string
-	ResourceHTTPInterfaceMap map[Resource][]*HTTPInterface
+	Scope                         string
+	Resource                      string
+	ScopeResourceHTTPInterfaceMap map[Scope]map[Resource][]*HTTPInterface
 )
 
 // HTTPInterface parse grpc http options, go-zero api file
 type HTTPInterface struct {
+	Scope    Scope
 	Resource Resource
 
 	Method     string
@@ -27,19 +28,20 @@ type HTTPInterface struct {
 
 	IsStreamClient bool
 	IsStreamServer bool
+	IsSpecified    bool
 }
 
 type RequestBody struct {
-	MessageName string
-	BodyName    string
-	Name        string
-	Type        string // proto or api
+	Body         string // if proto. it takes effect. * or others
+	RealBodyName string // if proto and body is not *. use it
+	Name         string // request type name
+	Type         string // proto or api
+	Package      string // for example. types. *types.HelloParamRequest{}
 }
 
 type ResponseBody struct {
-	Name         string
-	GoImportPath string
-	RootPath     string
+	Name    string
+	Package string
 }
 
 type PathParam struct {

@@ -5,7 +5,16 @@
 package jzero
 
 import (
+    "context"
+
+	"github.com/jaronnie/jzero-go/model/pb/credentialpb"
+	
+
     "github.com/jaronnie/jzero-go/rest"
+)
+
+var (
+    _ = context.Background()
 )
 
 type CredentialGetter interface {
@@ -13,6 +22,22 @@ type CredentialGetter interface {
 }
 
 type CredentialInterface interface {
+	// <no value> trans *credentialpb.Empty into *credentialpb.CredentialVersionResponse
+	// API /api/v1.0/credential/version 
+	CredentialVersion(ctx context.Context,param *credentialpb.Empty) (*credentialpb.CredentialVersionResponse, error)
+
+	// <no value> trans *credentialpb.CreateCredentialRequest into *credentialpb.CreateCredentialResponse
+	// API /api/v1.0/credential/create 
+	CreateCredential(ctx context.Context,param *credentialpb.CreateCredentialRequest) (*credentialpb.CreateCredentialResponse, error)
+
+	// <no value> trans *credentialpb.CredentialListRequest into *credentialpb.CredentialListResponse
+	// API /api/v1.0/credential/list 
+	CredentialList(ctx context.Context,param *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error)
+
+	// <no value> trans *credentialpb.Int32Id into *credentialpb.Credential
+	// API /api/v1.0/credential/{id} 
+	CredentialDetail(ctx context.Context,param *credentialpb.Int32Id) (*credentialpb.Credential, error)
+
 	
 	CredentialExpansion
 }
@@ -25,5 +50,86 @@ func newCredentialClient(c *JzeroClient) *credentialClient {
 	return &credentialClient{
 		client: c.RESTClient(),
 	}
+}
+
+func (x *credentialClient) CredentialVersion(ctx context.Context,param *credentialpb.Empty) (*credentialpb.CredentialVersionResponse, error) {
+	var resp credentialpb.CredentialVersionResponse
+		err := x.client.Verb("GET").
+		SubPath(
+			"/api/v1.0/credential/version",
+		).
+		Params(
+		).
+		Body(nil).
+		Do(ctx).
+		Into(&resp, true)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+func (x *credentialClient) CreateCredential(ctx context.Context,param *credentialpb.CreateCredentialRequest) (*credentialpb.CreateCredentialResponse, error) {
+	var resp credentialpb.CreateCredentialResponse
+		err := x.client.Verb("POST").
+		SubPath(
+			"/api/v1.0/credential/create",
+		).
+		Params(
+		).
+		Body(param).
+		Do(ctx).
+		Into(&resp, true)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+func (x *credentialClient) CredentialList(ctx context.Context,param *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error) {
+	var resp credentialpb.CredentialListResponse
+		err := x.client.Verb("GET").
+		SubPath(
+			"/api/v1.0/credential/list",
+		).
+		Params(
+			rest.QueryParam{Name: "page", Value: param.Page},
+			rest.QueryParam{Name: "size", Value: param.Size},
+			rest.QueryParam{Name: "name", Value: param.Name},
+		).
+		Body(nil).
+		Do(ctx).
+		Into(&resp, true)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+func (x *credentialClient) CredentialDetail(ctx context.Context,param *credentialpb.Int32Id) (*credentialpb.Credential, error) {
+	var resp credentialpb.Credential
+		err := x.client.Verb("GET").
+		SubPath(
+			"/api/v1.0/credential/{id}",
+			rest.PathParam{Name: "id", Value: param.Id},
+		).
+		Params(
+			rest.QueryParam{Name: "id", Value: param.Id},
+		).
+		Body(nil).
+		Do(ctx).
+		Into(&resp, true)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
 }
 
