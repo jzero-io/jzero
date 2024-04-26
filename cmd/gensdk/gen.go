@@ -1,18 +1,20 @@
 package gensdk
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/jaronnie/genius"
 	"github.com/jaronnie/jzero/cmd/gensdk/generator"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-	"os"
-	"path/filepath"
 )
 
 var (
 	Dir      string
 	Language string
+	Module   string
 )
 
 func GenSdk(cmd *cobra.Command, args []string) error {
@@ -35,6 +37,7 @@ func GenSdk(cmd *cobra.Command, args []string) error {
 	target := generator.Target{
 		Language: Language,
 		APP:      cast.ToString(g.Get("APP")),
+		Module:   Module,
 	}
 
 	gen, err := generator.New(target)
@@ -48,8 +51,8 @@ func GenSdk(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, v := range files {
-		if !pathx.FileExists(filepath.Dir(v.Path)) {
-			if err = os.MkdirAll(filepath.Dir(v.Path), 0o755); err != nil {
+		if !pathx.FileExists(filepath.Dir(filepath.Join(Dir, v.Path))) {
+			if err = os.MkdirAll(filepath.Dir(filepath.Join(Dir, v.Path)), 0o755); err != nil {
 				return err
 			}
 		}

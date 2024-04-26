@@ -2,6 +2,7 @@ package generator
 
 import (
 	"bytes"
+
 	"github.com/pkg/errors"
 )
 
@@ -19,6 +20,7 @@ var langGenerator = map[string]NewFunc{}
 type Target struct {
 	Language string
 	APP      string
+	Module   string
 }
 
 type NewFunc func(target Target) (Generator, error)

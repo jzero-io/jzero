@@ -4,7 +4,7 @@
 package typed
 
 import (
-	"{{.GoModule}}/rest"
+	"github.com/jaronnie/jzero-go/rest"
 )
 
 

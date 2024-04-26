@@ -2,6 +2,13 @@ package gen
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"path"
+	"path/filepath"
+	"strings"
+	"syscall"
+
 	"github.com/jaronnie/genius"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
@@ -13,12 +20,6 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-	"os"
-	"os/signal"
-	"path"
-	"path/filepath"
-	"strings"
-	"syscall"
 
 	"github.com/jaronnie/jzero/daemon/pkg/mod"
 	"github.com/jaronnie/jzero/daemon/pkg/stringx"
@@ -26,9 +27,7 @@ import (
 	"github.com/jaronnie/jzero/embeded"
 )
 
-var (
-	WorkingDir string
-)
+var WorkingDir string
 
 type (
 	ImportLines   []string
@@ -177,7 +176,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 			cobra.CheckErr(err)
 			toml, err := g.EncodeToToml()
 			cobra.CheckErr(err)
-			err = os.WriteFile(filepath.Join(wd, "config.toml"), toml, 0644)
+			err = os.WriteFile(filepath.Join(wd, "config.toml"), toml, 0o644)
 			cobra.CheckErr(err)
 			fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
 		case strings.EqualFold(in, "n"):
