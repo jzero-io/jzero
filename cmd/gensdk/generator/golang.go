@@ -43,7 +43,8 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	}
 	apiSpecs = append(apiSpecs, apiSpec)
 
-	var goImportPaths []string
+	var protoGoImportPaths []string
+	var apiGoImportPaths []string
 
 	fds, err := protoParser.ParseFiles("credential.proto")
 	if err != nil {
@@ -51,8 +52,10 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	}
 
 	for _, fd := range fds {
-		goImportPaths = append(goImportPaths, fmt.Sprintf("%s/model/%s", g.target.Module, strings.TrimPrefix(*fd.GetFileOptions().GoPackage, "./")))
+		protoGoImportPaths = append(protoGoImportPaths, fmt.Sprintf("%s/model/%s", g.target.Module, strings.TrimPrefix(*fd.GetFileOptions().GoPackage, "./")))
 	}
+
+	apiGoImportPaths = append(apiGoImportPaths, fmt.Sprintf("%s/model/types", g.target.Module))
 
 	rhis, err := jparser.Parse(fds, apiSpecs)
 	if err != nil {
@@ -108,7 +111,7 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	scopeClientGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
 		"Scope":     "jzero",
 		"Module":    g.target.Module,
-		"Resources": []string{"credential"},
+		"Resources": []string{"credential", "hello"},
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "client", "client-go", "typed", "scope_client.go.tpl")))
 	if err != nil {
 		return nil, err
@@ -132,6 +135,19 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 		Content: *bytes.NewBuffer(resourceExpansionGoBytes),
 	})
 
+	resourceExpansionGoBytes, err = templatex.ParseTemplate(map[string]interface{}{
+		"Module":   g.target.Module,
+		"Scope":    "jzero",
+		"Resource": "hello",
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "client", "client-go", "typed", "resource_expansion.go.tpl")))
+	if err != nil {
+		return nil, err
+	}
+	files = append(files, &GeneratedFile{
+		Path:    filepath.Join("typed", "jzero", "hello_expansion.go"),
+		Content: *bytes.NewBuffer(resourceExpansionGoBytes),
+	})
+
 	// gen typed/resource.go
 	resourceGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
 		"GoModule":           g.target.Module,
@@ -139,13 +155,30 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 		"Resource":           "credential",
 		"HTTPInterfaces":     rhis["jzero"]["credential"],
 		"IsWarpHTTPResponse": true,
-		"GoImportPaths":      goImportPaths,
+		"GoImportPaths":      protoGoImportPaths,
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "client", "client-go", "typed", "resource.go.tpl")))
 	if err != nil {
 		return nil, err
 	}
 	files = append(files, &GeneratedFile{
 		Path:    filepath.Join("typed", "jzero", "credential.go"),
+		Content: *bytes.NewBuffer(resourceGoBytes),
+	})
+
+	// gen typed/resource.go
+	resourceGoBytes, err = templatex.ParseTemplate(map[string]interface{}{
+		"GoModule":           g.target.Module,
+		"Scope":              "jzero",
+		"Resource":           "hello",
+		"HTTPInterfaces":     rhis["jzero"]["hello"],
+		"IsWarpHTTPResponse": true,
+		"GoImportPaths":      apiGoImportPaths,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "client", "client-go", "typed", "resource.go.tpl")))
+	if err != nil {
+		return nil, err
+	}
+	files = append(files, &GeneratedFile{
+		Path:    filepath.Join("typed", "jzero", "hello.go"),
 		Content: *bytes.NewBuffer(resourceGoBytes),
 	})
 

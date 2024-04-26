@@ -27,13 +27,18 @@ func Parse(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) (vars.ScopeReso
 	}
 
 	var credentialInterfaces []*vars.HTTPInterface
+	var helloInterfaces []*vars.HTTPInterface
 	for _, iface := range interfaces {
 		if iface.Resource == "credential" {
 			credentialInterfaces = append(credentialInterfaces, iface)
 		}
+		if iface.Resource == "hello" {
+			helloInterfaces = append(helloInterfaces, iface)
+		}
 	}
 
 	resourceHTTPInterfaceMap["credential"] = credentialInterfaces
+	resourceHTTPInterfaceMap["hello"] = helloInterfaces
 	scopeResourceHTTPInterfaceMap["jzero"] = resourceHTTPInterfaceMap
 
 	return scopeResourceHTTPInterfaceMap, nil
@@ -109,22 +114,23 @@ func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]
 
 				httpInterface := vars.HTTPInterface{
 					Resource:   vars.Resource(group.Annotation.Properties["group"]),
-					Method:     route.Method,
+					Method:     strings.ToUpper(route.Method),
 					URL:        path,
 					MethodName: route.Handler,
 					Comments:   route.AtDoc.Text,
 				}
 				if route.RequestType != nil {
 					httpInterface.RequestBody = &vars.RequestBody{
-						Name:         route.RequestType.Name(),
-						RealBodyName: route.RequestType.Name(),
+						Name:         stringx.FirstUpper(route.RequestType.Name()),
+						RealBodyName: stringx.FirstUpper(route.RequestType.Name()),
 						Package:      "types",
 						Type:         "api",
 					}
 				}
 				if route.ResponseType != nil {
 					httpInterface.ResponseBody = &vars.ResponseBody{
-						Name: route.ResponseType.Name(),
+						Name:    stringx.FirstUpper(route.ResponseType.Name()),
+						Package: "types",
 					}
 				}
 

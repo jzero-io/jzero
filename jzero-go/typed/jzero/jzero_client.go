@@ -11,6 +11,7 @@ type JzeroInterface interface {
 	RESTClient() rest.Interface
 	
 	CredentialGetter
+	HelloGetter
 	
 }
 
@@ -27,6 +28,10 @@ func (x *JzeroClient) RESTClient() rest.Interface {
 
 func (x *JzeroClient) Credential() CredentialInterface {
 	return newCredentialClient(x)
+}
+
+func (x *JzeroClient) Hello() HelloInterface {
+	return newHelloClient(x)
 }
 
 

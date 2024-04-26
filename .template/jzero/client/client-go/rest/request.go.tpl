@@ -72,8 +72,10 @@ func (r *Request) SubPath(subPath string, args ...PathParam) *Request {
 				panic(err)
 			}
 			subPath = strings.ReplaceAll(subPath, "{"+v.Name+"}", cast.ToString(js[1:len(js)-1]))
+			subPath = strings.ReplaceAll(subPath, ":"+v.Name, cast.ToString(js[1:len(js)-1]))
 		} else {
 			subPath = strings.ReplaceAll(subPath, "{"+v.Name+"}", cast.ToString(v.Value))
+			subPath = strings.ReplaceAll(subPath, ":"+v.Name, cast.ToString(v.Value))
 		}
 	}
 	r.subPath = r.c.gatewayPrefix + subPath

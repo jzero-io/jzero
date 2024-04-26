@@ -18,11 +18,11 @@ import (
 	"time"
 
 	simplejson "github.com/bitly/go-simplejson"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 // Request allows for building up a request to a server in a chained fashion.
@@ -43,7 +43,6 @@ type Request struct {
 }
 
 func NewRequest(c *RESTClient) *Request {
-
 	r := &Request{
 		c: c,
 	}
@@ -66,14 +65,16 @@ func (r *Request) SubPath(subPath string, args ...PathParam) *Request {
 	for _, v := range args {
 		val := reflect.ValueOf(v.Value)
 		kind := val.Kind()
-		if (kind == reflect.Slice || kind == reflect.Array) {
+		if kind == reflect.Slice || kind == reflect.Array {
 			js, err := json.Marshal(v.Value)
 			if err != nil {
 				panic(err)
 			}
 			subPath = strings.ReplaceAll(subPath, "{"+v.Name+"}", cast.ToString(js[1:len(js)-1]))
+			subPath = strings.ReplaceAll(subPath, ":"+v.Name, cast.ToString(js[1:len(js)-1]))
 		} else {
 			subPath = strings.ReplaceAll(subPath, "{"+v.Name+"}", cast.ToString(v.Value))
+			subPath = strings.ReplaceAll(subPath, ":"+v.Name, cast.ToString(v.Value))
 		}
 	}
 	r.subPath = r.c.gatewayPrefix + subPath
@@ -126,7 +127,7 @@ func (r *Request) Params(args ...QueryParam) *Request {
 			}
 		}
 	}
-	r.params = queryParams.String()
+	r.params = strings.TrimRight(queryParams.String(), "&")
 	return r
 }
 
@@ -386,7 +387,7 @@ func (r Result) Into(obj interface{}, isWarpHttpResponse bool) error {
 			return err
 		}
 	} else {
-		marshalJSON,err = j.MarshalJSON()
+		marshalJSON, err = j.MarshalJSON()
 		if err != nil {
 			return err
 		}
