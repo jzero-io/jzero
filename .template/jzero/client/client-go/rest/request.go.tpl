@@ -167,6 +167,8 @@ func (r *Request) Body(obj interface{}) *Request {
 	}
 
 	switch t := obj.(type) {
+	case nil:
+	    r.body = nil
 	case string:
 		r.body = bytes.NewReader([]byte(t))
 	case []byte:

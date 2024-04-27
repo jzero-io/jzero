@@ -170,6 +170,8 @@ func (r *Request) Body(obj interface{}) *Request {
 		r.body = bytes.NewReader([]byte(t))
 	case []byte:
 		r.body = bytes.NewReader(t)
+	case nil:
+		r.body = nil
 	default:
 		data, err := json.Marshal(obj)
 		if err != nil {
