@@ -13,22 +13,29 @@ order: 5
 ```bash
 cd app1
 jzero gensdk --module=github.com/jaronnie/app1-go --dir=app1-go
+go mod tidy
 ```
 
 @tab Docker(amd64)
 
 ```bash
+cd app1
 docker run --rm \
   -v ./app1:/app/app1 jaronnie/jzero:latest \
   gensdk --module=github.com/jaronnie/app1-go --dir=app1-go
+
+go mod tidy
 ```
 
 @tab Docker(arm64)
 
 ```bash
+cd app1
 docker run --rm \
   -v ./app1:/app/app1 jaronnie/jzero:latest-arm64 \
   gensdk --module=github.com/jaronnie/app1-go --dir=app1-go
+
+go mod tidy  
 ```
 :::
 
