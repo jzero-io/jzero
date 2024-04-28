@@ -8,7 +8,6 @@ import (
     "context"
 
     "github.com/jaronnie/jzero-go/model/jzero/pb/credentialpb"
-    "github.com/jaronnie/jzero-go/model/jzero/types"
     
     "github.com/jaronnie/jzero-go/rest"
 )
@@ -30,8 +29,6 @@ type CredentialInterface interface {
 	CredentialList(ctx context.Context,param *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error)
 	// API /api/v1.0/credential/{id} 
 	CredentialDetail(ctx context.Context,param *credentialpb.Int32Id) (*credentialpb.Credential, error)
-	// API /api/v1/credential/:name 
-	CredentialPathHandler(ctx context.Context,param *types.CredentialRequest) (*types.CredentialResponse, error)
 	
 	CredentialExpansion
 }
@@ -115,26 +112,6 @@ func (x *credentialClient) CredentialDetail(ctx context.Context,param *credentia
 		).
 		Params(
 			rest.QueryParam{Name: "id", Value: param.Id},
-		).
-		Body(nil).
-		Do(ctx).
-		Into(&resp, true)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
-}
-
-func (x *credentialClient) CredentialPathHandler(ctx context.Context,param *types.CredentialRequest) (*types.CredentialResponse, error) {
-	var resp types.CredentialResponse
-		err := x.client.Verb("GET").
-		SubPath(
-			"/api/v1/credential/:name",
-			rest.PathParam{Name: "name", Value: param.Name},
-		).
-		Params(
 		).
 		Body(nil).
 		Do(ctx).

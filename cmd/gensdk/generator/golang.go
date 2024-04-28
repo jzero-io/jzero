@@ -195,10 +195,38 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 		}
 	}
 
-	// go mod init
-	_, err = execx.Run(fmt.Sprintf("go mod init %s", g.config.Module), g.config.Dir)
+	// go mod file
+	goModFile, err := g.genGoMod()
+	if err != nil {
+		return nil, err
+	}
+	files = append(files, goModFile)
 
 	return files, nil
+}
+
+func (g *Golang) genGoMod() (*GeneratedFile, error) {
+	tmpDir, err := os.MkdirTemp(os.TempDir(), "")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmpDir)
+
+	resp, err := execx.Run(fmt.Sprintf("go mod init %s", g.config.Module), tmpDir)
+	if err != nil {
+		return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
+	}
+
+	goModBytes, err := os.ReadFile(filepath.Join(tmpDir, "go.mod"))
+	if err != nil {
+		return nil, err
+	}
+
+	return &GeneratedFile{
+		Skip:    true,
+		Path:    "go.mod",
+		Content: *bytes.NewBuffer(goModBytes),
+	}, nil
 }
 
 func (g *Golang) genApiTypesModel(types []spec.Type) (string, error) {

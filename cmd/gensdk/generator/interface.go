@@ -11,6 +11,7 @@ import (
 type GeneratedFile struct {
 	Path    string
 	Content bytes.Buffer
+	Skip    bool
 }
 
 type Generator interface {

@@ -59,6 +59,9 @@ func GenSdk(cmd *cobra.Command, args []string) error {
 				return err
 			}
 		}
+		if pathx.FileExists(filepath.Join(Dir, v.Path)) && v.Skip {
+			continue
+		}
 		if err = os.WriteFile(filepath.Join(Dir, v.Path), v.Content.Bytes(), 0o644); err != nil {
 			return err
 		}
