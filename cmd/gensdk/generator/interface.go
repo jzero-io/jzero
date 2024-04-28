@@ -3,6 +3,8 @@ package generator
 import (
 	"bytes"
 
+	"github.com/jaronnie/jzero/cmd/gensdk/config"
+
 	"github.com/pkg/errors"
 )
 
@@ -17,21 +19,14 @@ type Generator interface {
 
 var langGenerator = map[string]NewFunc{}
 
-type Target struct {
-	Language string
-	APP      string
-	Module   string
-	Dir      string
-}
+type NewFunc func(target config.Config) (Generator, error)
 
-type NewFunc func(target Target) (Generator, error)
-
-func New(target Target) (Generator, error) {
-	f, ok := langGenerator[target.Language]
+func New(config config.Config) (Generator, error) {
+	f, ok := langGenerator[config.Language]
 	if !ok {
-		return nil, errors.Errorf("language %s not support", target.Language)
+		return nil, errors.Errorf("language %s not support", config.Language)
 	}
-	return f(target)
+	return f(config)
 }
 
 func Register(language string, f NewFunc) {

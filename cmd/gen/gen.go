@@ -60,7 +60,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 
 	// read proto dir
-	protoDir, err := os.ReadDir(filepath.Join(wd, "daemon", "desc", "proto"))
+	protoDir, err := GetProtoDir(wd)
 	if len(protoDir) == 0 {
 		fmt.Printf("proto dir [%s] not found. Skip generate", filepath.Join(wd, "daemon", "desc", "proto"))
 	}

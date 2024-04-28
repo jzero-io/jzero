@@ -30,7 +30,6 @@ func main() {
 	fmt.Println(result.Message)
 
 	// proto gateway interface
-
 	list, err := clientset.Credential().CredentialList(context.Background(), &credentialpb.CredentialListRequest{
 		Page: 1,
 		Size: 10,

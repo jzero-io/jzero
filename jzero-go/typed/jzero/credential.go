@@ -7,9 +7,7 @@ package jzero
 import (
     "context"
 
-	"github.com/jaronnie/jzero-go/model/pb/credentialpb"
-	
-
+    "github.com/jaronnie/jzero-go/model/pb/credentialpb"
     "github.com/jaronnie/jzero-go/rest"
 )
 
@@ -22,22 +20,14 @@ type CredentialGetter interface {
 }
 
 type CredentialInterface interface {
-	// <no value> trans *credentialpb.Empty into *credentialpb.CredentialVersionResponse
 	// API /api/v1.0/credential/version 
 	CredentialVersion(ctx context.Context,param *credentialpb.Empty) (*credentialpb.CredentialVersionResponse, error)
-
-	// <no value> trans *credentialpb.CreateCredentialRequest into *credentialpb.CreateCredentialResponse
 	// API /api/v1.0/credential/create 
 	CreateCredential(ctx context.Context,param *credentialpb.CreateCredentialRequest) (*credentialpb.CreateCredentialResponse, error)
-
-	// <no value> trans *credentialpb.CredentialListRequest into *credentialpb.CredentialListResponse
 	// API /api/v1.0/credential/list 
 	CredentialList(ctx context.Context,param *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error)
-
-	// <no value> trans *credentialpb.Int32Id into *credentialpb.Credential
 	// API /api/v1.0/credential/{id} 
 	CredentialDetail(ctx context.Context,param *credentialpb.Int32Id) (*credentialpb.Credential, error)
-
 	
 	CredentialExpansion
 }

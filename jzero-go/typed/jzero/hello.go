@@ -7,9 +7,7 @@ package jzero
 import (
     "context"
 
-	"github.com/jaronnie/jzero-go/model/types"
-	
-
+    "github.com/jaronnie/jzero-go/model/types"
     "github.com/jaronnie/jzero-go/rest"
 )
 
@@ -22,18 +20,12 @@ type HelloGetter interface {
 }
 
 type HelloInterface interface {
-	// <no value> trans *types.ParamRequest into *types.Response
 	// API /api/v1/hello 
 	HelloParamHandler(ctx context.Context,param *types.ParamRequest) (*types.Response, error)
-
-	// <no value> trans *types.PostRequest into *types.Response
 	// API /api/v1/hello 
 	HelloPostHandler(ctx context.Context,param *types.PostRequest) (*types.Response, error)
-
-	// <no value> trans *types.PathRequest into *types.Response
 	// API /api/v1/hello/:name 
 	HelloPathHandler(ctx context.Context,param *types.PathRequest) (*types.Response, error)
-
 	
 	HelloExpansion
 }

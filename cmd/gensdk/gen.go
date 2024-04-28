@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jaronnie/jzero/cmd/gensdk/config"
+
 	"github.com/jaronnie/genius"
 	"github.com/jaronnie/jzero/cmd/gensdk/generator"
 	"github.com/spf13/cast"
@@ -34,14 +36,14 @@ func GenSdk(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	target := generator.Target{
+	c := config.Config{
 		Language: Language,
 		APP:      cast.ToString(g.Get("APP")),
 		Module:   Module,
 		Dir:      Dir,
 	}
 
-	gen, err := generator.New(target)
+	gen, err := generator.New(c)
 	if err != nil {
 		return err
 	}

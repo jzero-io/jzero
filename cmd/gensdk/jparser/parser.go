@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/jaronnie/jzero/cmd/gensdk/config"
+
 	"github.com/jaronnie/jzero/daemon/pkg/stringx"
 
 	"github.com/jaronnie/jzero/cmd/gensdk/jparser/api"
@@ -17,34 +19,15 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func Parse(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) (vars.ScopeResourceHTTPInterfaceMap, error) {
-	scopeResourceHTTPInterfaceMap := make(vars.ScopeResourceHTTPInterfaceMap)
-	resourceHTTPInterfaceMap := make(map[vars.Resource][]*vars.HTTPInterface)
-
-	interfaces, err := genHTTPInterfaces(fds, apiSpecs)
+func Parse(config *config.Config, fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) (vars.ScopeResourceHTTPInterfaceMap, error) {
+	interfaces, err := genHTTPInterfaces(config, fds, apiSpecs)
 	if err != nil {
 		return nil, err
 	}
-
-	var credentialInterfaces []*vars.HTTPInterface
-	var helloInterfaces []*vars.HTTPInterface
-	for _, iface := range interfaces {
-		if iface.Resource == "credential" {
-			credentialInterfaces = append(credentialInterfaces, iface)
-		}
-		if iface.Resource == "hello" {
-			helloInterfaces = append(helloInterfaces, iface)
-		}
-	}
-
-	resourceHTTPInterfaceMap["credential"] = credentialInterfaces
-	resourceHTTPInterfaceMap["hello"] = helloInterfaces
-	scopeResourceHTTPInterfaceMap["jzero"] = resourceHTTPInterfaceMap
-
-	return scopeResourceHTTPInterfaceMap, nil
+	return convertToMap(interfaces), nil
 }
 
-func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]*vars.HTTPInterface, error) {
+func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]*vars.HTTPInterface, error) {
 	var httpInterfaces []*vars.HTTPInterface
 
 	for _, fd := range fds {
@@ -92,6 +75,8 @@ func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]
 					}
 				}
 				httpInterface.MethodName = method.GetName()
+				// TODO if multiple. Use config to get scope
+				httpInterface.Scope = vars.Scope(config.APP)
 				httpInterface.Resource = vars.Resource(service.GetName())
 
 				pathParams, err := gateway.PathParam(httpInterface.URL)
@@ -113,6 +98,7 @@ func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]
 				path, _ := url.JoinPath(group.Annotation.Properties["prefix"], route.Path)
 
 				httpInterface := vars.HTTPInterface{
+					Scope:      vars.Scope(config.APP),
 					Resource:   vars.Resource(group.Annotation.Properties["group"]),
 					Method:     strings.ToUpper(route.Method),
 					URL:        path,
@@ -126,12 +112,17 @@ func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]
 						Package:      "types",
 						Type:         "api",
 					}
+				} else {
+					continue
 				}
+
 				if route.ResponseType != nil {
 					httpInterface.ResponseBody = &vars.ResponseBody{
 						Name:    stringx.FirstUpper(route.ResponseType.Name()),
 						Package: "types",
 					}
+				} else {
+					continue
 				}
 
 				pathParams, err := api.CreatePathParam(httpInterface.URL, &route)
@@ -147,4 +138,21 @@ func genHTTPInterfaces(fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) ([]
 		}
 	}
 	return httpInterfaces, nil
+}
+
+func convertToMap(interfaces []*vars.HTTPInterface) vars.ScopeResourceHTTPInterfaceMap {
+	scopeResourceHTTPInterfaceMap := make(vars.ScopeResourceHTTPInterfaceMap)
+
+	for _, inf := range interfaces {
+		scope := inf.Scope
+		resource := inf.Resource
+
+		if _, ok := scopeResourceHTTPInterfaceMap[scope]; !ok {
+			scopeResourceHTTPInterfaceMap[scope] = make(map[vars.Resource][]*vars.HTTPInterface)
+		}
+
+		scopeResourceHTTPInterfaceMap[scope][resource] = append(scopeResourceHTTPInterfaceMap[scope][resource], inf)
+	}
+
+	return scopeResourceHTTPInterfaceMap
 }

@@ -18,11 +18,11 @@ import (
 	"time"
 
 	simplejson "github.com/bitly/go-simplejson"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 )
 
 // Request allows for building up a request to a server in a chained fashion.
@@ -43,6 +43,7 @@ type Request struct {
 }
 
 func NewRequest(c *RESTClient) *Request {
+
 	r := &Request{
 		c: c,
 	}
@@ -65,7 +66,7 @@ func (r *Request) SubPath(subPath string, args ...PathParam) *Request {
 	for _, v := range args {
 		val := reflect.ValueOf(v.Value)
 		kind := val.Kind()
-		if kind == reflect.Slice || kind == reflect.Array {
+		if (kind == reflect.Slice || kind == reflect.Array) {
 			js, err := json.Marshal(v.Value)
 			if err != nil {
 				panic(err)
@@ -127,7 +128,7 @@ func (r *Request) Params(args ...QueryParam) *Request {
 			}
 		}
 	}
-	r.params = strings.TrimRight(queryParams.String(), "&")
+	r.params = queryParams.String()
 	return r
 }
 
@@ -166,12 +167,12 @@ func (r *Request) Body(obj interface{}) *Request {
 	}
 
 	switch t := obj.(type) {
+	case nil:
+	    r.body = nil
 	case string:
 		r.body = bytes.NewReader([]byte(t))
 	case []byte:
 		r.body = bytes.NewReader(t)
-	case nil:
-		r.body = nil
 	default:
 		data, err := json.Marshal(obj)
 		if err != nil {

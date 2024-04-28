@@ -3,7 +3,8 @@ package vars
 type (
 	Scope                         string
 	Resource                      string
-	ScopeResourceHTTPInterfaceMap map[Scope]map[Resource][]*HTTPInterface
+	ResourceHTTPInterfaceMap      = map[Resource][]*HTTPInterface
+	ScopeResourceHTTPInterfaceMap map[Scope]ResourceHTTPInterfaceMap
 )
 
 // HTTPInterface parse grpc http options, go-zero api file
@@ -36,7 +37,7 @@ type RequestBody struct {
 	RealBodyName string // if proto and body is not *. use it
 	Name         string // request type name
 	Type         string // proto or api
-	Package      string // for example. types. *types.HelloParamRequest{}
+	Package      string // for example. types. *types.HelloParamRequest
 }
 
 type ResponseBody struct {

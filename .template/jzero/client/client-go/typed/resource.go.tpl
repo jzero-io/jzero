@@ -7,9 +7,7 @@ package {{.Scope}}
 import (
     "context"
 
-	{{range $v := .GoImportPaths | uniq}}"{{$v}}"
-	{{end}}
-
+    {{range $v := .GoImportPaths | uniq}}"{{$v}}"{{end}}
     "{{.GoModule}}/rest"
 )
 
@@ -22,10 +20,8 @@ type {{.Resource | FirstUpper}}Getter interface {
 }
 
 type {{.Resource | FirstUpper}}Interface interface {
-	{{range $k, $v := .HTTPInterfaces}}// {{$.MethodName}} trans *{{.RequestBody.Package | base}}.{{.RequestBody.Name}} into *{{.ResponseBody.Package | base}}.{{.ResponseBody.Name}}
-	// API {{$v.URL}} {{.Comments}}
+	{{range $k, $v := .HTTPInterfaces}}// API {{$v.URL}} {{.Comments}}
 	{{template "methodDefine" $v}}
-
 	{{end}}
 	{{.Resource | FirstUpper}}Expansion
 }

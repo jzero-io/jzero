@@ -390,7 +390,7 @@ func (r Result) Into(obj interface{}, isWarpHttpResponse bool) error {
 			return err
 		}
 	} else {
-		marshalJSON,err = j.MarshalJSON()
+		marshalJSON, err = j.MarshalJSON()
 		if err != nil {
 			return err
 		}
