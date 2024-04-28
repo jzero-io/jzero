@@ -4,11 +4,11 @@
 package fake
 
 import (
-	"{{.GoModule}}/typed"
-	"{{.GoModule}}/typed/fake"
+	"{{.Module}}/typed"
+	"{{.Module}}/typed/fake"
 
-{{range $k, $v := .ScopeVersions}}{{$k}} "{{$.GoModule}}/typed/{{$k}}"
-fake{{$k}} "{{$.GoModule}}/typed/{{$k}}/fake"
+{{range $v := .Scopes}}    {{$v}} "{{$.Module}}/typed/{{$v}}"
+    fake{{$v}} "{{$.Module}}/typed/{{$v}}/fake"
 {{end}}
 )
 
@@ -18,8 +18,8 @@ func (f *Clientset) Direct() typed.DirectInterface {
 	return &fake.FakeDirect{}
 }
 
-{{range $k, $v := .ScopeVersions}}func (f *Clientset) {{$v}}() {{$k}}.{{$v}}Interface {
-return &fake{{$k}}.Fake{{$v}}{}
+{{range $v := .Scopes}}func (f *Clientset) {{$v | FirstUpper}}() {{$v}}.{{$v | FirstUpper}}Interface {
+    return &fake{{$v}}.Fake{{$v | FirstUpper}}{}
 }
 
 {{end}}
