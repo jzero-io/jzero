@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+
 	"github.com/jaronnie/jzero/cmd"
 	"github.com/jaronnie/jzero/embeded"
 )
@@ -23,7 +24,7 @@ var (
 
 // ldflags
 var (
-	version string = "0.9.2"
+	version string = "0.9.3"
 	commit  string
 	date    string
 )

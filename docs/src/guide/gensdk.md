@@ -4,12 +4,63 @@ icon: lightbulb
 order: 5
 ---
 
-::: tip 努力开发中...
+## 自动生成客户端 sdk
+
+::: code-tabs#shell
+
+@tab jzero
+
+```bash
+cd app1
+jzero gensdk --module=github.com/jaronnie/app1-go --dir=app1-go
+```
+
+@tab Docker(amd64)
+
+```bash
+docker run --rm \
+  -v ./app1:/app/app1 jaronnie/jzero:latest \
+  gensdk --module=github.com/jaronnie/app1-go --dir=app1-go
+```
+
+@tab Docker(arm64)
+
+```bash
+docker run --rm \
+  -v ./app1:/app/app1 jaronnie/jzero:latest-arm64 \
+  gensdk --module=github.com/jaronnie/app1-go --dir=app1-go
+```
 :::
 
-目标:
+## sdk 使用实例
 
-* 根据 proto 文件中的 options 和 api 文件生成 http sdk
-* 根据 proto 文件生成 grpc 客户端
-* 仿照 k8s client-go 的设计进行链式调用
-* 支持多语言客户端 sdk 的生成, 默认生成 go 语言
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	
+	"github.com/jaronnie/app1-go"
+	"github.com/jaronnie/app1-go/model/app1/types"
+	"github.com/jaronnie/app1-go/rest"
+)
+
+func main() {
+	clientset, err := app1.NewClientWithOptions(
+		rest.WithAddr("127.0.0.1"),
+		rest.WithPort("8001"),
+		rest.WithProtocol("http"))
+	if err != nil {
+		panic(err)
+	}
+
+	result, err := clientset.Hello().HelloPathHandler(context.Background(), &types.PathRequest{
+		Name: "jzero",
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(result.Message)
+}
+```
