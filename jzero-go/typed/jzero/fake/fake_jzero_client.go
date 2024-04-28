@@ -15,15 +15,15 @@ func (f *FakeJzero) RESTClient() rest.Interface {
 	return ret
 }
 
-func (f *FakeJzero) credential() jzero.CredentialInterface {
-	return &FakeCredential{Fake: f}
-}
-
-func (f *FakeJzero) machine() jzero.MachineInterface {
+func (f *FakeJzero) Machine() jzero.MachineInterface {
 	return &FakeMachine{Fake: f}
 }
 
-func (f *FakeJzero) hello() jzero.HelloInterface {
+func (f *FakeJzero) Hello() jzero.HelloInterface {
 	return &FakeHello{Fake: f}
+}
+
+func (f *FakeJzero) Credential() jzero.CredentialInterface {
+	return &FakeCredential{Fake: f}
 }
 

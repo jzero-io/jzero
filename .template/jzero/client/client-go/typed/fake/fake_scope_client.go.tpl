@@ -15,7 +15,7 @@ func (f *Fake{{.Scope | FirstUpper}}) RESTClient() rest.Interface {
 	return ret
 }
 
-{{range $v := .Resources}}func (f *Fake{{$.Scope | FirstUpper}}) {{$v}}() {{$.Scope}}.{{$v | FirstUpper}}Interface {
+{{range $v := .Resources}}func (f *Fake{{$.Scope | FirstUpper}}) {{$v | FirstUpper}}() {{$.Scope}}.{{$v | FirstUpper}}Interface {
 	return &Fake{{$v | FirstUpper}}{Fake: f}
 }
 

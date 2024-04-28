@@ -6,34 +6,34 @@ package fake
 import (
 	"context"
 
-	{{range $k, $v := .Gateways}}{{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}"{{$.GoModule}}/rest"{{break}}{{end}}{{end}}
+	{{range $k, $v := .HTTPInterfaces}}{{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}"{{$.Module}}/rest"{{break}}{{end}}{{end}}
 
-	{{range $v := .GoImportPaths}}"{{$v}}"
+	{{range $v := .GoImportPaths | uniq}}"{{$v}}"
 	{{end}}
 )
 
 var (
-	{{range $k, $v := .Gateways}}FakeReturn{{$v.FuncName}} = &{{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}rest.Request{}{{else}}{{$v.HTTPResponseBody.RootPath}}.{{$v.HTTPResponseBody.Name}}{}{{end}}
+	{{range $k, $v := .HTTPInterfaces}}FakeReturn{{$v.MethodName}} = &{{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}rest.Request{}{{else}}{{$v.ResponseBody.Package | base}}.{{$v.ResponseBody.Name}}{}{{end}}
 	{{end}}
 )
 
-type {{.UpResource}}Getter interface {
-	{{.UpResource}}() {{.UpResource}}Interface
+type {{.Resource | FirstUpper}}Getter interface {
+	{{.Resource | FirstUpper}}() {{.Resource | FirstUpper}}Interface
 
-	Fake{{.UpResource}}Expansion
+	Fake{{.Resource | FirstUpper}}Expansion
 }
 
-type {{.UpResource}}Interface interface {
-	{{range $k, $v := .Gateways}}{{$v.FuncName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}} param *{{$v.ProtoRequestBody.RootPath}}.{{$v.ProtoRequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}*{{$v.HTTPResponseBody.RootPath}}.{{$v.HTTPResponseBody.Name}}{{end}}, error)
+type {{.Resource | FirstUpper}}Interface interface {
+	{{range $k, $v := .HTTPInterfaces}}{{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}} param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}*{{$v.ResponseBody.Package | base}}.{{$v.ResponseBody.Name}}{{end}}, error)
 	{{end}}
 }
 
-type Fake{{.UpResource}} struct {
-	Fake *Fake{{.UpScopeVersion}}
+type Fake{{.Resource | FirstUpper}} struct {
+	Fake *Fake{{.Scope | FirstUpper}}
 }
 
-{{range $k, $v := .Gateways}}func (f *Fake{{$.UpResource}}) {{$v.FuncName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}}param *{{$v.ProtoRequestBody.RootPath}}.{{$v.ProtoRequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}*{{$v.HTTPResponseBody.RootPath}}.{{$v.HTTPResponseBody.Name}}{{end}}, error) {
-	return FakeReturn{{$v.FuncName}}, nil
+{{range $k, $v := .HTTPInterfaces}}func (f *Fake{{$.Resource | FirstUpper}}) {{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}}param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}*{{$v.ResponseBody.Package | base}}.{{$v.ResponseBody.Name}}{{end}}, error) {
+	return FakeReturn{{$v.MethodName}}, nil
 }
 
 {{end}}

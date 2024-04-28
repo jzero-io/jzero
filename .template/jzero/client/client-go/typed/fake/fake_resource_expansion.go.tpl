@@ -1,3 +1,3 @@
 package fake
 
-type Fake{{.UpResource}}Expansion interface {}
+type Fake{{.Resource | FirstUpper}}Expansion interface {}

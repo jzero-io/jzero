@@ -47,7 +47,7 @@ func start(ctx *svc.ServiceContext) {
 	// verify sql conn
 	_, err := ctx.SqlConn.Exec("select 1 = 1")
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 
 	middlewares.RateLimit = syncx.NewLimit(ctx.Config.Jzero.GrpcMaxConns)
