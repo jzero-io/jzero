@@ -7,7 +7,8 @@ package {{.Scope}}
 import (
     "context"
 
-    {{range $v := .GoImportPaths | uniq}}"{{$v}}"{{end}}
+    {{range $v := .GoImportPaths | uniq}}"{{$v}}"
+    {{end}}
     "{{.GoModule}}/rest"
 )
 

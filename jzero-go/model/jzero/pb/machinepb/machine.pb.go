@@ -7,12 +7,11 @@
 package machinepb
 
 import (
-	reflect "reflect"
-	sync "sync"
-
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	reflect "reflect"
+	sync "sync"
 )
 
 const (
@@ -141,14 +140,11 @@ func file_machine_proto_rawDescGZIP() []byte {
 	return file_machine_proto_rawDescData
 }
 
-var (
-	file_machine_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-	file_machine_proto_goTypes  = []interface{}{
-		(*Empty)(nil),                  // 0: machinepb.Empty
-		(*MachineVersionResponse)(nil), // 1: machinepb.MachineVersionResponse
-	}
-)
-
+var file_machine_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_machine_proto_goTypes = []interface{}{
+	(*Empty)(nil),                  // 0: machinepb.Empty
+	(*MachineVersionResponse)(nil), // 1: machinepb.MachineVersionResponse
+}
 var file_machine_proto_depIdxs = []int32{
 	0, // 0: machinepb.machine.MachineVersion:input_type -> machinepb.Empty
 	1, // 1: machinepb.machine.MachineVersion:output_type -> machinepb.MachineVersionResponse

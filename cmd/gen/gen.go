@@ -68,8 +68,8 @@ func Gen(_ *cobra.Command, _ []string) error {
 	// api file path
 	apiFilePath := filepath.Join(wd, "daemon", "desc", "api", cast.ToString(g.Get("APP"))+".api")
 
-	err = check(g, wd, protoDir, apiFilePath)
-	cobra.CheckErr(err)
+	// err = check(g, wd, protoDir, apiFilePath)
+	// cobra.CheckErr(err)
 
 	var protosets []string
 	var serverImports ImportLines
@@ -83,7 +83,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 	defer func() {
 		_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
 		_ = os.RemoveAll(filepath.Join(wd, "daemon", "etc"))
-		os.Exit(-1)
+		os.Exit(0)
 	}()
 
 	// 异常删除无用文件夹
@@ -188,6 +188,8 @@ func Gen(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
+// check. 优化: proto 和 api group 名称可以重复, 但是 rpc method 和 api handler 名称不能重复
+// TODO
 func check(g *genius.Genius, wd string, protoDir []os.DirEntry, apiFilePath string) error {
 	// check logic dir duplicate
 	var protoLogicDir []string

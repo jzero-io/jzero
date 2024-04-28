@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jaronnie/jzero-go/model/pb/credentialpb"
+	"github.com/jaronnie/jzero-go/model/jzero/pb/credentialpb"
+	"github.com/jaronnie/jzero-go/model/jzero/types"
 
 	"github.com/jaronnie/jzero-go"
-	"github.com/jaronnie/jzero-go/model/types"
 	"github.com/jaronnie/jzero-go/rest"
 )
 

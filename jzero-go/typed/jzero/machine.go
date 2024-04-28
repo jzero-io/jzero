@@ -7,7 +7,8 @@ package jzero
 import (
     "context"
 
-    "github.com/jaronnie/jzero-go/model/pb/machinepb"
+    "github.com/jaronnie/jzero-go/model/jzero/pb/machinepb"
+    
     "github.com/jaronnie/jzero-go/rest"
 )
 

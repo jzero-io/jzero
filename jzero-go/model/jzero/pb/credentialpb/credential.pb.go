@@ -7,12 +7,11 @@
 package credentialpb
 
 import (
-	reflect "reflect"
-	sync "sync"
-
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	reflect "reflect"
+	sync "sync"
 )
 
 const (
@@ -541,20 +540,17 @@ func file_credential_proto_rawDescGZIP() []byte {
 	return file_credential_proto_rawDescData
 }
 
-var (
-	file_credential_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
-	file_credential_proto_goTypes  = []interface{}{
-		(*Empty)(nil),                     // 0: credentialpb.Empty
-		(*CredentialVersionResponse)(nil), // 1: credentialpb.CredentialVersionResponse
-		(*Credential)(nil),                // 2: credentialpb.Credential
-		(*CreateCredentialRequest)(nil),   // 3: credentialpb.CreateCredentialRequest
-		(*CredentialListRequest)(nil),     // 4: credentialpb.CredentialListRequest
-		(*CredentialListResponse)(nil),    // 5: credentialpb.CredentialListResponse
-		(*CreateCredentialResponse)(nil),  // 6: credentialpb.CreateCredentialResponse
-		(*Int32Id)(nil),                   // 7: credentialpb.Int32Id
-	}
-)
-
+var file_credential_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_credential_proto_goTypes = []interface{}{
+	(*Empty)(nil),                     // 0: credentialpb.Empty
+	(*CredentialVersionResponse)(nil), // 1: credentialpb.CredentialVersionResponse
+	(*Credential)(nil),                // 2: credentialpb.Credential
+	(*CreateCredentialRequest)(nil),   // 3: credentialpb.CreateCredentialRequest
+	(*CredentialListRequest)(nil),     // 4: credentialpb.CredentialListRequest
+	(*CredentialListResponse)(nil),    // 5: credentialpb.CredentialListResponse
+	(*CreateCredentialResponse)(nil),  // 6: credentialpb.CreateCredentialResponse
+	(*Int32Id)(nil),                   // 7: credentialpb.Int32Id
+}
 var file_credential_proto_depIdxs = []int32{
 	2, // 0: credentialpb.CredentialListResponse.list:type_name -> credentialpb.Credential
 	0, // 1: credentialpb.credential.CredentialVersion:input_type -> credentialpb.Empty
