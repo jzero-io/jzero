@@ -9,14 +9,14 @@ import (
 func GrpcErrorHandler(err error) (int, any) {
 	if st, ok := status.FromError(err); ok {
 		return http.StatusOK, Body{
-			Code: int(st.Code()),
-			Msg:  st.Message(),
+			Code:    int(st.Code()),
+			Message: st.Message(),
 		}
 	}
 
 	code := http.StatusInternalServerError
 	return http.StatusOK, Body{
-		Code: code,
-		Msg:  err.Error(),
+		Code:    code,
+		Message: err.Error(),
 	}
 }
