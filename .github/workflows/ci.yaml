@@ -23,7 +23,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
-          args: build --snapshot --clean
+          args: build --single-target --snapshot --clean
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
@@ -47,7 +47,7 @@ jobs:
           skip-go-installation: true
 
           # Optional: if set to true then the action don't cache or restore ~/go/pkg.
-          # skip-pkg-cache: true
+          skip-pkg-cache: true
 
           # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
           # skip-build-cache: true
