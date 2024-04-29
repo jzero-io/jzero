@@ -10,9 +10,29 @@ jobs:
     name: ci
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-go@v2
         with:
           go-version: '1.19.13'
+
+      - uses: arduino/setup-task@v1
+        name: Install task
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@v4
+        with:
+          distribution: goreleaser
+          args: build --snapshot --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
       - uses: actions/checkout@v2
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
@@ -24,37 +44,16 @@ jobs:
           working-directory: ./
 
           # Optional: golangci-lint command line arguments.
-          args: --timeout 60s --max-same-issues 50
+          args: --timeout 60s --verbose
 
           # Optional: show only new issues if it's a pull request. The default value is `false`.
           # only-new-issues: true
 
           # Optional: if set to true then the action will use pre-installed Go.
-          # skip-go-installation: true
+          skip-go-installation: true
 
           # Optional: if set to true then the action don't cache or restore ~/go/pkg.
           # skip-pkg-cache: true
 
           # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
           # skip-build-cache: true
-
-          # optionally use a specific version of Go rather than the latest one
-          go_version: '1.19.13'
-
-      - uses: arduino/setup-task@v1
-        name: set up task
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.ACCESS_TOKEN }}
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
-        with:
-          distribution: goreleaser
-          args: --version
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-
-      - name: task build
-        run: |  
-          task build:all
