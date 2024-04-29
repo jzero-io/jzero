@@ -3,6 +3,10 @@ name: jzero-ci
 on:
   push:
     branches:
+    paths-ignore:
+      - 'docs'
+    tags-ignore:
+      - 'v*'
   pull_request:
 
 jobs:
@@ -19,17 +23,11 @@ jobs:
         with:
           go-version: '1.19.13'
 
-      - uses: arduino/setup-task@v1
-        name: Install task
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.ACCESS_TOKEN }}
-
-      - name: Install GoReleaser
+      - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
-          args: build --snapshot --rm-dist
+          args: build --snapshot --clean
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
@@ -44,7 +42,7 @@ jobs:
           working-directory: ./
 
           # Optional: golangci-lint command line arguments.
-          args: --timeout 60s --verbose
+          args: --timeout 180s --verbose
 
           # Optional: show only new issues if it's a pull request. The default value is `false`.
           # only-new-issues: true
