@@ -6,6 +6,13 @@ order: 5
 
 ## 自动生成客户端 sdk
 
+* kubernetes client-go style
+* 根据 api group 和 proto service 进行业务分组
+* 链式调用, 调用逻辑清晰
+* 自带 fake client 支持单元测试
+* 可自定义接口进行扩展
+* 支持基于统一 api 网关的多服务 sdk 集成在一个 sdk 库中
+
 ::: code-tabs#shell
 
 @tab jzero
