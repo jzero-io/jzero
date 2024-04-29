@@ -3,10 +3,6 @@ name: jzero-ci
 on:
   push:
     branches:
-    paths-ignore:
-      - 'docs'
-    tags-ignore:
-      - 'v*'
   pull_request:
 
 jobs:
