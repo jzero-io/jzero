@@ -76,6 +76,5 @@ func WrapResponse(next http.HandlerFunc) http.HandlerFunc {
 		if err != nil {
 			logc.Errorf(logCtx, "Write response error: %s\n", err.Error())
 		}
-		return
 	}
 }
