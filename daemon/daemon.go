@@ -47,7 +47,7 @@ func start(ctx *svc.ServiceContext) {
 	// verify sql conn
 	_, err := ctx.SqlConn.Exec("select 1 = 1")
 	if err != nil {
-		//panic(err)
+		// panic(err)
 	}
 
 	middlewares.RateLimit = syncx.NewLimit(ctx.Config.Jzero.GrpcMaxConns)
@@ -68,6 +68,7 @@ func start(ctx *svc.ServiceContext) {
 	var unixListener net.Listener
 	if ctx.Config.Jzero.ListenOnUnixSocket != "" {
 		sock := ctx.Config.Jzero.ListenOnUnixSocket
+		_ = os.Remove(ctx.Config.Jzero.ListenOnUnixSocket)
 		unixListener, err = net.Listen("unix", sock)
 		if err != nil {
 			panic(err)
