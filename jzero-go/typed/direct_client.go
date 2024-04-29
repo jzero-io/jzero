@@ -4,9 +4,8 @@
 package typed
 
 import (
-	"github.com/jaronnie/jzero-go/rest"
+	"github.com/jzero-io/jzero-go/rest"
 )
-
 
 type DirectInterface interface {
 	RESTClient() rest.Interface

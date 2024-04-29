@@ -4,16 +4,15 @@
 package jzero
 
 import (
-	"github.com/jaronnie/jzero-go/rest"
+	"github.com/jzero-io/jzero-go/rest"
 )
 
 type JzeroInterface interface {
 	RESTClient() rest.Interface
-	
+
 	MachineGetter
 	HelloGetter
 	CredentialGetter
-	
 }
 
 type JzeroClient struct {
@@ -38,7 +37,6 @@ func (x *JzeroClient) Hello() HelloInterface {
 func (x *JzeroClient) Credential() CredentialInterface {
 	return newCredentialClient(x)
 }
-
 
 // NewForConfig creates a new JzeroClient for the given config.
 func NewForConfig(x *rest.RESTClient) (*JzeroClient, error) {

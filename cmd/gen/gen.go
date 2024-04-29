@@ -21,10 +21,10 @@ import (
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
-	"github.com/jaronnie/jzero/daemon/pkg/mod"
-	"github.com/jaronnie/jzero/daemon/pkg/stringx"
-	"github.com/jaronnie/jzero/daemon/pkg/templatex"
-	"github.com/jaronnie/jzero/embeded"
+	"github.com/jzero-io/jzero/daemon/pkg/mod"
+	"github.com/jzero-io/jzero/daemon/pkg/stringx"
+	"github.com/jzero-io/jzero/daemon/pkg/templatex"
+	"github.com/jzero-io/jzero/embeded"
 )
 
 var WorkingDir string

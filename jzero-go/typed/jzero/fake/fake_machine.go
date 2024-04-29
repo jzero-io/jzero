@@ -6,16 +6,10 @@ package fake
 import (
 	"context"
 
-	
-
-	"github.com/jaronnie/jzero-go/model/jzero/pb/machinepb"
-	
+	"github.com/jzero-io/jzero-go/model/jzero/pb/machinepb"
 )
 
-var (
-	FakeReturnMachineVersion = &machinepb.MachineVersionResponse{}
-	
-)
+var FakeReturnMachineVersion = &machinepb.MachineVersionResponse{}
 
 type MachineGetter interface {
 	Machine() MachineInterface
@@ -25,14 +19,12 @@ type MachineGetter interface {
 
 type MachineInterface interface {
 	MachineVersion(ctx context.Context, param *machinepb.Empty) (*machinepb.MachineVersionResponse, error)
-	
 }
 
 type FakeMachine struct {
 	Fake *FakeJzero
 }
 
-func (f *FakeMachine) MachineVersion(ctx context.Context,param *machinepb.Empty) (*machinepb.MachineVersionResponse, error) {
+func (f *FakeMachine) MachineVersion(ctx context.Context, param *machinepb.Empty) (*machinepb.MachineVersionResponse, error) {
 	return FakeReturnMachineVersion, nil
 }
-

@@ -5,9 +5,9 @@ import (
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 
-	"github.com/jaronnie/jzero/daemon/internal/logic/hello"
-	"github.com/jaronnie/jzero/daemon/internal/svc"
-	"github.com/jaronnie/jzero/daemon/internal/types"
+	"github.com/jzero-io/jzero/daemon/internal/logic/hello"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
+	"github.com/jzero-io/jzero/daemon/internal/types"
 )
 
 func HelloParamHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/jaronnie/jzero-go/examples/credential"
+	"github.com/jzero-io/jzero-go/examples/credential"
 )
 
 func main() {

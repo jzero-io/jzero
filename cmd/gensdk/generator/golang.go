@@ -8,13 +8,13 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/jaronnie/jzero/cmd/gen"
-	"github.com/jaronnie/jzero/cmd/gensdk/config"
-	"github.com/jaronnie/jzero/cmd/gensdk/jparser"
-	"github.com/jaronnie/jzero/cmd/gensdk/vars"
-	"github.com/jaronnie/jzero/daemon/pkg/templatex"
-	"github.com/jaronnie/jzero/embeded"
 	"github.com/jhump/protoreflect/desc/protoparse"
+	"github.com/jzero-io/jzero/cmd/gen"
+	"github.com/jzero-io/jzero/cmd/gensdk/config"
+	"github.com/jzero-io/jzero/cmd/gensdk/jparser"
+	"github.com/jzero-io/jzero/cmd/gensdk/vars"
+	"github.com/jzero-io/jzero/daemon/pkg/templatex"
+	"github.com/jzero-io/jzero/embeded"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	apiparser "github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
@@ -245,7 +245,6 @@ func (g *Golang) genScopeClients(scope string, resources []string) ([]*Generated
 		"Module":    g.config.Module,
 		"Resources": resources,
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "client", "client-go", "typed", "scope_client.go.tpl")))
-
 	if err != nil {
 		return nil, err
 	}

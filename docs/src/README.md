@@ -79,7 +79,7 @@ go install github.com/zeromicro/go-zero/tools/goctl@latest
 # 一键安装相关工具
 goctl env check --install --verbose --force
 # 安装 jzero
-go install github.com/jaronnie/jzero@latest
+go install github.com/jzero-io/jzero@latest
 # 一键创建项目
 jzero new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
 cd app1

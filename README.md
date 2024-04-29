@@ -1,7 +1,7 @@
 # jzero
 
-[![GitHub release](https://img.shields.io/github/release/jaronnie/jzero.svg?style=flat-square)](https://github.com/jaronnie/jzero/releases/latest)
-[![Go Report Card](https://goreportcard.com/badge/github.com/jaronnie/jzero?style=flat-square)](https://goreportcard.com/report/github.com/jaronnie/jzero)
+[![GitHub release](https://img.shields.io/github/release/jzero-io/jzero.svg?style=flat-square)](https://github.com/jzero-io/jzero/releases/latest)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jzero-io/jzero?style=flat-square)](https://goreportcard.com/report/github.com/jzero-io/jzero)
 
 <p align="center">
 <img align="center" width="150px" src="https://oss.jaronnie.com/jzero.jpg">

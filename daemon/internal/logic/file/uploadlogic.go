@@ -9,8 +9,8 @@ import (
 
 	"github.com/zeromicro/go-zero/core/logx"
 
-	"github.com/jaronnie/jzero/daemon/internal/svc"
-	"github.com/jaronnie/jzero/daemon/internal/types"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
+	"github.com/jzero-io/jzero/daemon/internal/types"
 )
 
 const maxFileSize = 10 << 20 // 10 MB

@@ -6,7 +6,7 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
-	"github.com/jaronnie/jzero/cmd/gensdk"
+	"github.com/jzero-io/jzero/cmd/gensdk"
 	"github.com/spf13/cobra"
 )
 

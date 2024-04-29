@@ -16,10 +16,10 @@ import (
 	"github.com/zeromicro/go-zero/gateway"
 	"github.com/zeromicro/go-zero/rest/httpx"
 
-	"github.com/jaronnie/jzero/daemon/internal/config"
-	"github.com/jaronnie/jzero/daemon/internal/handler"
-	"github.com/jaronnie/jzero/daemon/internal/svc"
-	"github.com/jaronnie/jzero/daemon/middlewares"
+	"github.com/jzero-io/jzero/daemon/internal/config"
+	"github.com/jzero-io/jzero/daemon/internal/handler"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
+	"github.com/jzero-io/jzero/daemon/middlewares"
 )
 
 func Start(cfgFile string) {

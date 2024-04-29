@@ -6,7 +6,7 @@ import (
 
 	sprig "github.com/Masterminds/sprig/v3"
 
-	"github.com/jaronnie/jzero/daemon/pkg/stringx"
+	"github.com/jzero-io/jzero/daemon/pkg/stringx"
 )
 
 // ParseTemplate template

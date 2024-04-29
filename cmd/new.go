@@ -8,7 +8,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/jaronnie/jzero/cmd/new"
+	"github.com/jzero-io/jzero/cmd/new"
 )
 
 // newCmd represents the new command

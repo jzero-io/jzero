@@ -1,4 +1,4 @@
-module github.com/jaronnie/jzero
+module github.com/jzero-io/jzero
 
 go 1.19
 

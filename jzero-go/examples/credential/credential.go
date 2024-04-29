@@ -3,10 +3,10 @@ package credential
 import (
 	"context"
 
-	"github.com/jaronnie/jzero-go"
-	"github.com/jaronnie/jzero-go/model/jzero/pb/credentialpb"
-	"github.com/jaronnie/jzero-go/rest"
-	typedjzero "github.com/jaronnie/jzero-go/typed/jzero"
+	"github.com/jzero-io/jzero-go"
+	"github.com/jzero-io/jzero-go/model/jzero/pb/credentialpb"
+	"github.com/jzero-io/jzero-go/rest"
+	typedjzero "github.com/jzero-io/jzero-go/typed/jzero"
 )
 
 func GetCredentialList() (*credentialpb.CredentialListResponse, error) {

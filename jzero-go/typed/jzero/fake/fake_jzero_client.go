@@ -4,11 +4,11 @@
 package fake
 
 import (
-	"github.com/jaronnie/jzero-go/rest"
-	"github.com/jaronnie/jzero-go/typed/jzero"
+	"github.com/jzero-io/jzero-go/rest"
+	"github.com/jzero-io/jzero-go/typed/jzero"
 )
 
-type FakeJzero struct {}
+type FakeJzero struct{}
 
 func (f *FakeJzero) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
@@ -26,4 +26,3 @@ func (f *FakeJzero) Hello() jzero.HelloInterface {
 func (f *FakeJzero) Credential() jzero.CredentialInterface {
 	return &FakeCredential{Fake: f}
 }
-

@@ -6,9 +6,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/jaronnie/jzero/cmd/gensdk/vars"
-	"github.com/jaronnie/jzero/daemon/pkg/stringx"
 	"github.com/jhump/protoreflect/desc"
+	"github.com/jzero-io/jzero/cmd/gensdk/vars"
+	"github.com/jzero-io/jzero/daemon/pkg/stringx"
 
 	"google.golang.org/protobuf/reflect/protoreflect"
 )

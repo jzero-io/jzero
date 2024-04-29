@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 
-	"github.com/jaronnie/jzero/embeded"
+	"github.com/jzero-io/jzero/embeded"
 )
 
 // initCmd represents the init command
@@ -28,7 +28,7 @@ var initCmd = &cobra.Command{
 		cobra.CheckErr(err)
 
 		// Check $HOME/.jzero/protosets
-		err = os.MkdirAll(filepath.Join(home, ".jzero", ".protosets"), 0755)
+		err = os.MkdirAll(filepath.Join(home, ".jzero", ".protosets"), 0o755)
 		cobra.CheckErr(err)
 
 		file, err := embeded.Config.ReadFile("config.toml")
@@ -40,7 +40,7 @@ var initCmd = &cobra.Command{
 		for _, d := range dir {
 			pb, err := embeded.Protosets.ReadFile(filepath.Join(".protosets", d.Name()))
 			cobra.CheckErr(err)
-			err = os.WriteFile(filepath.Join(home, ".jzero", ".protosets", d.Name()), pb, 0644)
+			err = os.WriteFile(filepath.Join(home, ".jzero", ".protosets", d.Name()), pb, 0o644)
 			cobra.CheckErr(err)
 		}
 
@@ -59,7 +59,7 @@ var initCmd = &cobra.Command{
 
 		toml, err := g.EncodeToToml()
 		cobra.CheckErr(err)
-		err = os.WriteFile(filepath.Join(home, ".jzero", "config.toml"), toml, 0644)
+		err = os.WriteFile(filepath.Join(home, ".jzero", "config.toml"), toml, 0o644)
 		cobra.CheckErr(err)
 
 		fmt.Println("init success")

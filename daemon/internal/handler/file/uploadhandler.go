@@ -5,8 +5,8 @@ import (
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 
-	"github.com/jaronnie/jzero/daemon/internal/logic/file"
-	"github.com/jaronnie/jzero/daemon/internal/svc"
+	"github.com/jzero-io/jzero/daemon/internal/logic/file"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
 )
 
 func UploadHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

@@ -2,8 +2,9 @@ package credential
 
 import (
 	"context"
+
 	"github.com/huandu/go-sqlbuilder"
-	"github.com/jaronnie/jzero/daemon/internal/pb/credentialpb"
+	"github.com/jzero-io/jzero/daemon/internal/pb/credentialpb"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 

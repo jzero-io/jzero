@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 
-	"github.com/jaronnie/jzero/daemon/pkg/templatex"
-	"github.com/jaronnie/jzero/embeded"
+	"github.com/jzero-io/jzero/daemon/pkg/templatex"
+	"github.com/jzero-io/jzero/embeded"
 )
 
 var (

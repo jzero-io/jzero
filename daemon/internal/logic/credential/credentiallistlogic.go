@@ -2,10 +2,11 @@ package credentiallogic
 
 import (
 	"context"
-	"github.com/jaronnie/jzero/daemon/internal/model/credential"
 
-	"github.com/jaronnie/jzero/daemon/internal/pb/credentialpb"
-	"github.com/jaronnie/jzero/daemon/internal/svc"
+	"github.com/jzero-io/jzero/daemon/internal/model/credential"
+
+	"github.com/jzero-io/jzero/daemon/internal/pb/credentialpb"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

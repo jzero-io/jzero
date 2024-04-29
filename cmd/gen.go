@@ -8,7 +8,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/jaronnie/jzero/cmd/gen"
+	"github.com/jzero-io/jzero/cmd/gen"
 )
 
 // genCmd represents the gen command

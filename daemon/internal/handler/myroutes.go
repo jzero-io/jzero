@@ -7,7 +7,7 @@ import (
 
 	"github.com/zeromicro/go-zero/rest"
 
-	"github.com/jaronnie/jzero/daemon/internal/svc"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
 )
 
 func RegisterMyHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {

@@ -42,7 +42,7 @@ goctl env check --install --verbose --force
 ## 安装 jzero
 
 ```shell
-go install github.com/jaronnie/jzero@latest
+go install github.com/jzero-io/jzero@latest
 
 jzero version
 ```

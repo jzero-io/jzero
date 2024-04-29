@@ -3,7 +3,7 @@ package svc
 import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
-	"github.com/jaronnie/jzero/daemon/internal/config"
+	"github.com/jzero-io/jzero/daemon/internal/config"
 )
 
 type ServiceContext struct {

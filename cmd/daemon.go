@@ -8,7 +8,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/jaronnie/jzero/daemon"
+	"github.com/jzero-io/jzero/daemon"
 )
 
 // daemonCmd represents the daemon command

@@ -5,8 +5,8 @@ import (
 
 	"github.com/zeromicro/go-zero/core/logx"
 
-	"github.com/jaronnie/jzero/daemon/internal/pb/machinepb"
-	"github.com/jaronnie/jzero/daemon/internal/svc"
+	"github.com/jzero-io/jzero/daemon/internal/pb/machinepb"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
 )
 
 type MachineVersionLogic struct {

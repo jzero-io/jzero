@@ -4,10 +4,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jaronnie/jzero/cmd/gensdk/config"
+	"github.com/jzero-io/jzero/cmd/gensdk/config"
 
 	"github.com/jaronnie/genius"
-	"github.com/jaronnie/jzero/cmd/gensdk/generator"
+	"github.com/jzero-io/jzero/cmd/gensdk/generator"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
