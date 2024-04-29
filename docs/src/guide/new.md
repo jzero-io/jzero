@@ -25,7 +25,7 @@ docker run --rm \
 
 ```bash
 docker run --rm \
-  -v ./app1:/app/app1 jaronnie/jzero:latest-arm64 \
+  -v $PWD/app1:/app/app1 jaronnie/jzero:latest-arm64 \
   new --module=github.com/jaronnie/app1 \
   --dir=./app1 --app=app1
 ```
