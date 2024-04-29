@@ -31,7 +31,10 @@ func NewUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UploadLogi
 }
 
 func (l *UploadLogic) Upload() (resp *types.UploadResponse, err error) {
-	l.r.ParseMultipartForm(maxFileSize)
+	err = l.r.ParseMultipartForm(maxFileSize)
+	if err != nil {
+		return nil, err
+	}
 	file, handler, err := l.r.FormFile("myFile")
 	if err != nil {
 		return nil, err
@@ -46,7 +49,10 @@ func (l *UploadLogic) Upload() (resp *types.UploadResponse, err error) {
 		return nil, err
 	}
 	defer tempFile.Close()
-	io.Copy(tempFile, file)
+	_, err = io.Copy(tempFile, file)
+	if err != nil {
+		return nil, err
+	}
 
 	return &types.UploadResponse{
 		Code: 0,

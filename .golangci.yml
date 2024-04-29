@@ -1,0 +1,14 @@
+run:
+  go: '1.19'
+linters:
+  enable:
+    - thelper
+    - gofumpt
+    - tparallel
+    - unconvert
+    - wastedassign
+    - tagliatelle
+
+issues:
+  exclude-dirs:
+    - daemon/internal/config

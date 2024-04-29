@@ -22,7 +22,7 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "jzero init",
 	Long:  `jzero init`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		// Find home directory.
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)

@@ -218,6 +218,8 @@ func (g *Golang) genDirectClients() ([]*GeneratedFile, error) {
 
 func (g *Golang) genRestFrame() ([]*GeneratedFile, error) {
 	var restFrameFiles []*GeneratedFile
+	var err error
+
 	// gen rest frame
 	restFrameFiles = append(restFrameFiles, &GeneratedFile{
 		Path:    filepath.Join("rest", "client.go"),
@@ -234,7 +236,7 @@ func (g *Golang) genRestFrame() ([]*GeneratedFile, error) {
 		Content: *bytes.NewBuffer(embeded.ReadTemplateFile(filepath.Join("jzero", "client", "client-go", "rest", "request.go.tpl"))),
 	})
 
-	return restFrameFiles, nil
+	return restFrameFiles, err
 }
 
 func (g *Golang) genScopeClients(scope string, resources []string) ([]*GeneratedFile, error) {
@@ -349,7 +351,7 @@ func (g *Golang) genApiTypesModel(types []spec.Type) (*GeneratedFile, error) {
 	}
 	return &GeneratedFile{
 		Path:    filepath.Join("model", g.config.APP, "types", "types.go"),
-		Content: *bytes.NewBuffer([]byte(typesGoBytes)),
+		Content: *bytes.NewBuffer(typesGoBytes),
 	}, nil
 }
 

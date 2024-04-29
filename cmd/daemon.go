@@ -16,7 +16,7 @@ var daemonCmd = &cobra.Command{
 	Use:   "daemon",
 	Short: "jzero daemon",
 	Long:  `jzero daemon`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		daemon.Start(cfgFile)
 	},
 }

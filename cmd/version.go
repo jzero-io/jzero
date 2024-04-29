@@ -29,7 +29,7 @@ var versionCmd = &cobra.Command{
 	RunE:  getVersion,
 }
 
-func getVersion(cmd *cobra.Command, args []string) error {
+func getVersion(_ *cobra.Command, _ []string) error {
 	var versionBuffer bytes.Buffer
 
 	versionBuffer.WriteString(fmt.Sprintf("jzero version %s %s/%s\n", Version, runtime.GOOS, runtime.GOARCH))
