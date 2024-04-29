@@ -28,7 +28,7 @@ go mod tidy
 ```bash
 cd app1
 docker run --rm \
-  -v ./app1:/app/app1 jaronnie/jzero:latest \
+  -v $PWD:/app/app1 jaronnie/jzero:latest \
   gensdk --module=github.com/jaronnie/app1-go --dir=app1-go
 
 go mod tidy
@@ -39,7 +39,7 @@ go mod tidy
 ```bash
 cd app1
 docker run --rm \
-  -v ./app1:/app/app1 jaronnie/jzero:latest-arm64 \
+  -v $PWD:/app/app1 jaronnie/jzero:latest-arm64 \
   gensdk --module=github.com/jaronnie/app1-go --dir=app1-go
 
 go mod tidy  

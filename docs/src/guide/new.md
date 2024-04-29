@@ -16,7 +16,7 @@ jzero new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
 
 ```bash
 docker run --rm \
-  -v ./app1:/app/app1 jaronnie/jzero:latest \
+  -v $PWD/app1:/app/app1 jaronnie/jzero:latest \
   new --module=github.com/jaronnie/app1 \
   --dir=./app1 --app=app1
 ```

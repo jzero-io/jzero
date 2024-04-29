@@ -14,12 +14,19 @@ import (
 )
 
 var (
-	Dir      string
-	Language string
-	Module   string
+	Dir        string
+	WorkingDir string
+	Language   string
+	Module     string
 )
 
 func GenSdk(cmd *cobra.Command, args []string) error {
+	// change dir
+	if WorkingDir != "" {
+		err := os.Chdir(WorkingDir)
+		cobra.CheckErr(err)
+	}
+
 	wd, err := os.Getwd()
 	cobra.CheckErr(err)
 	configBytes, err := os.ReadFile(filepath.Join(wd, "config.toml"))
