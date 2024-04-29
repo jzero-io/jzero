@@ -6,6 +6,7 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"runtime"
 	"time"
@@ -29,11 +30,18 @@ var versionCmd = &cobra.Command{
 }
 
 func getVersion(cmd *cobra.Command, args []string) error {
-	fmt.Printf(`Jzero version: %s
-Go version: %s
-Commit: %s
-Date: %s
-`, Version, runtime.Version(), Commit, cast.ToTimeInDefaultLocation(Date, time.Local))
+	var versionBuffer bytes.Buffer
+
+	versionBuffer.WriteString(fmt.Sprintf("jzero version %s %s/%s\n", Version, runtime.GOOS, runtime.GOARCH))
+	versionBuffer.WriteString(fmt.Sprintf("Go version %s\n", runtime.Version()))
+	if Commit != "" {
+		versionBuffer.WriteString(fmt.Sprintf("Git commit %s\n", Commit))
+	}
+	if Date != "" {
+		versionBuffer.WriteString(fmt.Sprintf("Build date %s\n", cast.ToTimeInDefaultLocation(Date, time.Local)))
+	}
+
+	fmt.Print(versionBuffer.String())
 	return nil
 }
 
