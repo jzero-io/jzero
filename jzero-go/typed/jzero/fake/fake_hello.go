@@ -6,13 +6,17 @@ package fake
 import (
 	"context"
 
+	
+
 	"github.com/jzero-io/jzero-go/model/jzero/types"
+	
 )
 
 var (
 	FakeReturnHelloParamHandler = &types.Response{}
-	FakeReturnHelloPostHandler  = &types.Response{}
-	FakeReturnHelloPathHandler  = &types.Response{}
+	FakeReturnHelloPostHandler = &types.Response{}
+	FakeReturnHelloPathHandler = &types.Response{}
+	
 )
 
 type HelloGetter interface {
@@ -25,20 +29,22 @@ type HelloInterface interface {
 	HelloParamHandler(ctx context.Context, param *types.ParamRequest) (*types.Response, error)
 	HelloPostHandler(ctx context.Context, param *types.PostRequest) (*types.Response, error)
 	HelloPathHandler(ctx context.Context, param *types.PathRequest) (*types.Response, error)
+	
 }
 
 type FakeHello struct {
 	Fake *FakeJzero
 }
 
-func (f *FakeHello) HelloParamHandler(ctx context.Context, param *types.ParamRequest) (*types.Response, error) {
+func (f *FakeHello) HelloParamHandler(ctx context.Context,param *types.ParamRequest) (*types.Response, error) {
 	return FakeReturnHelloParamHandler, nil
 }
 
-func (f *FakeHello) HelloPostHandler(ctx context.Context, param *types.PostRequest) (*types.Response, error) {
+func (f *FakeHello) HelloPostHandler(ctx context.Context,param *types.PostRequest) (*types.Response, error) {
 	return FakeReturnHelloPostHandler, nil
 }
 
-func (f *FakeHello) HelloPathHandler(ctx context.Context, param *types.PathRequest) (*types.Response, error) {
+func (f *FakeHello) HelloPathHandler(ctx context.Context,param *types.PathRequest) (*types.Response, error) {
 	return FakeReturnHelloPathHandler, nil
 }
+

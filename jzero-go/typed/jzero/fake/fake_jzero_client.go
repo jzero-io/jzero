@@ -8,11 +8,15 @@ import (
 	"github.com/jzero-io/jzero-go/typed/jzero"
 )
 
-type FakeJzero struct{}
+type FakeJzero struct {}
 
 func (f *FakeJzero) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
 	return ret
+}
+
+func (f *FakeJzero) Credential() jzero.CredentialInterface {
+	return &FakeCredential{Fake: f}
 }
 
 func (f *FakeJzero) Machine() jzero.MachineInterface {
@@ -23,6 +27,3 @@ func (f *FakeJzero) Hello() jzero.HelloInterface {
 	return &FakeHello{Fake: f}
 }
 
-func (f *FakeJzero) Credential() jzero.CredentialInterface {
-	return &FakeCredential{Fake: f}
-}

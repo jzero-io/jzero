@@ -7,16 +7,18 @@ import (
 	"github.com/jzero-io/jzero-go/typed"
 	"github.com/jzero-io/jzero-go/typed/fake"
 
-	jzero "github.com/jzero-io/jzero-go/typed/jzero"
-	fakejzero "github.com/jzero-io/jzero-go/typed/jzero/fake"
+    jzero "github.com/jzero-io/jzero-go/typed/jzero"
+    fakejzero "github.com/jzero-io/jzero-go/typed/jzero/fake"
+
 )
 
-type Clientset struct{}
+type Clientset struct {}
 
 func (f *Clientset) Direct() typed.DirectInterface {
 	return &fake.FakeDirect{}
 }
 
 func (f *Clientset) Jzero() jzero.JzeroInterface {
-	return &fakejzero.FakeJzero{}
+    return &fakejzero.FakeJzero{}
 }
+

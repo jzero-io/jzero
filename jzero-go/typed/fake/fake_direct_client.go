@@ -7,7 +7,7 @@ import (
 	"github.com/jzero-io/jzero-go/rest"
 )
 
-type FakeDirect struct{}
+type FakeDirect struct {}
 
 func (f *FakeDirect) RESTClient() rest.Interface {
 	var ret *rest.RESTClient

@@ -6,14 +6,18 @@ package fake
 import (
 	"context"
 
+	
+
 	"github.com/jzero-io/jzero-go/model/jzero/pb/credentialpb"
+	
 )
 
 var (
 	FakeReturnCredentialVersion = &credentialpb.CredentialVersionResponse{}
-	FakeReturnCreateCredential  = &credentialpb.CreateCredentialResponse{}
-	FakeReturnCredentialList    = &credentialpb.CredentialListResponse{}
-	FakeReturnCredentialDetail  = &credentialpb.Credential{}
+	FakeReturnCreateCredential = &credentialpb.CreateCredentialResponse{}
+	FakeReturnCredentialList = &credentialpb.CredentialListResponse{}
+	FakeReturnCredentialDetail = &credentialpb.Credential{}
+	
 )
 
 type CredentialGetter interface {
@@ -27,24 +31,26 @@ type CredentialInterface interface {
 	CreateCredential(ctx context.Context, param *credentialpb.CreateCredentialRequest) (*credentialpb.CreateCredentialResponse, error)
 	CredentialList(ctx context.Context, param *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error)
 	CredentialDetail(ctx context.Context, param *credentialpb.Int32Id) (*credentialpb.Credential, error)
+	
 }
 
 type FakeCredential struct {
 	Fake *FakeJzero
 }
 
-func (f *FakeCredential) CredentialVersion(ctx context.Context, param *credentialpb.Empty) (*credentialpb.CredentialVersionResponse, error) {
+func (f *FakeCredential) CredentialVersion(ctx context.Context,param *credentialpb.Empty) (*credentialpb.CredentialVersionResponse, error) {
 	return FakeReturnCredentialVersion, nil
 }
 
-func (f *FakeCredential) CreateCredential(ctx context.Context, param *credentialpb.CreateCredentialRequest) (*credentialpb.CreateCredentialResponse, error) {
+func (f *FakeCredential) CreateCredential(ctx context.Context,param *credentialpb.CreateCredentialRequest) (*credentialpb.CreateCredentialResponse, error) {
 	return FakeReturnCreateCredential, nil
 }
 
-func (f *FakeCredential) CredentialList(ctx context.Context, param *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error) {
+func (f *FakeCredential) CredentialList(ctx context.Context,param *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error) {
 	return FakeReturnCredentialList, nil
 }
 
-func (f *FakeCredential) CredentialDetail(ctx context.Context, param *credentialpb.Int32Id) (*credentialpb.Credential, error) {
+func (f *FakeCredential) CredentialDetail(ctx context.Context,param *credentialpb.Int32Id) (*credentialpb.Credential, error) {
 	return FakeReturnCredentialDetail, nil
 }
+

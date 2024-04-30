@@ -95,7 +95,7 @@ go run main.go daemon --config config.toml
 ```shell
 # test
 # gateway
-curl http://localhost:8001/api/v1.0/credential/version
+curl http://localhost:8001/api/v1/credential/version
 # grpc
 grpcurl -plaintext localhost:8000 credentialpb.credential/CredentialVersion
 # api

@@ -7,6 +7,7 @@ import (
 	"github.com/jzero-io/jzero-go/rest"
 )
 
+
 type DirectInterface interface {
 	RESTClient() rest.Interface
 }

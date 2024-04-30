@@ -49,6 +49,6 @@ func NewClientWithOptions(ops ...rest.Opt) (jzero.JzeroInterface, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return cs.Jzero(), nil
 }
