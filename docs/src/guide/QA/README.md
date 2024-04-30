@@ -1,6 +1,6 @@
 ---
 title: QA
-icon: bug
+icon: circle-question
 index: false
 dir:
   order: 9

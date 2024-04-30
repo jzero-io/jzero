@@ -1,6 +1,6 @@
 ---
 title: 生成客户端 SDK
-icon: lightbulb
+icon: code
 order: 5
 ---
 

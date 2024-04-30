@@ -2,7 +2,7 @@
 title: 新增 command
 icon: puzzle-piece
 star: true
-order: 1
+order: 0
 category: 开发
 tag:
   - Guide
