@@ -24,3 +24,5 @@
 * 所有工具链跨平台支持
 
 ## [快速开始](https://jzero.jaronnie.com/#快速开始)
+
+![2024-04-30_10-10-52](https://oss.jaronnie.com/2024-04-30_10-10-52.gif)

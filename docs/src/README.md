@@ -28,6 +28,8 @@ title: 首页
 
 ## 快速开始
 
+![2024-04-30_10-10-52](https://oss.jaronnie.com/2024-04-30_10-10-52.gif)
+
 ::: code-tabs#shell
 
 @tab Docker(amd64)
