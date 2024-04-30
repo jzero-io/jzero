@@ -30,23 +30,21 @@ title: 首页
 
 ![2024-04-30_10-10-52](https://oss.jaronnie.com/2024-04-30_10-10-52.gif)
 
+:::tip Windows 用户请在 powershell 下执行所有指令
+:::
+
 ::: code-tabs#shell
 
 @tab Docker(amd64)
 
 ```bash
 # 一键创建项目
-docker run --rm \
-  -v $PWD/app1:/app/app1 jaronnie/jzero:latest \
-  new --module=github.com/jaronnie/app1 \
-  --dir=./app1 --app=app1
+docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
   
 cd app1 
 
 # 一键生成代码
-docker run --rm \
-  -v $PWD:/app/app1 jaronnie/jzero:latest \
-  gen -w app1
+docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest gen -w app1
 
 # 下载依赖
 go mod tidy
@@ -58,18 +56,12 @@ go run main.go daemon --config config.toml
 
 ```bash
 # 一键创建项目
-docker run --rm \
-  -v $PWD/app1:/app/app1 jaronnie/jzero:latest-arm64 \
-  new --module=github.com/jaronnie/app1 \
-  --dir=./app1 --app=app1
+docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest-arm64 new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
   
 cd app1  
 
 # 一键生成代码
-docker run --rm \
-  -v $PWD:/app/app1 jaronnie/jzero:latest-arm64 \
-  gen -w app1
-
+docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest-arm64 gen -w app1
 
 # 下载依赖
 go mod tidy
