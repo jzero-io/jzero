@@ -3,7 +3,7 @@ title: 配置模块
 icon: gears
 index: false
 dir:
-  order: 5
+  order: 6
 ---
 
 <Catalog />
