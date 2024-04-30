@@ -52,6 +52,14 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 	err = os.WriteFile(filepath.Join(Dir, "cmd", "daemon.go"), daemonCmdFile, 0o644)
 	cobra.CheckErr(err)
+	// touch cmd/version.go
+	versionCmdFile, err := templatex.ParseTemplate(map[string]interface{}{
+		"Module": Module,
+		"APP":    APP,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "cmd", "version.go.tpl")))
+	cobra.CheckErr(err)
+	err = os.WriteFile(filepath.Join(Dir, "cmd", "version.go"), versionCmdFile, 0o644)
+	cobra.CheckErr(err)
 	// mkdir daemon dir
 	err = os.MkdirAll(filepath.Join(Dir, "daemon"), 0o755)
 	cobra.CheckErr(err)
@@ -181,6 +189,10 @@ func NewProject(_ *cobra.Command, _ []string) error {
 
 	// write Taskfile.yml
 	err = os.WriteFile(filepath.Join(Dir, "Taskfile.yml"), embeded.ReadTemplateFile(filepath.Join("jzero", "Taskfile.yml.tpl")), 0o644)
+	cobra.CheckErr(err)
+
+	// add .template/go-zero
+	err = embeded.WriteTemplateDir(filepath.Join("go-zero"), filepath.Join(Dir, ".templates", "go-zero"))
 	cobra.CheckErr(err)
 
 	return nil

@@ -1,8 +1,3 @@
-/*
-Copyright © 2024 jaronnie <jaron@jaronnie.com>
-
-*/
-
 package cmd
 
 import (
@@ -24,8 +19,8 @@ var (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "jzero version",
-	Long:  `jzero version`,
+	Short: "{{ .APP }} version",
+	Long:  `{{ .APP }} version`,
 	RunE:  getVersion,
 }
 
