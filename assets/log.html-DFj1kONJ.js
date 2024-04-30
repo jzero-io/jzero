@@ -1,4 +1,4 @@
-import{_ as n}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as e,c as a,e as t}from"./app-Bu5n84Ot.js";const s={},o=t(`<div class="language-toml line-numbers-mode" data-ext="toml" data-title="toml"><pre class="language-toml"><code><span class="token punctuation">[</span><span class="token table class-name">Log</span><span class="token punctuation">]</span>
+import{_ as n}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as e,c as a,e as t}from"./app-ZnHwN4kc.js";const s={},o=t(`<div class="language-toml line-numbers-mode" data-ext="toml" data-title="toml"><pre class="language-toml"><code><span class="token punctuation">[</span><span class="token table class-name">Log</span><span class="token punctuation">]</span>
 <span class="token key property">ServiceName</span> <span class="token punctuation">=</span> <span class="token string">&quot;app1&quot;</span>
 <span class="token key property">Level</span> <span class="token punctuation">=</span> <span class="token string">&quot;info&quot;</span>
 <span class="token key property">Mode</span> <span class="token punctuation">=</span> <span class="token string">&quot;file&quot;</span>
