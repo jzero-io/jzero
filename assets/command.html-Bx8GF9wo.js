@@ -1,4 +1,4 @@
-import{_ as n}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as e,c as a,e as s}from"./app-CuFSX_La.js";const o={},t=s(`<h2 id="获取-jzero-usage" tabindex="-1"><a class="header-anchor" href="#获取-jzero-usage"><span>获取 jzero usage</span></a></h2><div class="language-bash line-numbers-mode" data-ext="sh" data-title="sh"><pre class="language-bash"><code>$ jzero <span class="token parameter variable">-h</span>
+import{_ as n}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as e,c as a,e as s}from"./app-B6zleICp.js";const o={},t=s(`<h2 id="获取-jzero-usage" tabindex="-1"><a class="header-anchor" href="#获取-jzero-usage"><span>获取 jzero usage</span></a></h2><div class="language-bash line-numbers-mode" data-ext="sh" data-title="sh"><pre class="language-bash"><code>$ jzero <span class="token parameter variable">-h</span>
 jzero framework.
 
 Usage:
