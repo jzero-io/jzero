@@ -15,7 +15,7 @@ message MachineVersionResponse {
 service machine {
     rpc MachineVersion(Empty) returns(MachineVersionResponse) {
         option (google.api.http) = {
-            get: "/api/v1.0/machine/version"
+            get: "/api/v1/machine/version"
         };
     };
 }

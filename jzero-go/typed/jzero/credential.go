@@ -7,9 +7,9 @@ package jzero
 import (
     "context"
 
-    "github.com/jaronnie/jzero-go/model/jzero/pb/credentialpb"
+    "github.com/jzero-io/jzero-go/model/jzero/pb/credentialpb"
     
-    "github.com/jaronnie/jzero-go/rest"
+    "github.com/jzero-io/jzero-go/rest"
 )
 
 var (
@@ -21,13 +21,13 @@ type CredentialGetter interface {
 }
 
 type CredentialInterface interface {
-	// API /api/v1.0/credential/version 
+	// API /api/v1/credential/version 
 	CredentialVersion(ctx context.Context,param *credentialpb.Empty) (*credentialpb.CredentialVersionResponse, error)
-	// API /api/v1.0/credential/create 
+	// API /api/v1/credential/create 
 	CreateCredential(ctx context.Context,param *credentialpb.CreateCredentialRequest) (*credentialpb.CreateCredentialResponse, error)
-	// API /api/v1.0/credential/list 
+	// API /api/v1/credential/list 
 	CredentialList(ctx context.Context,param *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error)
-	// API /api/v1.0/credential/{id} 
+	// API /api/v1/credential/{id} 
 	CredentialDetail(ctx context.Context,param *credentialpb.Int32Id) (*credentialpb.Credential, error)
 	
 	CredentialExpansion
@@ -47,7 +47,7 @@ func (x *credentialClient) CredentialVersion(ctx context.Context,param *credenti
 	var resp credentialpb.CredentialVersionResponse
 		err := x.client.Verb("GET").
 		SubPath(
-			"/api/v1.0/credential/version",
+			"/api/v1/credential/version",
 		).
 		Params(
 		).
@@ -66,7 +66,7 @@ func (x *credentialClient) CreateCredential(ctx context.Context,param *credentia
 	var resp credentialpb.CreateCredentialResponse
 		err := x.client.Verb("POST").
 		SubPath(
-			"/api/v1.0/credential/create",
+			"/api/v1/credential/create",
 		).
 		Params(
 		).
@@ -85,7 +85,7 @@ func (x *credentialClient) CredentialList(ctx context.Context,param *credentialp
 	var resp credentialpb.CredentialListResponse
 		err := x.client.Verb("GET").
 		SubPath(
-			"/api/v1.0/credential/list",
+			"/api/v1/credential/list",
 		).
 		Params(
 			rest.QueryParam{Name: "page", Value: param.Page},
@@ -107,7 +107,7 @@ func (x *credentialClient) CredentialDetail(ctx context.Context,param *credentia
 	var resp credentialpb.Credential
 		err := x.client.Verb("GET").
 		SubPath(
-			"/api/v1.0/credential/{id}",
+			"/api/v1/credential/{id}",
 			rest.PathParam{Name: "id", Value: param.Id},
 		).
 		Params(

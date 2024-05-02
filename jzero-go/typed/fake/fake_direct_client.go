@@ -4,7 +4,7 @@
 package fake
 
 import (
-	"github.com/jaronnie/jzero-go/rest"
+	"github.com/jzero-io/jzero-go/rest"
 )
 
 type FakeDirect struct {}

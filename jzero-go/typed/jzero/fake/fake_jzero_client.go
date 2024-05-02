@@ -4,8 +4,8 @@
 package fake
 
 import (
-	"github.com/jaronnie/jzero-go/rest"
-	"github.com/jaronnie/jzero-go/typed/jzero"
+	"github.com/jzero-io/jzero-go/rest"
+	"github.com/jzero-io/jzero-go/typed/jzero"
 )
 
 type FakeJzero struct {}
@@ -15,15 +15,15 @@ func (f *FakeJzero) RESTClient() rest.Interface {
 	return ret
 }
 
+func (f *FakeJzero) Credential() jzero.CredentialInterface {
+	return &FakeCredential{Fake: f}
+}
+
 func (f *FakeJzero) Machine() jzero.MachineInterface {
 	return &FakeMachine{Fake: f}
 }
 
 func (f *FakeJzero) Hello() jzero.HelloInterface {
 	return &FakeHello{Fake: f}
-}
-
-func (f *FakeJzero) Credential() jzero.CredentialInterface {
-	return &FakeCredential{Fake: f}
 }
 

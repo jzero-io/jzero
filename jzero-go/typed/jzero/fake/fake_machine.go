@@ -8,7 +8,7 @@ import (
 
 	
 
-	"github.com/jaronnie/jzero-go/model/jzero/pb/machinepb"
+	"github.com/jzero-io/jzero-go/model/jzero/pb/machinepb"
 	
 )
 

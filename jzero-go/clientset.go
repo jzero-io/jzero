@@ -4,10 +4,10 @@
 package jzero
 
 import (
-	"github.com/jaronnie/jzero-go/rest"
-	"github.com/jaronnie/jzero-go/typed"
+	"github.com/jzero-io/jzero-go/rest"
+	"github.com/jzero-io/jzero-go/typed"
 
-	"github.com/jaronnie/jzero-go/typed/jzero"
+	"github.com/jzero-io/jzero-go/typed/jzero"
 )
 
 type Interface interface {

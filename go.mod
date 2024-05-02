@@ -1,13 +1,12 @@
-module github.com/jaronnie/jzero
+module github.com/jzero-io/jzero
 
-go 1.21
-
-toolchain go1.22.1
+go 1.19
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/huandu/go-sqlbuilder v1.27.1
 	github.com/jaronnie/genius v0.3.1
+	github.com/jhump/protoreflect v1.16.0
 	github.com/nxadm/tail v1.4.11
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.39.0
@@ -26,7 +25,6 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bitly/go-simplejson v0.5.1 // indirect
 	github.com/bufbuild/protocompile v0.10.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -61,7 +59,6 @@ require (
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/jhump/protoreflect v1.16.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

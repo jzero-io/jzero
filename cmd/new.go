@@ -8,7 +8,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/jaronnie/jzero/cmd/new"
+	"github.com/jzero-io/jzero/cmd/new"
 )
 
 // newCmd represents the new command
@@ -23,6 +23,11 @@ func init() {
 	rootCmd.AddCommand(newCmd)
 
 	newCmd.Flags().StringVarP(&new.Module, "module", "m", "", "set go module")
+	_ = newCmd.MarkFlagRequired("module")
+
 	newCmd.Flags().StringVarP(&new.Dir, "dir", "d", "", "set output dir")
+	_ = newCmd.MarkFlagRequired("dir")
+
 	newCmd.Flags().StringVarP(&new.APP, "app", "", "", "set app name")
+	_ = newCmd.MarkFlagRequired("app")
 }

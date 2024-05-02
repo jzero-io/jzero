@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"github.com/jaronnie/jzero/daemon/internal/logic/machine"
-	"github.com/jaronnie/jzero/daemon/internal/pb/machinepb"
-	"github.com/jaronnie/jzero/daemon/internal/svc"
+	"github.com/jzero-io/jzero/daemon/internal/logic/machine"
+	"github.com/jzero-io/jzero/daemon/internal/pb/machinepb"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
 )
 
 type MachineServer struct {

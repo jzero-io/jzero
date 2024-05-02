@@ -12,13 +12,13 @@ tag:
 
 ```toml
 [Telemetry]
-Name = "your_app-gw"
+Name = "app1-rpc"
 Endpoint = "http://jaeger:14268/api/traces"
 Sampler = 1.0
 Batcher = "jaeger"
 
 [Gateway.Telemetry]
-Name = "your_app-gw"
+Name = "app1-gw"
 Endpoint = "http://jaeger:14268/api/traces"
 Sampler = 1.0
 Batcher = "jaeger"

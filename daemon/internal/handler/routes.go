@@ -4,9 +4,9 @@ package handler
 import (
 	"net/http"
 
-	file "github.com/jaronnie/jzero/daemon/internal/handler/file"
-	hello "github.com/jaronnie/jzero/daemon/internal/handler/hello"
-	"github.com/jaronnie/jzero/daemon/internal/svc"
+	file "github.com/jzero-io/jzero/daemon/internal/handler/file"
+	hello "github.com/jzero-io/jzero/daemon/internal/handler/hello"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

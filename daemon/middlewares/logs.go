@@ -8,7 +8,7 @@ import (
 	"github.com/nxadm/tail"
 	"github.com/zeromicro/go-zero/core/mr"
 
-	"github.com/jaronnie/jzero/daemon/internal/config"
+	"github.com/jzero-io/jzero/daemon/internal/config"
 )
 
 func PrintLogToConsole(c config.Config) {
@@ -55,9 +55,7 @@ func PrintLogToConsole(c config.Config) {
 			for line := range t.Lines {
 				fmt.Println(line.Text)
 			}
-
 		}, func(pipe <-chan *tail.Tail, cancel func(error)) {}, mr.WithWorkers(len(logs)))
-
 		if err != nil {
 			return
 		}

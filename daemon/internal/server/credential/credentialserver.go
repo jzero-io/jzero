@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"github.com/jaronnie/jzero/daemon/internal/logic/credential"
-	"github.com/jaronnie/jzero/daemon/internal/pb/credentialpb"
-	"github.com/jaronnie/jzero/daemon/internal/svc"
+	"github.com/jzero-io/jzero/daemon/internal/logic/credential"
+	"github.com/jzero-io/jzero/daemon/internal/pb/credentialpb"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
 )
 
 type CredentialServer struct {

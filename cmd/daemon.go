@@ -8,7 +8,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/jaronnie/jzero/daemon"
+	"github.com/jzero-io/jzero/daemon"
 )
 
 // daemonCmd represents the daemon command
@@ -16,7 +16,7 @@ var daemonCmd = &cobra.Command{
 	Use:   "daemon",
 	Short: "jzero daemon",
 	Long:  `jzero daemon`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		daemon.Start(cfgFile)
 	},
 }

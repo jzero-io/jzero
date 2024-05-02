@@ -1,8 +1,9 @@
-module github.com/jaronnie/jzero-go
+module github.com/jzero-io/jzero-go
 
 go 1.19
 
 require (
+	github.com/agiledragon/gomonkey/v2 v2.11.0
 	github.com/bitly/go-simplejson v0.5.1
 	github.com/gorilla/websocket v1.5.1
 	github.com/pkg/errors v0.9.1

@@ -7,9 +7,9 @@ package jzero
 import (
     "context"
 
-    "github.com/jaronnie/jzero-go/model/jzero/types"
+    "github.com/jzero-io/jzero-go/model/jzero/types"
     
-    "github.com/jaronnie/jzero-go/rest"
+    "github.com/jzero-io/jzero-go/rest"
 )
 
 var (

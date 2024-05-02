@@ -1,5 +1,5 @@
 ---
-title: 生成代码
+title: 生成服务端代码
 icon: code
 order: 4
 ---
@@ -22,17 +22,15 @@ jzero gen
 @tab Docker(amd64)
 
 ```bash
-docker run --rm \
-  -v ./app1:/app/app1 jaronnie/jzero:latest \
-  gen -w app1
+cd app1
+docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest gen -w app1
 ```
 
 @tab Docker(arm64)
 
 ```bash
-docker run --rm \
-  -v ./app1:/app/app1 jaronnie/jzero:latest-arm64 \
-  gen -w app1
+cd app1
+docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest-arm64 gen -w app1
 ```
 :::
 
@@ -53,7 +51,7 @@ go run main.go daemon --config config.toml
 
 ```shell
 # gateway
-curl http://localhost:8001/api/v1.0/credential/version
+curl http://localhost:8001/api/v1/credential/version
 # grpc
 grpcurl -plaintext localhost:8000 credentialpb.credential/CredentialVersion
 # api

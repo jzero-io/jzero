@@ -4,7 +4,7 @@ import navbar from "./navbar.js";
 import sidebar from "./sidebar.js";
 
 export default hopeTheme({
-  hostname: "https://jaronnie.github.io/jzero",
+  hostname: "https://jzero.jaronnie.com",
 
   author: {
     name: "jaronnie",
@@ -17,7 +17,7 @@ export default hopeTheme({
   // favicon.ico made by https://www.bitbug.net
   logo: "https://oss.jaronnie.com/jzero.jpg",
 
-  repo: "jaronnie/jzero",
+  repo: "jzero-io/jzero",
 
   docsDir: "docs/src",
 

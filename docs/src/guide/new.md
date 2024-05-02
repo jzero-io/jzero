@@ -15,19 +15,13 @@ jzero new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
 @tab Docker(amd64)
 
 ```bash
-docker run --rm \
-  -v ./app1:/app/app1 jaronnie/jzero:latest \
-  new --module=github.com/jaronnie/app1 \
-  --dir=./app1 --app=app1
+docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
 ```
 
 @tab Docker(arm64)
 
 ```bash
-docker run --rm \
-  -v ./app1:/app/app1 jaronnie/jzero:latest-arm64 \
-  new --module=github.com/jaronnie/app1 \
-  --dir=./app1 --app=app1
+docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest-arm64 new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
 ```
 :::
 

@@ -1,10 +1,11 @@
 package api
 
 import (
-	"github.com/jaronnie/jzero/cmd/gensdk/vars"
-	"github.com/jaronnie/jzero/daemon/pkg/stringx"
-	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"strings"
+
+	"github.com/jzero-io/jzero/cmd/gensdk/vars"
+	"github.com/jzero-io/jzero/daemon/pkg/stringx"
+	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 )
 
 func CreatePathParam(pattern string, route *spec.Route) ([]*vars.PathParam, error) {

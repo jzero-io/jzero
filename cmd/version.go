@@ -6,6 +6,7 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"runtime"
 	"time"
@@ -28,12 +29,29 @@ var versionCmd = &cobra.Command{
 	RunE:  getVersion,
 }
 
-func getVersion(cmd *cobra.Command, args []string) error {
-	fmt.Printf(`Jzero version: %s
-Go version: %s
-Commit: %s
-Date: %s
-`, Version, runtime.Version(), Commit, cast.ToTimeInDefaultLocation(Date, time.Local))
+func getVersion(_ *cobra.Command, _ []string) error {
+	var versionBuffer bytes.Buffer
+
+	if Version != "" {
+		versionBuffer.WriteString(fmt.Sprintf("jzero version %s %s/%s\n", Version, runtime.GOOS, runtime.GOARCH))
+	} else {
+		versionBuffer.WriteString(fmt.Sprintf("jzero version %s %s/%s\n", "unknown", runtime.GOOS, runtime.GOARCH))
+	}
+
+	versionBuffer.WriteString(fmt.Sprintf("Go version %s\n", runtime.Version()))
+	if Commit != "" {
+		versionBuffer.WriteString(fmt.Sprintf("Git commit %s\n", Commit))
+	} else {
+		versionBuffer.WriteString(fmt.Sprintf("Git commit %s\n", "unknown"))
+	}
+
+	if Date != "" {
+		versionBuffer.WriteString(fmt.Sprintf("Build date %s\n", cast.ToTimeInDefaultLocation(Date, time.Local)))
+	} else {
+		versionBuffer.WriteString(fmt.Sprintf("Build date %s\n", "unknown"))
+	}
+
+	fmt.Print(versionBuffer.String())
 	return nil
 }
 

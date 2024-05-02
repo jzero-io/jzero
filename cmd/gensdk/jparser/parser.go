@@ -5,13 +5,13 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/jaronnie/jzero/cmd/gensdk/config"
+	"github.com/jzero-io/jzero/cmd/gensdk/config"
 
-	"github.com/jaronnie/jzero/daemon/pkg/stringx"
+	"github.com/jzero-io/jzero/daemon/pkg/stringx"
 
-	"github.com/jaronnie/jzero/cmd/gensdk/jparser/api"
-	"github.com/jaronnie/jzero/cmd/gensdk/jparser/gateway"
-	"github.com/jaronnie/jzero/cmd/gensdk/vars"
+	"github.com/jzero-io/jzero/cmd/gensdk/jparser/api"
+	"github.com/jzero-io/jzero/cmd/gensdk/jparser/gateway"
+	"github.com/jzero-io/jzero/cmd/gensdk/vars"
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"

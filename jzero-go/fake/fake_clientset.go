@@ -4,11 +4,11 @@
 package fake
 
 import (
-	"github.com/jaronnie/jzero-go/typed"
-	"github.com/jaronnie/jzero-go/typed/fake"
+	"github.com/jzero-io/jzero-go/typed"
+	"github.com/jzero-io/jzero-go/typed/fake"
 
-    jzero "github.com/jaronnie/jzero-go/typed/jzero"
-    fakejzero "github.com/jaronnie/jzero-go/typed/jzero/fake"
+    jzero "github.com/jzero-io/jzero-go/typed/jzero"
+    fakejzero "github.com/jzero-io/jzero-go/typed/jzero/fake"
 
 )
 

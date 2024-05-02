@@ -9,8 +9,8 @@ import (
 
 	"github.com/zeromicro/go-zero/core/logx"
 
-	"github.com/jaronnie/jzero/daemon/internal/svc"
-	"github.com/jaronnie/jzero/daemon/internal/types"
+	"github.com/jzero-io/jzero/daemon/internal/svc"
+	"github.com/jzero-io/jzero/daemon/internal/types"
 )
 
 const maxFileSize = 10 << 20 // 10 MB
@@ -31,7 +31,10 @@ func NewUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UploadLogi
 }
 
 func (l *UploadLogic) Upload() (resp *types.UploadResponse, err error) {
-	l.r.ParseMultipartForm(maxFileSize)
+	err = l.r.ParseMultipartForm(maxFileSize)
+	if err != nil {
+		return nil, err
+	}
 	file, handler, err := l.r.FormFile("myFile")
 	if err != nil {
 		return nil, err
@@ -46,7 +49,10 @@ func (l *UploadLogic) Upload() (resp *types.UploadResponse, err error) {
 		return nil, err
 	}
 	defer tempFile.Close()
-	io.Copy(tempFile, file)
+	_, err = io.Copy(tempFile, file)
+	if err != nil {
+		return nil, err
+	}
 
 	return &types.UploadResponse{
 		Code: 0,

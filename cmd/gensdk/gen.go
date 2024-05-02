@@ -4,22 +4,29 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jaronnie/jzero/cmd/gensdk/config"
+	"github.com/jzero-io/jzero/cmd/gensdk/config"
 
 	"github.com/jaronnie/genius"
-	"github.com/jaronnie/jzero/cmd/gensdk/generator"
+	"github.com/jzero-io/jzero/cmd/gensdk/generator"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 var (
-	Dir      string
-	Language string
-	Module   string
+	Dir        string
+	WorkingDir string
+	Language   string
+	Module     string
 )
 
 func GenSdk(cmd *cobra.Command, args []string) error {
+	// change dir
+	if WorkingDir != "" {
+		err := os.Chdir(WorkingDir)
+		cobra.CheckErr(err)
+	}
+
 	wd, err := os.Getwd()
 	cobra.CheckErr(err)
 	configBytes, err := os.ReadFile(filepath.Join(wd, "config.toml"))

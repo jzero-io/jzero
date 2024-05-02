@@ -7,9 +7,9 @@ package jzero
 import (
     "context"
 
-    "github.com/jaronnie/jzero-go/model/jzero/pb/machinepb"
+    "github.com/jzero-io/jzero-go/model/jzero/pb/machinepb"
     
-    "github.com/jaronnie/jzero-go/rest"
+    "github.com/jzero-io/jzero-go/rest"
 )
 
 var (
@@ -21,7 +21,7 @@ type MachineGetter interface {
 }
 
 type MachineInterface interface {
-	// API /api/v1.0/machine/version 
+	// API /api/v1/machine/version 
 	MachineVersion(ctx context.Context,param *machinepb.Empty) (*machinepb.MachineVersionResponse, error)
 	
 	MachineExpansion
@@ -41,7 +41,7 @@ func (x *machineClient) MachineVersion(ctx context.Context,param *machinepb.Empt
 	var resp machinepb.MachineVersionResponse
 		err := x.client.Verb("GET").
 		SubPath(
-			"/api/v1.0/machine/version",
+			"/api/v1/machine/version",
 		).
 		Params(
 		).

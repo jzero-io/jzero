@@ -1,9 +1,9 @@
 ---
 title: 项目实际案例
-icon: grip
+icon: splotch
 index: false
 dir:
-  order: 7
+  order: 8
 ---
 
 <Catalog />

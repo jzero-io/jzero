@@ -8,7 +8,7 @@ import (
 
 	
 
-	"github.com/jaronnie/jzero-go/model/jzero/types"
+	"github.com/jzero-io/jzero-go/model/jzero/types"
 	
 )
 
