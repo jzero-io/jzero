@@ -1,3 +1,4 @@
+// @ts-ignore
 import { hopeTheme } from "vuepress-theme-hope";
 import navbar from "./navbar.js";
 import sidebar from "./sidebar.js";
@@ -27,7 +28,7 @@ export default hopeTheme({
   sidebar,
 
   // 页脚
-  footer: "",
+  footer: "powered by [hope](https://theme-hope.vuejs.press/)",
   displayFooter: true,
 
   // 多语言配置
