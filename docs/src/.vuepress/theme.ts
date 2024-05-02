@@ -28,7 +28,7 @@ export default hopeTheme({
   sidebar,
 
   // 页脚
-  footer: "powered by [hope](https://theme-hope.vuejs.press/)",
+  footer: "",
   displayFooter: true,
 
   // 多语言配置
