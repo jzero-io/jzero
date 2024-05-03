@@ -25,6 +25,18 @@ gvm install go1.19
 gvm activate go1.19
 ```
 
+## 安装 jzero
+
+```shell
+go install github.com/jzero-io/jzero@latest
+
+jzero version
+```
+
+:::tip
+最新 main 分支支持一键安装工具. 执行: jzero check
+:::
+
 ## 安装 goctl
 
 ```shell
@@ -39,13 +51,7 @@ goctl --version
 goctl env check --install --verbose --force
 ```
 
-## 安装 jzero
 
-```shell
-go install github.com/jzero-io/jzero@latest
-
-jzero version
-```
 
 ## 安装 goreleaser
 
