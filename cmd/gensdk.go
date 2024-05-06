@@ -7,6 +7,7 @@ package cmd
 
 import (
 	"github.com/jzero-io/jzero/cmd/gensdk"
+	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +16,10 @@ var genSdkCmd = &cobra.Command{
 	Use:   "gensdk",
 	Short: "jzero gensdk",
 	Long:  `jzero gensdk. Generate sdk client by api file and proto file`,
-	RunE:  gensdk.GenSdk,
+	PreRun: func(_ *cobra.Command, _ []string) {
+		gensdk.Version = Version
+	},
+	RunE: gensdk.GenSdk,
 }
 
 func init() {
@@ -28,4 +32,6 @@ func init() {
 
 	genSdkCmd.Flags().StringVarP(&gensdk.Module, "module", "m", "", "set module name")
 	_ = genSdkCmd.MarkFlagRequired("module")
+
+	genSdkCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set template home")
 }

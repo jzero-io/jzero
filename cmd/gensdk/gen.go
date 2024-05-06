@@ -1,6 +1,7 @@
 package gensdk
 
 import (
+	"github.com/jzero-io/jzero/embeded"
 	"os"
 	"path/filepath"
 
@@ -18,9 +19,16 @@ var (
 	WorkingDir string
 	Language   string
 	Module     string
+
+	Version string
 )
 
-func GenSdk(cmd *cobra.Command, args []string) error {
+func GenSdk(_ *cobra.Command, _ []string) error {
+	homeDir, err := os.UserHomeDir()
+	if embeded.Home == "" {
+		embeded.Home = filepath.Join(homeDir, ".jzero", Version)
+	}
+
 	// change dir
 	if WorkingDir != "" {
 		err := os.Chdir(WorkingDir)

@@ -6,9 +6,9 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/jzero-io/jzero/cmd/new"
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/spf13/cobra"
 )
 
 // newCmd represents the new command
@@ -16,7 +16,10 @@ var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "jzero new project",
 	Long:  `jzero new project`,
-	RunE:  new.NewProject,
+	PreRun: func(_ *cobra.Command, _ []string) {
+		new.Version = Version
+	},
+	RunE: new.NewProject,
 }
 
 func init() {
@@ -30,4 +33,6 @@ func init() {
 
 	newCmd.Flags().StringVarP(&new.APP, "app", "", "", "set app name")
 	_ = newCmd.MarkFlagRequired("app")
+
+	newCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set home dir")
 }

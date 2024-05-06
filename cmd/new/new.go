@@ -17,11 +17,18 @@ var (
 	Module string
 	Dir    string
 	APP    string
+
+	Version string
 )
 
 func NewProject(_ *cobra.Command, _ []string) error {
+	homeDir, err := os.UserHomeDir()
+	if embeded.Home == "" {
+		embeded.Home = filepath.Join(homeDir, ".jzero", Version)
+	}
+
 	// mkdir output
-	err := os.MkdirAll(Dir, 0o755)
+	err = os.MkdirAll(Dir, 0o755)
 	cobra.CheckErr(err)
 	// go mod init
 	_, err = execx.Run(fmt.Sprintf("go mod init %s", Module), Dir)
@@ -191,8 +198,7 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	err = os.WriteFile(filepath.Join(Dir, "Taskfile.yml"), embeded.ReadTemplateFile(filepath.Join("jzero", "Taskfile.yml.tpl")), 0o644)
 	cobra.CheckErr(err)
 
-	// add .template/go-zero
-	err = embeded.WriteTemplateDir(filepath.Join("go-zero"), filepath.Join(Dir, ".templates", "go-zero"))
+	err = embeded.WriteTemplateDir(filepath.Join("go-zero"), filepath.Join(embeded.Home, "go-zero"))
 	cobra.CheckErr(err)
 
 	return nil

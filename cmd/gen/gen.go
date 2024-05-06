@@ -25,7 +25,11 @@ import (
 	"github.com/jzero-io/jzero/embeded"
 )
 
-var WorkingDir string
+var (
+	WorkingDir string
+
+	Version string
+)
 
 type (
 	ImportLines   []string
@@ -50,6 +54,11 @@ func Gen(_ *cobra.Command, _ []string) error {
 	wd, err := os.Getwd()
 	cobra.CheckErr(err)
 	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), wd)
+
+	if embeded.Home == "" {
+		home, _ := os.UserHomeDir()
+		embeded.Home = filepath.Join(home, ".jzero", Version)
+	}
 
 	configBytes, err := os.ReadFile(filepath.Join(wd, "config.toml"))
 	cobra.CheckErr(err)
@@ -94,7 +103,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 		}
 		if strings.HasSuffix(v.Name(), "proto") {
 			fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), filepath.Join(wd, "daemon", "desc", "proto", v.Name()))
-			command := fmt.Sprintf("goctl rpc protoc daemon/desc/proto/%s  -I./daemon/desc/proto --go_out=./daemon/internal --go-grpc_out=./daemon/internal  --zrpc_out=./daemon --client=false --home %s -m", v.Name(), filepath.Join(wd, ".template", "go-zero"))
+			command := fmt.Sprintf("goctl rpc protoc daemon/desc/proto/%s  -I./daemon/desc/proto --go_out=./daemon/internal --go-grpc_out=./daemon/internal --zrpc_out=./daemon --client=false --home %s -m", v.Name(), filepath.Join(embeded.Home, "go-zero"))
 			_, err := execx.Run(command, wd)
 			cobra.CheckErr(err)
 			fmt.Println(color.WithColor("Done", color.FgGreen))
@@ -125,7 +134,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 	// 生成 api 代码
 	if pathx.FileExists(apiFilePath) {
 		fmt.Printf("%s to generate api code.\n%s api file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), apiFilePath)
-		command := fmt.Sprintf("goctl api go --api %s --dir ./daemon --home %s", apiFilePath, filepath.Join(wd, ".template", "go-zero"))
+		command := fmt.Sprintf("goctl api go --api %s --dir ./daemon --home %s", apiFilePath, filepath.Join(embeded.Home, "go-zero"))
 		_, err = execx.Run(command, wd)
 		cobra.CheckErr(err)
 		fmt.Println(color.WithColor("Done", color.FgGreen))
