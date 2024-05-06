@@ -23,11 +23,20 @@ var checkCmd = &cobra.Command{
 	Short: "jzero env check",
 	Long:  `jzero env check.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		log := console.NewColorConsole(true)
+
+		log.Info("[jzero-env]: looking up goctl")
 		// install goctl
 		_, err := LookUpTool("goctl")
 		if err != nil {
+			log.Warning(`[jzero-env]: goctl is not found in PATH`)
 			err = golang.Install("github.com/zeromicro/go-zero/tools/goctl@latest")
 			cobra.CheckErr(err)
+		}
+		if _, err = LookUpTool("goctl"); err == nil {
+			log.Success(`[jzero-env]: "goctl" is installed`)
+		} else {
+			log.Fatalln("[jzero-env]: env check failed, goctl is not installed")
 		}
 
 		// goctl env check
@@ -35,20 +44,8 @@ var checkCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		fmt.Println(resp)
 
-		log := console.NewColorConsole(true)
-
 		// jzero env check
-		_, err = LookUpTool("goreleaser")
-		if err != nil {
-			log.Info(`[jzero-env]: looking up "goreleaser"`)
-			err = golang.Install("github.com/goreleaser/goreleaser@latest")
-			cobra.CheckErr(err)
-		}
-		if _, err = LookUpTool("goreleaser"); err == nil {
-			fmt.Println()
-			log.Success(`[jzero-env]: "goreleaser" is installed`)
-		}
-
+		log.Info("\n[jzero-env]: looking up task")
 		_, err = LookUpTool("task")
 		if err != nil {
 			err = golang.Install("github.com/go-task/task/v3/cmd/task@latest")
@@ -56,6 +53,20 @@ var checkCmd = &cobra.Command{
 		}
 		if _, err = LookUpTool("task"); err == nil {
 			log.Success(`[jzero-env]: "task" is installed`)
+		} else {
+			log.Fatalln("[jzero-env]: env check failed, task is not installed")
+		}
+
+		log.Info("[jzero-env]: looking up goreleaser")
+		_, err = LookUpTool("goreleaser")
+		if err != nil {
+			err = golang.Install("github.com/goreleaser/goreleaser@latest")
+			cobra.CheckErr(err)
+		}
+		if _, err = LookUpTool("goreleaser"); err == nil {
+			log.Success(`[jzero-env]: "goreleaser" is installed`)
+		} else {
+			log.Fatalln("[jzero-env]: env check failed, goreleaser is not installed")
 		}
 
 		log.Success("[jzero-env]: congratulations! your jzero environment is ready!")
