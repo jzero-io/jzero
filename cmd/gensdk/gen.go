@@ -1,6 +1,7 @@
 package gensdk
 
 import (
+	"github.com/jzero-io/jzero/daemon/pkg/stringx"
 	"os"
 	"path/filepath"
 
@@ -38,16 +39,20 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 
 	wd, err := os.Getwd()
 	cobra.CheckErr(err)
-	configBytes, err := os.ReadFile(filepath.Join(wd, "config.toml"))
+
+	configType, err := stringx.GetConfigType(wd)
 	cobra.CheckErr(err)
 
-	g, err := genius.NewFromToml(configBytes)
+	configBytes, err := os.ReadFile(filepath.Join(wd, "config."+configType))
+	cobra.CheckErr(err)
+
+	g, err := genius.NewFromType(configBytes, configType)
 	cobra.CheckErr(err)
 
 	if Dir != "" {
 		if !pathx.FileExists(Dir) {
 			if err := os.MkdirAll(Dir, 0o755); err != nil {
-				return err
+				cobra.CheckErr(err)
 			}
 		}
 	}

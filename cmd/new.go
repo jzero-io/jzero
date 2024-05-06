@@ -35,4 +35,5 @@ func init() {
 	_ = newCmd.MarkFlagRequired("app")
 
 	newCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set home dir")
+	newCmd.Flags().StringVarP(&new.ConfigType, "config-type", "", "yaml", "set config type, default toml")
 }

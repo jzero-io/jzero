@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+    "github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 var cfgFile string
@@ -58,10 +59,25 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".{{ .APP }}" (without extension).
-		viper.AddConfigPath(filepath.Join(home, ".{{ .APP }}"))
-		viper.SetConfigType("toml")
-		viper.SetConfigName("config")
+        wd, err := os.Getwd()
+        cobra.CheckErr(err)
+
+        var (
+            configPath string
+            configType string
+        )
+
+        if pathx.FileExists(filepath.Join(wd, "config.{{ .ConfigType }}")) {
+            configPath = wd
+            configType = "{{ .ConfigType }}"
+        } else {
+            configPath = filepath.Join(home, ".jzero")
+            configType = "toml"
+        }
+
+        viper.AddConfigPath(configPath)
+        viper.SetConfigType(configType)
+        viper.SetConfigName("config")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

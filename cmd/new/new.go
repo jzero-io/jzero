@@ -3,6 +3,7 @@ package new
 import (
 	"bytes"
 	"fmt"
+	"github.com/jaronnie/genius"
 	"os"
 	"path/filepath"
 
@@ -17,6 +18,8 @@ var (
 	Module string
 	Dir    string
 	APP    string
+	// ConfigType config type
+	ConfigType string
 
 	Version string
 )
@@ -46,8 +49,9 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 	// touch cmd/root.go
 	rootCmdFile, err := templatex.ParseTemplate(map[string]interface{}{
-		"Module": Module,
-		"APP":    APP,
+		"Module":     Module,
+		"APP":        APP,
+		"ConfigType": ConfigType,
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "cmd", "root.go.tpl")))
 	cobra.CheckErr(err)
 	err = os.WriteFile(filepath.Join(Dir, "cmd", "root.go"), rootCmdFile, 0o644)
@@ -114,7 +118,22 @@ func NewProject(_ *cobra.Command, _ []string) error {
 		"APP": APP,
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "config.toml.tpl")))
 	cobra.CheckErr(err)
-	err = os.WriteFile(filepath.Join(Dir, "config.toml"), configTomlFile, 0o644)
+
+	g, err := genius.NewFromToml(configTomlFile)
+	cobra.CheckErr(err)
+
+	switch ConfigType {
+	case "toml":
+		err = os.WriteFile(filepath.Join(Dir, "config.toml"), configTomlFile, 0o644)
+	case "yaml":
+		yaml, err := g.EncodeToYaml()
+		cobra.CheckErr(err)
+		err = os.WriteFile(filepath.Join(Dir, "config.yaml"), yaml, 0o644)
+	case "json":
+		json, err := g.EncodeToJSON()
+		cobra.CheckErr(err)
+		err = os.WriteFile(filepath.Join(Dir, "config.json"), json, 0o644)
+	}
 	cobra.CheckErr(err)
 
 	// ################# start gen config ###################

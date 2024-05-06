@@ -60,10 +60,14 @@ func Gen(_ *cobra.Command, _ []string) error {
 		embeded.Home = filepath.Join(home, ".jzero", Version)
 	}
 
-	configBytes, err := os.ReadFile(filepath.Join(wd, "config.toml"))
+	// get configType
+	configType, err := stringx.GetConfigType(wd)
 	cobra.CheckErr(err)
 
-	g, err := genius.NewFromToml(configBytes)
+	configBytes, err := os.ReadFile(filepath.Join(wd, "config."+configType))
+	cobra.CheckErr(err)
+
+	g, err := genius.NewFromType(configBytes, configType)
 	cobra.CheckErr(err)
 
 	// read proto dir
@@ -176,16 +180,16 @@ func Gen(_ *cobra.Command, _ []string) error {
 	existProtosets := g.Get("Gateway.Upstreams.0.ProtoSets")
 	if len(lo.Intersect(cast.ToStringSlice(existProtosets), protosets)) != len(protosets) {
 		var in string
-		fmt.Println("检测到 config.toml 中 Gateway.Upstreams.0.ProtoSets 配置需要更新. 是否自动更新 y/n. 更新需谨慎, 会将注释删掉")
+		fmt.Printf("检测到 config.%s 中 Gateway.Upstreams.0.ProtoSets 配置需要更新. 是否自动更新 y/n. 更新需谨慎, 会将注释删掉\n", configType)
 		_, _ = fmt.Scanln(&in)
 		switch {
 		case strings.EqualFold(in, "y"):
-			fmt.Printf("%s to update config.toml\n", color.WithColor("Start", color.FgGreen))
+			fmt.Printf("%s to update config.%s\n", color.WithColor("Start", color.FgGreen), configType)
 			err = g.Set("Gateway.Upstreams.0.ProtoSets", protosets)
 			cobra.CheckErr(err)
-			toml, err := g.EncodeToToml()
+			configBytes, err := g.EncodeToType(configType)
 			cobra.CheckErr(err)
-			err = os.WriteFile(filepath.Join(wd, "config.toml"), toml, 0o644)
+			err = os.WriteFile(filepath.Join(wd, "config."+configType), configBytes, 0o644)
 			cobra.CheckErr(err)
 			fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
 		case strings.EqualFold(in, "n"):

@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/huandu/go-sqlbuilder v1.27.1
-	github.com/jaronnie/genius v0.3.1
+	github.com/jaronnie/genius v0.4.2
 	github.com/jhump/protoreflect v1.16.0
 	github.com/nxadm/tail v1.4.11
 	github.com/pkg/errors v0.9.1
