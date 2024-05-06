@@ -8,15 +8,15 @@ tag:
   - Guide
 ---
 
-修改 config.toml, 增加以下配置, 设置最大 qps 100
+修改 config.yaml, 增加以下配置, 设置最大 qps 100
 
-```toml
-[Gateway]
-MaxConns = 100
+```yaml
+Gateway:
+  MaxConns: 100
 
 # 替换成自己的 App 名称
-[App1]
-GrpcMaxConns = 100
+App1:
+  GrpcMaxConns: 100
 ```
 
 由于 jzero 集成了 go-zero 三个特性
@@ -132,7 +132,7 @@ Status code distribution:
 
 # test gateway
 # 用 hey 工具来进行压测，压测 120 个并发，执行 1 秒, 有 20 个被限流
-hey -z 1s -c 120 -q 1 'http://localhost:8001/api/v1.0/credential/version'
+hey -z 1s -c 120 -q 1 'http://localhost:8001/api/v1/credential/version'
 
 Summary:
   Total:	1.1574 secs

@@ -8,14 +8,14 @@ tag:
   - Guide
 ---
 
-修改 config.toml. 添加一下内容
+修改 config.yaml. 添加一下内容
 
-::: tip 以创建项目时填写的 app 名称的首字母大写作为配置项, 可查看 config.toml APP 查看值
+::: tip 以创建项目时填写的 app 名称的首字母大写作为配置项, 可查看 config.yaml APP 查看值
 :::
 
-```toml
-[App1]
-ListenOnUnixSocket = "./app1.sock"
+```yaml
+App1:
+  ListenOnUnixSocket: "./app1.sock"
 ```
 
 ```shell

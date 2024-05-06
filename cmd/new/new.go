@@ -196,7 +196,8 @@ func NewProject(_ *cobra.Command, _ []string) error {
 
 	// write Dockerfile
 	dockerFile, err := templatex.ParseTemplate(map[string]interface{}{
-		"APP": APP,
+		"APP":        APP,
+		"ConfigType": ConfigType,
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "Dockerfile.tpl")))
 	cobra.CheckErr(err)
 	err = os.WriteFile(filepath.Join(Dir, "Dockerfile"), dockerFile, 0o644)
@@ -204,7 +205,8 @@ func NewProject(_ *cobra.Command, _ []string) error {
 
 	// write Dockerfile-arm64
 	dockerArm64File, err := templatex.ParseTemplate(map[string]interface{}{
-		"APP": APP,
+		"APP":        APP,
+		"ConfigType": ConfigType,
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "Dockerfile-arm64.tpl")))
 	cobra.CheckErr(err)
 	err = os.WriteFile(filepath.Join(Dir, "Dockerfile-arm64"), dockerArm64File, 0o644)

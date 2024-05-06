@@ -8,9 +8,11 @@ tag:
   - Guide
 ---
 
-修改 config.toml. 添加一下内容
+修改 config.yaml. 添加一下内容
 
-```toml
-[DevServer]
-Enabled = true
+```yaml
+DevServer:
+    Enabled: true
 ```
+
+## 测试 prometheus

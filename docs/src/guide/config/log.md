@@ -8,19 +8,21 @@ tag:
   - Guide
 ---
 
-```toml
-[Log]
-ServiceName = "app1"
-Level = "info"
-Mode = "file"
-encoding = "plain"
-KeepDays = 30
-MaxBackups = 7
-MaxSize = 50
-Rotation = "size"
+修改 config.yaml
 
-[App1]
-LogToConsole = true
+```yaml
+Log:
+  KeepDays: 30
+  Level: info
+  MaxBackups: 7
+  MaxSize: 50
+  Mode: file
+  Rotation: size
+  ServiceName: app1
+  encoding: plain
+
+App1:
+  LogToConsole: true # 将日志重定向到 console.
 ```
 
 默认配置下日志最大占用空间: 2G

@@ -8,18 +8,19 @@ tag:
   - Guide
 ---
 
-修改 config.toml. 添加一下内容
+修改 config.yaml. 添加一下内容
 
-```toml
-[Telemetry]
-Name = "app1-rpc"
-Endpoint = "http://jaeger:14268/api/traces"
-Sampler = 1.0
-Batcher = "jaeger"
+```yaml
+Telemetry:
+  Name: "app1-rpc"
+  Endpoint: "http://jaeger:14268/api/traces"
+  Sampler: 1.0
+  Batcher: "jaeger"
 
-[Gateway.Telemetry]
-Name = "app1-gw"
-Endpoint = "http://jaeger:14268/api/traces"
-Sampler = 1.0
-Batcher = "jaeger"
+Gateway:
+  Telemetry:
+    Name: "app1-gw"
+    Endpoint: "http://jaeger:14268/api/traces"
+    Sampler: 1.0
+    Batcher: "jaeger"
 ```
