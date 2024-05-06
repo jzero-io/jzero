@@ -50,7 +50,7 @@ docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest gen -w app1
 # 下载依赖
 go mod tidy
 # 启动项目
-go run main.go daemon --config config.toml
+go run main.go daemon
 ```
 
 @tab Docker(arm64)
@@ -67,7 +67,7 @@ docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest-arm64 gen -w app1
 # 下载依赖
 go mod tidy
 # 启动项目
-go run main.go daemon --config config.toml
+go run main.go daemon
 ```
 
 @tab jzero
