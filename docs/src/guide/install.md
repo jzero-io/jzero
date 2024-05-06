@@ -21,8 +21,8 @@ tar -zxvf gvm_1.4.2_Linux_x86_64.tar.gz
 mv gvm /usr/local/bin
 gvm init
 # 重新开一个 terminal 或者 source 一下配置文件. 如 source ~/.bashrc
-gvm install go1.19
-gvm activate go1.19
+gvm install go1.22.2
+gvm activate go1.22.2
 ```
 
 ## 安装 jzero
@@ -33,36 +33,13 @@ go install github.com/jzero-io/jzero@latest
 jzero version
 ```
 
-:::tip
-最新 main 分支支持一键安装工具. 执行: jzero check
+## jzero 相关工具一键安装
+
+:::tip go 1.21 版本以下会有报错信息, 不影响基本使用. 推荐采用 go 1.21 版本以及以上
 :::
 
-## 安装 goctl
-
 ```shell
-go install github.com/zeromicro/go-zero/tools/goctl@latest
-
-goctl --version
-```
-
-## 安装 proto 相关工具
-
-```shell
-goctl env check --install --verbose --force
-```
-
-
-
-## 安装 goreleaser
-
-```shell
-go install github.com/goreleaser/goreleaser@latest
-```
-
-## 安装 task
-
-```shell
-go install github.com/go-task/task/v3/cmd/task@latest
+jzero check
 ```
 
 ## Docker
