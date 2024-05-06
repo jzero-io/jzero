@@ -6,11 +6,12 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/jzero-io/jzero/cmd/gen"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"
-	"os"
-	"path/filepath"
 )
 
 // genCmd represents the gen command

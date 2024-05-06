@@ -6,15 +6,14 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
-	"github.com/jzero-io/jzero/embeded"
-	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
+
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/spf13/cobra"
 )
 
-var (
-	Home string
-)
+var Home string
 
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{

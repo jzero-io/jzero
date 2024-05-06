@@ -23,6 +23,7 @@ var (
 
 func NewProject(_ *cobra.Command, _ []string) error {
 	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
 	if embeded.Home == "" {
 		embeded.Home = filepath.Join(homeDir, ".jzero", Version)
 	}
