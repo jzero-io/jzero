@@ -1,10 +1,11 @@
 package stringx
 
 import (
-	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 func FirstUpper(s string) string {

@@ -3,10 +3,10 @@ package new
 import (
 	"bytes"
 	"fmt"
-	"github.com/jaronnie/genius"
 	"os"
 	"path/filepath"
 
+	"github.com/jaronnie/genius"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 
@@ -125,16 +125,18 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	switch ConfigType {
 	case "toml":
 		err = os.WriteFile(filepath.Join(Dir, "config.toml"), configTomlFile, 0o644)
+		cobra.CheckErr(err)
 	case "yaml":
 		yaml, err := g.EncodeToYaml()
 		cobra.CheckErr(err)
 		err = os.WriteFile(filepath.Join(Dir, "config.yaml"), yaml, 0o644)
+		cobra.CheckErr(err)
 	case "json":
 		json, err := g.EncodeToJSON()
 		cobra.CheckErr(err)
 		err = os.WriteFile(filepath.Join(Dir, "config.json"), json, 0o644)
+		cobra.CheckErr(err)
 	}
-	cobra.CheckErr(err)
 
 	// ################# start gen config ###################
 	// write daemon/internal/config/config.go
