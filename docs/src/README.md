@@ -73,12 +73,10 @@ go run main.go daemon --config config.toml
 @tab jzero
 
 ```bash
-# 安装 goctl
-go install github.com/zeromicro/go-zero/tools/goctl@latest
-# 一键安装相关工具
-goctl env check --install --verbose --force
 # 安装 jzero
 go install github.com/jzero-io/jzero@latest
+# 一键安装所需的工具
+jzero check
 # 一键创建项目
 jzero new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
 cd app1
@@ -86,8 +84,8 @@ cd app1
 jzero gen
 # 下载依赖
 go mod tidy
-# 启动项目
-go run main.go daemon --config config.toml
+# 启动服务端程序
+go run main.go daemon
 ```
 :::
 

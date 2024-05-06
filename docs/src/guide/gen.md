@@ -44,7 +44,7 @@ go mod tidy
 ## 运行项目
 
 ```shell
-go run main.go daemon --config config.toml
+go run main.go daemon
 ```
 
 ## 测试接口

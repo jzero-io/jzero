@@ -14,6 +14,7 @@ Usage:
   jzero [command]
 
 Available Commands:
+  check       jzero env check
   completion  Generate completion script
   daemon      jzero daemon
   gen         jzero gen code
@@ -21,6 +22,7 @@ Available Commands:
   help        Help about any command
   init        jzero init
   new         jzero new project
+  template    jzero template
   version     jzero version
 
 Flags:
