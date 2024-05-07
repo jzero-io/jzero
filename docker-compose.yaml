@@ -9,6 +9,7 @@ services:
       - './config.toml:/app/config.toml'
     environment:
       - Jzero_Mysql_Address=jzero_mysql:3306
+      - Jaeger_endpoint=http://jzero_jaeger:14268/api/traces
     command:
       - daemon
     depends_on:
@@ -24,3 +25,8 @@ services:
     volumes:
       - ./daemon/desc/sql:/docker-entrypoint-initdb.d
     restart: always
+  jzero_jaeger:
+    image: jaegertracing/all-in-one:1.6
+    ports:
+      - "14268:14268"
+      - "16686:16686"

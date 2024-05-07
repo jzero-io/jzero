@@ -7,10 +7,22 @@ Name = "jzero.rpc"
 [DevServer]
   Enabled = true
 
+[Telemetry]
+  Name="jzero-rpc"
+  Endpoint= "${Jaeger_endpoint}"
+  Sampler=1.0
+  Batcher="jaeger"
+
 [Gateway]
   MaxConns = 100
   Name = "jzero.gw"
   Port = 8001
+
+  [Gateway.Telemetry]
+    Name="jzero-gw"
+    Endpoint= "${Jaeger_endpoint}"
+    Sampler=1.0
+    Batcher="jaeger"
 
   [[Gateway.Upstreams]]
     Name = "jzero.gw"
