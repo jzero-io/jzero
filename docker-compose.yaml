@@ -1,0 +1,26 @@
+version: '3'
+services:
+  jzero:
+    image: jaronnie/jzero:latest
+    ports:
+      - "8001:8001"
+      - "8002:8002"
+    volumes:
+      - './config.toml:/app/config.toml'
+    environment:
+      - Jzero_Mysql_Address=jzero_mysql:3306
+    command:
+      - daemon
+    depends_on:
+      - jzero_mysql
+    restart: always
+  jzero_mysql:
+    image: "mysql:5.7"
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_ROOT_USER=root
+      - MYSQL_DATABASE=jzero
+    volumes:
+      - ./daemon/desc/sql:/docker-entrypoint-initdb.d
+    restart: always

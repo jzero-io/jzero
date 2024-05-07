@@ -24,7 +24,7 @@ import (
 
 func Start(cfgFile string) {
 	var c config.Config
-	conf.MustLoad(cfgFile, &c)
+	conf.MustLoad(cfgFile, &c, conf.UseEnv())
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		c.Jzero.Mysql.Username,

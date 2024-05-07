@@ -23,7 +23,7 @@ Name = "jzero.rpc"
   ListenOnUnixSocket = "./jzero.sock"
 
   [Jzero.Mysql]
-    Address = "127.0.0.1:33060"
+    Address = "${Jzero_Mysql_Address}"
     Database = "jzero"
     Password = "123456"
     Username = "root"
