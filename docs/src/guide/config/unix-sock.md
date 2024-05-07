@@ -26,3 +26,9 @@ Starting gateway server at 0.0.0.0:8001...
 Starting unix server at ./app1.sock...
 
 ```
+
+## 验证
+
+```shell
+curl -s --unix-socket ./app1.sock http://localhost/api/v1/credential/version  
+```
