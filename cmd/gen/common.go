@@ -6,7 +6,7 @@ import (
 )
 
 func GetProtoDir(wd string) ([]os.DirEntry, error) {
-	protoDir, err := os.ReadDir(filepath.Join(wd, "daemon", "desc", "proto"))
+	protoDir, err := os.ReadDir(filepath.Join(wd, "app", "desc", "proto"))
 	if err != nil {
 		return nil, err
 	}

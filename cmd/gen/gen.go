@@ -2,6 +2,9 @@ package gen
 
 import (
 	"fmt"
+	"github.com/jzero-io/jzero/daemon/pkg/mod"
+	"github.com/jzero-io/jzero/daemon/pkg/stringx"
+	"github.com/jzero-io/jzero/daemon/pkg/templatex"
 	"os"
 	"os/signal"
 	"path"
@@ -19,9 +22,6 @@ import (
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
-	"github.com/jzero-io/jzero/daemon/pkg/mod"
-	"github.com/jzero-io/jzero/daemon/pkg/stringx"
-	"github.com/jzero-io/jzero/daemon/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
 )
 
@@ -73,12 +73,12 @@ func Gen(_ *cobra.Command, _ []string) error {
 	// read proto dir
 	protoDir, err := GetProtoDir(wd)
 	if len(protoDir) == 0 {
-		fmt.Printf("proto dir [%s] not found. Skip generate", filepath.Join(wd, "daemon", "desc", "proto"))
+		fmt.Printf("proto dir [%s] not found. Skip generate", filepath.Join(wd, "app", "desc", "proto"))
 	}
 	cobra.CheckErr(err)
 
 	// api file path
-	apiFilePath := filepath.Join(wd, "daemon", "desc", "api", cast.ToString(g.Get("APP"))+".api")
+	apiFilePath := filepath.Join(wd, "app", "desc", "api", cast.ToString(g.Get("APP"))+".api")
 
 	// err = check(g, wd, protoDir, apiFilePath)
 	// cobra.CheckErr(err)
@@ -93,8 +93,8 @@ func Gen(_ *cobra.Command, _ []string) error {
 
 	// 正常删除无用文件夹
 	defer func() {
-		_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
-		_ = os.RemoveAll(filepath.Join(wd, "daemon", "etc"))
+		_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
+		_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
 		os.Exit(0)
 	}()
 
@@ -106,18 +106,18 @@ func Gen(_ *cobra.Command, _ []string) error {
 			continue
 		}
 		if strings.HasSuffix(v.Name(), "proto") {
-			fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), filepath.Join(wd, "daemon", "desc", "proto", v.Name()))
-			command := fmt.Sprintf("goctl rpc protoc daemon/desc/proto/%s  -I./daemon/desc/proto --go_out=./daemon/internal --go-grpc_out=./daemon/internal --zrpc_out=./daemon --client=false --home %s -m", v.Name(), filepath.Join(embeded.Home, "go-zero"))
+			fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), filepath.Join(wd, "app", "desc", "proto", v.Name()))
+			command := fmt.Sprintf("goctl rpc protoc app/desc/proto/%s  -I./app/desc/proto --go_out=./app/internal --go-grpc_out=./app/internal --zrpc_out=./app --client=false --home %s -m", v.Name(), filepath.Join(embeded.Home, "go-zero"))
 			_, err := execx.Run(command, wd)
 			cobra.CheckErr(err)
 			fmt.Println(color.WithColor("Done", color.FgGreen))
 
 			fileBase := v.Name()[0 : len(v.Name())-len(path.Ext(v.Name()))]
-			_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", fileBase)))
+			_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", fileBase)))
 
 			// # gen proto descriptor
 			_ = os.MkdirAll(filepath.Join(wd, ".protosets"), 0o755)
-			protocCommand := fmt.Sprintf("protoc --include_imports -I./daemon/desc/proto --descriptor_set_out=.protosets/%s.pb daemon/desc/proto/%s.proto", fileBase, fileBase)
+			protocCommand := fmt.Sprintf("protoc --include_imports -I./app/desc/proto --descriptor_set_out=.protosets/%s.pb app/desc/proto/%s.proto", fileBase, fileBase)
 			_, err = execx.Run(protocCommand, wd)
 			cobra.CheckErr(err)
 
@@ -125,27 +125,27 @@ func Gen(_ *cobra.Command, _ []string) error {
 
 			// parse proto
 			protoParser := rpcparser.NewDefaultProtoParser()
-			parse, err := protoParser.Parse(filepath.Join(wd, "daemon", "desc", "proto", v.Name()), true)
+			parse, err := protoParser.Parse(filepath.Join(wd, "app", "desc", "proto", v.Name()), true)
 			cobra.CheckErr(err)
 			for _, s := range parse.Service {
-				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/daemon/internal/server/%s"`, s.Name, moduleStruct.Path, s.Name))
+				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/app/internal/server/%s"`, s.Name, moduleStruct.Path, s.Name))
 				registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%sServer(ctx))", filepath.Base(parse.GoPackage), stringx.FirstUpper(s.Name), s.Name, stringx.FirstUpper(s.Name)))
 			}
-			pbImports = append(pbImports, fmt.Sprintf(`"%s/daemon/internal/%s"`, moduleStruct.Path, strings.TrimPrefix(parse.GoPackage, "./")))
+			pbImports = append(pbImports, fmt.Sprintf(`"%s/app/internal/%s"`, moduleStruct.Path, strings.TrimPrefix(parse.GoPackage, "./")))
 		}
 	}
 
 	// 生成 api 代码
 	if pathx.FileExists(apiFilePath) {
 		fmt.Printf("%s to generate api code.\n%s api file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), apiFilePath)
-		command := fmt.Sprintf("goctl api go --api %s --dir ./daemon --home %s", apiFilePath, filepath.Join(embeded.Home, "go-zero"))
+		command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", apiFilePath, filepath.Join(embeded.Home, "go-zero"))
 		_, err = execx.Run(command, wd)
 		cobra.CheckErr(err)
 		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
 
 	// 检测是否包含 sql
-	sqlDir := filepath.Join(wd, "daemon", "desc", "sql")
+	sqlDir := filepath.Join(wd, "app", "desc", "sql")
 	if f, err := os.Stat(sqlDir); err == nil && f.IsDir() {
 		fs, err := os.ReadDir(sqlDir)
 		cobra.CheckErr(err)
@@ -153,7 +153,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 			if !f.IsDir() && strings.HasSuffix(f.Name(), ".sql") {
 				sqlFilePath := filepath.Join(sqlDir, f.Name())
 				fmt.Printf("%s to generate model code.\n%s sql file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), sqlFilePath)
-				command := fmt.Sprintf("goctl model mysql ddl --src daemon/desc/sql/%s --dir ./daemon/internal/model/%s --home %s", f.Name(), f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))], filepath.Join(wd, ".template", "go-zero"))
+				command := fmt.Sprintf("goctl model mysql ddl --src app/desc/sql/%s --dir ./app/internal/model/%s --home %s", f.Name(), f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))], filepath.Join(wd, ".template", "go-zero"))
 				_, err = execx.Run(command, wd)
 				cobra.CheckErr(err)
 				fmt.Println(color.WithColor("Done", color.FgGreen))
@@ -161,17 +161,17 @@ func Gen(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	// 生成 daemon/zrpc.go
-	fmt.Printf("%s to generate daemon/zrpc.go\n", color.WithColor("Start", color.FgGreen))
+	// 生成 app/zrpc.go
+	fmt.Printf("%s to generate app/zrpc.go\n", color.WithColor("Start", color.FgGreen))
 	zrpcFile, err := templatex.ParseTemplate(map[string]interface{}{
 		"Module":          moduleStruct.Path,
 		"APP":             cast.ToString(g.Get("APP")),
 		"ServerImports":   serverImports,
 		"PbImports":       pbImports,
 		"RegisterServers": registerServers,
-	}, embeded.ReadTemplateFile(filepath.Join("jzero", "daemon", "zrpc.go.tpl")))
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "zrpc.go.tpl")))
 	cobra.CheckErr(err)
-	err = os.WriteFile(filepath.Join(wd, "daemon", "zrpc.go"), zrpcFile, 0o644)
+	err = os.WriteFile(filepath.Join(wd, "app", "zrpc.go"), zrpcFile, 0o644)
 	cobra.CheckErr(err)
 	fmt.Printf("%s", color.WithColor("Done\n", color.FgGreen))
 
@@ -214,7 +214,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 //		}
 //		if strings.HasSuffix(v.Name(), "proto") {
 //			protoParser := rpcparser.NewDefaultProtoParser()
-//			parse, err := protoParser.Parse(filepath.Join(wd, "daemon", "desc", "proto", v.Name()), true)
+//			parse, err := protoParser.Parse(filepath.Join(wd, "app", "desc", "proto", v.Name()), true)
 //			cobra.CheckErr(err)
 //			for _, s := range parse.Service {
 //				protoLogicDir = append(protoLogicDir, s.Name)
@@ -224,7 +224,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 //
 //	// parse api
 //	if pathx.FileExists(apiFilePath) {
-//		apiSpec, err := parser.Parse(filepath.Join(wd, "daemon", "desc", "api", cast.ToString(g.Get("APP"))+".api"))
+//		apiSpec, err := parser.Parse(filepath.Join(wd, "app", "desc", "api", cast.ToString(g.Get("APP"))+".api"))
 //		if err != nil {
 //			return err
 //		}
@@ -253,8 +253,8 @@ func extraFileHandler(g *genius.Genius, wd string) {
 		s := <-c
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-			_ = os.Remove(filepath.Join(wd, "daemon", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
-			_ = os.RemoveAll(filepath.Join(wd, "daemon", "etc"))
+			_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
+			_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
 			os.Exit(-1)
 		case syscall.SIGHUP:
 		default:
