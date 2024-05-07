@@ -3,7 +3,7 @@ version: "3"
 tasks:
   run:
     cmds:
-      - go run main.go daemon --config config.toml
+      - go run main.go daemon
   build:
     cmds:
       - goreleaser build --snapshot --single-target --clean
