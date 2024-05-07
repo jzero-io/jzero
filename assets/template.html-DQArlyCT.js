@@ -1,4 +1,4 @@
-import{_ as e}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as t,c as a,e as o}from"./app-mSjmIJ7g.js";const n={},r=o(`<p>jzero gen 生成代码, 仍然是依赖于 goctl 工具.</p><div class="language-bash line-numbers-mode" data-ext="sh" data-title="sh"><pre class="language-bash"><code><span class="token comment"># 初始化的模板位置: ~/.jzero/Version 下, 可以修改模板后再进行新建项目</span>
+import{_ as e}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as t,c as a,e as o}from"./app-Cwf2IHuM.js";const n={},r=o(`<p>jzero gen 生成代码, 仍然是依赖于 goctl 工具.</p><div class="language-bash line-numbers-mode" data-ext="sh" data-title="sh"><pre class="language-bash"><code><span class="token comment"># 初始化的模板位置: ~/.jzero/Version 下, 可以修改模板后再进行新建项目</span>
 jzero template init
 <span class="token comment"># 或者 jzero template init --home .template</span>
 
