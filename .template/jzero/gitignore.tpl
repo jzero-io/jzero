@@ -33,7 +33,7 @@ logs
 dist
 
 # binary
-./{{ .APP }}
+{{ .APP }}
 
 # unix sock
 *.sock
