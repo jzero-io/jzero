@@ -2,9 +2,6 @@ package gen
 
 import (
 	"fmt"
-	"github.com/jzero-io/jzero/app/pkg/mod"
-	"github.com/jzero-io/jzero/app/pkg/stringx"
-	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"os"
 	"os/signal"
 	"path"
@@ -13,6 +10,9 @@ import (
 	"syscall"
 
 	"github.com/jaronnie/genius"
+	"github.com/jzero-io/jzero/app/pkg/mod"
+	"github.com/jzero-io/jzero/app/pkg/stringx"
+	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
