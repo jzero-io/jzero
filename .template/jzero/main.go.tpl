@@ -11,7 +11,6 @@ var (
 	date    string
 )
 
-
 func main() {
     cmd.Version = version
     cmd.Date = date

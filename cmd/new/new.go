@@ -225,5 +225,13 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	err = embeded.WriteTemplateDir(filepath.Join("go-zero"), filepath.Join(embeded.Home, "go-zero"))
 	cobra.CheckErr(err)
 
+	// write .gitignore
+	gitignoreFile, err := templatex.ParseTemplate(map[string]interface{}{
+		"APP": APP,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "gitignore.tpl")))
+	cobra.CheckErr(err)
+	err = os.WriteFile(filepath.Join(Dir, ".gitignore"), gitignoreFile, 0o644)
+	cobra.CheckErr(err)
+
 	return nil
 }
