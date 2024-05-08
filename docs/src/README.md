@@ -41,7 +41,7 @@ title: 首页
 
 ```bash
 # 一键创建项目
-docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
+docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new app1
   
 cd app1 
 
@@ -51,16 +51,16 @@ docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest gen -w app1
 # 下载依赖
 go mod tidy
 # 启动项目
-go run main.go app
+go run main.go server
 ```
 
 @tab Docker(arm64)
 
 ```bash
 # 一键创建项目
-docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest-arm64 new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
+docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest-arm64 new app1
   
-cd app1  
+cd app1
 
 # 一键生成代码
 docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest-arm64 gen -w app1
@@ -68,7 +68,7 @@ docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest-arm64 gen -w app1
 # 下载依赖
 go mod tidy
 # 启动项目
-go run main.go app
+go run main.go server
 ```
 
 @tab jzero
@@ -79,14 +79,14 @@ go install github.com/jzero-io/jzero@latest
 # 一键安装所需的工具
 jzero check
 # 一键创建项目
-jzero new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
+jzero new app1
 cd app1
 # 一键生成代码
 jzero gen
 # 下载依赖
 go mod tidy
 # 启动服务端程序
-go run main.go app
+go run main.go server
 ```
 :::
 

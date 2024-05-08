@@ -44,7 +44,7 @@ go mod tidy
 ## 运行项目
 
 ```shell
-go run main.go app
+go run main.go server
 ```
 
 ## 测试接口

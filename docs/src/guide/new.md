@@ -9,24 +9,23 @@ order: 3
 @tab jzero
 
 ```bash
-jzero new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
+jzero new app1
 ```
 
 @tab Docker(amd64)
 
 ```bash
-docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
+docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new app1
 ```
 
 @tab Docker(arm64)
 
 ```bash
-docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest-arm64 new --module=github.com/jaronnie/app1 --dir=./app1 --app=app1
+docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest-arm64 new app1
 ```
 :::
 
-flag 解释:
+all flags:
 
-* module 表示新建项目的 go module
-* dir 表示创建的项目目录路径
-* app 表示项目名
+* module 设置 go module
+* dir 设置生成的项目路径
