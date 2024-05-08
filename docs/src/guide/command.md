@@ -16,7 +16,7 @@ Usage:
 Available Commands:
   check       jzero env check
   completion  Generate completion script
-  daemon      jzero daemon
+  app      jzero app
   gen         jzero gen code
   gensdk      jzero gensdk
   help        Help about any command

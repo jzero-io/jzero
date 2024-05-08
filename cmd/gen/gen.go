@@ -2,9 +2,9 @@ package gen
 
 import (
 	"fmt"
-	"github.com/jzero-io/jzero/daemon/pkg/mod"
-	"github.com/jzero-io/jzero/daemon/pkg/stringx"
-	"github.com/jzero-io/jzero/daemon/pkg/templatex"
+	"github.com/jzero-io/jzero/app/pkg/mod"
+	"github.com/jzero-io/jzero/app/pkg/stringx"
+	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"os"
 	"os/signal"
 	"path"

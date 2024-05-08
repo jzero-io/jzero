@@ -9,11 +9,11 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/jhump/protoreflect/desc/protoparse"
+	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/jzero-io/jzero/cmd/gen"
 	"github.com/jzero-io/jzero/cmd/gensdk/config"
 	"github.com/jzero-io/jzero/cmd/gensdk/jparser"
 	"github.com/jzero-io/jzero/cmd/gensdk/vars"
-	"github.com/jzero-io/jzero/daemon/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	apiparser "github.com/zeromicro/go-zero/tools/goctl/api/parser"
@@ -45,11 +45,11 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 
 	// parse proto
 	var protoParser protoparse.Parser
-	protoParser.ImportPaths = []string{filepath.Join("daemon", "desc", "proto")}
+	protoParser.ImportPaths = []string{filepath.Join("app", "desc", "proto")}
 
 	// parse api
 	var apiSpecs []*spec.ApiSpec
-	apiSpec, err := apiparser.Parse(filepath.Join("daemon", "desc", "api", g.config.APP+".api"))
+	apiSpec, err := apiparser.Parse(filepath.Join("app", "desc", "api", g.config.APP+".api"))
 	if err != nil {
 		return nil, err
 	}
@@ -362,7 +362,7 @@ func (g *Golang) genPbTypesModel() ([]*GeneratedFile, error) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	resp, err := execx.Run(fmt.Sprintf("protoc -I./daemon/desc/proto --go_out=%s daemon/desc/proto/*.proto", tmpDir), g.wd)
+	resp, err := execx.Run(fmt.Sprintf("protoc -I./app/desc/proto --go_out=%s app/desc/proto/*.proto", tmpDir), g.wd)
 	if err != nil {
 		return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
 	}

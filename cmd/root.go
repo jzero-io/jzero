@@ -52,7 +52,7 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if len(os.Args) >= 1 && os.Args[1] != daemonCmd.Name() {
+	if len(os.Args) >= 1 && os.Args[1] != serverCmd.Name() {
 		return
 	}
 

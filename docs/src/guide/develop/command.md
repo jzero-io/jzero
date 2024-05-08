@@ -26,7 +26,7 @@ Usage:
 
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
-  daemon      app1 daemon
+  app      app1 app
   help        Help about any command
   init        A brief description of your command
   version     app1 version

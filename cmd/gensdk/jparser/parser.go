@@ -7,7 +7,7 @@ import (
 
 	"github.com/jzero-io/jzero/cmd/gensdk/config"
 
-	"github.com/jzero-io/jzero/daemon/pkg/stringx"
+	"github.com/jzero-io/jzero/app/pkg/stringx"
 
 	"github.com/jzero-io/jzero/cmd/gensdk/jparser/api"
 	"github.com/jzero-io/jzero/cmd/gensdk/jparser/gateway"

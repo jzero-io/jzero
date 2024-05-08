@@ -11,4 +11,4 @@ linters:
 
 issues:
   exclude-dirs:
-    - daemon/internal/config
+    - app/internal/config

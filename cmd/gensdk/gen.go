@@ -4,9 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jzero-io/jzero/app/pkg/stringx"
 	"github.com/jzero-io/jzero/cmd/gensdk/config"
 	"github.com/jzero-io/jzero/cmd/gensdk/generator"
-	"github.com/jzero-io/jzero/daemon/pkg/stringx"
 	"github.com/jzero-io/jzero/embeded"
 
 	"github.com/jaronnie/genius"

@@ -11,7 +11,7 @@ services:
       - Jzero_Mysql_Address=jzero_mysql:3306
       - Jaeger_endpoint=http://jzero_jaeger:14268/api/traces
     command:
-      - daemon
+      - server
     depends_on:
       - jzero_mysql
     restart: always
@@ -23,7 +23,7 @@ services:
       - MYSQL_ROOT_USER=root
       - MYSQL_DATABASE=jzero
     volumes:
-      - ./daemon/desc/sql:/docker-entrypoint-initdb.d
+      - ./app/desc/sql:/docker-entrypoint-initdb.d
     restart: always
   jzero_jaeger:
     image: jaegertracing/all-in-one:1.6

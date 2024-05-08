@@ -51,7 +51,7 @@ docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest gen -w app1
 # 下载依赖
 go mod tidy
 # 启动项目
-go run main.go daemon
+go run main.go app
 ```
 
 @tab Docker(arm64)
@@ -68,7 +68,7 @@ docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest-arm64 gen -w app1
 # 下载依赖
 go mod tidy
 # 启动项目
-go run main.go daemon
+go run main.go app
 ```
 
 @tab jzero
@@ -86,7 +86,7 @@ jzero gen
 # 下载依赖
 go mod tidy
 # 启动服务端程序
-go run main.go daemon
+go run main.go app
 ```
 :::
 
