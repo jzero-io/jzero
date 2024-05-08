@@ -13,4 +13,4 @@ COPY .protosets /app/.protosets
 
 EXPOSE 8001 8002
 
-ENTRYPOINT ["./{{ .APP }}", "app"]
+ENTRYPOINT ["./{{ .APP }}", "server"]
