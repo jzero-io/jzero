@@ -16,23 +16,28 @@ var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "jzero new project",
 	Long:  `jzero new project`,
-	PreRun: func(_ *cobra.Command, _ []string) {
+	PreRun: func(_ *cobra.Command, args []string) {
 		new.Version = Version
+		new.APP = args[0]
+
+		if new.Module == "" {
+			new.Module = args[0]
+		}
+
+		if new.Dir == "" {
+			new.Dir = args[0]
+		}
 	},
 	RunE: new.NewProject,
+	Args: cobra.ExactArgs(1),
 }
 
 func init() {
 	rootCmd.AddCommand(newCmd)
 
 	newCmd.Flags().StringVarP(&new.Module, "module", "m", "", "set go module")
-	_ = newCmd.MarkFlagRequired("module")
 
 	newCmd.Flags().StringVarP(&new.Dir, "dir", "d", "", "set output dir")
-	_ = newCmd.MarkFlagRequired("dir")
-
-	newCmd.Flags().StringVarP(&new.APP, "app", "", "", "set app name")
-	_ = newCmd.MarkFlagRequired("app")
 
 	newCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set home dir")
 	newCmd.Flags().StringVarP(&new.ConfigType, "config-type", "", "yaml", "set config type, default toml")
