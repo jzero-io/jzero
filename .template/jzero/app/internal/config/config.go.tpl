@@ -9,10 +9,10 @@ type Config struct {
 	zrpc.RpcServerConf
 	Gateway gateway.GatewayConf
 
-	{{ .APP | FirstUpper }} {{ .APP | FirstUpper }}Config
+	{{ .APP | FirstUpper | ToCamel }} {{ .APP | FirstUpper | ToCamel }}Config
 }
 
-type {{ .APP | FirstUpper }}Config struct {
+type {{ .APP | FirstUpper | ToCamel  }}Config struct {
 	ListenOnUnixSocket string `json:",optional"`
 	GrpcMaxConns       int    `json:",default=10000"`
     // only Log.Mode is file or volume take effect

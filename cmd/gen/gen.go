@@ -93,8 +93,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 
 	// 正常删除无用文件夹
 	defer func() {
-		_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
-		_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
+		removeExtraFiles(wd, cast.ToString(g.Get("APP")))
 		os.Exit(0)
 	}()
 
@@ -253,14 +252,18 @@ func extraFileHandler(g *genius.Genius, wd string) {
 		s := <-c
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-			_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", cast.ToString(g.Get("APP")))))
-			_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
+			removeExtraFiles(wd, cast.ToString(g.Get("APP")))
 			os.Exit(-1)
 		case syscall.SIGHUP:
 		default:
 			return
 		}
 	}
+}
+
+func removeExtraFiles(wd string, app string) {
+	_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", strings.ReplaceAll(app, "-", ""))))
+	_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
 }
 
 func init() {

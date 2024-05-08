@@ -15,6 +15,18 @@ func FirstUpper(s string) string {
 	return s
 }
 
+func ToCamel(s string) string {
+	words := strings.Split(s, "-")
+
+	for i := 1; i < len(words); i++ {
+		words[i] = FirstUpper(words[i])
+	}
+
+	result := strings.Join(words, "")
+
+	return result
+}
+
 func GetConfigType(wd string) (string, error) {
 	files, err := os.ReadDir(wd)
 	if err != nil {

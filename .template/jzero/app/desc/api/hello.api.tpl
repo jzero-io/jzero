@@ -12,7 +12,7 @@ type response {
     prefix: /api/v1
     group: hello
 )
-service {{ .APP }} {
+service {{ .APP | ToCamel }} {
     @handler HelloPathHandler
     get /hello/:name (pathRequest) returns (response)
 }

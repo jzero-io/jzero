@@ -35,4 +35,5 @@ func RegisterFuncMap() template.FuncMap {
 
 var registerFuncMap = map[string]interface{}{
 	"FirstUpper": stringx.FirstUpper,
+	"ToCamel":    stringx.ToCamel,
 }

@@ -35,7 +35,7 @@ func start(ctx *svc.ServiceContext) {
 
 	s := getZrpcServer(ctx.Config, ctx)
 
-	middlewares.RateLimit = syncx.NewLimit(ctx.Config.{{ .APP | FirstUpper }}.GrpcMaxConns)
+	middlewares.RateLimit = syncx.NewLimit(ctx.Config.{{ .APP | FirstUpper | ToCamel }}.GrpcMaxConns)
 	s.AddUnaryInterceptors(middlewares.GrpcRateLimitInterceptors)
 
 	gw := gateway.MustNewServer(ctx.Config.Gateway)
@@ -52,14 +52,14 @@ func start(ctx *svc.ServiceContext) {
 	// listen unix
 	var unixListener net.Listener
 	var err error
-	if ctx.Config.{{ .APP | FirstUpper }}.ListenOnUnixSocket != "" {
-		sock := ctx.Config.{{ .APP | FirstUpper }}.ListenOnUnixSocket
+	if ctx.Config.{{ .APP | FirstUpper | ToCamel }}.ListenOnUnixSocket != "" {
+		sock := ctx.Config.{{ .APP | FirstUpper | ToCamel }}.ListenOnUnixSocket
 		unixListener, err = net.Listen("unix", sock)
 		if err != nil {
 			panic(err)
 		}
 		go func() {
-			fmt.Printf("Starting unix server at %s...\n", ctx.Config.{{ .APP | FirstUpper }}.ListenOnUnixSocket)
+			fmt.Printf("Starting unix server at %s...\n", ctx.Config.{{ .APP | FirstUpper | ToCamel }}.ListenOnUnixSocket)
 			if err := http.Serve(unixListener, gw); err != nil {
 				return
 			}
@@ -90,10 +90,10 @@ func signalHandler(ctx *svc.ServiceContext, serviceGroup *service.ServiceGroup, 
 			fmt.Println("Waiting 1 second...\nStopping rpc server and gateway server")
 			time.Sleep(time.Second)
 			serviceGroup.Stop()
-			if ctx.Config.{{ .APP | FirstUpper }}.ListenOnUnixSocket != "" {
+			if ctx.Config.{{ .APP | FirstUpper | ToCamel }}.ListenOnUnixSocket != "" {
 				fmt.Println("Stopping unix server")
 				unixListener.Close()
-				_ = os.Remove(ctx.Config.{{ .APP | FirstUpper }}.ListenOnUnixSocket)
+				_ = os.Remove(ctx.Config.{{ .APP | FirstUpper | ToCamel }}.ListenOnUnixSocket)
 			}
 			return
 		case syscall.SIGHUP:
