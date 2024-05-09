@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"os"
 	"os/signal"
 	"path"
@@ -72,16 +73,10 @@ func Gen(_ *cobra.Command, _ []string) error {
 
 	// read proto dir
 	protoDir, err := GetProtoDir(wd)
-	if len(protoDir) == 0 {
-		fmt.Printf("proto dir [%s] not found. Skip generate", filepath.Join(wd, "app", "desc", "proto"))
-	}
 	cobra.CheckErr(err)
 
 	// api file path
-	apiFilePath := filepath.Join(wd, "app", "desc", "api", cast.ToString(g.Get("APP"))+".api")
-
-	// err = check(g, wd, protoDir, apiFilePath)
-	// cobra.CheckErr(err)
+	apiFilePath := getApiFilePath(wd, g)
 
 	var protosets []string
 	var serverImports ImportLines
@@ -93,7 +88,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 
 	// 正常删除无用文件夹
 	defer func() {
-		removeExtraFiles(wd, cast.ToString(g.Get("APP")))
+		removeExtraFiles(g, wd)
 		os.Exit(0)
 	}()
 
@@ -200,50 +195,6 @@ func Gen(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-// check. 优化: proto 和 api group 名称可以重复, 但是 rpc method 和 api handler 名称不能重复
-// TODO
-//func check(g *genius.Genius, wd string, protoDir []os.DirEntry, apiFilePath string) error {
-//	// check logic dir duplicate
-//	var protoLogicDir []string
-//	var apiLogicDir []string
-//
-//	for _, v := range protoDir {
-//		if v.IsDir() {
-//			continue
-//		}
-//		if strings.HasSuffix(v.Name(), "proto") {
-//			protoParser := rpcparser.NewDefaultProtoParser()
-//			parse, err := protoParser.Parse(filepath.Join(wd, "app", "desc", "proto", v.Name()), true)
-//			cobra.CheckErr(err)
-//			for _, s := range parse.Service {
-//				protoLogicDir = append(protoLogicDir, s.Name)
-//			}
-//		}
-//	}
-//
-//	// parse api
-//	if pathx.FileExists(apiFilePath) {
-//		apiSpec, err := parser.Parse(filepath.Join(wd, "app", "desc", "api", cast.ToString(g.Get("APP"))+".api"))
-//		if err != nil {
-//			return err
-//		}
-//		for _, v := range apiSpec.Service.Groups {
-//			if g, ok := v.Annotation.Properties["group"]; ok {
-//				apiLogicDir = append(apiLogicDir, g)
-//			}
-//		}
-//	}
-//
-//	// check logicDir has duplicate
-//	intersect := lo.Intersect(protoLogicDir, apiLogicDir)
-//	if len(intersect) != 0 {
-//		errorString := fmt.Sprintf("service %s duplicate. Please check api file group and proto file service name", strings.Join(intersect, ","))
-//		return errors.New(errorString)
-//	}
-//
-//	return nil
-//}
-
 func extraFileHandler(g *genius.Genius, wd string) {
 	// signal handler
 	c := make(chan os.Signal, 1)
@@ -252,7 +203,7 @@ func extraFileHandler(g *genius.Genius, wd string) {
 		s := <-c
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-			removeExtraFiles(wd, cast.ToString(g.Get("APP")))
+			removeExtraFiles(g, wd)
 			os.Exit(-1)
 		case syscall.SIGHUP:
 		default:
@@ -261,9 +212,22 @@ func extraFileHandler(g *genius.Genius, wd string) {
 	}
 }
 
-func removeExtraFiles(wd string, app string) {
-	_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", strings.ReplaceAll(app, "-", ""))))
+func getApiFilePath(wd string, g *genius.Genius) string {
+	return filepath.Join(wd, "app", "desc", "api", cast.ToString(g.Get("APP"))+".api")
+}
+
+func removeExtraFiles(g *genius.Genius, wd string) {
+	_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", strings.ReplaceAll(cast.ToString(g.Get("APP")), "-", ""))))
 	_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
+
+	if pathx.FileExists(getApiFilePath(wd, g)) {
+		apiSpec, err := parser.Parse(filepath.Join(wd, "app", "desc", "api", cast.ToString(g.Get("APP"))+".api"))
+		if err != nil {
+			return
+		}
+		_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", apiSpec.Service.Name)))
+	}
+
 }
 
 func init() {
