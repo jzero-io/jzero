@@ -7,20 +7,32 @@ import (
 )
 
 type Config struct {
-	Zrpc    zrpc.RpcServerConf
-	Gateway gateway.GatewayConf
+	Zrpc    ZrpcConf
+	Gateway GatewayConf
 
 	JzeroConf
 }
 
-type JzeroConf struct {
-	ListenOnUnixSocket string `json:",optional"`
-	GrpcMaxConns       int    `json:",default=10000"`
+type ZrpcConf struct {
+	zrpc.RpcServerConf
 
-	Log logx.LogConf
+	MaxConns int `json:",default=10000"`
+}
+
+type GatewayConf struct {
+	gateway.GatewayConf
+
+	ListenOnUnixSocket string `json:",optional"`
+}
+
+type LogConf struct {
+	logx.LogConf
 	// only Log.Mode is file or volume take effect
 	LogToConsole bool `json:",default=true"`
+}
 
+type JzeroConf struct {
+	Log   LogConf
 	Mysql MysqlConfig
 }
 

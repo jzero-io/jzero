@@ -13,7 +13,7 @@ import (
 )
 
 func getZrpcServer(c config.Config, ctx *svc.ServiceContext) *zrpc.RpcServer {
-	s := zrpc.MustNewServer(c.Zrpc, func(grpcServer *grpc.Server) {
+	s := zrpc.MustNewServer(c.Zrpc.RpcServerConf, func(grpcServer *grpc.Server) {
 	    {{ if .RegisterServers }}{{ .RegisterServers }}{{ end }}
 
 		if c.Zrpc.Mode == service.DevMode || c.Zrpc.Mode == service.TestMode {

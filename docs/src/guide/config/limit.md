@@ -14,9 +14,7 @@ tag:
 Gateway:
   MaxConns: 100
 
-# 替换成自己的 App 名称
-App1:
-  GrpcMaxConns: 100
+GrpcMaxConns: 100
 ```
 
 由于 jzero 集成了 go-zero 三个特性

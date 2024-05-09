@@ -27,7 +27,7 @@ func Start(cfgFile string) {
 	var c config.Config
 	conf.MustLoad(cfgFile, &c, conf.UseEnv())
 	// set up logger
-	if err := logx.SetUp(c.Log); err != nil {
+	if err := logx.SetUp(c.Log.LogConf); err != nil {
 		logx.Must(err)
 	}
 
@@ -55,10 +55,10 @@ func start(ctx *svc.ServiceContext) {
 		logx.Error(err)
 	}
 
-	middlewares.RateLimit = syncx.NewLimit(ctx.Config.GrpcMaxConns)
+	middlewares.RateLimit = syncx.NewLimit(ctx.Config.Zrpc.MaxConns)
 	s.AddUnaryInterceptors(middlewares.GrpcRateLimitInterceptors)
 
-	gw := gateway.MustNewServer(ctx.Config.Gateway)
+	gw := gateway.MustNewServer(ctx.Config.Gateway.GatewayConf)
 
 	gw.Use(middlewares.WrapResponse)
 	httpx.SetErrorHandler(middlewares.GrpcErrorHandler)
@@ -71,15 +71,15 @@ func start(ctx *svc.ServiceContext) {
 
 	// listen unix
 	var unixListener net.Listener
-	if ctx.Config.ListenOnUnixSocket != "" {
-		sock := ctx.Config.ListenOnUnixSocket
-		_ = os.Remove(ctx.Config.ListenOnUnixSocket)
+	if ctx.Config.Gateway.ListenOnUnixSocket != "" {
+		sock := ctx.Config.Gateway.ListenOnUnixSocket
+		_ = os.Remove(ctx.Config.Gateway.ListenOnUnixSocket)
 		unixListener, err = net.Listen("unix", sock)
 		if err != nil {
 			panic(err)
 		}
 		go func() {
-			fmt.Printf("Starting unix server at %s...\n", ctx.Config.ListenOnUnixSocket)
+			fmt.Printf("Starting unix server at %s...\n", ctx.Config.Gateway.ListenOnUnixSocket)
 			if err := http.Serve(unixListener, gw); err != nil {
 				return
 			}
@@ -110,10 +110,10 @@ func signalHandler(ctx *svc.ServiceContext, serviceGroup *service.ServiceGroup, 
 			fmt.Println("Waiting 1 second...\nStopping rpc server and gateway server")
 			time.Sleep(time.Second)
 			serviceGroup.Stop()
-			if ctx.Config.ListenOnUnixSocket != "" {
+			if ctx.Config.Gateway.ListenOnUnixSocket != "" {
 				fmt.Println("Stopping unix server")
 				unixListener.Close()
-				_ = os.Remove(ctx.Config.ListenOnUnixSocket)
+				_ = os.Remove(ctx.Config.Gateway.ListenOnUnixSocket)
 			}
 			return
 		case syscall.SIGHUP:

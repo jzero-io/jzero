@@ -16,7 +16,7 @@ func PrintLogToConsole(c config.Config) {
 		return
 	}
 
-	if !c.LogToConsole {
+	if !c.Log.LogToConsole {
 		return
 	}
 

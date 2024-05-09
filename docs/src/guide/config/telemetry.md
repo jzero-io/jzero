@@ -11,7 +11,8 @@ tag:
 修改 config.yaml. 添加一下内容
 
 ```yaml
-Telemetry:
+Zrpc:
+  Telemetry:
   Name: "app1-rpc"
   Endpoint: "http://jaeger:14268/api/traces"
   Sampler: 1.0

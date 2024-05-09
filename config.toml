@@ -13,9 +13,9 @@
     Batcher="jaeger"
 
 [Gateway]
-  MaxConns = 100
   Name = "jzero.gw"
   Port = 8001
+  ListenOnUnixSocket = "./jzero.sock"
 
   [Gateway.Telemetry]
     Name="jzero-gw"
@@ -32,7 +32,6 @@
 
 # app config
 APP = "jzero"
-ListenOnUnixSocket = "./jzero.sock"
 [Mysql]
   Address = "${Jzero_Mysql_Address}"
   Database = "jzero"

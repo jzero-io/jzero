@@ -24,7 +24,7 @@ func Start(cfgFile string) {
 	var c config.Config
 	conf.MustLoad(cfgFile, &c)
     // set up logger
-    if err := logx.SetUp(c.Log); err != nil {
+    if err := logx.SetUp(c.Log.LogConf); err != nil {
         logx.Must(err)
     }
 
@@ -38,10 +38,10 @@ func start(ctx *svc.ServiceContext) {
 
 	s := getZrpcServer(ctx.Config, ctx)
 
-	middlewares.RateLimit = syncx.NewLimit(ctx.Config.GrpcMaxConns)
+	middlewares.RateLimit = syncx.NewLimit(ctx.Config.Zrpc.MaxConns)
 	s.AddUnaryInterceptors(middlewares.GrpcRateLimitInterceptors)
 
-	gw := gateway.MustNewServer(ctx.Config.Gateway)
+	gw := gateway.MustNewServer(ctx.Config.Gateway.GatewayConf)
 
 	gw.Use(middlewares.WrapResponse)
 	httpx.SetErrorHandler(middlewares.GrpcErrorHandler)

@@ -11,8 +11,10 @@ tag:
 修改 config.yaml. 添加一下内容
 
 ```yaml
-DevServer:
+Zrpc:
+  DevServer:
+    Enabled: true
+Gateway:
+  DevServer:
     Enabled: true
 ```
-
-## 测试 prometheus
