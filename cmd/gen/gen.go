@@ -2,7 +2,6 @@ package gen
 
 import (
 	"fmt"
-	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"os"
 	"os/signal"
 	"path"
@@ -14,16 +13,16 @@ import (
 	"github.com/jzero-io/jzero/app/pkg/mod"
 	"github.com/jzero-io/jzero/app/pkg/stringx"
 	"github.com/jzero-io/jzero/app/pkg/templatex"
+	"github.com/jzero-io/jzero/embeded"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-
-	"github.com/jzero-io/jzero/embeded"
 )
 
 var (
@@ -227,7 +226,6 @@ func removeExtraFiles(g *genius.Genius, wd string) {
 		}
 		_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", apiSpec.Service.Name)))
 	}
-
 }
 
 func init() {
