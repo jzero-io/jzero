@@ -38,7 +38,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.{{ .APP }}/config.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is project root dir config.{{ .ConfigType }} or $HOME/.{{ .APP }}/config.{{ .ConfigType }})")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -62,21 +62,15 @@ func initConfig() {
         wd, err := os.Getwd()
         cobra.CheckErr(err)
 
-        var (
-            configPath string
-            configType string
-        )
-
+        var configPath string
         if pathx.FileExists(filepath.Join(wd, "config.{{ .ConfigType }}")) {
             configPath = wd
-            configType = "{{ .ConfigType }}"
         } else {
-            configPath = filepath.Join(home, ".jzero")
-            configType = "toml"
+            configPath = filepath.Join(home, ".{{ .APP }}")
         }
 
         viper.AddConfigPath(configPath)
-        viper.SetConfigType(configType)
+        viper.SetConfigType("{{ .ConfigType }}")
         viper.SetConfigName("config")
 	}
 
