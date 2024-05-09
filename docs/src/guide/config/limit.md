@@ -11,10 +11,10 @@ tag:
 修改 config.yaml, 增加以下配置, 设置最大 qps 100
 
 ```yaml
+Zrpc:
+  MaxConns: 100
 Gateway:
   MaxConns: 100
-
-GrpcMaxConns: 100
 ```
 
 由于 jzero 集成了 go-zero 三个特性

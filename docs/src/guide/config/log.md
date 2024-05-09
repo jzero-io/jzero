@@ -17,12 +17,10 @@ Log:
   MaxBackups: 7
   MaxSize: 50
   Mode: file
+  LogToConsole: true # 将日志重定向到 console.
   Rotation: size
   ServiceName: app1
   encoding: plain
-
-App1:
-  LogToConsole: true # 将日志重定向到 console.
 ```
 
 默认配置下日志最大占用空间: 2G
