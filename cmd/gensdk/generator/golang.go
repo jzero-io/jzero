@@ -49,7 +49,7 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 
 	// parse api
 	var apiSpecs []*spec.ApiSpec
-	apiSpec, err := apiparser.Parse(filepath.Join("app", "desc", "api", g.config.APP+".api"))
+	apiSpec, err := apiparser.Parse(g.config.ApiFile)
 	if err != nil {
 		return nil, err
 	}

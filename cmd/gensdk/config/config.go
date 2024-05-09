@@ -5,4 +5,5 @@ type Config struct {
 	APP      string
 	Module   string
 	Dir      string // output dir
+	ApiFile  string // api file
 }

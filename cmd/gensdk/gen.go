@@ -1,13 +1,12 @@
 package gensdk
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/jzero-io/jzero/app/pkg/stringx"
 	"github.com/jzero-io/jzero/cmd/gensdk/config"
 	"github.com/jzero-io/jzero/cmd/gensdk/generator"
 	"github.com/jzero-io/jzero/embeded"
+	"os"
+	"path/filepath"
 
 	"github.com/jaronnie/genius"
 	"github.com/spf13/cast"
@@ -59,7 +58,8 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 
 	c := config.Config{
 		Language: Language,
-		APP:      cast.ToString(g.Get("APP")),
+		ApiFile:  filepath.Join("app", "desc", "api", cast.ToString(g.Get("APP"))+".api"),
+		APP:      stringx.ToCamel(cast.ToString(g.Get("APP"))),
 		Module:   Module,
 		Dir:      Dir,
 	}
