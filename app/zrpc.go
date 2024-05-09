@@ -19,12 +19,12 @@ import (
 )
 
 func getZrpcServer(c config.Config, ctx *svc.ServiceContext) *zrpc.RpcServer {
-	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
+	s := zrpc.MustNewServer(c.Zrpc, func(grpcServer *grpc.Server) {
 	    
 		credentialpb.RegisterCredentialServer(grpcServer, credentialsvr.NewCredentialServer(ctx))
 		machinepb.RegisterMachineServer(grpcServer, machinesvr.NewMachineServer(ctx))
 
-		if c.Mode == service.DevMode || c.Mode == service.TestMode {
+		if c.Zrpc.Mode == service.DevMode || c.Zrpc.Mode == service.TestMode {
 			reflection.Register(grpcServer)
 		}
 	})

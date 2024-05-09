@@ -1,17 +1,16 @@
-APP = "jzero"
-Key = "jzero.rpc"
-ListenOn = "0.0.0.0:8000"
-Mode = "dev"
-Name = "jzero.rpc"
+[Zrpc]
+  ListenOn = "0.0.0.0:8000"
+  Mode = "dev"
+  Name = "jzero.rpc"
 
-[DevServer]
-  Enabled = true
+  [DevServer]
+    Enabled = true
 
-[Telemetry]
-  Name="jzero-rpc"
-  Endpoint= "${Jaeger_endpoint}"
-  Sampler=1.0
-  Batcher="jaeger"
+  [Telemetry]
+    Name="jzero-rpc"
+    Endpoint= "${Jaeger_endpoint}"
+    Sampler=1.0
+    Batcher="jaeger"
 
 [Gateway]
   MaxConns = 100
@@ -31,14 +30,14 @@ Name = "jzero.rpc"
     [Gateway.Upstreams.Grpc]
       Endpoints = ["0.0.0.0:8000"]
 
-[Jzero]
-  ListenOnUnixSocket = "./jzero.sock"
-
-  [Jzero.Mysql]
-    Address = "${Jzero_Mysql_Address}"
-    Database = "jzero"
-    Password = "123456"
-    Username = "root"
+# app config
+APP = "jzero"
+ListenOnUnixSocket = "./jzero.sock"
+[Mysql]
+  Address = "${Jzero_Mysql_Address}"
+  Database = "jzero"
+  Password = "123456"
+  Username = "root"
 
 [Log]
   ServiceName = "jzero"

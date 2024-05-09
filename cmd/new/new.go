@@ -113,28 +113,28 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	err = embeded.WriteTemplateDir(filepath.Join("jzero", "app", "desc", "proto"), filepath.Join(Dir, "app", "desc", "proto"))
 	cobra.CheckErr(err)
 
-	// write config.toml
-	configTomlFile, err := templatex.ParseTemplate(map[string]interface{}{
+	// write config.yaml
+	configYamlFile, err := templatex.ParseTemplate(map[string]interface{}{
 		"APP": APP,
-	}, embeded.ReadTemplateFile(filepath.Join("jzero", "config.toml.tpl")))
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "config.yaml.tpl")))
 	cobra.CheckErr(err)
 
-	g, err := genius.NewFromToml(configTomlFile)
+	g, err := genius.NewFromYaml(configYamlFile)
 	cobra.CheckErr(err)
 
 	switch ConfigType {
 	case "toml":
+		configTomlFile, err := g.EncodeToToml()
+		cobra.CheckErr(err)
 		err = os.WriteFile(filepath.Join(Dir, "config.toml"), configTomlFile, 0o644)
 		cobra.CheckErr(err)
 	case "yaml":
-		yaml, err := g.EncodeToYaml()
-		cobra.CheckErr(err)
-		err = os.WriteFile(filepath.Join(Dir, "config.yaml"), yaml, 0o644)
+		err = os.WriteFile(filepath.Join(Dir, "config.yaml"), configYamlFile, 0o644)
 		cobra.CheckErr(err)
 	case "json":
-		json, err := g.EncodeToJSON()
+		configJsonFIle, err := g.EncodeToJSON()
 		cobra.CheckErr(err)
-		err = os.WriteFile(filepath.Join(Dir, "config.json"), json, 0o644)
+		err = os.WriteFile(filepath.Join(Dir, "config.json"), configJsonFIle, 0o644)
 		cobra.CheckErr(err)
 	}
 

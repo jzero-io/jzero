@@ -16,7 +16,7 @@ func PrintLogToConsole(c config.Config) {
 		return
 	}
 
-	if !c.Jzero.LogToConsole {
+	if !c.LogToConsole {
 		return
 	}
 

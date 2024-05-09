@@ -26,12 +26,16 @@ import (
 func Start(cfgFile string) {
 	var c config.Config
 	conf.MustLoad(cfgFile, &c, conf.UseEnv())
+	// set up logger
+	if err := logx.SetUp(c.Log); err != nil {
+		logx.Must(err)
+	}
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		c.Jzero.Mysql.Username,
-		c.Jzero.Mysql.Password,
-		c.Jzero.Mysql.Address,
-		c.Jzero.Mysql.Database)
+		c.Mysql.Username,
+		c.Mysql.Password,
+		c.Mysql.Address,
+		c.Mysql.Database)
 
 	conn := sqlx.NewSqlConn("mysql", dsn)
 	ctx := svc.NewServiceContext(c, conn)
@@ -51,7 +55,7 @@ func start(ctx *svc.ServiceContext) {
 		logx.Error(err)
 	}
 
-	middlewares.RateLimit = syncx.NewLimit(ctx.Config.Jzero.GrpcMaxConns)
+	middlewares.RateLimit = syncx.NewLimit(ctx.Config.GrpcMaxConns)
 	s.AddUnaryInterceptors(middlewares.GrpcRateLimitInterceptors)
 
 	gw := gateway.MustNewServer(ctx.Config.Gateway)
@@ -67,15 +71,15 @@ func start(ctx *svc.ServiceContext) {
 
 	// listen unix
 	var unixListener net.Listener
-	if ctx.Config.Jzero.ListenOnUnixSocket != "" {
-		sock := ctx.Config.Jzero.ListenOnUnixSocket
-		_ = os.Remove(ctx.Config.Jzero.ListenOnUnixSocket)
+	if ctx.Config.ListenOnUnixSocket != "" {
+		sock := ctx.Config.ListenOnUnixSocket
+		_ = os.Remove(ctx.Config.ListenOnUnixSocket)
 		unixListener, err = net.Listen("unix", sock)
 		if err != nil {
 			panic(err)
 		}
 		go func() {
-			fmt.Printf("Starting unix server at %s...\n", ctx.Config.Jzero.ListenOnUnixSocket)
+			fmt.Printf("Starting unix server at %s...\n", ctx.Config.ListenOnUnixSocket)
 			if err := http.Serve(unixListener, gw); err != nil {
 				return
 			}
@@ -87,7 +91,7 @@ func start(ctx *svc.ServiceContext) {
 	group.Add(gw)
 
 	go func() {
-		fmt.Printf("Starting rpc server at %s...\n", ctx.Config.ListenOn)
+		fmt.Printf("Starting rpc server at %s...\n", ctx.Config.Zrpc.ListenOn)
 		fmt.Printf("Starting gateway server at %s:%d...\n", ctx.Config.Gateway.Host, ctx.Config.Gateway.Port)
 		group.Start()
 	}()
@@ -106,10 +110,10 @@ func signalHandler(ctx *svc.ServiceContext, serviceGroup *service.ServiceGroup, 
 			fmt.Println("Waiting 1 second...\nStopping rpc server and gateway server")
 			time.Sleep(time.Second)
 			serviceGroup.Stop()
-			if ctx.Config.Jzero.ListenOnUnixSocket != "" {
+			if ctx.Config.ListenOnUnixSocket != "" {
 				fmt.Println("Stopping unix server")
 				unixListener.Close()
-				_ = os.Remove(ctx.Config.Jzero.ListenOnUnixSocket)
+				_ = os.Remove(ctx.Config.ListenOnUnixSocket)
 			}
 			return
 		case syscall.SIGHUP:

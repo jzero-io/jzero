@@ -2,14 +2,13 @@ package app
 
 import (
 	"fmt"
-	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/conf"
+    "github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/core/syncx"
 	"github.com/zeromicro/go-zero/gateway"
@@ -24,6 +23,10 @@ import (
 func Start(cfgFile string) {
 	var c config.Config
 	conf.MustLoad(cfgFile, &c)
+    // set up logger
+    if err := logx.SetUp(c.Log); err != nil {
+        logx.Must(err)
+    }
 
 	ctx := svc.NewServiceContext(c)
 	start(ctx)
@@ -35,7 +38,7 @@ func start(ctx *svc.ServiceContext) {
 
 	s := getZrpcServer(ctx.Config, ctx)
 
-	middlewares.RateLimit = syncx.NewLimit(ctx.Config.{{ .APP | FirstUpper | ToCamel }}.GrpcMaxConns)
+	middlewares.RateLimit = syncx.NewLimit(ctx.Config.GrpcMaxConns)
 	s.AddUnaryInterceptors(middlewares.GrpcRateLimitInterceptors)
 
 	gw := gateway.MustNewServer(ctx.Config.Gateway)
@@ -49,37 +52,20 @@ func start(ctx *svc.ServiceContext) {
 	// gw add api routes
 	handler.RegisterHandlers(gw.Server, ctx)
 
-	// listen unix
-	var unixListener net.Listener
-	var err error
-	if ctx.Config.{{ .APP | FirstUpper | ToCamel }}.ListenOnUnixSocket != "" {
-		sock := ctx.Config.{{ .APP | FirstUpper | ToCamel }}.ListenOnUnixSocket
-		unixListener, err = net.Listen("unix", sock)
-		if err != nil {
-			panic(err)
-		}
-		go func() {
-			fmt.Printf("Starting unix server at %s...\n", ctx.Config.{{ .APP | FirstUpper | ToCamel }}.ListenOnUnixSocket)
-			if err := http.Serve(unixListener, gw); err != nil {
-				return
-			}
-		}()
-	}
-
 	group := service.NewServiceGroup()
 	group.Add(s)
 	group.Add(gw)
 
 	go func() {
-		fmt.Printf("Starting rpc server at %s...\n", ctx.Config.ListenOn)
+		fmt.Printf("Starting rpc server at %s...\n", ctx.Config.Zrpc.ListenOn)
 		fmt.Printf("Starting gateway server at %s:%d...\n", ctx.Config.Gateway.Host, ctx.Config.Gateway.Port)
 		group.Start()
 	}()
 
-	signalHandler(ctx, group, unixListener)
+	signalHandler(ctx, group)
 }
 
-func signalHandler(ctx *svc.ServiceContext, serviceGroup *service.ServiceGroup, unixListener net.Listener) {
+func signalHandler(ctx *svc.ServiceContext, serviceGroup *service.ServiceGroup) {
 	// signal handler
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
@@ -90,11 +76,6 @@ func signalHandler(ctx *svc.ServiceContext, serviceGroup *service.ServiceGroup, 
 			fmt.Println("Waiting 1 second...\nStopping rpc server and gateway server")
 			time.Sleep(time.Second)
 			serviceGroup.Stop()
-			if ctx.Config.{{ .APP | FirstUpper | ToCamel }}.ListenOnUnixSocket != "" {
-				fmt.Println("Stopping unix server")
-				unixListener.Close()
-				_ = os.Remove(ctx.Config.{{ .APP | FirstUpper | ToCamel }}.ListenOnUnixSocket)
-			}
 			return
 		case syscall.SIGHUP:
 		default:
