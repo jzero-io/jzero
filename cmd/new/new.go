@@ -214,8 +214,9 @@ func NewProject(_ *cobra.Command, _ []string) error {
 
 	// write .goreleaser.yaml
 	goreleaserBytes := embeded.ReadTemplateFile(filepath.Join("jzero", "goreleaser.yaml.tpl"))
-	newGoreleaserBytes := bytes.ReplaceAll(goreleaserBytes, []byte("{{ .APP }}"), []byte(APP))
-	err = os.WriteFile(filepath.Join(Dir, ".goreleaser.yaml"), newGoreleaserBytes, 0o644)
+	goreleaserBytes = bytes.ReplaceAll(goreleaserBytes, []byte("{{ .APP }}"), []byte(APP))
+	goreleaserBytes = bytes.ReplaceAll(goreleaserBytes, []byte("{{ .Module }}"), []byte(Module))
+	err = os.WriteFile(filepath.Join(Dir, ".goreleaser.yaml"), goreleaserBytes, 0o644)
 	cobra.CheckErr(err)
 
 	// write Taskfile.yml

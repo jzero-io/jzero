@@ -8,6 +8,10 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
+    ldflags:
+      - -X {{ .Module }}/cmd.Version={{.Version}}
+      - -X {{ .Module }}/cmd.Commit={{.Commit}}
+      - -X {{ .Module }}/cmd.Date={{.Date}}
     goos:
       - linux
       - windows
