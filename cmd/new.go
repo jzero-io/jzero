@@ -7,13 +7,14 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/jzero-io/jzero/cmd/new"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-	"os"
-	"path/filepath"
 )
 
 // newCmd represents the new command
