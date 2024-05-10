@@ -155,42 +155,43 @@ func Gen(_ *cobra.Command, _ []string) error {
 	}
 
 	// 生成 app/zrpc.go
-	fmt.Printf("%s to generate app/zrpc.go\n", color.WithColor("Start", color.FgGreen))
-	zrpcFile, err := templatex.ParseTemplate(map[string]interface{}{
-		"Module":          moduleStruct.Path,
-		"APP":             cast.ToString(g.Get("APP")),
-		"ServerImports":   serverImports,
-		"PbImports":       pbImports,
-		"RegisterServers": registerServers,
-	}, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "zrpc.go.tpl")))
-	cobra.CheckErr(err)
-	err = os.WriteFile(filepath.Join(wd, "app", "zrpc.go"), zrpcFile, 0o644)
-	cobra.CheckErr(err)
-	fmt.Printf("%s", color.WithColor("Done\n", color.FgGreen))
+	if pathx.FileExists(filepath.Join(wd, "app", "zrpc.go")) {
+		fmt.Printf("%s to generate app/zrpc.go\n", color.WithColor("Start", color.FgGreen))
+		zrpcFile, err := templatex.ParseTemplate(map[string]interface{}{
+			"Module":          moduleStruct.Path,
+			"APP":             cast.ToString(g.Get("APP")),
+			"ServerImports":   serverImports,
+			"PbImports":       pbImports,
+			"RegisterServers": registerServers,
+		}, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "zrpc.go.tpl")))
+		cobra.CheckErr(err)
+		err = os.WriteFile(filepath.Join(wd, "app", "zrpc.go"), zrpcFile, 0o644)
+		cobra.CheckErr(err)
+		fmt.Printf("%s", color.WithColor("Done\n", color.FgGreen))
 
-	// 修改 config.toml protosets 内容
-	// 检测是否需要修改 config.toml. 以及让用户选择是否自动更新文件
-	existProtosets := g.Get("Gateway.Upstreams.0.ProtoSets")
-	if len(lo.Intersect(cast.ToStringSlice(existProtosets), protosets)) != len(protosets) {
-		var in string
-		fmt.Printf("检测到 config.%s 中 Gateway.Upstreams.0.ProtoSets 配置需要更新. 是否自动更新 y/n. 更新需谨慎, 会将注释删掉\n", configType)
-		_, _ = fmt.Scanln(&in)
-		switch {
-		case strings.EqualFold(in, "y"):
-			fmt.Printf("%s to update config.%s\n", color.WithColor("Start", color.FgGreen), configType)
-			err = g.Set("Gateway.Upstreams.0.ProtoSets", protosets)
-			cobra.CheckErr(err)
-			configBytes, err := g.EncodeToType(configType)
-			cobra.CheckErr(err)
-			err = os.WriteFile(filepath.Join(wd, "config."+configType), configBytes, 0o644)
-			cobra.CheckErr(err)
-			fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
-		case strings.EqualFold(in, "n"):
-			fmt.Printf("请手动更新 Gateway.Upstreams.0.ProtoSets 配置\n配置该值为: \n%s\n",
-				color.WithColor(fmt.Sprintf("%v", protosets), color.FgGreen))
+		// 修改 config.toml protosets 内容
+		// 检测是否需要修改 config.toml. 以及让用户选择是否自动更新文件
+		existProtosets := g.Get("Gateway.Upstreams.0.ProtoSets")
+		if len(lo.Intersect(cast.ToStringSlice(existProtosets), protosets)) != len(protosets) {
+			var in string
+			fmt.Printf("检测到 config.%s 中 Gateway.Upstreams.0.ProtoSets 配置需要更新. 是否自动更新 y/n. 更新需谨慎, 会将注释删掉\n", configType)
+			_, _ = fmt.Scanln(&in)
+			switch {
+			case strings.EqualFold(in, "y"):
+				fmt.Printf("%s to update config.%s\n", color.WithColor("Start", color.FgGreen), configType)
+				err = g.Set("Gateway.Upstreams.0.ProtoSets", protosets)
+				cobra.CheckErr(err)
+				configBytes, err := g.EncodeToType(configType)
+				cobra.CheckErr(err)
+				err = os.WriteFile(filepath.Join(wd, "config."+configType), configBytes, 0o644)
+				cobra.CheckErr(err)
+				fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
+			case strings.EqualFold(in, "n"):
+				fmt.Printf("请手动更新 Gateway.Upstreams.0.ProtoSets 配置\n配置该值为: \n%s\n",
+					color.WithColor(fmt.Sprintf("%v", protosets), color.FgGreen))
+			}
 		}
 	}
-
 	return nil
 }
 
