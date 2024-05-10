@@ -11,6 +11,6 @@ COPY dist/{{ .APP }}_linux_arm64/{{ .APP }} /app/{{ .APP }}
 COPY config.{{ .ConfigType }} /app/config.{{ .ConfigType }}
 COPY .protosets /app/.protosets
 
-EXPOSE 8001 8002
+EXPOSE 8000 8001
 
 ENTRYPOINT ["./{{ .APP }}", "server"]
