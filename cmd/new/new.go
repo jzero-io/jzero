@@ -242,7 +242,7 @@ func CheckWrite(path string, bytes []byte) error {
 }
 
 func checkWrite(path string, bytes []byte) error {
-	if bytes == nil || len(bytes) == 0 {
+	if len(bytes) == 0 {
 		return nil
 	}
 	err := os.WriteFile(path, bytes, 0o644)
