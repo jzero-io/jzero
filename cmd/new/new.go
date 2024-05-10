@@ -78,9 +78,7 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 	err = checkWrite(filepath.Join(Dir, "cmd", "version.go"), versionCmdFile)
 	cobra.CheckErr(err)
-	// mkdir app dir
-	err = os.MkdirAll(filepath.Join(Dir, "app"), 0o755)
-	cobra.CheckErr(err)
+
 	// touch app/server.go
 	serverFile, err := templatex.ParseTemplate(map[string]interface{}{
 		"Module": Module,
@@ -145,9 +143,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 
 	// ################# start gen config ###################
 	// write app/internal/config/config.go
-	err = os.MkdirAll(filepath.Join(Dir, "app", "internal", "config"), 0o755)
-	cobra.CheckErr(err)
-
 	configGoFile, err := templatex.ParseTemplate(map[string]interface{}{
 		"APP": APP,
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "internal", "config", "config.go.tpl")))
@@ -158,8 +153,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 
 	// ################# start gen middlewares ###################
 	// write app/middlewares/response.go
-	err = os.MkdirAll(filepath.Join(Dir, "app", "middlewares"), 0o755)
-	cobra.CheckErr(err)
 	err = checkWrite(filepath.Join(Dir, "app", "middlewares", "response.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "app", "middlewares", "response.go.tpl")))
 	cobra.CheckErr(err)
 
