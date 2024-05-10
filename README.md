@@ -10,7 +10,7 @@
 
 基于 go-zero 框架定制的企业级后端代码框架 jzero
 
-## 特性
+## Features
 
 * 企业级代码规范
 * grpc, grpc-gateway, api 三合一, 满足绝大部分场景业务需要
@@ -24,7 +24,7 @@
 * 支持链路追踪, 监控等, 快速定位问题
 * 所有工具链跨平台支持
 
-## [快速开始](https://jzero.jaronnie.com/#快速开始)
+## [Quick Start](https://jzero.jaronnie.com/#快速开始)
 
 ![2024-04-30_10-10-52](https://oss.jaronnie.com/2024-04-30_10-10-52.gif)
 
