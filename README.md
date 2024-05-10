@@ -27,3 +27,28 @@
 ## [快速开始](https://jzero.jaronnie.com/#快速开始)
 
 ![2024-04-30_10-10-52](https://oss.jaronnie.com/2024-04-30_10-10-52.gif)
+
+### new project with grpc, gateway, api, cli
+
+```shell
+jzero new simple
+```
+
+### new project with only grpc
+
+```shell
+jzero new simplerpc --branch rpc
+```
+
+### new project with only api
+
+```shell
+jzero new simpleapi --branch api
+```
+
+### new project with only cli
+
+```shell
+jzero new simplecli --branch cli
+```
+
