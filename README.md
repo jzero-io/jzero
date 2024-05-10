@@ -52,3 +52,6 @@ jzero new simpleapi --branch api
 jzero new simplecli --branch cli
 ```
 
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
