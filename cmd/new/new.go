@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/rinchsan/gosimports"
+
 	"github.com/jaronnie/genius"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -240,14 +242,26 @@ func NewProject(_ *cobra.Command, _ []string) error {
 }
 
 func checkWrite(path string, bytes []byte) error {
+	var err error
 	if len(bytes) == 0 {
 		return nil
 	}
 	if !pathx.FileExists(filepath.Join(path)) {
-		err := os.MkdirAll(filepath.Dir(path), 0o755)
+		err = os.MkdirAll(filepath.Dir(path), 0o755)
 		if err != nil {
 			return err
 		}
 	}
-	return os.WriteFile(path, bytes, 0o644)
+
+	bytesFormat := bytes
+	// if is go file. format it
+	// format template
+	if filepath.Ext(path) == ".go" {
+		bytesFormat, err = gosimports.Process("", bytes, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	return os.WriteFile(path, bytesFormat, 0o644)
 }
