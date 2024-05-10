@@ -20,6 +20,9 @@ var (
 	APP    string
 	// ConfigType config type
 	ConfigType string
+	// Remote templates repo
+	Remote string
+	Branch string
 
 	Version string
 )

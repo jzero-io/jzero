@@ -6,9 +6,14 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
+	"fmt"
 	"github.com/jzero-io/jzero/cmd/new"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"
+	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"os"
+	"path/filepath"
 )
 
 // newCmd represents the new command
@@ -27,6 +32,22 @@ var newCmd = &cobra.Command{
 		if new.Dir == "" {
 			new.Dir = args[0]
 		}
+
+		if new.Remote != "" && new.Branch != "" {
+			// clone to local
+			wd, _ := os.UserHomeDir()
+			_ = os.MkdirAll(filepath.Join(wd, ".jzero"), 0o755)
+
+			fmt.Printf("Using cache: %s", filepath.Join(wd, ".jzero", "templates", new.Branch))
+			if !pathx.FileExists(filepath.Join(wd, ".jzero", "templates", new.Branch)) {
+				fmt.Printf("Cloning into '%s/templates/api', please wait...\n", filepath.Join(wd, ".jzero"))
+				_, err := execx.Run(fmt.Sprintf("git clone %s -b %s templates/%s", new.Remote, new.Branch, new.Branch), filepath.Join(wd, ".jzero"))
+				cobra.CheckErr(err)
+				fmt.Println("Clone success", filepath.Join(wd, ".jzero"))
+			}
+
+			embeded.Home = filepath.Join(wd, ".jzero", "templates", new.Branch)
+		}
 	},
 	RunE: new.NewProject,
 	Args: cobra.ExactArgs(1),
@@ -36,9 +57,9 @@ func init() {
 	rootCmd.AddCommand(newCmd)
 
 	newCmd.Flags().StringVarP(&new.Module, "module", "m", "", "set go module")
-
 	newCmd.Flags().StringVarP(&new.Dir, "dir", "d", "", "set output dir")
-
 	newCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set home dir")
 	newCmd.Flags().StringVarP(&new.ConfigType, "config-type", "", "yaml", "set config type, default toml")
+	newCmd.Flags().StringVarP(&new.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
+	newCmd.Flags().StringVarP(&new.Branch, "branch", "b", "main", "remote templates repo branch")
 }
