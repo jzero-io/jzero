@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jhump/protoreflect/desc"
+
 	"github.com/pkg/errors"
 
 	"github.com/jhump/protoreflect/desc/protoparse"
@@ -43,10 +45,6 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 
 	g.wd = wd
 
-	// parse proto
-	var protoParser protoparse.Parser
-	protoParser.ImportPaths = []string{filepath.Join("app", "desc", "proto")}
-
 	// parse api
 	var apiSpecs []*spec.ApiSpec
 	apiSpec, err := apiparser.Parse(g.config.ApiFile)
@@ -59,9 +57,17 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	if err != nil {
 		return nil, err
 	}
-	fds, err := protoParser.ParseFiles(protoFiles...)
-	if err != nil {
-		return nil, err
+
+	var fds []*desc.FileDescriptor
+
+	// parse proto
+	var protoParser protoparse.Parser
+	if len(protoFiles) > 0 {
+		protoParser.ImportPaths = []string{filepath.Join("app", "desc", "proto")}
+		fds, err = protoParser.ParseFiles(protoFiles...)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	rhis, err := jparser.Parse(g.config, fds, apiSpecs)
@@ -105,12 +111,14 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 		}
 		files = append(files, apiTypesFile)
 
-		// gen pb model
-		pbFiles, err := g.genPbTypesModel()
-		if err != nil {
-			return nil, err
+		if len(protoFiles) > 0 {
+			// gen pb model
+			pbFiles, err := g.genPbTypesModel()
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, pbFiles...)
 		}
-		files = append(files, pbFiles...)
 
 		for _, resource := range getScopeResources(rhis[vars.Scope(scope)]) {
 			scopeResourcesFiles, err := g.genScopeResources(rhis, scope, resource)

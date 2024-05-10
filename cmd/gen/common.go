@@ -16,7 +16,7 @@ func GetProtoDir(wd string) ([]os.DirEntry, error) {
 func GetProtoFilenames(wd string) ([]string, error) {
 	protoDir, err := GetProtoDir(wd)
 	if err != nil {
-		return nil, err
+		return nil, nil
 	}
 
 	var protoFilenames []string
