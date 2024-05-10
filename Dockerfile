@@ -17,6 +17,6 @@ COPY dist/jzero_linux_amd64_v1/jzero /app/jzero
 COPY config.toml /app/config.toml
 COPY .protosets /app/.protosets
 
-EXPOSE 8001 8002
+EXPOSE 8000 8001
 
 ENTRYPOINT ["./jzero"]
