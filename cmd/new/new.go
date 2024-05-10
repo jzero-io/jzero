@@ -3,6 +3,7 @@ package new
 import (
 	"bytes"
 	"fmt"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"os"
 	"path/filepath"
 
@@ -103,7 +104,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 		cobra.CheckErr(err)
 	}
 
-	err = os.MkdirAll(filepath.Join(Dir, "app", "desc", "api"), 0o755)
 	cobra.CheckErr(err)
 	// touch app/desc/api/{{.APP}}.api
 	err = checkWrite(filepath.Join(Dir, "app", "desc", "api", APP+".api"), embeded.ReadTemplateFile(filepath.Join("jzero", "app", "desc", "api", "jzero.api.tpl")))
@@ -181,7 +181,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	// ################# end gen middlewares ###################
 
 	// write app/internal/handler/myroutes.go
-	_ = os.MkdirAll(filepath.Join(Dir, "app", "internal", "handler"), 0o755)
 	myroutesFile, err := templatex.ParseTemplate(map[string]interface{}{
 		"Module": Module,
 	}, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "internal", "handler", "myroutes.go.tpl")))
@@ -240,14 +239,15 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-func CheckWrite(path string, bytes []byte) error {
-	return checkWrite(path, bytes)
-}
-
 func checkWrite(path string, bytes []byte) error {
 	if len(bytes) == 0 {
 		return nil
 	}
-	err := os.WriteFile(path, bytes, 0o644)
-	return err
+	if !pathx.FileExists(filepath.Join(path)) {
+		err := os.MkdirAll(filepath.Dir(path), 0o755)
+		if err != nil {
+			return err
+		}
+	}
+	return os.WriteFile(path, bytes, 0o644)
 }

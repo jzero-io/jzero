@@ -39,12 +39,13 @@ var newCmd = &cobra.Command{
 			wd, _ := os.UserHomeDir()
 			_ = os.MkdirAll(filepath.Join(wd, ".jzero"), 0o755)
 
-			fmt.Printf("Using cache: %s", filepath.Join(wd, ".jzero", "templates", new.Branch))
 			if !pathx.FileExists(filepath.Join(wd, ".jzero", "templates", new.Branch)) {
 				fmt.Printf("Cloning into '%s/templates/api', please wait...\n", filepath.Join(wd, ".jzero"))
 				_, err := execx.Run(fmt.Sprintf("git clone %s -b %s templates/%s", new.Remote, new.Branch, new.Branch), filepath.Join(wd, ".jzero"))
 				cobra.CheckErr(err)
-				fmt.Println("Clone success", filepath.Join(wd, ".jzero"))
+				fmt.Println("Clone success")
+			} else {
+				fmt.Printf("Using cache: %s\n", filepath.Join(wd, ".jzero", "templates", new.Branch))
 			}
 
 			embeded.Home = filepath.Join(wd, ".jzero", "templates", new.Branch)
@@ -62,5 +63,5 @@ func init() {
 	newCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set home dir")
 	newCmd.Flags().StringVarP(&new.ConfigType, "config-type", "", "yaml", "set config type, default toml")
 	newCmd.Flags().StringVarP(&new.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
-	newCmd.Flags().StringVarP(&new.Branch, "branch", "b", "main", "remote templates repo branch")
+	newCmd.Flags().StringVarP(&new.Branch, "branch", "b", "", "remote templates repo branch")
 }
