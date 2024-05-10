@@ -3,13 +3,13 @@ package new
 import (
 	"bytes"
 	"fmt"
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"os"
 	"path/filepath"
 
 	"github.com/jaronnie/genius"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
