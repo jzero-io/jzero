@@ -1,4 +1,4 @@
-import{_ as e}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as n,c as a,e as t}from"./app-FPj7iqWP.js";const s={},o=t(`<p>修改 config.yaml. 添加一下内容</p><div class="language-yaml line-numbers-mode" data-ext="yml" data-title="yml"><pre class="language-yaml"><code><span class="token key atrule">Zrpc</span><span class="token punctuation">:</span>
+import{_ as e}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as n,c as a,e as t}from"./app-DOHQ6ClH.js";const s={},o=t(`<p>修改 config.yaml. 添加一下内容</p><div class="language-yaml line-numbers-mode" data-ext="yml" data-title="yml"><pre class="language-yaml"><code><span class="token key atrule">Zrpc</span><span class="token punctuation">:</span>
   <span class="token key atrule">Telemetry</span><span class="token punctuation">:</span>
   <span class="token key atrule">Name</span><span class="token punctuation">:</span> <span class="token string">&quot;app1-rpc&quot;</span>
   <span class="token key atrule">Endpoint</span><span class="token punctuation">:</span> <span class="token string">&quot;http://jaeger:14268/api/traces&quot;</span>
