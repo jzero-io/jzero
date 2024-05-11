@@ -18,6 +18,13 @@ func ReadTemplateFile(filename string) []byte {
 	path := filepath.ToSlash(filepath.Join(".template", filename))
 	data, err := Template.ReadFile(path)
 	if err != nil {
+		// 默认模板没有此文件, 但是用户自己的模板有这个文件
+		if Home != "" {
+			file, err := os.ReadFile(filepath.Join(Home, filename))
+			if err == nil {
+				return file
+			}
+		}
 		return nil
 	}
 	if Home != "" {
