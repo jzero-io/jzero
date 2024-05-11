@@ -30,6 +30,22 @@ func ReadTemplateFile(filename string) []byte {
 	return data
 }
 
+func ReadTemplateDir(dirname string) []os.DirEntry {
+	path := filepath.ToSlash(filepath.Join(".template", dirname))
+	data, err := Template.ReadDir(path)
+	if err != nil {
+		return nil
+	}
+	if Home != "" {
+		file, err := os.ReadDir(filepath.Join(Home, dirname))
+		if err != nil {
+			return data
+		}
+		data = file
+	}
+	return data
+}
+
 func WriteTemplateDir(sourceDir, targetDir string) error {
 	err := os.MkdirAll(targetDir, 0o755)
 	if err != nil {

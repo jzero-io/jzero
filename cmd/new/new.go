@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jaronnie/genius"
 	"github.com/rinchsan/gosimports"
@@ -54,23 +55,16 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 	err = checkWrite(filepath.Join(Dir, "main.go"), mainFile)
 	cobra.CheckErr(err)
-	// mkdir cmd dir
-	cobra.CheckErr(err)
-	// touch cmd/root.go
-	rootCmdFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "cmd", "root.go.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "cmd", "root.go"), rootCmdFile)
-	cobra.CheckErr(err)
-	// touch cmd/server.go
-	serverCmdFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "cmd", "server.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "cmd", "server.go"), serverCmdFile)
-	cobra.CheckErr(err)
-	// touch cmd/version.go
-	versionCmdFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "cmd", "version.go.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "cmd", "version.go"), versionCmdFile)
-	cobra.CheckErr(err)
+
+	// write cmd dir
+	cmdDir := embeded.ReadTemplateDir(filepath.Join("jzero", "cmd"))
+	for _, file := range cmdDir {
+		cmdFileBytes, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "cmd", file.Name())))
+		cobra.CheckErr(err)
+		cmdFileName := strings.TrimRight(file.Name(), ".tpl")
+		err = checkWrite(filepath.Join(Dir, "cmd", cmdFileName), cmdFileBytes)
+		cobra.CheckErr(err)
+	}
 
 	// touch app/server.go
 	serverFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "server.go.tpl")))
@@ -89,7 +83,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 		cobra.CheckErr(err)
 	}
 
-	cobra.CheckErr(err)
 	// touch app/desc/api/{{.APP}}.api
 	err = checkWrite(filepath.Join(Dir, "app", "desc", "api", APP+".api"), embeded.ReadTemplateFile(filepath.Join("jzero", "app", "desc", "api", "jzero.api.tpl")))
 	cobra.CheckErr(err)
