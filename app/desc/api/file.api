@@ -1,11 +1,11 @@
 syntax = "v1"
 
 type DownloadRequest {
-  File string `path:"file"`
+	File string `path:"file"`
 }
 
 type UploadResponse {
-  Code int `json:"code"`
+	Code int `json:"code"`
 }
 
 @server (
@@ -14,8 +14,9 @@ type UploadResponse {
 )
 service jzero {
 	@handler DownloadHandler
-	get /static/:file(DownloadRequest)
+	get /static/:file (DownloadRequest)
 
 	@handler UploadHandler
-  	post /upload returns (UploadResponse)
+	post /upload returns (UploadResponse)
 }
+

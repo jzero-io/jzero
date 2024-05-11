@@ -1,32 +1,33 @@
 syntax = "v1"
 
 type pathRequest {
-    Name string `path:"name"`
+	Name string `path:"name"`
 }
 
 type paramRequest {
-    Name string `form:"name"`
+	Name string `form:"name"`
 }
 
 type postRequest {
-    Name string `json:"name"`
+	Name string `json:"name"`
 }
 
 type response {
-    Message string
+	Message string
 }
 
-@server(
-    prefix: /api/v1
-    group: hello
+@server (
+	prefix: /api/v1
+	group:  hello
 )
 service jzero {
-    @handler HelloPathHandler
-    get /hello/:name (pathRequest) returns (response)
+	@handler HelloPathHandler
+	get /hello/:name (pathRequest) returns (response)
 
-    @handler HelloParamHandler
-    get /hello (paramRequest) returns (response)
+	@handler HelloParamHandler
+	get /hello (paramRequest) returns (response)
 
-    @handler HelloPostHandler
-    post /hello (postRequest) returns (response)
+	@handler HelloPostHandler
+	post /hello (postRequest) returns (response)
 }
+

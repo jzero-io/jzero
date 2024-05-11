@@ -74,9 +74,6 @@ func Gen(_ *cobra.Command, _ []string) error {
 	protoDir, err := GetProtoDir(wd)
 	cobra.CheckErr(err)
 
-	// api file path
-	apiFilePath := getApiFilePath(wd, g)
-
 	var protosets []string
 	var serverImports ImportLines
 	var pbImports ImportLines
@@ -87,12 +84,12 @@ func Gen(_ *cobra.Command, _ []string) error {
 
 	// 正常删除无用文件夹
 	defer func() {
-		removeExtraFiles(g, wd)
+		removeExtraFiles(wd)
 		os.Exit(0)
 	}()
 
 	// 异常删除无用文件夹
-	go extraFileHandler(g, wd)
+	go extraFileHandler(wd)
 
 	for _, v := range protoDir {
 		if v.IsDir() {
@@ -129,10 +126,10 @@ func Gen(_ *cobra.Command, _ []string) error {
 	}
 
 	// 生成 api 代码
-	if pathx.FileExists(apiFilePath) {
-		fmt.Printf("%s to generate api code.\n%s api file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), apiFilePath)
-		command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", apiFilePath, filepath.Join(embeded.Home, "go-zero"))
-		_, err = execx.Run(command, wd)
+	apiDirName := filepath.Join(wd, "app", "desc", "api")
+	if pathx.FileExists(apiDirName) {
+		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
+		err = generateApiCode(wd, apiDirName)
 		cobra.CheckErr(err)
 		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
@@ -197,15 +194,14 @@ func Gen(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-func extraFileHandler(g *genius.Genius, wd string) {
-	// signal handler
+func extraFileHandler(wd string) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	for {
 		s := <-c
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-			removeExtraFiles(g, wd)
+			removeExtraFiles(wd)
 			os.Exit(-1)
 		case syscall.SIGHUP:
 		default:
@@ -214,21 +210,58 @@ func extraFileHandler(g *genius.Genius, wd string) {
 	}
 }
 
-func getApiFilePath(wd string, g *genius.Genius) string {
-	return filepath.Join(wd, "app", "desc", "api", cast.ToString(g.Get("APP"))+".api")
+func getApiServiceName(apiDirName string) string {
+	if pathx.FileExists(apiDirName) {
+		apiDir, err := os.ReadDir(apiDirName)
+		if err != nil {
+			return ""
+		}
+		for _, file := range apiDir {
+			if file.IsDir() {
+				return getApiServiceName(filepath.Join(apiDirName, file.Name()))
+			} else {
+				if filepath.Ext(file.Name()) != ".api" {
+					continue
+				}
+				apiSpec, err := parser.Parse(filepath.Join(apiDirName, file.Name()))
+				if err != nil {
+					cobra.CheckErr(err)
+				}
+				if apiSpec.Service.Name != "" {
+					return apiSpec.Service.Name
+				}
+			}
+		}
+
+	}
+	return ""
 }
 
-func removeExtraFiles(g *genius.Genius, wd string) {
-	_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", strings.ReplaceAll(cast.ToString(g.Get("APP")), "-", ""))))
-	_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
-
-	if pathx.FileExists(getApiFilePath(wd, g)) {
-		apiSpec, err := parser.Parse(filepath.Join(wd, "app", "desc", "api", cast.ToString(g.Get("APP"))+".api"))
-		if err != nil {
-			return
-		}
-		_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", apiSpec.Service.Name)))
+func generateApiCode(wd string, apiDir string) error {
+	dir, err := os.ReadDir(apiDir)
+	if err != nil {
+		return err
 	}
+	for _, file := range dir {
+		if file.IsDir() {
+			err = generateApiCode(wd, filepath.Join(apiDir, file.Name()))
+			if err != nil {
+				return err
+			}
+		} else {
+			fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), filepath.Join(apiDir, file.Name()))
+			command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", filepath.Join(apiDir, file.Name()), filepath.Join(embeded.Home, "go-zero"))
+			if _, err := execx.Run(command, wd); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func removeExtraFiles(wd string) {
+	_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
+	_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", getApiServiceName(filepath.Join(wd, "app", "desc", "api")))))
 }
 
 func init() {

@@ -59,6 +59,9 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	// write cmd dir
 	cmdDir := embeded.ReadTemplateDir(filepath.Join("jzero", "cmd"))
 	for _, file := range cmdDir {
+		if file.IsDir() {
+			continue
+		}
 		cmdFileBytes, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "cmd", file.Name())))
 		cobra.CheckErr(err)
 		cmdFileName := strings.TrimRight(file.Name(), ".tpl")
@@ -99,14 +102,18 @@ func NewProject(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	// touch app/desc/api/{{.APP}}.api
-	err = checkWrite(filepath.Join(Dir, "app", "desc", "api", APP+".api"), embeded.ReadTemplateFile(filepath.Join("jzero", "app", "desc", "api", "jzero.api.tpl")))
-	cobra.CheckErr(err)
-	// touch app/desc/api/hello.api
-	helloApiFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "desc", "api", "hello.api.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "app", "desc", "api", "hello.api"), helloApiFile)
-	cobra.CheckErr(err)
+	// write app/desc/api
+	apiDir := embeded.ReadTemplateDir(filepath.Join("jzero", "app", "desc", "api"))
+	for _, file := range apiDir {
+		if file.IsDir() {
+			continue
+		}
+		apiFileBytes, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "desc", "api", file.Name())))
+		cobra.CheckErr(err)
+		apiFileName := strings.TrimRight(file.Name(), ".tpl")
+		err = checkWrite(filepath.Join(Dir, "app", "desc", "api", apiFileName), apiFileBytes)
+		cobra.CheckErr(err)
+	}
 
 	// write config.yaml
 	configYamlFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "config.yaml.tpl")))
@@ -139,6 +146,9 @@ func NewProject(_ *cobra.Command, _ []string) error {
 
 	middlewareDir := embeded.ReadTemplateDir(filepath.Join("jzero", "app", "middlewares"))
 	for _, file := range middlewareDir {
+		if file.IsDir() {
+			continue
+		}
 		middlewareFileBytes, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "middlewares", file.Name())))
 		cobra.CheckErr(err)
 		middlewareFileName := strings.TrimRight(file.Name(), ".tpl")
