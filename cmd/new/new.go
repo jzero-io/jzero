@@ -124,24 +124,14 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	// ################# end gen config ###################
 
 	// ################# start gen middlewares ###################
-	// write app/middlewares/response.go
-	err = checkWrite(filepath.Join(Dir, "app", "middlewares", "response.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "app", "middlewares", "response.go.tpl")))
-	cobra.CheckErr(err)
-
-	// write app/middlewares/errors.go
-	err = checkWrite(filepath.Join(Dir, "app", "middlewares", "errors.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "app", "middlewares", "errors.go.tpl")))
-	cobra.CheckErr(err)
-
-	// write app/middlewares/grpc_rate_limit.go
-	err = checkWrite(filepath.Join(Dir, "app", "middlewares", "grpc_rate_limit.go"), embeded.ReadTemplateFile(filepath.Join("jzero", "app", "middlewares", "grpc_rate_limit.go.tpl")))
-	cobra.CheckErr(err)
-
-	// write app/middlewares/logs.go
-	logsMiddlewareFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "middlewares", "logs.go.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "app", "middlewares", "logs.go"), logsMiddlewareFile)
-	cobra.CheckErr(err)
-
+	middlewareDir := embeded.ReadTemplateDir(filepath.Join("jzero", "app", "middlewares"))
+	for _, file := range middlewareDir {
+		middlewareFileBytes, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "middlewares", file.Name())))
+		cobra.CheckErr(err)
+		middlewareFileName := strings.TrimRight(file.Name(), ".tpl")
+		err = checkWrite(filepath.Join(Dir, "app", "middlewares", middlewareFileName), middlewareFileBytes)
+		cobra.CheckErr(err)
+	}
 	// ################# end gen middlewares ###################
 
 	// write app/internal/handler/myroutes.go
