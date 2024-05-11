@@ -28,9 +28,9 @@ func getVersion(_ *cobra.Command, _ []string) error {
 	var versionBuffer bytes.Buffer
 
 	if Version != "" {
-		versionBuffer.WriteString(fmt.Sprintf("jzero version %s %s/%s\n", Version, runtime.GOOS, runtime.GOARCH))
+		versionBuffer.WriteString(fmt.Sprintf("{{ .APP }} version %s %s/%s\n", Version, runtime.GOOS, runtime.GOARCH))
 	} else {
-		versionBuffer.WriteString(fmt.Sprintf("jzero version %s %s/%s\n", "unknown", runtime.GOOS, runtime.GOARCH))
+		versionBuffer.WriteString(fmt.Sprintf("{{ .APP }} version %s %s/%s\n", "unknown", runtime.GOOS, runtime.GOARCH))
 	}
 
 	versionBuffer.WriteString(fmt.Sprintf("Go version %s\n", runtime.Version()))
