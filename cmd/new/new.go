@@ -1,7 +1,6 @@
 package new
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -160,19 +159,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	dockerFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "Dockerfile.tpl")))
 	cobra.CheckErr(err)
 	err = checkWrite(filepath.Join(Dir, "Dockerfile"), dockerFile)
-	cobra.CheckErr(err)
-
-	// write Dockerfile-arm64
-	dockerArm64File, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "Dockerfile-arm64.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "Dockerfile-arm64"), dockerArm64File)
-	cobra.CheckErr(err)
-
-	// write .goreleaser.yaml
-	goreleaserBytes := embeded.ReadTemplateFile(filepath.Join("jzero", "goreleaser.yaml.tpl"))
-	goreleaserBytes = bytes.ReplaceAll(goreleaserBytes, []byte("{{ .APP }}"), []byte(APP))
-	goreleaserBytes = bytes.ReplaceAll(goreleaserBytes, []byte("{{ .Module }}"), []byte(Module))
-	err = checkWrite(filepath.Join(Dir, ".goreleaser.yaml"), goreleaserBytes)
 	cobra.CheckErr(err)
 
 	// write Taskfile.yml
