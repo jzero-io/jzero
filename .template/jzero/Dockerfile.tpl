@@ -13,6 +13,7 @@ FROM --platform=$TARGETPLATFORM alpine:latest
 WORKDIR /app
 COPY --from=builder /app .
 COPY config.{{ .ConfigType }} /app/config.{{ .ConfigType }}
+COPY .protosets /app/.protosets
 EXPOSE 8000 8001
 ENTRYPOINT ["./app"]
 CMD ["server"]
