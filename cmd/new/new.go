@@ -134,18 +134,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	}
 	// ################# end gen middlewares ###################
 
-	// write app/internal/handler/myroutes.go
-	myroutesFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "internal", "handler", "myroutes.go.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "app", "internal", "handler", "myroutes.go"), myroutesFile)
-	cobra.CheckErr(err)
-
-	// write app/internal/handler/myhandler.go
-	myhandlerFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "internal", "handler", "myhandler.go.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "app", "internal", "handler", "myhandler.go"), myhandlerFile)
-	cobra.CheckErr(err)
-
 	// write Dockerfile
 	dockerFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "Dockerfile.tpl")))
 	cobra.CheckErr(err)
