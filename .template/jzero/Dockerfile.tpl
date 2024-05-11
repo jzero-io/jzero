@@ -12,6 +12,6 @@ RUN go mod tidy && CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -a -ldfl
 FROM --platform=$TARGETPLATFORM alpine:latest
 WORKDIR /app
 COPY --from=builder /app .
-COPY config.yaml /app/config.yaml
+COPY config.{{ .ConfigType }} /app/config.{{ .ConfigType }}
 ENTRYPOINT ["./app"]
 CMD ["-h"]
