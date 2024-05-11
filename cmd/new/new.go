@@ -66,21 +66,37 @@ func NewProject(_ *cobra.Command, _ []string) error {
 		cobra.CheckErr(err)
 	}
 
-	// touch app/server.go
-	serverFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "server.go.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "app", "server.go"), serverFile)
-	cobra.CheckErr(err)
-
-	// touch app/zrpc.go
-	zrpcFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "zrpc.go.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "app", "zrpc.go"), zrpcFile)
-	cobra.CheckErr(err)
-
-	if zrpcFile != nil {
-		err = embeded.WriteTemplateDir(filepath.Join("jzero", "app", "desc", "proto"), filepath.Join(Dir, "app", "desc", "proto"))
+	// write app/*.go
+	appDir := embeded.ReadTemplateDir(filepath.Join("jzero", "app"))
+	for _, file := range appDir {
+		if file.IsDir() {
+			continue
+		}
+		appFileBytes, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", file.Name())))
 		cobra.CheckErr(err)
+		appFileName := strings.TrimRight(file.Name(), ".tpl")
+		err = checkWrite(filepath.Join(Dir, "app", appFileName), appFileBytes)
+		cobra.CheckErr(err)
+	}
+
+	// write proto dir
+	protoDir := embeded.ReadTemplateDir(filepath.Join("jzero", "app", "desc", "proto"))
+	for _, file := range protoDir {
+		if file.IsDir() {
+			continue
+		}
+		protoFileBytes, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "desc", "proto", file.Name())))
+		cobra.CheckErr(err)
+		protoFileName := file.Name()
+		err = checkWrite(filepath.Join(Dir, "app", "desc", "proto", protoFileName), protoFileBytes)
+		cobra.CheckErr(err)
+
+		if len(protoFileBytes) > 0 {
+			if !pathx.FileExists(filepath.Join(Dir, "app", "desc", "proto", "google")) {
+				err = embeded.WriteTemplateDir(filepath.Join("jzero", "app", "desc", "proto", "google"), filepath.Join(Dir, "app", "desc", "proto", "google"))
+				cobra.CheckErr(err)
+			}
+		}
 	}
 
 	// touch app/desc/api/{{.APP}}.api
@@ -115,15 +131,12 @@ func NewProject(_ *cobra.Command, _ []string) error {
 		cobra.CheckErr(err)
 	}
 
-	// ################# start gen config ###################
 	// write app/internal/config/config.go
 	configGoFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "internal", "config", "config.go.tpl")))
 	cobra.CheckErr(err)
 	err = checkWrite(filepath.Join(Dir, "app", "internal", "config", "config.go"), configGoFile)
 	cobra.CheckErr(err)
-	// ################# end gen config ###################
 
-	// ################# start gen middlewares ###################
 	middlewareDir := embeded.ReadTemplateDir(filepath.Join("jzero", "app", "middlewares"))
 	for _, file := range middlewareDir {
 		middlewareFileBytes, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "middlewares", file.Name())))
@@ -132,7 +145,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 		err = checkWrite(filepath.Join(Dir, "app", "middlewares", middlewareFileName), middlewareFileBytes)
 		cobra.CheckErr(err)
 	}
-	// ################# end gen middlewares ###################
 
 	// write Dockerfile
 	dockerFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "Dockerfile.tpl")))

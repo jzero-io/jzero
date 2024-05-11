@@ -4,8 +4,6 @@ import (
 	"embed"
 	"os"
 	"path/filepath"
-
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 var (
@@ -93,18 +91,9 @@ func writeTemplateDirRecursive(sourceDir, targetDir string) error {
 				return err
 			}
 		} else {
-			if pathx.FileExists(targetPath) {
-				continue
-			}
-
 			data, err := Template.ReadFile(filepath.ToSlash(filepath.Join(".template", sourcePath)))
 			if err != nil {
 				return err
-			}
-
-			file, err := os.ReadFile(filepath.Join(Home, sourcePath))
-			if err == nil {
-				data = file
 			}
 
 			err = os.WriteFile(targetPath, data, 0o644)

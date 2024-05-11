@@ -46,7 +46,6 @@ func start(ctx *svc.ServiceContext) {
 	// print log to console if Log.Mode is file or volume
 	middlewares.PrintLogToConsole(ctx.Config)
 
-	// 保持与以往的版本兼容
 	s := getZrpcServer(ctx.Config, ctx)
 
 	// verify sql conn
