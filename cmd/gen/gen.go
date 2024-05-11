@@ -2,13 +2,14 @@ package gen
 
 import (
 	"fmt"
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/ast"
 	"os"
 	"os/signal"
 	"path"
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/ast"
 
 	"github.com/jaronnie/genius"
 	"github.com/jzero-io/jzero/app/pkg/mod"
