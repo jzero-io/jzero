@@ -44,7 +44,7 @@ func start(ctx *svc.ServiceContext) {
 	gw := gateway.MustNewServer(ctx.Config.Gateway.GatewayConf)
 
 	gw.Use(middlewares.WrapResponse)
-	httpx.SetErrorHandler(middlewares.GrpcErrorHandler)
+	httpx.SetErrorHandler(middlewares.ErrorHandler)
 
 	// gw add routes
 	handler.RegisterMyHandlers(gw.Server, ctx)

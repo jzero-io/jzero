@@ -49,6 +49,12 @@ func WrapResponse(next http.HandlerFunc) http.HandlerFunc {
 		next.ServeHTTP(rw, r)
 
 		if rw.statusCode != http.StatusOK {
+			wrappedResp := Body{
+				Data:    nil,
+				Code:    rw.statusCode,
+				Message: string(rw.Body()),
+			}
+			httpx.OkJson(w, wrappedResp)
 			return
 		}
 

@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func GrpcErrorHandler(err error) (int, any) {
+func ErrorHandler(err error) (int, any) {
 	if st, ok := status.FromError(err); ok {
 		return http.StatusOK, Body{
 			Code: int(st.Code()),
