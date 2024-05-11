@@ -1,0 +1,7 @@
+syntax = "v1"
+
+import (
+	"hello.api"
+	"file.api"
+)
+

@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/ast"
 	"os"
 	"os/signal"
 	"path"
@@ -19,7 +20,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -223,7 +224,7 @@ func getApiServiceName(apiDirName string) string {
 				if filepath.Ext(file.Name()) != ".api" {
 					continue
 				}
-				apiSpec, err := parser.Parse(filepath.Join(apiDirName, file.Name()))
+				apiSpec, err := parser.Parse(filepath.Join(apiDirName, file.Name()), "")
 				if err != nil {
 					cobra.CheckErr(err)
 				}
@@ -237,22 +238,28 @@ func getApiServiceName(apiDirName string) string {
 	return ""
 }
 
-func generateApiCode(wd string, apiDir string) error {
-	dir, err := os.ReadDir(apiDir)
+func generateApiCode(wd string, apiDirName string) error {
+	apiDir, err := os.ReadDir(apiDirName)
 	if err != nil {
 		return err
 	}
-	for _, file := range dir {
+	for _, file := range apiDir {
 		if file.IsDir() {
-			err = generateApiCode(wd, filepath.Join(apiDir, file.Name()))
+			err = generateApiCode(wd, filepath.Join(apiDirName, file.Name()))
 			if err != nil {
 				return err
 			}
 		} else {
-			fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), filepath.Join(apiDir, file.Name()))
-			command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", filepath.Join(apiDir, file.Name()), filepath.Join(embeded.Home, "go-zero"))
-			if _, err := execx.Run(command, wd); err != nil {
-				return err
+			apiParser := parser.New(filepath.Join(apiDirName, file.Name()), "")
+			apiAst := apiParser.Parse()
+			for _, v := range apiAst.Stmts {
+				if _, ok := v.(*ast.ImportGroupStmt); ok {
+					fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), filepath.Join(apiDirName, file.Name()))
+					command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", filepath.Join(apiDirName, file.Name()), filepath.Join(embeded.Home, "go-zero"))
+					if _, err := execx.Run(command, wd); err != nil {
+						return err
+					}
+				}
 			}
 		}
 	}
