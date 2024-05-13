@@ -7,14 +7,13 @@ package cmd
 
 import (
 	"fmt"
-	"runtime"
-
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/env"
 	"github.com/zeromicro/go-zero/tools/goctl/vars"
+	"runtime"
 )
 
 // checkCmd represents the check command
@@ -48,13 +47,12 @@ var checkCmd = &cobra.Command{
 		log.Info("\n[jzero-env]: looking up task")
 		_, err = LookUpTool("task")
 		if err != nil {
-			err = golang.Install("github.com/go-task/task/v3/cmd/task@latest")
-			cobra.CheckErr(err)
+			_ = golang.Install("github.com/go-task/task/v3/cmd/task@latest")
 		}
 		if _, err = LookUpTool("task"); err == nil {
 			log.Success(`[jzero-env]: "task" is installed`)
 		} else {
-			log.Fatalln("[jzero-env]: env check failed, task is not installed")
+			log.Warning("[jzero-env] warning: env check failed, task is not installed")
 		}
 
 		log.Success("[jzero-env]: congratulations! your jzero environment is ready!")
