@@ -46,13 +46,8 @@ jzero check
 
 ::: code-tabs#shell
 
-@tab Docker(amd64)
+@tab Docker
 ```shell
 docker pull jaronnie/jzero:latest
-```
-
-@tab Docker(arm64)
-```shell
-docker pull jaronnie/jzero:latest-arm64
 ```
 :::

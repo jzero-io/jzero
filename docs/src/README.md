@@ -36,7 +36,7 @@ title: 首页
 
 ::: code-tabs#shell
 
-@tab Docker(amd64)
+@tab Docker
 
 ```bash
 # 一键创建项目
@@ -46,23 +46,6 @@ cd app1
 
 # 一键生成代码
 docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest gen -w app1
-
-# 下载依赖
-go mod tidy
-# 启动项目
-go run main.go server
-```
-
-@tab Docker(arm64)
-
-```bash
-# 一键创建项目
-docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest-arm64 new app1
-  
-cd app1
-
-# 一键生成代码
-docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest-arm64 gen -w app1
 
 # 下载依赖
 go mod tidy
