@@ -7,13 +7,14 @@ package cmd
 
 import (
 	"fmt"
+	"runtime"
+
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/env"
 	"github.com/zeromicro/go-zero/tools/goctl/vars"
-	"runtime"
 )
 
 // checkCmd represents the check command
