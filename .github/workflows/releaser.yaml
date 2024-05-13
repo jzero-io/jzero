@@ -62,5 +62,6 @@ jobs:
 
       - name: Docker build and push
         run: |
+          docker buildx create --use --driver docker-container --driver-opt image=dockerpracticesig/buildkit:master
           docker buildx build --platform linux/amd64,linux/arm64 --progress=plain -t jaronnie/jzero:latest . --push
           docker buildx build --platform linux/amd64,linux/arm64 --progress=plain -t jaronnie/jzero:${{ steps.get_version.outputs.VERSION }} . --push
