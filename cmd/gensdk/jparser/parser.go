@@ -112,6 +112,9 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 						Package:      "types",
 						Type:         "api",
 					}
+					if strings.ToUpper(route.Method) == http.MethodPost {
+						httpInterface.RequestBody.Body = "*"
+					}
 				} else {
 					continue
 				}

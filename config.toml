@@ -1,3 +1,5 @@
+APP = "jzero"
+
 [Zrpc]
   ListenOn = "0.0.0.0:8000"
   Mode = "dev"
@@ -30,8 +32,6 @@
     [Gateway.Upstreams.Grpc]
       Endpoints = ["0.0.0.0:8000"]
 
-# app config
-APP = "jzero"
 [Mysql]
   Address = "${Jzero_Mysql_Address}"
   Database = "jzero"

@@ -25,6 +25,8 @@ services:
     volumes:
       - ./app/desc/sql:/docker-entrypoint-initdb.d
     restart: always
+    ports:
+      - "33060:3306"
   jzero_jaeger:
     image: jaegertracing/all-in-one:1.6
     ports:
