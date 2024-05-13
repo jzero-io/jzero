@@ -57,18 +57,6 @@ var checkCmd = &cobra.Command{
 			log.Fatalln("[jzero-env]: env check failed, task is not installed")
 		}
 
-		log.Info("[jzero-env]: looking up goreleaser")
-		_, err = LookUpTool("goreleaser")
-		if err != nil {
-			err = golang.Install("github.com/goreleaser/goreleaser@latest")
-			cobra.CheckErr(err)
-		}
-		if _, err = LookUpTool("goreleaser"); err == nil {
-			log.Success(`[jzero-env]: "goreleaser" is installed`)
-		} else {
-			log.Fatalln("[jzero-env]: env check failed, goreleaser is not installed")
-		}
-
 		log.Success("[jzero-env]: congratulations! your jzero environment is ready!")
 	},
 }
