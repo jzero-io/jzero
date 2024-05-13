@@ -17,7 +17,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.19.13'
+          go-version: '1.22.3'
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
@@ -44,10 +44,30 @@ jobs:
           # only-new-issues: true
 
           # Optional: if set to true then the action will use pre-installed Go.
-          skip-go-installation: true
+          # skip-go-installation: true
 
           # Optional: if set to true then the action don't cache or restore ~/go/pkg.
           skip-pkg-cache: true
 
           # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
           # skip-build-cache: true
+
+      - name: Test Usage
+        run: |
+          ./dist/jzero_linux_amd64_v1/jzero check
+          ./dist/jzero_linux_amd64_v1/jzero new simple
+          cd simple && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
+
+          cd ..
+          ./dist/jzero_linux_amd64_v1/jzero new simpleapi --branch api
+          cd simpleapi && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
+
+          cd ..
+          ./dist/jzero_linux_amd64_v1/jzero new simplerpc --branch rpc
+          cd simplerpc && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
+
+          cd ..
+          ./dist/jzero_linux_amd64_v1/jzero new simplecli --branch cli
+          cd simplecli && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
+
+          cd ..

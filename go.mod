@@ -9,6 +9,7 @@ require (
 	github.com/jhump/protoreflect v1.16.0
 	github.com/nxadm/tail v1.4.11
 	github.com/pkg/errors v0.9.1
+	github.com/rinchsan/gosimports v0.3.8
 	github.com/samber/lo v1.39.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
@@ -80,7 +81,6 @@ require (
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/redis/go-redis/v9 v9.4.0 // indirect
-	github.com/rinchsan/gosimports v0.3.8 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
