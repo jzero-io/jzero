@@ -259,8 +259,8 @@ func generateApiCode(wd string, apiDirName string) error {
 					isMainApiFile = true
 				} else if _, ok := v.(*ast.ImportLiteralStmt); ok {
 					isMainApiFile = true
-				} else {
 				}
+
 				if isMainApiFile && !isUsed {
 					fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), filepath.Join(apiDirName, file.Name()))
 					command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", filepath.Join(apiDirName, file.Name()), filepath.Join(embeded.Home, "go-zero"))
