@@ -27,6 +27,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
+      - name: Test Usage
+        run: |
+          ./dist/jzero_linux_amd64_v1/jzero check
+          ./dist/jzero_linux_amd64_v1/jzero new simple
+          cd simple && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
+
+          cd ..
+          ./dist/jzero_linux_amd64_v1/jzero new simpleapi --branch api
+          cd simpleapi && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
+
+          cd ..
+          ./dist/jzero_linux_amd64_v1/jzero new simplerpc --branch rpc
+          cd simplerpc && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
+
+          cd ..
+          ./dist/jzero_linux_amd64_v1/jzero new simplecli --branch cli
+          cd simplecli && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
+
+          cd ..
+
       - uses: actions/checkout@v2
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
@@ -51,23 +71,3 @@ jobs:
 
           # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
           # skip-build-cache: true
-
-      - name: Test Usage
-        run: |
-          ./dist/jzero_linux_amd64_v1/jzero check
-          ./dist/jzero_linux_amd64_v1/jzero new simple
-          cd simple && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-
-          cd ..
-          ./dist/jzero_linux_amd64_v1/jzero new simpleapi --branch api
-          cd simpleapi && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-
-          cd ..
-          ./dist/jzero_linux_amd64_v1/jzero new simplerpc --branch rpc
-          cd simplerpc && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-
-          cd ..
-          ./dist/jzero_linux_amd64_v1/jzero new simplecli --branch cli
-          cd simplecli && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-
-          cd ..
