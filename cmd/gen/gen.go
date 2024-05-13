@@ -9,8 +9,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/ast"
-
 	"github.com/jaronnie/genius"
 	"github.com/jzero-io/jzero/app/pkg/mod"
 	"github.com/jzero-io/jzero/app/pkg/stringx"
@@ -21,6 +19,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/ast"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
@@ -253,13 +252,22 @@ func generateApiCode(wd string, apiDirName string) error {
 		} else {
 			apiParser := parser.New(filepath.Join(apiDirName, file.Name()), "")
 			apiAst := apiParser.Parse()
+			var isUsed bool
 			for _, v := range apiAst.Stmts {
+				var isMainApiFile bool
 				if _, ok := v.(*ast.ImportGroupStmt); ok {
+					isMainApiFile = true
+				} else if _, ok := v.(*ast.ImportLiteralStmt); ok {
+					isMainApiFile = true
+				} else {
+				}
+				if isMainApiFile && !isUsed {
 					fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), filepath.Join(apiDirName, file.Name()))
 					command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", filepath.Join(apiDirName, file.Name()), filepath.Join(embeded.Home, "go-zero"))
 					if _, err := execx.Run(command, wd); err != nil {
 						return err
 					}
+					isUsed = true
 				}
 			}
 		}
