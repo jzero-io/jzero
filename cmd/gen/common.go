@@ -1,10 +1,11 @@
 package gen
 
 import (
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/ast"
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"os"
 	"path/filepath"
+
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/ast"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 )
 
 func GetProtoDir(wd string) ([]os.DirEntry, error) {
