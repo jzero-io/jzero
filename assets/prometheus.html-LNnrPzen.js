@@ -1,4 +1,4 @@
-import{_ as e}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as t,c as n,e as a}from"./app-DOHQ6ClH.js";const o={},s=a(`<p>修改 config.yaml. 添加一下内容</p><div class="language-yaml line-numbers-mode" data-ext="yml" data-title="yml"><pre class="language-yaml"><code><span class="token key atrule">Zrpc</span><span class="token punctuation">:</span>
+import{_ as e}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as t,c as n,e as a}from"./app-wEGK0SEC.js";const o={},s=a(`<p>修改 config.yaml. 添加一下内容</p><div class="language-yaml line-numbers-mode" data-ext="yml" data-title="yml"><pre class="language-yaml"><code><span class="token key atrule">Zrpc</span><span class="token punctuation">:</span>
   <span class="token key atrule">DevServer</span><span class="token punctuation">:</span>
     <span class="token key atrule">Enabled</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
 <span class="token key atrule">Gateway</span><span class="token punctuation">:</span>
