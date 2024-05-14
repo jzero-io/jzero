@@ -37,16 +37,10 @@ docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new app1
 jzero new app1 --branch api
 ```
 
-@tab Docker(amd64)
+@tab Docker
 
 ```bash
 docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new app1 --branch api
-```
-
-@tab Docker(arm64)
-
-```bash
-docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest-arm64 new app1 --branch api
 ```
 :::
 
@@ -60,16 +54,27 @@ docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest-arm64 new app1 --
 jzero new app1 --branch rpc
 ```
 
-@tab Docker(amd64)
+@tab Docker
 
 ```bash
 docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new app1 --branch rpc
 ```
+:::
 
-@tab Docker(arm64)
+## 新建仅有 cli 的项目
+
+::: code-tabs#shell
+
+@tab jzero
 
 ```bash
-docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest-arm64 new app1 --branch rpc
+jzero new app1 --branch cli
+```
+
+@tab Docker
+
+```bash
+docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new app1 --branch cli
 ```
 :::
 
