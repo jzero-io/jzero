@@ -13,13 +13,14 @@ import (
 
 // genSdkCmd represents the gen sdk command
 var genSdkCmd = &cobra.Command{
-	Use:   "gensdk",
+	Use:   "sdk",
 	Short: "jzero gensdk",
 	Long:  `jzero gensdk. Generate sdk client by api file and proto file`,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		gensdk.Version = Version
 	},
-	RunE: gensdk.GenSdk,
+	Aliases: []string{"gensdk"},
+	RunE:    gensdk.GenSdk,
 }
 
 func init() {

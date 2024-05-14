@@ -27,6 +27,8 @@ var genCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(genCmd)
+	genCmd.AddCommand(genSdkCmd)
+
 	genCmd.Flags().StringVarP(&gen.WorkingDir, "working-dir", "w", "", "set working dir")
 
 	dir, _ := os.UserHomeDir()
