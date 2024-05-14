@@ -1,5 +1,5 @@
 ---
-title: 编译镜像
+title: 镜像推送
 icon: puzzle-piece
 star: true
 order: 3
@@ -8,28 +8,22 @@ tag:
   - Guide
 ---
 
-采用 goreleaser 工具交叉编译二进制文件
-
-采用 Task 工具代替 Makefile
-
-将这两个工具结合起来使用, 能更加方便的管理项目
-
-[安装 goreleaser](../install.md#安装-goreleaser)
-
-[安装 task](../install.md#安装-task)
-
-## 编译 linux/amd64 镜像
+## 创建一个可以构建多平台的 buildx
 
 ```shell
-task build:amd64
-
-docker build -t jaronnie/jzero:latest .
+docker buildx create --use --name=mybuilder --driver docker-container --driver-opt image=dockerpracticesig/buildkit:master
 ```
 
-## 编译 linux/arm64 镜像
+## 推送多平台镜像
 
 ```shell
-task build:arm64
+cd app1
+docker buildx build --platform linux/amd64,linux/arm64 --progress=plain -t app1:latest . --push
+```
 
-docker build -t jaronnie/jzero:latest-arm64 -f Dockerfile-arm64 .
+## 编译单平台镜像
+
+```shell
+cd app1
+docker buildx build --platform linux/amd64 --progress=plain -t app1:latest . --load
 ```
