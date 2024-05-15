@@ -48,24 +48,16 @@ func WrapResponse(next http.HandlerFunc) http.HandlerFunc {
 
 		next.ServeHTTP(rw, r)
 
-		if rw.statusCode != http.StatusOK {
-			wrappedResp := Body{
-				Data:    nil,
-				Code:    rw.statusCode,
-				Message: string(rw.Body()),
-			}
-			httpx.OkJson(w, wrappedResp)
-			return
-		}
-
 		if strings.Contains(strings.ToLower(w.Header().Get("Content-Type")), "application/json") {
 			var resp map[string]interface{}
 			err := json.Unmarshal(rw.Body(), &resp)
 			if err != nil {
-				_, err := w.Write(rw.Body())
-				if err != nil {
-					logc.Errorf(logCtx, "Write response error: %s\n", err.Error())
-				}
+				logc.Errorf(logCtx, "Unmarshal resp error: %s\n", err.Error())
+				return
+			}
+
+			if _, ok := resp["code"]; ok {
+				httpx.OkJson(w, resp)
 				return
 			}
 
