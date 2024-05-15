@@ -7,16 +7,18 @@ import (
 )
 
 func ErrorHandler(err error) (int, any) {
+	code := http.StatusInternalServerError
+	message := err.Error()
+
+	// from grpc error
 	if st, ok := status.FromError(err); ok {
-		return http.StatusOK, Body{
-			Code: int(st.Code()),
-			Message:  st.Message(),
-		}
+		code = int(st.Code())
+		message = st.Message()
 	}
 
-	code := http.StatusInternalServerError
 	return http.StatusOK, Body{
-		Code: code,
-		Message:  err.Error(),
+		Data:    nil,
+		Code:    code,
+		Message: message,
 	}
 }

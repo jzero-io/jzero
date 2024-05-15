@@ -1,8 +1,9 @@
 package middlewares
 
 import (
-	"google.golang.org/grpc/status"
 	"net/http"
+
+	"google.golang.org/grpc/status"
 )
 
 func ErrorHandler(err error) (int, any) {
