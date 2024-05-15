@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/jzero-io/jzero/cmd/gen"
+	"github.com/jzero-io/jzero/cmd/genswagger"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"
 )
@@ -25,9 +26,18 @@ var genCmd = &cobra.Command{
 	RunE: gen.Gen,
 }
 
+// genSwaggerCmd represents the genSwagger command
+var genSwaggerCmd = &cobra.Command{
+	Use:   "swagger",
+	Short: "jzero gen swagger",
+	Long:  `jzero gen swagger`,
+	RunE:  genswagger.Gen,
+}
+
 func init() {
 	rootCmd.AddCommand(genCmd)
 	genCmd.AddCommand(genSdkCmd)
+	genCmd.AddCommand(genSwaggerCmd)
 
 	genCmd.Flags().StringVarP(&gen.WorkingDir, "working-dir", "w", "", "set working dir")
 
