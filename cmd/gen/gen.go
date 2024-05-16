@@ -219,7 +219,9 @@ func getApiServiceName(apiDirName string) string {
 		}
 		for _, file := range apiDir {
 			if file.IsDir() {
-				return getApiServiceName(filepath.Join(apiDirName, file.Name()))
+				if getApiServiceName(filepath.Join(apiDirName, file.Name())) == "" {
+					continue
+				}
 			} else {
 				if filepath.Ext(file.Name()) != ".api" {
 					continue
