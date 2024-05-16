@@ -19,7 +19,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/ast"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
@@ -211,6 +210,30 @@ func extraFileHandler(wd string) {
 	}
 }
 
+func getApiFilaPath(apiDirName string) []string {
+	var apiFiles []string
+	_ = filepath.Walk(apiDirName, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && filepath.Ext(path) == ".api" {
+			spec, err := parser.Parse(path, nil)
+			if err != nil {
+				return err
+			}
+			if len(spec.Service.Routes()) > 0 {
+				rel, err := filepath.Rel(apiDirName, path)
+				if err != nil {
+					return err
+				}
+				apiFiles = append(apiFiles, filepath.ToSlash(rel))
+			}
+		}
+		return nil
+	})
+	return apiFiles
+}
+
 func getApiServiceName(apiDirName string) string {
 	if pathx.FileExists(apiDirName) {
 		apiDir, err := os.ReadDir(apiDirName)
@@ -245,34 +268,44 @@ func generateApiCode(wd string, apiDirName string) error {
 	if err != nil {
 		return err
 	}
-	for _, file := range apiDir {
-		if file.IsDir() {
-			err = generateApiCode(wd, filepath.Join(apiDirName, file.Name()))
-			if err != nil {
-				return err
-			}
-		} else {
-			apiParser := parser.New(filepath.Join(apiDirName, file.Name()), "")
-			apiAst := apiParser.Parse()
-			var isUsed bool
-			for _, v := range apiAst.Stmts {
-				var isMainApiFile bool
-				if _, ok := v.(*ast.ImportGroupStmt); ok {
-					isMainApiFile = true
-				} else if _, ok := v.(*ast.ImportLiteralStmt); ok {
-					isMainApiFile = true
-				}
 
-				if isMainApiFile && !isUsed {
-					fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), filepath.Join(apiDirName, file.Name()))
-					command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", filepath.Join(apiDirName, file.Name()), filepath.Join(embeded.Home, "go-zero"))
-					if _, err := execx.Run(command, wd); err != nil {
-						return err
-					}
-					isUsed = true
-				}
-			}
+	var mainApiFilePath string
+
+	for _, file := range apiDir {
+		if file.Name() == "main.api" {
+			mainApiFilePath = filepath.Join(apiDirName, file.Name())
+			break
 		}
+	}
+
+	if mainApiFilePath == "" {
+		apiFilePath := getApiFilaPath(apiDirName)
+		sb := strings.Builder{}
+		sb.WriteString("syntax = \"v1\"")
+		sb.WriteString("\n")
+
+		for _, api := range apiFilePath {
+			sb.WriteString(fmt.Sprintf("import \"%s\"\n", api))
+		}
+
+		f, err := os.CreateTemp(apiDirName, "*.api")
+		if err != nil {
+			return err
+		}
+
+		_, err = f.WriteString(sb.String())
+		if err != nil {
+			return err
+		}
+		mainApiFilePath = f.Name()
+		f.Close()
+		defer os.Remove(mainApiFilePath)
+	}
+
+	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
+	command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", mainApiFilePath, filepath.Join(embeded.Home, "go-zero"))
+	if _, err := execx.Run(command, wd); err != nil {
+		return err
 	}
 	return nil
 }
