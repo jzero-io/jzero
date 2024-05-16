@@ -36,19 +36,19 @@ var newCmd = &cobra.Command{
 
 		if new.Remote != "" && new.Branch != "" {
 			// clone to local
-			wd, _ := os.UserHomeDir()
-			_ = os.MkdirAll(filepath.Join(wd, ".jzero"), 0o755)
+			home, _ := os.UserHomeDir()
+			_ = os.MkdirAll(filepath.Join(home, ".jzero"), 0o755)
 
-			if !pathx.FileExists(filepath.Join(wd, ".jzero", "templates", new.Branch)) {
-				fmt.Printf("Cloning into '%s/templates/api', please wait...\n", filepath.Join(wd, ".jzero"))
-				_, err := execx.Run(fmt.Sprintf("git clone %s -b %s templates/%s", new.Remote, new.Branch, new.Branch), filepath.Join(wd, ".jzero"))
+			if !pathx.FileExists(filepath.Join(home, ".jzero", "templates", new.Branch)) {
+				fmt.Printf("Cloning into '%s/templates/api', please wait...\n", filepath.Join(home, ".jzero"))
+				_, err := execx.Run(fmt.Sprintf("git clone %s -b %s templates/%s", new.Remote, new.Branch, new.Branch), filepath.Join(home, ".jzero"))
 				cobra.CheckErr(err)
 				fmt.Println("Clone success")
 			} else {
-				fmt.Printf("Using cache: %s\n", filepath.Join(wd, ".jzero", "templates", new.Branch))
+				fmt.Printf("Using cache: %s\n", filepath.Join(home, ".jzero", "templates", new.Branch))
 			}
 
-			embeded.Home = filepath.Join(wd, ".jzero", "templates", new.Branch)
+			embeded.Home = filepath.Join(home, ".jzero", "templates", new.Branch)
 		}
 	},
 	RunE: new.NewProject,

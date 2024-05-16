@@ -13,6 +13,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/genswagger"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 // genCmd represents the gen command
@@ -22,6 +23,13 @@ var genCmd = &cobra.Command{
 	Long:  `jzero gen code`,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		gen.Version = Version
+
+		// check go-zero api template
+		home, _ := os.UserHomeDir()
+		if !pathx.FileExists(filepath.Join(home, ".jzero", Version, "go-zero")) {
+			err := embeded.WriteTemplateDir(filepath.Join("go-zero"), filepath.Join(home, ".jzero", Version, "go-zero"))
+			cobra.CheckErr(err)
+		}
 	},
 	RunE: gen.Gen,
 }
