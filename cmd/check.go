@@ -56,6 +56,17 @@ var checkCmd = &cobra.Command{
 			log.Warning("[jzero-env] warning: env check failed, task is not installed")
 		}
 
+		log.Info("\n[jzero-env]: looking up goctl-swagger")
+		_, err = LookUpTool("goctl-swagger")
+		if err != nil {
+			_ = golang.Install("github.com/zeromicro/goctl-swagger@latest")
+		}
+		if _, err = LookUpTool("goctl-swagger"); err == nil {
+			log.Success(`[jzero-env]: "goctl-swagger" is installed`)
+		} else {
+			log.Warning("[jzero-env] warning: env check failed, goctl-swagger is not installed")
+		}
+
 		log.Success("[jzero-env]: congratulations! your jzero environment is ready!")
 	},
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/jzero-io/jzero/app/pkg/stringx"
 	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
@@ -129,7 +130,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 	apiDirName := filepath.Join(wd, "app", "desc", "api")
 	if pathx.FileExists(apiDirName) {
 		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
-		err = generateApiCode(wd, apiDirName)
+		err = generateApiCode(wd, GetMainApiFilePath(apiDirName))
 		cobra.CheckErr(err)
 		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
@@ -139,16 +140,17 @@ func Gen(_ *cobra.Command, _ []string) error {
 	if f, err := os.Stat(sqlDir); err == nil && f.IsDir() {
 		fs, err := os.ReadDir(sqlDir)
 		cobra.CheckErr(err)
+		fmt.Printf("%s to generate model code.\n", color.WithColor("Start", color.FgGreen))
 		for _, f := range fs {
 			if !f.IsDir() && strings.HasSuffix(f.Name(), ".sql") {
 				sqlFilePath := filepath.Join(sqlDir, f.Name())
-				fmt.Printf("%s to generate model code.\n%s sql file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), sqlFilePath)
+				fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), sqlFilePath)
 				command := fmt.Sprintf("goctl model mysql ddl --src app/desc/sql/%s --dir ./app/internal/model/%s --home %s", f.Name(), f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))], filepath.Join(wd, ".template", "go-zero"))
 				_, err = execx.Run(command, wd)
 				cobra.CheckErr(err)
-				fmt.Println(color.WithColor("Done", color.FgGreen))
 			}
 		}
+		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
 
 	// 生成 app/zrpc.go
@@ -235,38 +237,37 @@ func getApiFilaPath(apiDirName string) []string {
 }
 
 func getApiServiceName(apiDirName string) string {
-	if pathx.FileExists(apiDirName) {
-		apiDir, err := os.ReadDir(apiDirName)
+	fs := getApiFilaPath(apiDirName)
+	for _, file := range fs {
+		apiSpec, err := parser.Parse(filepath.Join(apiDirName, file), "")
 		if err != nil {
-			return ""
+			cobra.CheckErr(err)
 		}
-		for _, file := range apiDir {
-			if file.IsDir() {
-				if getApiServiceName(filepath.Join(apiDirName, file.Name())) == "" {
-					continue
-				}
-			} else {
-				if filepath.Ext(file.Name()) != ".api" {
-					continue
-				}
-				apiSpec, err := parser.Parse(filepath.Join(apiDirName, file.Name()), "")
-				if err != nil {
-					cobra.CheckErr(err)
-				}
-				if apiSpec.Service.Name != "" {
-					return apiSpec.Service.Name
-				}
-			}
+		if apiSpec.Service.Name != "" {
+			return apiSpec.Service.Name
 		}
-
 	}
 	return ""
 }
 
-func generateApiCode(wd string, apiDirName string) error {
+func generateApiCode(wd string, mainApiFilePath string) error {
+	if mainApiFilePath == "" {
+		return errors.New("empty mainApiFilePath")
+	}
+	defer os.Remove(mainApiFilePath)
+
+	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
+	command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", mainApiFilePath, filepath.Join(embeded.Home, "go-zero"))
+	if _, err := execx.Run(command, wd); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetMainApiFilePath(apiDirName string) string {
 	apiDir, err := os.ReadDir(apiDirName)
 	if err != nil {
-		return err
+		return ""
 	}
 
 	var mainApiFilePath string
@@ -290,24 +291,17 @@ func generateApiCode(wd string, apiDirName string) error {
 
 		f, err := os.CreateTemp(apiDirName, "*.api")
 		if err != nil {
-			return err
+			return ""
 		}
 
 		_, err = f.WriteString(sb.String())
 		if err != nil {
-			return err
+			return ""
 		}
 		mainApiFilePath = f.Name()
 		f.Close()
-		defer os.Remove(mainApiFilePath)
 	}
-
-	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
-	command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", mainApiFilePath, filepath.Join(embeded.Home, "go-zero"))
-	if _, err := execx.Run(command, wd); err != nil {
-		return err
-	}
-	return nil
+	return mainApiFilePath
 }
 
 func removeExtraFiles(wd string) {
