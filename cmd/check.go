@@ -7,14 +7,12 @@ package cmd
 
 import (
 	"fmt"
-	"runtime"
 
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/env"
-	"github.com/zeromicro/go-zero/tools/goctl/vars"
 )
 
 // checkCmd represents the check command
@@ -27,13 +25,13 @@ var checkCmd = &cobra.Command{
 
 		log.Info("[jzero-env]: looking up goctl")
 		// install goctl
-		_, err := LookUpTool("goctl")
+		_, err := env.LookPath("goctl")
 		if err != nil {
 			log.Warning(`[jzero-env]: goctl is not found in PATH`)
 			err = golang.Install("github.com/zeromicro/go-zero/tools/goctl@latest")
 			cobra.CheckErr(err)
 		}
-		if _, err = LookUpTool("goctl"); err == nil {
+		if _, err = env.LookPath("goctl"); err == nil {
 			log.Success(`[jzero-env]: "goctl" is installed`)
 		} else {
 			log.Fatalln("[jzero-env]: env check failed, goctl is not installed")
@@ -46,22 +44,22 @@ var checkCmd = &cobra.Command{
 
 		// jzero env check
 		log.Info("\n[jzero-env]: looking up task")
-		_, err = LookUpTool("task")
+		_, err = env.LookPath("task")
 		if err != nil {
 			_ = golang.Install("github.com/go-task/task/v3/cmd/task@latest")
 		}
-		if _, err = LookUpTool("task"); err == nil {
+		if _, err = env.LookPath("task"); err == nil {
 			log.Success(`[jzero-env]: "task" is installed`)
 		} else {
 			log.Warning("[jzero-env] warning: env check failed, task is not installed")
 		}
 
 		log.Info("\n[jzero-env]: looking up goctl-swagger")
-		_, err = LookUpTool("goctl-swagger")
+		_, err = env.LookPath("goctl-swagger")
 		if err != nil {
 			_ = golang.Install("github.com/zeromicro/goctl-swagger@latest")
 		}
-		if _, err = LookUpTool("goctl-swagger"); err == nil {
+		if _, err = env.LookPath("goctl-swagger"); err == nil {
 			log.Success(`[jzero-env]: "goctl-swagger" is installed`)
 		} else {
 			log.Warning("[jzero-env] warning: env check failed, goctl-swagger is not installed")
@@ -69,19 +67,6 @@ var checkCmd = &cobra.Command{
 
 		log.Success("[jzero-env]: congratulations! your jzero environment is ready!")
 	},
-}
-
-func LookUpTool(name string) (string, error) {
-	suffix := getExeSuffix()
-	xProtoc := name + suffix
-	return env.LookPath(xProtoc)
-}
-
-func getExeSuffix() string {
-	if runtime.GOOS == vars.OsWindows {
-		return ".exe"
-	}
-	return ""
 }
 
 func init() {
