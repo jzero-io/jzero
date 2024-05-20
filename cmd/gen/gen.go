@@ -236,7 +236,7 @@ func getApiFilaPath(apiDirName string) []string {
 	return apiFiles
 }
 
-func getApiServiceName(apiDirName string) string {
+func GetApiServiceName(apiDirName string) string {
 	fs := getApiFilaPath(apiDirName)
 	for _, file := range fs {
 		apiSpec, err := parser.Parse(filepath.Join(apiDirName, file), "")
@@ -306,7 +306,7 @@ func GetMainApiFilePath(apiDirName string) string {
 
 func removeExtraFiles(wd string) {
 	_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
-	_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", getApiServiceName(filepath.Join(wd, "app", "desc", "api")))))
+	_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", GetApiServiceName(filepath.Join(wd, "app", "desc", "api")))))
 }
 
 func init() {

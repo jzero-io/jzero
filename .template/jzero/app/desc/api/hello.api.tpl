@@ -5,7 +5,7 @@ type pathRequest {
 }
 
 type response {
-    Message string
+    Message string `json:"message"`
 }
 
 @server(

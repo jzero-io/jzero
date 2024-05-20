@@ -51,4 +51,6 @@ func init() {
 
 	dir, _ := os.UserHomeDir()
 	genCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(dir, ".jzero"), "set template home")
+
+	genSwaggerCmd.Flags().StringVarP(&genswagger.Dir, "dir", "d", filepath.Join("app", "desc", "swagger"), "set swagger output dir")
 }

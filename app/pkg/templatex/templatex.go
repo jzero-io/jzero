@@ -5,7 +5,6 @@ import (
 	"text/template"
 
 	sprig "github.com/Masterminds/sprig/v3"
-
 	"github.com/jzero-io/jzero/app/pkg/stringx"
 )
 

@@ -5,14 +5,17 @@ package handler
 import (
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest"
-
+	"github.com/jzero-io/jzero-contrib/swaggerv2"
 	"github.com/jzero-io/jzero/app/internal/svc"
+	"github.com/zeromicro/go-zero/rest"
 )
 
 func RegisterMyHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	// register static embed handler
 	registerStaticEmbedHandler(server, serverCtx)
+
+	// register swagger ui handler
+	swaggerv2.RegisterRoutes(server)
 
 	server.AddRoutes(
 		[]rest.Route{

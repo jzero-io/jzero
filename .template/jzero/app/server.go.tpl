@@ -10,6 +10,7 @@ import (
 	"github.com/zeromicro/go-zero/core/conf"
     "github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
+	"github.com/jzero-io/jzero-contrib/swaggerv2"
 	"github.com/zeromicro/go-zero/core/syncx"
 	"github.com/zeromicro/go-zero/gateway"
 	"github.com/zeromicro/go-zero/rest/httpx"
@@ -48,6 +49,9 @@ func start(ctx *svc.ServiceContext) {
 
     // gw add api routes
     handler.RegisterHandlers(gw.Server, ctx)
+
+    // gw add swagger routes. If you do not want it, you can delete this line
+    swaggerv2.RegisterRoutes(gw.Server)
 
 	// gw add routes
     // You can use gw.Server.AddRoutes() to add your own handler

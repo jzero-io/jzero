@@ -1,0 +1,198 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/hello": {
+      "get": {
+        "operationId": "HelloParamHandler",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "hello"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ]
+      },
+      "post": {
+        "operationId": "HelloPostHandler",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/postRequest"
+            }
+          }
+        ],
+        "tags": [
+          "hello"
+        ]
+      }
+    },
+    "/api/v1/hello/{name}": {
+      "get": {
+        "operationId": "HelloPathHandler",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "hello"
+        ]
+      }
+    },
+    "/api/v1/static/{file}": {
+      "get": {
+        "operationId": "DownloadHandler",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "file",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "file"
+        ]
+      }
+    },
+    "/api/v1/upload": {
+      "post": {
+        "operationId": "UploadHandler",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UploadResponse"
+            }
+          }
+        },
+        "tags": [
+          "file"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "DownloadRequest": {
+      "type": "object",
+      "title": "DownloadRequest"
+    },
+    "UploadResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "UploadResponse",
+      "required": [
+        "code"
+      ]
+    },
+    "paramRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "paramRequest",
+      "required": [
+        "name"
+      ]
+    },
+    "pathRequest": {
+      "type": "object",
+      "title": "pathRequest"
+    },
+    "postRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "postRequest",
+      "required": [
+        "name"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "title": "response",
+      "required": [
+        "message"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "Enter JWT Bearer token **_only_**",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

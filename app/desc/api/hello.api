@@ -13,7 +13,7 @@ type postRequest {
 }
 
 type response {
-	Message string
+	Message string `json:"message"`
 }
 
 @server (
