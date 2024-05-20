@@ -1,4 +1,4 @@
-import{_ as e}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as n,c as a,e as t}from"./app-B2RTipEo.js";const s={},o=t(`<p>修改 config.yaml</p><div class="language-yaml line-numbers-mode" data-ext="yml" data-title="yml"><pre class="language-yaml"><code><span class="token key atrule">Log</span><span class="token punctuation">:</span>
+import{_ as e}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as n,c as a,e as t}from"./app-BZ6tmrik.js";const s={},o=t(`<p>修改 config.yaml</p><div class="language-yaml line-numbers-mode" data-ext="yml" data-title="yml"><pre class="language-yaml"><code><span class="token key atrule">Log</span><span class="token punctuation">:</span>
   <span class="token key atrule">KeepDays</span><span class="token punctuation">:</span> <span class="token number">30</span>
   <span class="token key atrule">Level</span><span class="token punctuation">:</span> info
   <span class="token key atrule">MaxBackups</span><span class="token punctuation">:</span> <span class="token number">7</span>
