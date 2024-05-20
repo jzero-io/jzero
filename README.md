@@ -32,24 +32,32 @@
 
 ```shell
 jzero new simple
+cd simple && jzero gen && go mod tidy
+go run main.go server
 ```
 
 ### new project with only grpc
 
 ```shell
 jzero new simplerpc --branch rpc
+cd simplerpc && jzero gen && go mod tidy
+go run main.go server
 ```
 
 ### new project with only api
 
 ```shell
 jzero new simpleapi --branch api
+cd simpleapi && jzero gen && go mod tidy
+go run main.go server
 ```
 
 ### new project with only cli
 
 ```shell
 jzero new simplecli --branch cli
+cd simplecli && go mod tidy
+go run main.go -h
 ```
 
 ## Stargazers over time
