@@ -65,6 +65,17 @@ var checkCmd = &cobra.Command{
 			log.Warning("[jzero-env] warning: env check failed, goctl-swagger is not installed")
 		}
 
+		log.Info("\n[jzero-env]: looking up protoc-gen-openapiv2")
+		_, err = env.LookPath("protoc-gen-openapiv2")
+		if err != nil {
+			_ = golang.Install("github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest")
+		}
+		if _, err = env.LookPath("protoc-gen-openapiv2"); err == nil {
+			log.Success(`[jzero-env]: "protoc-gen-openapiv2" is installed`)
+		} else {
+			log.Warning("[jzero-env] warning: env check failed, protoc-gen-openapiv2 is not installed")
+		}
+
 		log.Success("[jzero-env]: congratulations! your jzero environment is ready!")
 	},
 }
