@@ -182,7 +182,7 @@ func checkWrite(path string, bytes []byte) error {
 	if len(bytes) == 0 {
 		return nil
 	}
-	if !pathx.FileExists(filepath.Join(path)) {
+	if !pathx.FileExists(filepath.Dir(path)) {
 		err = os.MkdirAll(filepath.Dir(path), 0o755)
 		if err != nil {
 			return err
@@ -192,7 +192,7 @@ func checkWrite(path string, bytes []byte) error {
 	bytesFormat := bytes
 	// if is go file. format it
 	if filepath.Ext(path) == ".go" {
-		bytesFormat, err = gosimports.Process("", bytes, nil)
+		bytesFormat, err = gosimports.Process("", bytes, &gosimports.Options{FormatOnly: true})
 		if err != nil {
 			return err
 		}
