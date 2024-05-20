@@ -8,4 +8,8 @@ export default navbar([
     link: "https://github.com/jzero-io/templates",
     text: "模板仓库"
   },
+  {
+    link: "https://github.com/jzero-io/jzero-contrib",
+    text: "扩展"
+  },
 ]);

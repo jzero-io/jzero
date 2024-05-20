@@ -16,7 +16,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 	github.com/zeromicro/go-zero v1.6.5
-	github.com/zeromicro/go-zero/tools/goctl v1.6.4
+	github.com/zeromicro/go-zero/tools/goctl v1.6.5
 	google.golang.org/genproto/googleapis/api v0.0.0-20240506185236-b8a5c65736ae
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.34.1
