@@ -14,13 +14,15 @@ import (
 	"github.com/jzero-io/jzero/app/pkg/stringx"
 	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/pkg/errors"
+	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
+	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
+	apiparser "github.com/zeromicro/go-zero/tools/goctl/api/parser"
+	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -36,6 +38,14 @@ type (
 	ImportLines   []string
 	RegisterLines []string
 )
+
+type ApiFileTypes struct {
+	Filepath string
+	ApiSpec  spec.ApiSpec
+	GenTypes []spec.Type
+
+	Base bool
+}
 
 func (l ImportLines) String() string {
 	return "\n\n\t" + strings.Join(l, "\n\t")
@@ -104,7 +114,9 @@ func Gen(_ *cobra.Command, _ []string) error {
 			fmt.Println(color.WithColor("Done", color.FgGreen))
 
 			fileBase := v.Name()[0 : len(v.Name())-len(path.Ext(v.Name()))]
-			_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", fileBase)))
+			rmf := strings.ReplaceAll(strings.ToLower(fileBase), "-", "")
+			rmf = strings.ReplaceAll(rmf, "_", "")
+			_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", rmf)))
 
 			// # gen proto descriptor
 			_ = os.MkdirAll(filepath.Join(wd, ".protosets"), 0o755)
@@ -130,9 +142,60 @@ func Gen(_ *cobra.Command, _ []string) error {
 	apiDirName := filepath.Join(wd, "app", "desc", "api")
 	if pathx.FileExists(apiDirName) {
 		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
-		err = generateApiCode(wd, GetMainApiFilePath(apiDirName))
+		mainApiFilePath := GetMainApiFilePath(apiDirName)
+
+		err = generateApiCode(wd, mainApiFilePath)
 		cobra.CheckErr(err)
 		fmt.Println(color.WithColor("Done", color.FgGreen))
+
+		// 生成 api types
+		apiFileTypes := make([]ApiFileTypes, 0)
+
+		allApiFilePaths := getAllApiFilePath(apiDirName)
+
+		for _, v := range allApiFilePaths {
+			apiSpec, err := apiparser.Parse(filepath.Join(apiDirName, v))
+			cobra.CheckErr(err)
+			apiFileTypes = append(apiFileTypes, ApiFileTypes{
+				Filepath: v,
+				ApiSpec:  *apiSpec,
+			})
+		}
+
+		types := getFileTypes(apiFileTypes)
+		for _, t := range types {
+			if len(t.GenTypes) == 0 {
+				continue
+			}
+			typesGoString, err := gogen.BuildTypes(t.GenTypes)
+			cobra.CheckErr(err)
+			typesGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+				"Module": moduleStruct.Path,
+				"Types":  typesGoString,
+			}, []byte(TypesGoTpl))
+			cobra.CheckErr(err)
+
+			typesGoFormatBytes, err := gosimports.Process("", typesGoBytes, &gosimports.Options{
+				FormatOnly: true,
+				Comments:   true,
+			})
+			if err != nil {
+				return err
+			}
+
+			prefix := strings.ReplaceAll(filepath.Dir(t.Filepath), "/", "_") + "_"
+			if len(strings.Split(t.Filepath, "/")) == 1 {
+				prefix = ""
+			}
+
+			fileBase := filepath.Base(t.Filepath)
+			typesGoFilePath := prefix + fileBase[0:len(fileBase)-len(path.Ext(fileBase))] + ".types.go"
+			if t.Base {
+				typesGoFilePath = "types.go"
+			}
+			err = os.WriteFile(filepath.Join("app", "internal", "types", typesGoFilePath), typesGoFormatBytes, 0o644)
+			cobra.CheckErr(err)
+		}
 	}
 
 	// 检测是否包含 sql
@@ -210,98 +273,6 @@ func extraFileHandler(wd string) {
 			return
 		}
 	}
-}
-
-func getApiFilaPath(apiDirName string) []string {
-	var apiFiles []string
-	_ = filepath.Walk(apiDirName, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && filepath.Ext(path) == ".api" {
-			spec, err := parser.Parse(path, nil)
-			if err != nil {
-				return err
-			}
-			if len(spec.Service.Routes()) > 0 {
-				rel, err := filepath.Rel(apiDirName, path)
-				if err != nil {
-					return err
-				}
-				apiFiles = append(apiFiles, filepath.ToSlash(rel))
-			}
-		}
-		return nil
-	})
-	return apiFiles
-}
-
-func GetApiServiceName(apiDirName string) string {
-	fs := getApiFilaPath(apiDirName)
-	for _, file := range fs {
-		apiSpec, err := parser.Parse(filepath.Join(apiDirName, file), "")
-		if err != nil {
-			cobra.CheckErr(err)
-		}
-		if apiSpec.Service.Name != "" {
-			return apiSpec.Service.Name
-		}
-	}
-	return ""
-}
-
-func generateApiCode(wd string, mainApiFilePath string) error {
-	if mainApiFilePath == "" {
-		return errors.New("empty mainApiFilePath")
-	}
-	defer os.Remove(mainApiFilePath)
-
-	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
-	command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", mainApiFilePath, filepath.Join(embeded.Home, "go-zero"))
-	if _, err := execx.Run(command, wd); err != nil {
-		return err
-	}
-	return nil
-}
-
-func GetMainApiFilePath(apiDirName string) string {
-	apiDir, err := os.ReadDir(apiDirName)
-	if err != nil {
-		return ""
-	}
-
-	var mainApiFilePath string
-
-	for _, file := range apiDir {
-		if file.Name() == "main.api" {
-			mainApiFilePath = filepath.Join(apiDirName, file.Name())
-			break
-		}
-	}
-
-	if mainApiFilePath == "" {
-		apiFilePath := getApiFilaPath(apiDirName)
-		sb := strings.Builder{}
-		sb.WriteString("syntax = \"v1\"")
-		sb.WriteString("\n")
-
-		for _, api := range apiFilePath {
-			sb.WriteString(fmt.Sprintf("import \"%s\"\n", api))
-		}
-
-		f, err := os.CreateTemp(apiDirName, "*.api")
-		if err != nil {
-			return ""
-		}
-
-		_, err = f.WriteString(sb.String())
-		if err != nil {
-			return ""
-		}
-		mainApiFilePath = f.Name()
-		f.Close()
-	}
-	return mainApiFilePath
 }
 
 func removeExtraFiles(wd string) {
