@@ -141,6 +141,11 @@ func Gen(_ *cobra.Command, _ []string) error {
 	// 生成 api 代码
 	apiDirName := filepath.Join(wd, "app", "desc", "api")
 	if pathx.FileExists(apiDirName) {
+		// format api dir
+		command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
+		_, err := execx.Run(command, wd)
+		cobra.CheckErr(err)
+
 		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
 		mainApiFilePath := GetMainApiFilePath(apiDirName)
 
