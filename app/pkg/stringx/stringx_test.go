@@ -18,6 +18,14 @@ func TestToCamel(t *testing.T) {
 			},
 			want: "pingPong",
 		},
+
+		{
+			name: "test2",
+			args: args{
+				s: "ping/pong",
+			},
+			want: "pingPong",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

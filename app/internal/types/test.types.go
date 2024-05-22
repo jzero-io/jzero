@@ -9,5 +9,6 @@ var (
 	_ = time.Now()
 )
 
-type Empty struct {
+type TestResponse struct {
+	Message string `json:"message"`
 }

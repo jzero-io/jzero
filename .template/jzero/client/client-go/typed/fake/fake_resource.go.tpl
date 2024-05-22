@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	{{range $k, $v := .HTTPInterfaces}}FakeReturn{{$v.MethodName}} = &{{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}rest.Request{}{{else}}{{$v.ResponseBody.Package | base}}.{{$v.ResponseBody.Name}}{}{{end}}
+	{{range $k, $v := .HTTPInterfaces}}FakeReturn{{$v.MethodName}} = {{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}rest.Request{}{{else}}{{$v.ResponseBody.FakeFullName}}{}{{end}}
 	{{end}}
 )
 
@@ -24,7 +24,7 @@ type {{.Resource | FirstUpper}}Getter interface {
 }
 
 type {{.Resource | FirstUpper}}Interface interface {
-	{{range $k, $v := .HTTPInterfaces}}{{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}} param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}*{{$v.ResponseBody.Package | base}}.{{$v.ResponseBody.Name}}{{end}}, error)
+	{{range $k, $v := .HTTPInterfaces}}{{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}} param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}{{$v.ResponseBody.FullName}}{{end}}, error)
 	{{end}}
 }
 
@@ -32,7 +32,7 @@ type Fake{{.Resource | FirstUpper}} struct {
 	Fake *Fake{{.Scope | FirstUpper}}
 }
 
-{{range $k, $v := .HTTPInterfaces}}func (f *Fake{{$.Resource | FirstUpper}}) {{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}}param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}*{{$v.ResponseBody.Package | base}}.{{$v.ResponseBody.Name}}{{end}}, error) {
+{{range $k, $v := .HTTPInterfaces}}func (f *Fake{{$.Resource | FirstUpper}}) {{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}}param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}{{$v.ResponseBody.FullName}}{{end}}, error) {
 	return FakeReturn{{$v.MethodName}}, nil
 }
 

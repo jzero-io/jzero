@@ -16,6 +16,7 @@ func FirstUpper(s string) string {
 }
 
 func ToCamel(s string) string {
+	s = strings.ReplaceAll(s, "/", "-")
 	words := strings.Split(s, "-")
 
 	for i := 1; i < len(words); i++ {

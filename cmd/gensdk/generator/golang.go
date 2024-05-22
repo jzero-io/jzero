@@ -47,10 +47,14 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 
 	// parse api
 	var apiSpecs []*spec.ApiSpec
-	apiSpec, err := apiparser.Parse(g.config.ApiFile)
+
+	mainApiFilePath := gen.GetMainApiFilePath(filepath.Join("app", "desc", "api"))
+	apiSpec, err := apiparser.Parse(mainApiFilePath)
 	if err != nil {
 		return nil, err
 	}
+	os.Remove(mainApiFilePath)
+
 	apiSpecs = append(apiSpecs, apiSpec)
 
 	protoFiles, err := gen.GetProtoFilenames(wd)

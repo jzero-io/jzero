@@ -1,8 +1,10 @@
 package jparser
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strings"
 
 	"github.com/jzero-io/jzero/cmd/gensdk/config"
@@ -70,9 +72,10 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 						Package:      strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./"),
 					}
 					httpInterface.ResponseBody = &vars.ResponseBody{
-						Name:    stringx.FirstUpper(method.GetOutputType().GetName()),
 						Package: strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./"),
 					}
+					httpInterface.ResponseBody.FullName = BuildProtoFullName(httpInterface.ResponseBody.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
+					httpInterface.ResponseBody.FakeFullName = BuildProtoFakeFullName(httpInterface.ResponseBody.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
 				}
 				httpInterface.MethodName = method.GetName()
 				// TODO if multiple. Use config to get scope
@@ -99,7 +102,7 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 
 				httpInterface := vars.HTTPInterface{
 					Scope:      vars.Scope(config.APP),
-					Resource:   vars.Resource(group.Annotation.Properties["group"]),
+					Resource:   vars.Resource(stringx.ToCamel(group.Annotation.Properties["group"])),
 					Method:     strings.ToUpper(route.Method),
 					URL:        path,
 					MethodName: route.Handler,
@@ -121,8 +124,9 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 
 				if route.ResponseType != nil {
 					httpInterface.ResponseBody = &vars.ResponseBody{
-						Name:    stringx.FirstUpper(route.ResponseType.Name()),
-						Package: "types",
+						FakeFullName: BuildApiFakeFullName(route.ResponseType.Name()),
+						FullName:     BuildApiFullName(route.ResponseType.Name()),
+						Package:      "types",
 					}
 				} else {
 					continue
@@ -141,6 +145,34 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 		}
 	}
 	return httpInterfaces, nil
+}
+
+func BuildProtoFullName(goPackage string, responseTypeName string) string {
+	return fmt.Sprintf("*%s.%s", filepath.Base(goPackage), responseTypeName)
+}
+
+func BuildProtoFakeFullName(goPackage string, responseTypeName string) string {
+	return fmt.Sprintf("&%s.%s", filepath.Base(goPackage), responseTypeName)
+}
+
+func BuildApiFullName(goPackage string) string {
+	if strings.HasPrefix(goPackage, "[]") {
+		// []*types.GroupTree
+		return fmt.Sprintf("[]*types.%s", strings.TrimPrefix(goPackage, "[]"))
+	}
+
+	// *types.GroupTree
+	return fmt.Sprintf("*types.%s", stringx.FirstUpper(strings.TrimPrefix(goPackage, "*")))
+}
+
+func BuildApiFakeFullName(goPackage string) string {
+	if strings.HasPrefix(goPackage, "[]") {
+		// []*types.GroupTree
+		return fmt.Sprintf("[]*types.%s", strings.TrimPrefix(goPackage, "[]"))
+	}
+
+	// &types.GroupTree
+	return fmt.Sprintf("&types.%s", stringx.FirstUpper(strings.TrimPrefix(goPackage, "*")))
 }
 
 func convertToMap(interfaces []*vars.HTTPInterface) vars.ScopeResourceHTTPInterfaceMap {

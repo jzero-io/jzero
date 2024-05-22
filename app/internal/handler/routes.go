@@ -6,6 +6,7 @@ import (
 
 	file "github.com/jzero-io/jzero/app/internal/handler/file"
 	hello "github.com/jzero-io/jzero/app/internal/handler/hello"
+	test "github.com/jzero-io/jzero/app/internal/handler/test"
 	"github.com/jzero-io/jzero/app/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -44,6 +45,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/hello/:name",
 				Handler: hello.HelloPathHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/test/slice-response",
+				Handler: test.TestSliceResponseHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),
