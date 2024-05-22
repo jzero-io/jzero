@@ -34,6 +34,10 @@ jobs:
           cd simple && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
 
           cd ..
+          ./dist/jzero_linux_amd64_v1/jzero new simplegateway --branch gateway
+          cd simplegateway && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version        
+
+          cd ..
           ./dist/jzero_linux_amd64_v1/jzero new simpleapi --branch api
           cd simpleapi && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
 

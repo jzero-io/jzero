@@ -40,7 +40,7 @@ var newCmd = &cobra.Command{
 			_ = os.MkdirAll(filepath.Join(home, ".jzero"), 0o755)
 
 			if !pathx.FileExists(filepath.Join(home, ".jzero", "templates", new.Branch)) {
-				fmt.Printf("Cloning into '%s/templates/api', please wait...\n", filepath.Join(home, ".jzero"))
+				fmt.Printf("Cloning into '%s/templates/%s', please wait...\n", filepath.Join(home, ".jzero"), new.Branch)
 				_, err := execx.Run(fmt.Sprintf("git clone %s -b %s templates/%s", new.Remote, new.Branch, new.Branch), filepath.Join(home, ".jzero"))
 				cobra.CheckErr(err)
 				fmt.Println("Clone success")

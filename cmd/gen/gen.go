@@ -107,9 +107,14 @@ func Gen(_ *cobra.Command, _ []string) error {
 			continue
 		}
 		if strings.HasSuffix(v.Name(), "proto") {
+			// parse proto
+			protoParser := rpcparser.NewDefaultProtoParser()
+			parse, err := protoParser.Parse(filepath.Join(wd, "app", "desc", "proto", v.Name()), true)
+			cobra.CheckErr(err)
+
 			fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), filepath.Join(wd, "app", "desc", "proto", v.Name()))
 			command := fmt.Sprintf("goctl rpc protoc app/desc/proto/%s  -I./app/desc/proto --go_out=./app/internal --go-grpc_out=./app/internal --zrpc_out=./app --client=false --home %s -m", v.Name(), filepath.Join(embeded.Home, "go-zero"))
-			_, err := execx.Run(command, wd)
+			_, err = execx.Run(command, wd)
 			cobra.CheckErr(err)
 			fmt.Println(color.WithColor("Done", color.FgGreen))
 
@@ -119,17 +124,14 @@ func Gen(_ *cobra.Command, _ []string) error {
 			_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", rmf)))
 
 			// # gen proto descriptor
-			_ = os.MkdirAll(filepath.Join(wd, ".protosets"), 0o755)
-			protocCommand := fmt.Sprintf("protoc --include_imports -I./app/desc/proto --descriptor_set_out=.protosets/%s.pb app/desc/proto/%s.proto", fileBase, fileBase)
-			_, err = execx.Run(protocCommand, wd)
-			cobra.CheckErr(err)
+			if isNeedGenProtoDescriptor(parse) {
+				_ = os.MkdirAll(filepath.Join(wd, ".protosets"), 0o755)
+				protocCommand := fmt.Sprintf("protoc --include_imports -I./app/desc/proto --descriptor_set_out=.protosets/%s.pb app/desc/proto/%s.proto", fileBase, fileBase)
+				_, err = execx.Run(protocCommand, wd)
+				cobra.CheckErr(err)
+				protosets = append(protosets, filepath.Join(".protosets", fmt.Sprintf("%s.pb", fileBase)))
+			}
 
-			protosets = append(protosets, filepath.Join(".protosets", fmt.Sprintf("%s.pb", fileBase)))
-
-			// parse proto
-			protoParser := rpcparser.NewDefaultProtoParser()
-			parse, err := protoParser.Parse(filepath.Join(wd, "app", "desc", "proto", v.Name()), true)
-			cobra.CheckErr(err)
 			for _, s := range parse.Service {
 				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/app/internal/server/%s"`, s.Name, moduleStruct.Path, s.Name))
 				registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%sServer(ctx))", filepath.Base(parse.GoPackage), stringx.FirstUpper(s.Name), s.Name, stringx.FirstUpper(s.Name)))
