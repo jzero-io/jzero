@@ -31,7 +31,8 @@ var genCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 	},
-	RunE: gen.Gen,
+	RunE:         gen.Gen,
+	SilenceUsage: false,
 }
 
 // genSwaggerCmd represents the genSwagger command

@@ -3,10 +3,8 @@ package gen
 import (
 	"fmt"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"strings"
-	"syscall"
 
 	"github.com/jzero-io/jzero/app/pkg/mod"
 	"github.com/jzero-io/jzero/embeded"
@@ -62,47 +60,32 @@ func Gen(_ *cobra.Command, _ []string) error {
 	moduleStruct, err := mod.GetGoMod(wd)
 	cobra.CheckErr(err)
 
-	// 正常删除无用文件夹
 	defer func() {
 		removeExtraFiles(wd)
-		os.Exit(0)
 	}()
-
-	// 异常删除无用文件夹
-	go extraFileHandler(wd)
 
 	// gen rpc code
 	jzeroRpc := JzeroRpc{Wd: wd, Module: moduleStruct.Path}
 	err = jzeroRpc.Gen()
-	cobra.CheckErr(err)
+	if err != nil {
+		return err
+	}
 
 	// 生成 api 代码
 	jzeroApi := JzeroApi{Wd: wd, Module: moduleStruct.Path}
 	err = jzeroApi.Gen()
-	cobra.CheckErr(err)
+	if err != nil {
+		return err
+	}
 
 	// 检测是否包含 sql
 	jzeroSql := JzeroSql{Wd: wd}
 	err = jzeroSql.Gen()
-	cobra.CheckErr(err)
+	if err != nil {
+		return err
+	}
 
 	return nil
-}
-
-func extraFileHandler(wd string) {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
-	for {
-		s := <-c
-		switch s {
-		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-			removeExtraFiles(wd)
-			os.Exit(-1)
-		case syscall.SIGHUP:
-		default:
-			return
-		}
-	}
 }
 
 func removeExtraFiles(wd string) {
