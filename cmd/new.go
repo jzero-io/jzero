@@ -10,10 +10,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/zeromicro/go-zero/core/color"
+
+	git "github.com/go-git/go-git/v5"
 	"github.com/jzero-io/jzero/cmd/new"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
@@ -38,16 +41,19 @@ var newCmd = &cobra.Command{
 			// clone to local
 			home, _ := os.UserHomeDir()
 			_ = os.MkdirAll(filepath.Join(home, ".jzero"), 0o755)
-
 			if !pathx.FileExists(filepath.Join(home, ".jzero", "templates", new.Branch)) {
-				fmt.Printf("Cloning into '%s/templates/%s', please wait...\n", filepath.Join(home, ".jzero"), new.Branch)
-				_, err := execx.Run(fmt.Sprintf("git clone %s -b %s templates/%s", new.Remote, new.Branch, new.Branch), filepath.Join(home, ".jzero"))
+				fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(home, ".jzero"), new.Branch)
+				_, err := git.PlainClone(filepath.Join(home, ".jzero", "templates", new.Branch), false, &git.CloneOptions{
+					SingleBranch:  true,
+					URL:           new.Remote,
+					Depth:         0,
+					ReferenceName: plumbing.ReferenceName("refs/heads/" + new.Branch),
+				})
 				cobra.CheckErr(err)
-				fmt.Println("Clone success")
+				fmt.Println(color.WithColor("Done", color.FgGreen))
 			} else {
-				fmt.Printf("Using cache: %s\n", filepath.Join(home, ".jzero", "templates", new.Branch))
+				fmt.Printf("%s cache: %s\n", color.WithColor("Using", color.FgGreen), filepath.Join(home, ".jzero", "templates", new.Branch))
 			}
-
 			embeded.Home = filepath.Join(home, ".jzero", "templates", new.Branch)
 		}
 	},
