@@ -26,6 +26,7 @@ import (
 type JzeroApi struct {
 	Wd     string
 	Module string
+	Style  string
 }
 
 func (ja *JzeroApi) Gen() error {
@@ -41,7 +42,7 @@ func (ja *JzeroApi) Gen() error {
 		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
 		mainApiFilePath := GetMainApiFilePath(apiDirName)
 
-		err = generateApiCode(ja.Wd, mainApiFilePath)
+		err = generateApiCode(ja.Wd, mainApiFilePath, ja.Style)
 		if err != nil {
 			return err
 		}
@@ -204,14 +205,14 @@ func getRouteApiFilePath(apiDirName string) []string {
 	return apiFiles
 }
 
-func generateApiCode(wd string, mainApiFilePath string) error {
+func generateApiCode(wd string, mainApiFilePath, style string) error {
 	if mainApiFilePath == "" {
 		return errors.New("empty mainApiFilePath")
 	}
 	defer os.Remove(mainApiFilePath)
 
 	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
-	command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s", mainApiFilePath, filepath.Join(embeded.Home, "go-zero"))
+	command := fmt.Sprintf("goctl api go --api %s --dir ./app --home %s --style %s ", mainApiFilePath, filepath.Join(embeded.Home, "go-zero"), style)
 	if _, err := execx.Run(command, wd); err != nil {
 		return err
 	}

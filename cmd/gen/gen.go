@@ -18,6 +18,7 @@ var (
 	WorkingDir string
 
 	Version string
+	Style   string
 )
 
 type (
@@ -65,21 +66,21 @@ func Gen(_ *cobra.Command, _ []string) error {
 	}()
 
 	// gen rpc code
-	jzeroRpc := JzeroRpc{Wd: wd, Module: moduleStruct.Path}
+	jzeroRpc := JzeroRpc{Wd: wd, Module: moduleStruct.Path, Style: Style}
 	err = jzeroRpc.Gen()
 	if err != nil {
 		return err
 	}
 
 	// 生成 api 代码
-	jzeroApi := JzeroApi{Wd: wd, Module: moduleStruct.Path}
+	jzeroApi := JzeroApi{Wd: wd, Module: moduleStruct.Path, Style: Style}
 	err = jzeroApi.Gen()
 	if err != nil {
 		return err
 	}
 
 	// 检测是否包含 sql
-	jzeroSql := JzeroSql{Wd: wd}
+	jzeroSql := JzeroSql{Wd: wd, Style: Style}
 	err = jzeroSql.Gen()
 	if err != nil {
 		return err

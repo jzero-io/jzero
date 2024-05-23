@@ -12,7 +12,8 @@ import (
 )
 
 type JzeroSql struct {
-	Wd string
+	Wd    string
+	Style string
 }
 
 func (js *JzeroSql) Gen() error {
@@ -27,7 +28,7 @@ func (js *JzeroSql) Gen() error {
 			if !f.IsDir() && strings.HasSuffix(f.Name(), ".sql") {
 				sqlFilePath := filepath.Join(sqlDir, f.Name())
 				fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), sqlFilePath)
-				command := fmt.Sprintf("goctl model mysql ddl --src app/desc/sql/%s --dir ./app/internal/model/%s --home %s", f.Name(), f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))], filepath.Join(js.Wd, ".template", "go-zero"))
+				command := fmt.Sprintf("goctl model mysql ddl --src app/desc/sql/%s --dir ./app/internal/model/%s --home %s --style %s", f.Name(), f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))], filepath.Join(js.Wd, ".template", "go-zero"), js.Style)
 				_, err = execx.Run(command, js.Wd)
 				if err != nil {
 					return err

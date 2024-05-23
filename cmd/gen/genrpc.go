@@ -22,6 +22,7 @@ import (
 type JzeroRpc struct {
 	Wd     string
 	Module string
+	Style  string
 }
 
 func (jr *JzeroRpc) Gen() error {
@@ -64,7 +65,7 @@ func (jr *JzeroRpc) Gen() error {
 			}
 
 			fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), filepath.Join(jr.Wd, "app", "desc", "proto", v.Name()))
-			command := fmt.Sprintf("goctl rpc protoc app/desc/proto/%s  -I./app/desc/proto --go_out=./app/internal --go-grpc_out=./app/internal --zrpc_out=./app --client=false --home %s -m", v.Name(), filepath.Join(embeded.Home, "go-zero"))
+			command := fmt.Sprintf("goctl rpc protoc app/desc/proto/%s  -I./app/desc/proto --go_out=./app/internal --go-grpc_out=./app/internal --zrpc_out=./app --client=false --home %s -m --style %s ", v.Name(), filepath.Join(embeded.Home, "go-zero"), jr.Style)
 			_, err = execx.Run(command, jr.Wd)
 			if err != nil {
 				return err
