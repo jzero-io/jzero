@@ -27,6 +27,23 @@ docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new app1
 ```
 :::
 
+## 新建 grpc, gateway 的项目
+
+::: code-tabs#shell
+
+@tab jzero
+
+```bash
+jzero new app1 --branch gateway
+```
+
+@tab Docker
+
+```bash
+docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new app1 --branch gateway
+```
+:::
+
 ## 新建仅有 api 的项目
 
 ::: code-tabs#shell

@@ -28,11 +28,19 @@
 
 ![2024-04-30_10-10-52](https://oss.jaronnie.com/2024-04-30_10-10-52.gif)
 
-### new project with grpc, gateway, api, cli
+### new project with grpc, gateway, api
 
 ```shell
 jzero new simple
 cd simple && jzero gen && go mod tidy
+go run main.go server
+```
+
+### new project with grpc, gateway
+
+```shell
+jzero new simplegateway --branch gateway
+cd simplegateway && jzero gen && go mod tidy
 go run main.go server
 ```
 
