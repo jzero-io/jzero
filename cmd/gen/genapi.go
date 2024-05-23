@@ -4,7 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
+
+	"github.com/jzero-io/jzero/app/pkg/templatex"
+	"github.com/rinchsan/gosimports"
+	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
+	apiparser "github.com/zeromicro/go-zero/tools/goctl/api/parser"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 
@@ -14,6 +22,91 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"golang.org/x/exp/constraints"
 )
+
+type JzeroApi struct {
+	Wd     string
+	Module string
+}
+
+func (ja *JzeroApi) Gen() error {
+	apiDirName := filepath.Join(ja.Wd, "app", "desc", "api")
+	if pathx.FileExists(apiDirName) {
+		// format api dir
+		command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
+		_, err := execx.Run(command, ja.Wd)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
+		mainApiFilePath := GetMainApiFilePath(apiDirName)
+
+		err = generateApiCode(ja.Wd, mainApiFilePath)
+		if err != nil {
+			return err
+		}
+		fmt.Println(color.WithColor("Done", color.FgGreen))
+
+		// 生成 api types
+		apiFileTypes := make([]ApiFileTypes, 0)
+
+		allApiFilePaths := getAllApiFilePath(apiDirName)
+
+		for _, v := range allApiFilePaths {
+			apiSpec, err := apiparser.Parse(filepath.Join(apiDirName, v))
+			if err != nil {
+				return err
+			}
+			apiFileTypes = append(apiFileTypes, ApiFileTypes{
+				Filepath: v,
+				ApiSpec:  *apiSpec,
+			})
+		}
+
+		types := getFileTypes(apiFileTypes)
+		for _, t := range types {
+			if len(t.GenTypes) == 0 {
+				continue
+			}
+			typesGoString, err := gogen.BuildTypes(t.GenTypes)
+			if err != nil {
+				return err
+			}
+			typesGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+				"Module": ja.Module,
+				"Types":  typesGoString,
+			}, []byte(TypesGoTpl))
+			if err != nil {
+				return err
+			}
+
+			typesGoFormatBytes, err := gosimports.Process("", typesGoBytes, &gosimports.Options{
+				FormatOnly: true,
+				Comments:   true,
+			})
+			if err != nil {
+				return err
+			}
+
+			prefix := strings.ReplaceAll(filepath.Dir(t.Filepath), "/", "_") + "_"
+			if len(strings.Split(t.Filepath, "/")) == 1 {
+				prefix = ""
+			}
+
+			fileBase := filepath.Base(t.Filepath)
+			typesGoFilePath := prefix + fileBase[0:len(fileBase)-len(path.Ext(fileBase))] + ".types.go"
+			if t.Base {
+				typesGoFilePath = "types.go"
+			}
+			err = os.WriteFile(filepath.Join("app", "internal", "types", typesGoFilePath), typesGoFormatBytes, 0o644)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
 
 func getFileTypes(apiFileTypes []ApiFileTypes) []ApiFileTypes {
 	var newApiFileTypes []ApiFileTypes
@@ -87,7 +180,7 @@ func getAllApiFilePath(apiDirName string) []string {
 	return apiFiles
 }
 
-func getRouteApiFilaPath(apiDirName string) []string {
+func getRouteApiFilePath(apiDirName string) []string {
 	var apiFiles []string
 	_ = filepath.Walk(apiDirName, func(path string, info os.FileInfo, err error) error {
 		if err != nil {

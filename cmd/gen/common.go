@@ -63,7 +63,7 @@ func GetMainApiFilePath(apiDirName string) string {
 	}
 
 	if mainApiFilePath == "" {
-		apiFilePath := getRouteApiFilaPath(apiDirName)
+		apiFilePath := getRouteApiFilePath(apiDirName)
 		sb := strings.Builder{}
 		sb.WriteString("syntax = \"v1\"")
 		sb.WriteString("\n")
@@ -88,7 +88,7 @@ func GetMainApiFilePath(apiDirName string) string {
 }
 
 func GetApiServiceName(apiDirName string) string {
-	fs := getRouteApiFilaPath(apiDirName)
+	fs := getRouteApiFilePath(apiDirName)
 	for _, file := range fs {
 		apiSpec, err := parser.Parse(filepath.Join(apiDirName, file), "")
 		if err != nil {
