@@ -19,7 +19,7 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 
 	data, err := execx.Run("go list -json -m", workDir)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	var m ModuleStruct

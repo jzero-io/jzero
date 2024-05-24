@@ -1,8 +1,6 @@
 module github.com/jzero-io/jzero
 
-go 1.21
-
-toolchain go1.22.2
+go 1.19
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3

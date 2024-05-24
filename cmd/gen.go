@@ -55,5 +55,4 @@ func init() {
 
 	genSwaggerCmd.Flags().StringVarP(&genswagger.Dir, "dir", "d", filepath.Join("app", "desc", "swagger"), "set swagger output dir")
 	genCmd.Flags().StringVarP(&gen.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
-
 }
