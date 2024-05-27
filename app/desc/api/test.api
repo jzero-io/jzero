@@ -1,18 +1,17 @@
 syntax = "v1"
+
 import "base.api"
 
 type TestResponse {
-    message string `json:"message"`
+	message string `json:"message"`
 }
 
 @server (
-    prefix: /api/v1
-    group:  test
+	prefix: /api/v1
+	group:  test
 )
-
-
 service jzero {
-    @handler TestSliceResponseHandler
-    post /test/slice-response (Empty) returns ([]TestResponse)
+	@handler TestSliceResponseHandler
+	post /test/slice-response (Empty) returns ([]TestResponse)
 }
 

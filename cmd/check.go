@@ -42,6 +42,17 @@ var checkCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		fmt.Println(resp)
 
+		log.Info("\n[jzero-env]: looking up goctl-types")
+		_, err = env.LookPath("goctl-types")
+		if err != nil {
+			_ = golang.Install("github.com/jzero-io/goctl-types@latest")
+		}
+		if _, err = env.LookPath("goctl-types"); err == nil {
+			log.Success(`[jzero-env]: "goctl-types" is installed`)
+		} else {
+			log.Fatalln("[jzero-env] env check failed, goctl-types is not installed")
+		}
+
 		// jzero env check
 		log.Info("\n[jzero-env]: looking up task")
 		_, err = env.LookPath("task")
