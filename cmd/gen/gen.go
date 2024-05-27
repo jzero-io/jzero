@@ -17,8 +17,9 @@ import (
 var (
 	WorkingDir string
 
-	Version string
-	Style   string
+	Version      string
+	Style        string
+	RemoveSuffix bool // 是否去掉 Logic 或者 Handler 后缀
 )
 
 type (
@@ -73,7 +74,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 	}
 
 	// 生成 api 代码
-	jzeroApi := JzeroApi{Wd: wd, Module: moduleStruct.Path, Style: Style}
+	jzeroApi := JzeroApi{Wd: wd, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
 	err = jzeroApi.Gen()
 	if err != nil {
 		return err

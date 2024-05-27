@@ -8,6 +8,7 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/jzero-io/jzero/cmd/gen"
 	"github.com/jzero-io/jzero/cmd/genswagger"
@@ -22,6 +23,10 @@ var genCmd = &cobra.Command{
 	Short: "jzero gen code",
 	Long:  `jzero gen code`,
 	PreRun: func(_ *cobra.Command, _ []string) {
+		if Debug {
+			time.Sleep(time.Second * 15)
+		}
+
 		gen.Version = Version
 
 		// check go-zero api template
@@ -55,4 +60,5 @@ func init() {
 
 	genSwaggerCmd.Flags().StringVarP(&genswagger.Dir, "dir", "d", filepath.Join("app", "desc", "swagger"), "set swagger output dir")
 	genCmd.Flags().StringVarP(&gen.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+	genCmd.Flags().BoolVarP(&gen.RemoveSuffix, "remove-suffix", "", false, "remove suffix Handler or Logic on filename or file content")
 }

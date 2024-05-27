@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
+	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
@@ -15,13 +19,30 @@ import (
 )
 
 type JzeroApi struct {
-	Wd     string
-	Module string
-	Style  string
+	Wd           string
+	Module       string
+	Style        string
+	RemoveSuffix bool
+}
+
+type HandlerFile struct {
+	Path string
+	Skip bool
+}
+
+type LogicFile struct {
+	Path string
+	Skip bool
 }
 
 func (ja *JzeroApi) Gen() error {
 	apiDirName := filepath.Join(ja.Wd, "app", "desc", "api")
+
+	var apiSpec *spec.ApiSpec
+	// 实验性功能
+	var allHandlerFiles []HandlerFile
+	var allLogicFiles []LogicFile
+
 	if pathx.FileExists(apiDirName) {
 		// format api dir
 		command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
@@ -32,6 +53,20 @@ func (ja *JzeroApi) Gen() error {
 
 		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
 		mainApiFilePath := GetMainApiFilePath(apiDirName)
+		apiSpec, err = parser.Parse(mainApiFilePath, nil)
+		if err != nil {
+			return err
+		}
+
+		allLogicFiles, err = ja.getAllLogicFiles(apiSpec)
+		if err != nil {
+			return err
+		}
+
+		allHandlerFiles, err = ja.getAllHandlerFiles(apiSpec)
+		if err != nil {
+			return err
+		}
 
 		err = generateApiCode(ja.Wd, mainApiFilePath, ja.Style)
 		if err != nil {
@@ -46,7 +81,70 @@ func (ja *JzeroApi) Gen() error {
 		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
 
+	if ja.RemoveSuffix && apiSpec != nil {
+		for _, file := range allHandlerFiles {
+			if !file.Skip {
+				// TODO
+			}
+		}
+		for _, file := range allLogicFiles {
+			if !file.Skip {
+				// TODO
+			}
+		}
+	}
+
 	return nil
+}
+
+func (ja *JzeroApi) getAllHandlerFiles(apiSpec *spec.ApiSpec) ([]HandlerFile, error) {
+	var handlerFiles []HandlerFile
+	for _, group := range apiSpec.Service.Groups {
+		for _, route := range group.Routes {
+			formatContent := strings.TrimSuffix(route.Handler, "Handler") + "Handler"
+			namingFormat, err := format.FileNamingFormat(ja.Style, formatContent)
+			if err != nil {
+				return nil, err
+			}
+			fp := filepath.Join(ja.Wd, "app", "internal", "handler", group.GetAnnotation("group"), namingFormat+".go")
+
+			f := HandlerFile{
+				Path: fp,
+			}
+
+			if pathx.FileExists(fp) {
+				f.Skip = true
+			}
+
+			handlerFiles = append(handlerFiles, f)
+		}
+	}
+	return handlerFiles, nil
+}
+
+func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error) {
+	var handlerFiles []LogicFile
+	for _, group := range apiSpec.Service.Groups {
+		for _, route := range group.Routes {
+			namingFormat, err := format.FileNamingFormat(ja.Style, strings.TrimSuffix(route.Handler, "Handler")+"Logic")
+			if err != nil {
+				return nil, err
+			}
+
+			fp := filepath.Join(ja.Wd, "app", "internal", "logic", group.GetAnnotation("group"), namingFormat+".go")
+
+			f := LogicFile{
+				Path: fp,
+			}
+
+			if pathx.FileExists(fp) {
+				f.Skip = true
+			}
+
+			handlerFiles = append(handlerFiles, f)
+		}
+	}
+	return handlerFiles, nil
 }
 
 func getRouteApiFilePath(apiDirName string) []string {
