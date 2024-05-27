@@ -84,12 +84,16 @@ func (ja *JzeroApi) Gen() error {
 	if ja.RemoveSuffix && apiSpec != nil {
 		for _, file := range allHandlerFiles {
 			if !file.Skip {
-				// TODO
+				if err := rewriteHandlerGo(file.Path); err != nil {
+					return err
+				}
 			}
 		}
 		for _, file := range allLogicFiles {
 			if !file.Skip {
-				// TODO
+				if err := rewriteLogicGo(file.Path); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -189,5 +193,13 @@ func separateTypesGoByGoctlTypesPlugin(wd string, mainApiFilePath, style string)
 	if _, err := execx.Run(command, wd); err != nil {
 		return err
 	}
+	return nil
+}
+
+func rewriteHandlerGo(fp string) error {
+	return nil
+}
+
+func rewriteLogicGo(fp string) error {
 	return nil
 }
