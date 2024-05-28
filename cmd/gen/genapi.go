@@ -258,9 +258,12 @@ func (ja *JzeroApi) rewriteHandlerGo(fp string) error {
 	}
 
 	// Get the new file name of the file (without the 7 characters(Handler) before the ".go" extension)
-	newFilePath := fp[:len(fp)-10] + ".go"
+	newFilePath := fp[:len(fp)-10]
+	// patch
+	newFilePath = strings.TrimSuffix(newFilePath, "_")
+	newFilePath = strings.TrimSuffix(newFilePath, "-")
 
-	return os.Rename(fp, newFilePath)
+	return os.Rename(fp, newFilePath+".go")
 }
 
 func (ja *JzeroApi) rewriteRoutesGo(group string, handler string) error {
@@ -370,7 +373,10 @@ func (ja *JzeroApi) rewriteLogicGo(fp string) error {
 	}
 
 	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
-	newFilePath := fp[:len(fp)-8] + ".go"
+	newFilePath := fp[:len(fp)-8]
+	// patch
+	newFilePath = strings.TrimSuffix(newFilePath, "_")
+	newFilePath = strings.TrimSuffix(newFilePath, "-")
 
-	return os.Rename(fp, newFilePath)
+	return os.Rename(fp, newFilePath+".go")
 }
