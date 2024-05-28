@@ -10,21 +10,21 @@ import (
 	"github.com/jzero-io/jzero/app/internal/svc"
 )
 
-type CreateCredentialLogic struct {
+type CreateCredential struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewCreateCredentialLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateCredentialLogic {
-	return &CreateCredentialLogic{
+func NewCreateCredential(ctx context.Context, svcCtx *svc.ServiceContext) *CreateCredential {
+	return &CreateCredential{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-func (l *CreateCredentialLogic) CreateCredential(in *credentialpb.CreateCredentialRequest) (*credentialpb.CreateCredentialResponse, error) {
+func (l *CreateCredential) CreateCredential(in *credentialpb.CreateCredentialRequest) (*credentialpb.CreateCredentialResponse, error) {
 	model := credential.NewCredentialModel(l.svcCtx.SqlConn)
 
 	result, err := model.Insert(l.ctx, &credential.Credential{

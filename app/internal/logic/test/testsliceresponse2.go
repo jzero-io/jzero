@@ -1,4 +1,4 @@
-package testlogic
+package test
 
 import (
 	"context"

@@ -17,7 +17,7 @@ func TestSliceResponseHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := testlogic.NewTestSliceResponseLogic(r.Context(), svcCtx)
+		l := test.NewTestSliceResponseLogic(r.Context(), svcCtx)
 		resp, err := l.TestSliceResponse(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)

@@ -141,7 +141,7 @@ func (ja *JzeroApi) getAllHandlerFiles(apiSpec *spec.ApiSpec) ([]HandlerFile, er
 }
 
 func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error) {
-	var handlerFiles []LogicFile
+	var logicFiles []LogicFile
 	for _, group := range apiSpec.Service.Groups {
 		for _, route := range group.Routes {
 			namingFormat, err := format.FileNamingFormat(ja.Style, strings.TrimSuffix(route.Handler, "Handler")+"Logic")
@@ -159,10 +159,10 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 				f.Skip = true
 			}
 
-			handlerFiles = append(handlerFiles, f)
+			logicFiles = append(logicFiles, f)
 		}
 	}
-	return handlerFiles, nil
+	return logicFiles, nil
 }
 
 func getRouteApiFilePath(apiDirName string) []string {

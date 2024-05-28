@@ -3,6 +3,7 @@ package gen
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -67,7 +68,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 	}()
 
 	// gen rpc code
-	jzeroRpc := JzeroRpc{Wd: wd, Module: moduleStruct.Path, Style: Style}
+	jzeroRpc := JzeroRpc{Wd: wd, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
 	err = jzeroRpc.Gen()
 	if err != nil {
 		return err
@@ -93,6 +94,15 @@ func Gen(_ *cobra.Command, _ []string) error {
 func removeExtraFiles(wd string) {
 	_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
 	_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", GetApiServiceName(filepath.Join(wd, "app", "desc", "api")))))
+	protoFilenames, err := GetProtoFilenames(wd)
+	if err == nil {
+		for _, v := range protoFilenames {
+			fileBase := v[0 : len(v)-len(path.Ext(v))]
+			rmf := strings.ReplaceAll(strings.ToLower(fileBase), "-", "")
+			rmf = strings.ReplaceAll(rmf, "_", "")
+			_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", rmf)))
+		}
+	}
 }
 
 func init() {
