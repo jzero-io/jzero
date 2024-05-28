@@ -1,11 +1,18 @@
 package gen
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"go/ast"
+	goformat "go/format"
+	goparser "go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/zeromicro/go-zero/tools/goctl/util"
 
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
@@ -26,8 +33,10 @@ type JzeroApi struct {
 }
 
 type HandlerFile struct {
-	Path string
-	Skip bool
+	Group   string
+	Handler string
+	Path    string
+	Skip    bool
 }
 
 type LogicFile struct {
@@ -84,14 +93,17 @@ func (ja *JzeroApi) Gen() error {
 	if ja.RemoveSuffix && apiSpec != nil {
 		for _, file := range allHandlerFiles {
 			if !file.Skip {
-				if err := rewriteHandlerGo(file.Path); err != nil {
+				if err := ja.rewriteHandlerGo(file.Path); err != nil {
+					return err
+				}
+				if err := ja.rewriteRoutesGo(file.Group, file.Handler); err != nil {
 					return err
 				}
 			}
 		}
 		for _, file := range allLogicFiles {
 			if !file.Skip {
-				if err := rewriteLogicGo(file.Path); err != nil {
+				if err := ja.rewriteLogicGo(file.Path); err != nil {
 					return err
 				}
 			}
@@ -113,7 +125,9 @@ func (ja *JzeroApi) getAllHandlerFiles(apiSpec *spec.ApiSpec) ([]HandlerFile, er
 			fp := filepath.Join(ja.Wd, "app", "internal", "handler", group.GetAnnotation("group"), namingFormat+".go")
 
 			f := HandlerFile{
-				Path: fp,
+				Path:    fp,
+				Group:   group.GetAnnotation("group"),
+				Handler: route.Handler,
 			}
 
 			if pathx.FileExists(fp) {
@@ -196,10 +210,167 @@ func separateTypesGoByGoctlTypesPlugin(wd string, mainApiFilePath, style string)
 	return nil
 }
 
-func rewriteHandlerGo(fp string) error {
+func (ja *JzeroApi) rewriteHandlerGo(fp string) error {
+	fset := token.NewFileSet()
+
+	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+	ast.Inspect(f, func(n ast.Node) bool {
+		if fn, ok := n.(*ast.FuncDecl); ok && strings.HasSuffix(fn.Name.Name, "Handler") {
+			fn.Name.Name = strings.TrimSuffix(fn.Name.Name, "Handler")
+
+			// find handlerFunc body: l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx)
+			for _, body := range fn.Body.List {
+				if returnStmt, ok := body.(*ast.ReturnStmt); ok {
+					for _, v := range returnStmt.Results {
+						if funcLit, ok := v.(*ast.FuncLit); ok {
+							for _, list := range funcLit.Body.List {
+								if assignStmt, ok := list.(*ast.AssignStmt); ok {
+									for _, rh := range assignStmt.Rhs {
+										if callExpr, ok := rh.(*ast.CallExpr); ok {
+											if selectorExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+												selectorExpr.Sel.Name = strings.TrimSuffix(selectorExpr.Sel.Name, "Logic")
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return false
+		}
+
+		return true
+	})
+
+	// Write the modified AST back to the file
+	buf := bytes.NewBuffer(nil)
+	if err := goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+		return err
+	}
+
+	// Get the new file name of the file (without the 7 characters(Handler) before the ".go" extension)
+	newFilePath := fp[:len(fp)-10] + ".go"
+
+	return os.Rename(fp, newFilePath)
+}
+
+func (ja *JzeroApi) rewriteRoutesGo(group string, handler string) error {
+	fp := filepath.Join(ja.Wd, "app", "internal", "handler", "routes.go")
+	fset := token.NewFileSet()
+	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+
+	ast.Inspect(f, func(node ast.Node) bool {
+		switch n := node.(type) {
+		case *ast.CallExpr:
+			if sel, ok := n.Fun.(*ast.SelectorExpr); ok {
+				if _, ok := sel.X.(*ast.Ident); ok {
+					if sel.Sel.Name == util.Title(strings.TrimSuffix(handler, "Handler"))+"Handler" {
+						sel.Sel.Name = util.Title(strings.TrimSuffix(handler, "Handler"))
+					}
+				}
+			}
+		}
+		return true
+	})
+	// Write the modified AST back to the file
+	buf := bytes.NewBuffer(nil)
+	if err := goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+		return err
+	}
 	return nil
 }
 
-func rewriteLogicGo(fp string) error {
-	return nil
+func (ja *JzeroApi) rewriteLogicGo(fp string) error {
+	fset := token.NewFileSet()
+
+	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+
+	// modify NewXXLogic
+	ast.Inspect(f, func(n ast.Node) bool {
+		if fn, ok := n.(*ast.FuncDecl); ok && strings.HasSuffix(fn.Name.Name, "Logic") {
+			fn.Name.Name = strings.TrimSuffix(fn.Name.Name, "Logic")
+			for _, result := range fn.Type.Results.List {
+				if starExpr, ok := result.Type.(*ast.StarExpr); ok {
+					if indent, ok := starExpr.X.(*ast.Ident); ok {
+						indent.Name = util.Title(strings.TrimSuffix(indent.Name, "Logic"))
+					}
+				}
+			}
+			for _, body := range fn.Body.List {
+				if returnStmt, ok := body.(*ast.ReturnStmt); ok {
+					for _, result := range returnStmt.Results {
+						if unaryExpr, ok := result.(*ast.UnaryExpr); ok {
+							if compositeLit, ok := unaryExpr.X.(*ast.CompositeLit); ok {
+								if indent, ok := compositeLit.Type.(*ast.Ident); ok {
+									indent.Name = util.Title(strings.TrimSuffix(indent.Name, "Logic"))
+								}
+							}
+						}
+					}
+				}
+			}
+			return false
+		}
+		return true
+	})
+
+	// modify XXLogic Struct
+	ast.Inspect(f, func(node ast.Node) bool {
+		if fn, ok := node.(*ast.GenDecl); ok && fn.Tok == token.TYPE {
+			for _, s := range fn.Specs {
+				if ts, ok := s.(*ast.TypeSpec); ok {
+					ts.Name.Name = strings.TrimSuffix(ts.Name.Name, "Logic")
+				}
+			}
+		}
+		return true
+	})
+
+	// modify XXLogic Struct methods receiver
+	ast.Inspect(f, func(n ast.Node) bool {
+		if fn, ok := n.(*ast.FuncDecl); ok && fn.Recv != nil {
+			for _, list := range fn.Recv.List {
+				if starExpr, ok := list.Type.(*ast.StarExpr); ok {
+					if ident, ok := starExpr.X.(*ast.Ident); ok {
+						ident.Name = util.Title(strings.TrimSuffix(ident.Name, "Logic"))
+					}
+				}
+			}
+		}
+		return true
+	})
+
+	// Write the modified AST back to the file
+	buf := bytes.NewBuffer(nil)
+	if err := goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
+
+	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+		return err
+	}
+
+	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
+	newFilePath := fp[:len(fp)-8] + ".go"
+
+	return os.Rename(fp, newFilePath)
 }

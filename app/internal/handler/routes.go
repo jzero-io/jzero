@@ -57,6 +57,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/test/slice-response",
 				Handler: test.TestSliceResponseHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/test/slice-response2",
+				Handler: test.TestSliceResponse2(serverCtx),
+			},
 		},
 		rest.WithPrefix("/api/v1"),
 	)
