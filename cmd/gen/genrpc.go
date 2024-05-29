@@ -258,6 +258,17 @@ func (jr *JzeroRpc) getAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, er
 }
 
 func (jr *JzeroRpc) rewriteLogicGo(fp string) error {
+	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
+	newFilePath := fp[:len(fp)-8]
+	// patch
+	newFilePath = strings.TrimSuffix(newFilePath, "_")
+	newFilePath = strings.TrimSuffix(newFilePath, "-")
+	newFilePath += ".go"
+
+	if pathx.FileExists(newFilePath) {
+		_ = os.Remove(fp)
+	}
+
 	fset := token.NewFileSet()
 
 	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
@@ -330,13 +341,7 @@ func (jr *JzeroRpc) rewriteLogicGo(fp string) error {
 		return err
 	}
 
-	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
-	newFilePath := fp[:len(fp)-8]
-	// patch
-	newFilePath = strings.TrimSuffix(newFilePath, "_")
-	newFilePath = strings.TrimSuffix(newFilePath, "-")
-
-	return os.Rename(fp, newFilePath+".go")
+	return os.Rename(fp, newFilePath)
 }
 
 func (jr *JzeroRpc) rewriteServerGo(fp string, needRename bool) error {
