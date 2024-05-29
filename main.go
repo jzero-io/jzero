@@ -9,7 +9,7 @@ import (
 
 // embeded
 var (
-	//go:embed .template
+	//go:embed all:.template
 	template embed.FS
 )
 

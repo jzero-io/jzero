@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -18,22 +17,16 @@ var (
 	Output  string
 	AppDir  string
 	AppName string
-	// ConfigType config type
-	ConfigType string
-	// Remote templates repo
-	Remote string
-	Branch string
+	Remote  string
+	Branch  string
 
 	Version string
 )
 
 type TemplateData struct {
-	Module          string
-	APP             string
-	ConfigType      string
-	ServerImports   string
-	PbImports       string
-	RegisterServers string
+	Module string
+	APP    string
+	AppDir string
 }
 
 func NewProject(_ *cobra.Command, _ []string) error {
@@ -43,64 +36,36 @@ func NewProject(_ *cobra.Command, _ []string) error {
 		embeded.Home = filepath.Join(homeDir, ".jzero", Version)
 	}
 
-	// mkdir output
-	err = os.MkdirAll(Output, 0o755)
+	err = os.MkdirAll(filepath.Join(Output, AppDir), 0o755)
 	cobra.CheckErr(err)
-	// go mod init
-	_, err = execx.Run(fmt.Sprintf("go mod init %s", Module), Output)
+
+	_, err = execx.Run(fmt.Sprintf("go mod init %s", Module), filepath.Join(Output, AppDir))
 	cobra.CheckErr(err)
 
 	templateData := TemplateData{
-		Module:     Module,
-		APP:        AppName,
-		ConfigType: ConfigType,
+		Module: Module,
+		APP:    AppName,
+		AppDir: AppDir,
 	}
 
-	// touch main.go
-	mainFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "main.go.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Output, "main.go"), mainFile)
+	jzeroRoot := JzeroRoot{TemplateData: templateData, AppDir: AppDir}
+	err = jzeroRoot.New()
 	cobra.CheckErr(err)
 
-	// write cmd dir
-	jzeroCmd := JzeroCmd{TemplateData: templateData}
+	jzeroEtc := JzeroEtc{TemplateData: templateData, AppDir: AppDir}
+	err = jzeroEtc.New()
+	cobra.CheckErr(err)
+
+	jzeroCmd := JzeroCmd{TemplateData: templateData, AppDir: AppDir}
 	err = jzeroCmd.New()
 	cobra.CheckErr(err)
 
-	// write app/*.go
-	jzeroApp := JzeroApp{TemplateData: templateData}
-	err = jzeroApp.New()
-	cobra.CheckErr(err)
-
-	// write proto dir
-	jzeroProto := JzeroProto{TemplateData: templateData}
+	jzeroProto := JzeroProto{TemplateData: templateData, AppDir: AppDir}
 	err = jzeroProto.New()
 	cobra.CheckErr(err)
 
-	// write app/desc/api
-	jzeroApi := JzeroApi{TemplateData: templateData}
+	jzeroApi := JzeroApi{TemplateData: templateData, AppDir: AppDir}
 	err = jzeroApi.New()
-	cobra.CheckErr(err)
-
-	// write config.yaml
-	jzeroConfig := JzeroConfig{TemplateData: templateData}
-	err = jzeroConfig.New()
-	cobra.CheckErr(err)
-
-	// write Dockerfile
-	dockerFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "Dockerfile.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Output, "Dockerfile"), dockerFile)
-	cobra.CheckErr(err)
-
-	// write Taskfile.yml
-	err = checkWrite(filepath.Join(Output, "Taskfile.yml"), embeded.ReadTemplateFile(filepath.Join("jzero", "Taskfile.yml.tpl")))
-	cobra.CheckErr(err)
-
-	// write .gitignore
-	gitignoreFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "gitignore.tpl")))
-	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Output, ".gitignore"), gitignoreFile)
 	cobra.CheckErr(err)
 
 	return nil
@@ -119,7 +84,6 @@ func checkWrite(path string, bytes []byte) error {
 	}
 
 	bytesFormat := bytes
-	// if is go file. format it
 	if filepath.Ext(path) == ".go" {
 		bytesFormat, err = gosimports.Process("", bytes, &gosimports.Options{FormatOnly: true})
 		if err != nil {

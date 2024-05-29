@@ -8,6 +8,7 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/jzero-io/jzero/internal/gen"
@@ -29,6 +30,7 @@ var genCmd = &cobra.Command{
 		}
 
 		gen.Version = Version
+		gen.AppDir = strings.TrimPrefix(gen.AppDir, ".")
 
 		// check go-zero api template
 		home, _ := os.UserHomeDir()
@@ -55,7 +57,7 @@ func init() {
 	genCmd.AddCommand(genSwaggerCmd)
 
 	genCmd.Flags().StringVarP(&gen.WorkingDir, "working-dir", "w", "", "set working dir")
-
+	genCmd.Flags().StringVarP(&gen.AppDir, "app-dir", "", ".", "set app dir")
 	dir, _ := os.UserHomeDir()
 	genCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(dir, ".jzero"), "set template home")
 

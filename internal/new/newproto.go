@@ -14,6 +14,7 @@ import (
 
 type JzeroProto struct {
 	TemplateData TemplateData
+	AppDir       string
 }
 
 func (jp *JzeroProto) New() error {
@@ -25,18 +26,18 @@ func (jp *JzeroProto) New() error {
 		protoFileBytes, err := templatex.ParseTemplate(jp.TemplateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "desc", "proto", file.Name())))
 		cobra.CheckErr(err)
 		protoFileName := file.Name()
-		err = checkWrite(filepath.Join(Output, "app", "desc", "proto", protoFileName), protoFileBytes)
+		err = checkWrite(filepath.Join(Output, jp.AppDir, "desc", "proto", protoFileName), protoFileBytes)
 		cobra.CheckErr(err)
 
 		if len(protoFileBytes) > 0 {
-			if !pathx.FileExists(filepath.Join(Output, "app", "desc", "proto", "google", "protobuf")) {
-				err = embeded.WriteTemplateDir(filepath.Join("jzero", "app", "desc", "proto", "google", "protobuf"), filepath.Join(Output, "app", "desc", "proto", "google", "protobuf"))
+			if !pathx.FileExists(filepath.Join(Output, jp.AppDir, "desc", "proto", "google", "protobuf")) {
+				err = embeded.WriteTemplateDir(filepath.Join("jzero", "app", "desc", "proto", "google", "protobuf"), filepath.Join(Output, jp.AppDir, "desc", "proto", "google", "protobuf"))
 				cobra.CheckErr(err)
 			}
 		}
 	}
-	if isNeedNewGoogleApiProto(filepath.Join(Output, "app", "desc", "proto")) {
-		err := embeded.WriteTemplateDir(filepath.Join("jzero", "app", "desc", "proto", "google", "api"), filepath.Join(Output, "app", "desc", "proto", "google", "api"))
+	if isNeedNewGoogleApiProto(filepath.Join(Output, jp.AppDir, "desc", "proto")) {
+		err := embeded.WriteTemplateDir(filepath.Join("jzero", "app", "desc", "proto", "google", "api"), filepath.Join(Output, jp.AppDir, "desc", "proto", "google", "api"))
 		if err != nil {
 			return err
 		}

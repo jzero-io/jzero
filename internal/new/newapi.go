@@ -10,6 +10,7 @@ import (
 
 type JzeroApi struct {
 	TemplateData TemplateData
+	AppDir       string
 }
 
 func (ja *JzeroApi) New() error {
@@ -23,7 +24,7 @@ func (ja *JzeroApi) New() error {
 			return err
 		}
 		apiFileName := strings.TrimRight(file.Name(), ".tpl")
-		err = checkWrite(filepath.Join(Output, "app", "desc", "api", apiFileName), apiFileBytes)
+		err = checkWrite(filepath.Join(Output, ja.AppDir, "desc", "api", apiFileName), apiFileBytes)
 		if err != nil {
 			return err
 		}

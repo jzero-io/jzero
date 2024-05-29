@@ -58,7 +58,7 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 
 	apiSpecs = append(apiSpecs, apiSpec)
 
-	protoFiles, err := gen.GetProtoFilenames(wd)
+	protoFiles, err := gen.GetProtoFilenames(wd, "")
 	if err != nil {
 		return nil, err
 	}
