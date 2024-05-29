@@ -9,21 +9,21 @@ import (
 	"github.com/jzero-io/jzero/app/internal/svc"
 )
 
-type MachineVersionLogic struct {
+type MachineVersion struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewMachineVersionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MachineVersionLogic {
-	return &MachineVersionLogic{
+func NewMachineVersion(ctx context.Context, svcCtx *svc.ServiceContext) *MachineVersion {
+	return &MachineVersion{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-func (l *MachineVersionLogic) MachineVersion(in *machinepb.Empty) (*machinepb.MachineVersionResponse, error) {
+func (l *MachineVersion) MachineVersion(in *machinepb.Empty) (*machinepb.MachineVersionResponse, error) {
 	// todo: add your logic here and delete this line
 
 	return &machinepb.MachineVersionResponse{}, nil

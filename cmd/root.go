@@ -15,7 +15,10 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	Debug   bool
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -44,15 +47,12 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.jzero/config.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "", false, "debug mode")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if len(os.Args) >= 1 && os.Args[1] != serverCmd.Name() {
+	if len(os.Args) <= 1 || os.Args[1] != serverCmd.Name() {
 		return
 	}
 

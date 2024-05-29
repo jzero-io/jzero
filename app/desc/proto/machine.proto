@@ -18,4 +18,9 @@ service machine {
             get: "/api/v1/machine/version"
         };
     };
+    rpc Create(Empty) returns(Empty) {
+        option (google.api.http) = {
+            get: "/api/v1/machine/create"
+        };
+    };
 }

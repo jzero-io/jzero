@@ -11,21 +11,21 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type CredentialListLogic struct {
+type CredentialList struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewCredentialListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CredentialListLogic {
-	return &CredentialListLogic{
+func NewCredentialList(ctx context.Context, svcCtx *svc.ServiceContext) *CredentialList {
+	return &CredentialList{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-func (l *CredentialListLogic) CredentialList(in *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error) {
+func (l *CredentialList) CredentialList(in *credentialpb.CredentialListRequest) (*credentialpb.CredentialListResponse, error) {
 	model := credential.NewCredentialModel(l.svcCtx.SqlConn)
 
 	if in.GetPage() == 0 {

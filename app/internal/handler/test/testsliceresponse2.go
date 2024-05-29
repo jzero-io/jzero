@@ -9,7 +9,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func TestSliceResponseHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func TestSliceResponse2(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.Empty
 		if err := httpx.Parse(r, &req); err != nil {
@@ -17,8 +17,8 @@ func TestSliceResponseHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := test.NewTestSliceResponseLogic(r.Context(), svcCtx)
-		resp, err := l.TestSliceResponse(&req)
+		l := test.NewTestSliceResponse2(r.Context(), svcCtx)
+		resp, err := l.TestSliceResponse2(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

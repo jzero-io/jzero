@@ -13,5 +13,8 @@ type TestResponse {
 service jzero {
 	@handler TestSliceResponseHandler
 	post /test/slice-response (Empty) returns ([]TestResponse)
+
+	@handler TestSliceResponse2
+	post /test/slice-response2 (Empty) returns ([]TestResponse)
 }
 

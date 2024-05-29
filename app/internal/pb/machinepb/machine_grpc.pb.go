@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	Machine_MachineVersion_FullMethodName = "/machinepb.machine/MachineVersion"
+	Machine_Create_FullMethodName         = "/machinepb.machine/Create"
 )
 
 // MachineClient is the client API for Machine service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MachineClient interface {
 	MachineVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MachineVersionResponse, error)
+	Create(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type machineClient struct {
@@ -46,11 +48,21 @@ func (c *machineClient) MachineVersion(ctx context.Context, in *Empty, opts ...g
 	return out, nil
 }
 
+func (c *machineClient) Create(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Machine_Create_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MachineServer is the server API for Machine service.
 // All implementations must embed UnimplementedMachineServer
 // for forward compatibility
 type MachineServer interface {
 	MachineVersion(context.Context, *Empty) (*MachineVersionResponse, error)
+	Create(context.Context, *Empty) (*Empty, error)
 	mustEmbedUnimplementedMachineServer()
 }
 
@@ -60,6 +72,9 @@ type UnimplementedMachineServer struct {
 
 func (UnimplementedMachineServer) MachineVersion(context.Context, *Empty) (*MachineVersionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MachineVersion not implemented")
+}
+func (UnimplementedMachineServer) Create(context.Context, *Empty) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedMachineServer) mustEmbedUnimplementedMachineServer() {}
 
@@ -92,6 +107,24 @@ func _Machine_MachineVersion_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Machine_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MachineServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Machine_Create_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MachineServer).Create(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Machine_ServiceDesc is the grpc.ServiceDesc for Machine service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -102,6 +135,10 @@ var Machine_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MachineVersion",
 			Handler:    _Machine_MachineVersion_Handler,
+		},
+		{
+			MethodName: "Create",
+			Handler:    _Machine_Create_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

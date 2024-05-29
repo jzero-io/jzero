@@ -9,21 +9,21 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type TestSliceResponseLogic struct {
+type TestSliceResponse2 struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewTestSliceResponseLogic(ctx context.Context, svcCtx *svc.ServiceContext) *TestSliceResponseLogic {
-	return &TestSliceResponseLogic{
+func NewTestSliceResponse2(ctx context.Context, svcCtx *svc.ServiceContext) *TestSliceResponse2 {
+	return &TestSliceResponse2{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *TestSliceResponseLogic) TestSliceResponse(req *types.Empty) (resp []types.TestResponse, err error) {
+func (l *TestSliceResponse2) TestSliceResponse2(req *types.Empty) (resp []types.TestResponse, err error) {
 	// todo: add your logic here and delete this line
 
 	return
