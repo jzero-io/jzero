@@ -211,6 +211,18 @@ func separateTypesGoByGoctlTypesPlugin(wd string, mainApiFilePath, style string)
 }
 
 func (ja *JzeroApi) rewriteHandlerGo(fp string) error {
+	// Get the new file name of the file (without the 7 characters(Handler) before the ".go" extension)
+	newFilePath := fp[:len(fp)-10]
+	// patch
+	newFilePath = strings.TrimSuffix(newFilePath, "_")
+	newFilePath = strings.TrimSuffix(newFilePath, "-")
+	newFilePath += ".go"
+
+	if pathx.FileExists(newFilePath) {
+		_ = os.Remove(fp)
+		return nil
+	}
+
 	fset := token.NewFileSet()
 
 	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
@@ -257,13 +269,7 @@ func (ja *JzeroApi) rewriteHandlerGo(fp string) error {
 		return err
 	}
 
-	// Get the new file name of the file (without the 7 characters(Handler) before the ".go" extension)
-	newFilePath := fp[:len(fp)-10]
-	// patch
-	newFilePath = strings.TrimSuffix(newFilePath, "_")
-	newFilePath = strings.TrimSuffix(newFilePath, "-")
-
-	return os.Rename(fp, newFilePath+".go")
+	return os.Rename(fp, newFilePath)
 }
 
 func (ja *JzeroApi) rewriteRoutesGo(group string, handler string) error {
@@ -300,6 +306,18 @@ func (ja *JzeroApi) rewriteRoutesGo(group string, handler string) error {
 }
 
 func (ja *JzeroApi) rewriteLogicGo(fp string) error {
+	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
+	newFilePath := fp[:len(fp)-8]
+	// patch
+	newFilePath = strings.TrimSuffix(newFilePath, "_")
+	newFilePath = strings.TrimSuffix(newFilePath, "-")
+	newFilePath += ".go"
+
+	if pathx.FileExists(newFilePath) {
+		_ = os.Remove(fp)
+		return nil
+	}
+
 	fset := token.NewFileSet()
 
 	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
@@ -372,11 +390,5 @@ func (ja *JzeroApi) rewriteLogicGo(fp string) error {
 		return err
 	}
 
-	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
-	newFilePath := fp[:len(fp)-8]
-	// patch
-	newFilePath = strings.TrimSuffix(newFilePath, "_")
-	newFilePath = strings.TrimSuffix(newFilePath, "-")
-
-	return os.Rename(fp, newFilePath+".go")
+	return os.Rename(fp, newFilePath)
 }
