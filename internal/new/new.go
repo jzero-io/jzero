@@ -97,9 +97,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	err = checkWrite(filepath.Join(Output, "Taskfile.yml"), embeded.ReadTemplateFile(filepath.Join("jzero", "Taskfile.yml.tpl")))
 	cobra.CheckErr(err)
 
-	err = embeded.WriteTemplateDir(filepath.Join("go-zero"), filepath.Join(embeded.Home, "go-zero"))
-	cobra.CheckErr(err)
-
 	// write .gitignore
 	gitignoreFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "gitignore.tpl")))
 	cobra.CheckErr(err)
