@@ -3,7 +3,8 @@ package api
 import (
 	"strings"
 
-	"github.com/jzero-io/jzero/cmd/gensdk/vars"
+	"github.com/jzero-io/jzero/internal/gensdk/vars"
+
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 )

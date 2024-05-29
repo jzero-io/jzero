@@ -10,8 +10,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/jzero-io/jzero/cmd/gen"
-	"github.com/jzero-io/jzero/cmd/genswagger"
+	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/internal/genswagger"
+
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"

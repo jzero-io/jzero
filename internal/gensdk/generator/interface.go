@@ -3,7 +3,7 @@ package generator
 import (
 	"bytes"
 
-	"github.com/jzero-io/jzero/cmd/gensdk/config"
+	"github.com/jzero-io/jzero/internal/gensdk/config"
 
 	"github.com/pkg/errors"
 )

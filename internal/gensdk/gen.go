@@ -4,9 +4,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jzero-io/jzero/internal/gensdk/config"
+	"github.com/jzero-io/jzero/internal/gensdk/generator"
+
 	"github.com/jaronnie/genius"
-	"github.com/jzero-io/jzero/cmd/gensdk/config"
-	"github.com/jzero-io/jzero/cmd/gensdk/generator"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/spf13/cast"

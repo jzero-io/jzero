@@ -6,15 +6,16 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/internal/gensdk/config"
+	"github.com/jzero-io/jzero/internal/gensdk/jparser"
+	"github.com/jzero-io/jzero/internal/gensdk/vars"
+
 	"github.com/jhump/protoreflect/desc"
 
 	"github.com/pkg/errors"
 
 	"github.com/jhump/protoreflect/desc/protoparse"
-	"github.com/jzero-io/jzero/cmd/gen"
-	"github.com/jzero-io/jzero/cmd/gensdk/config"
-	"github.com/jzero-io/jzero/cmd/gensdk/jparser"
-	"github.com/jzero-io/jzero/cmd/gensdk/vars"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"

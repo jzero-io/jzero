@@ -6,8 +6,8 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
-	"github.com/jzero-io/jzero/cmd/gensdk"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/internal/gensdk"
 	"github.com/spf13/cobra"
 )
 

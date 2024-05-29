@@ -5,7 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jzero-io/jzero/cmd/gen"
+	"github.com/jzero-io/jzero/internal/gen"
+
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"

@@ -7,11 +7,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/internal/gensdk/config"
+	"github.com/jzero-io/jzero/internal/gensdk/jparser/api"
+	"github.com/jzero-io/jzero/internal/gensdk/jparser/gateway"
+	"github.com/jzero-io/jzero/internal/gensdk/vars"
+
 	"github.com/jhump/protoreflect/desc"
-	"github.com/jzero-io/jzero/cmd/gensdk/config"
-	"github.com/jzero-io/jzero/cmd/gensdk/jparser/api"
-	"github.com/jzero-io/jzero/cmd/gensdk/jparser/gateway"
-	"github.com/jzero-io/jzero/cmd/gensdk/vars"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"google.golang.org/genproto/googleapis/api/annotations"

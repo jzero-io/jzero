@@ -1,6 +1,8 @@
 package generator
 
-import "github.com/jzero-io/jzero/cmd/gensdk/vars"
+import (
+	"github.com/jzero-io/jzero/internal/gensdk/vars"
+)
 
 func getScopes(rhis vars.ScopeResourceHTTPInterfaceMap) []string {
 	var scopes []string
