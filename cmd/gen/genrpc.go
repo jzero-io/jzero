@@ -3,8 +3,6 @@ package gen
 import (
 	"bytes"
 	"fmt"
-	"github.com/zeromicro/go-zero/tools/goctl/util"
-	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"go/ast"
 	goformat "go/format"
 	goparser "go/parser"
@@ -13,6 +11,9 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/zeromicro/go-zero/tools/goctl/util"
+	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
 	"github.com/jaronnie/genius"
 	"github.com/jzero-io/jzero/app/pkg/stringx"
@@ -220,19 +221,17 @@ func isNeedGenProtoDescriptor(proto rpcparser.Proto) bool {
 func (jr *JzeroRpc) getAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, error) {
 	var serverFiles []ServerFile
 	for _, service := range protoSpec.Service {
-		for _, _ = range service.RPC {
-			namingFormat, err := format.FileNamingFormat(jr.Style, service.Name+"Server")
-			if err != nil {
-				return nil, err
-			}
-			fp := filepath.Join(jr.Wd, "app", "internal", "server", service.Name, namingFormat+".go")
-
-			f := ServerFile{
-				Path: fp,
-			}
-
-			serverFiles = append(serverFiles, f)
+		namingFormat, err := format.FileNamingFormat(jr.Style, service.Name+"Server")
+		if err != nil {
+			return nil, err
 		}
+		fp := filepath.Join(jr.Wd, "app", "internal", "server", service.Name, namingFormat+".go")
+
+		f := ServerFile{
+			Path: fp,
+		}
+
+		serverFiles = append(serverFiles, f)
 	}
 	return serverFiles, nil
 }
