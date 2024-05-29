@@ -40,7 +40,7 @@ go run main.go server
 
 ```shell
 jzero new simplegateway --branch gateway
-cd simplegateway && jzero gen && go mod tidy
+cd simplegateway && jzero gen --home ~/.jzero/templates/gateway && go mod tidy
 go run main.go server
 ```
 
@@ -48,7 +48,7 @@ go run main.go server
 
 ```shell
 jzero new simplerpc --branch rpc
-cd simplerpc && jzero gen && go mod tidy
+cd simplerpc && jzero gen --home ~/.jzero/templates/rpc && go mod tidy
 go run main.go server
 ```
 
@@ -56,7 +56,7 @@ go run main.go server
 
 ```shell
 jzero new simpleapi --branch api
-cd simpleapi && jzero gen && go mod tidy
+cd simpleapi && jzero gen --home ~/.jzero/templates/api && go mod tidy
 go run main.go server
 ```
 
