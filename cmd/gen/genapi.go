@@ -130,9 +130,9 @@ func (ja *JzeroApi) getAllHandlerFiles(apiSpec *spec.ApiSpec) ([]HandlerFile, er
 				Handler: route.Handler,
 			}
 
-			if pathx.FileExists(fp) {
-				f.Skip = true
-			}
+			//if pathx.FileExists(fp) {
+			//	f.Skip = true
+			//}
 
 			handlerFiles = append(handlerFiles, f)
 		}
@@ -155,9 +155,9 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 				Path: fp,
 			}
 
-			if pathx.FileExists(fp) {
-				f.Skip = true
-			}
+			//if pathx.FileExists(fp) {
+			//	f.Skip = true
+			//}
 
 			logicFiles = append(logicFiles, f)
 		}
