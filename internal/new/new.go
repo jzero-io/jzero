@@ -16,7 +16,7 @@ import (
 var (
 	Module  string
 	Output  string
-	AppDir  string // default {{OutPut}}/app
+	AppDir  string
 	AppName string
 	// ConfigType config type
 	ConfigType string
@@ -26,6 +26,15 @@ var (
 
 	Version string
 )
+
+type TemplateData struct {
+	Module          string
+	APP             string
+	ConfigType      string
+	ServerImports   string
+	PbImports       string
+	RegisterServers string
+}
 
 func NewProject(_ *cobra.Command, _ []string) error {
 	homeDir, err := os.UserHomeDir()
@@ -41,10 +50,10 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	_, err = execx.Run(fmt.Sprintf("go mod init %s", Module), Output)
 	cobra.CheckErr(err)
 
-	templateData := map[string]interface{}{
-		"Module":     Module,
-		"App":        AppName,
-		"ConfigType": ConfigType,
+	templateData := TemplateData{
+		Module:     Module,
+		APP:        AppName,
+		ConfigType: ConfigType,
 	}
 
 	// touch main.go

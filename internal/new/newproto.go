@@ -13,7 +13,7 @@ import (
 )
 
 type JzeroProto struct {
-	TemplateData map[string]interface{}
+	TemplateData TemplateData
 }
 
 func (jp *JzeroProto) New() error {

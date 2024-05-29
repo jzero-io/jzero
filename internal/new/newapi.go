@@ -9,7 +9,7 @@ import (
 )
 
 type JzeroApi struct {
-	TemplateData map[string]interface{}
+	TemplateData TemplateData
 }
 
 func (ja *JzeroApi) New() error {

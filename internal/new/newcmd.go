@@ -9,7 +9,7 @@ import (
 )
 
 type JzeroCmd struct {
-	TemplateData map[string]interface{}
+	TemplateData TemplateData
 }
 
 func (jc *JzeroCmd) New() error {
