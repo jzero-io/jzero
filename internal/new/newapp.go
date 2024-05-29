@@ -28,14 +28,6 @@ func (ja *JzeroApp) New() error {
 			return err
 		}
 	}
-	configGoFile, err := templatex.ParseTemplate(ja.TemplateData, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "internal", "config", "config.go.tpl")))
-	if err != nil {
-		return err
-	}
-	err = checkWrite(filepath.Join(Output, "app", "internal", "config", "config.go"), configGoFile)
-	if err != nil {
-		return err
-	}
 
 	middlewareDir := embeded.ReadTemplateDir(filepath.Join("jzero", "app", "middlewares"))
 	for _, file := range middlewareDir {

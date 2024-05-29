@@ -9,8 +9,7 @@ import (
 type Config struct {
 	Zrpc    ZrpcConf
 	Gateway GatewayConf
-
-	{{ .APP | FirstUpper | ToCamel }}Conf
+	Log     LogConf
 }
 
 type ZrpcConf struct {
@@ -29,8 +28,4 @@ type LogConf struct {
 	logx.LogConf
 	// only Log.Mode is file or volume take effect
 	LogToConsole bool `json:",default=true"`
-}
-
-type {{ .APP | FirstUpper | ToCamel }}Conf struct {
-	Log   LogConf
 }
