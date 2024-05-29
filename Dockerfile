@@ -4,8 +4,6 @@ ENV CGO_ENABLED 0
 ENV GOPROXY https://goproxy.io,direct
 WORKDIR /app
 COPY config.toml /app/config.toml
-COPY .protosets /app/.protosets
-COPY dist /dist
 
 RUN if [ `go env GOARCH` = "amd64" ]; then \
       cp /dist/jzero_linux_amd64_v1/jzero /app/jzero; \
@@ -24,4 +22,4 @@ RUN rm -rf /dist \
 
 EXPOSE 8000 8001
 ENTRYPOINT ["./jzero"]
-CMD ["server"]
+CMD ["-h"]

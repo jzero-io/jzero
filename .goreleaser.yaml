@@ -29,9 +29,6 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-    files:
-      - config.toml
-      - .protosets/*
 
 changelog:
   sort: asc

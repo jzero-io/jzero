@@ -27,14 +27,14 @@ var newCmd = &cobra.Command{
 	Long:  `jzero new project`,
 	PreRun: func(_ *cobra.Command, args []string) {
 		new.Version = Version
-		new.APP = args[0]
+		new.AppName = args[0]
 
 		if new.Module == "" {
 			new.Module = args[0]
 		}
 
-		if new.Dir == "" {
-			new.Dir = args[0]
+		if new.Output == "" {
+			new.Output = args[0]
 		}
 
 		if new.Remote != "" && new.Branch != "" {
@@ -65,7 +65,8 @@ func init() {
 	rootCmd.AddCommand(newCmd)
 
 	newCmd.Flags().StringVarP(&new.Module, "module", "m", "", "set go module")
-	newCmd.Flags().StringVarP(&new.Dir, "dir", "d", "", "set output dir")
+	newCmd.Flags().StringVarP(&new.Output, "output", "o", "", "set output dir")
+	newCmd.Flags().StringVarP(&new.AppDir, "app-dir", "", "", "set app dir")
 	newCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set home dir")
 	newCmd.Flags().StringVarP(&new.ConfigType, "config-type", "", "yaml", "set config type, default toml")
 	newCmd.Flags().StringVarP(&new.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")

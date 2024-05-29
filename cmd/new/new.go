@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	Module string
-	Dir    string
-	APP    string
+	Module  string
+	Output  string
+	AppDir  string // default {{OutPut}}/app
+	AppName string
 	// ConfigType config type
 	ConfigType string
 	// Remote templates repo
@@ -34,22 +35,22 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	}
 
 	// mkdir output
-	err = os.MkdirAll(Dir, 0o755)
+	err = os.MkdirAll(Output, 0o755)
 	cobra.CheckErr(err)
 	// go mod init
-	_, err = execx.Run(fmt.Sprintf("go mod init %s", Module), Dir)
+	_, err = execx.Run(fmt.Sprintf("go mod init %s", Module), Output)
 	cobra.CheckErr(err)
 
 	templateData := map[string]interface{}{
 		"Module":     Module,
-		"APP":        APP,
+		"App":        AppName,
 		"ConfigType": ConfigType,
 	}
 
 	// touch main.go
 	mainFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "main.go.tpl")))
 	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "main.go"), mainFile)
+	err = checkWrite(filepath.Join(Output, "main.go"), mainFile)
 	cobra.CheckErr(err)
 
 	// write cmd dir
@@ -80,11 +81,11 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	// write Dockerfile
 	dockerFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "Dockerfile.tpl")))
 	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, "Dockerfile"), dockerFile)
+	err = checkWrite(filepath.Join(Output, "Dockerfile"), dockerFile)
 	cobra.CheckErr(err)
 
 	// write Taskfile.yml
-	err = checkWrite(filepath.Join(Dir, "Taskfile.yml"), embeded.ReadTemplateFile(filepath.Join("jzero", "Taskfile.yml.tpl")))
+	err = checkWrite(filepath.Join(Output, "Taskfile.yml"), embeded.ReadTemplateFile(filepath.Join("jzero", "Taskfile.yml.tpl")))
 	cobra.CheckErr(err)
 
 	err = embeded.WriteTemplateDir(filepath.Join("go-zero"), filepath.Join(embeded.Home, "go-zero"))
@@ -93,7 +94,7 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	// write .gitignore
 	gitignoreFile, err := templatex.ParseTemplate(templateData, embeded.ReadTemplateFile(filepath.Join("jzero", "gitignore.tpl")))
 	cobra.CheckErr(err)
-	err = checkWrite(filepath.Join(Dir, ".gitignore"), gitignoreFile)
+	err = checkWrite(filepath.Join(Output, ".gitignore"), gitignoreFile)
 	cobra.CheckErr(err)
 
 	return nil

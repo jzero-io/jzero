@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 
 	"github.com/jaronnie/genius"
-	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 type JzeroConfig struct {
@@ -29,12 +29,12 @@ func (jc *JzeroConfig) New() error {
 		if err != nil {
 			return err
 		}
-		err = checkWrite(filepath.Join(Dir, "config.toml"), configTomlFile)
+		err = checkWrite(filepath.Join(Output, "config.toml"), configTomlFile)
 		if err != nil {
 			return err
 		}
 	case "yaml":
-		err = checkWrite(filepath.Join(Dir, "config.yaml"), configYamlFile)
+		err = checkWrite(filepath.Join(Output, "config.yaml"), configYamlFile)
 		if err != nil {
 			return err
 		}
@@ -43,7 +43,7 @@ func (jc *JzeroConfig) New() error {
 		if err != nil {
 			return err
 		}
-		err = checkWrite(filepath.Join(Dir, "config.json"), configJsonFile)
+		err = checkWrite(filepath.Join(Output, "config.json"), configJsonFile)
 		if err != nil {
 			return err
 		}

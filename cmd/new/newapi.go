@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 type JzeroApi struct {
@@ -23,7 +23,7 @@ func (ja *JzeroApi) New() error {
 			return err
 		}
 		apiFileName := strings.TrimRight(file.Name(), ".tpl")
-		err = checkWrite(filepath.Join(Dir, "app", "desc", "api", apiFileName), apiFileBytes)
+		err = checkWrite(filepath.Join(Output, "app", "desc", "api", apiFileName), apiFileBytes)
 		if err != nil {
 			return err
 		}

@@ -11,15 +11,6 @@ import (
 var (
 	//go:embed .template
 	template embed.FS
-
-	//go:embed .protosets/*.pb
-	protosets embed.FS
-
-	//go:embed config.toml
-	config embed.FS
-
-	//go:embed all:web
-	web embed.FS
 )
 
 // ldflags
@@ -30,18 +21,10 @@ var (
 )
 
 func main() {
-	{
-		embeded.Web = web
-		embeded.Protosets = protosets
-		embeded.Config = config
-		embeded.Template = template
-	}
-
-	{
-		cmd.Version = version
-		cmd.Date = date
-		cmd.Commit = commit
-	}
+	embeded.Template = template
+	cmd.Version = version
+	cmd.Date = date
+	cmd.Commit = commit
 
 	cmd.Execute()
 }

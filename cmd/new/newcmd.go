@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 type JzeroCmd struct {
@@ -23,7 +23,7 @@ func (jc *JzeroCmd) New() error {
 			return err
 		}
 		cmdFileName := strings.TrimRight(file.Name(), ".tpl")
-		err = checkWrite(filepath.Join(Dir, "cmd", cmdFileName), cmdFileBytes)
+		err = checkWrite(filepath.Join(Output, "cmd", cmdFileName), cmdFileBytes)
 		if err != nil {
 			return err
 		}

@@ -1,4 +1,0 @@
-syntax = "v1"
-
-type Empty {}
-

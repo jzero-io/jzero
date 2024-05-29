@@ -7,9 +7,8 @@ import (
 	"strings"
 
 	"github.com/jhump/protoreflect/desc"
-	"github.com/jzero-io/jzero/app/pkg/stringx"
 	"github.com/jzero-io/jzero/cmd/gensdk/vars"
-
+	"github.com/jzero-io/jzero/pkg/stringx"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 

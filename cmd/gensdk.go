@@ -19,12 +19,10 @@ var genSdkCmd = &cobra.Command{
 	PreRun: func(_ *cobra.Command, _ []string) {
 		gensdk.Version = Version
 	},
-	Aliases: []string{"gensdk"},
-	RunE:    gensdk.GenSdk,
+	RunE: gensdk.GenSdk,
 }
 
 func init() {
-	rootCmd.AddCommand(genSdkCmd)
 	genSdkCmd.Flags().StringVarP(&gensdk.Language, "language", "l", "go", "set language")
 	genSdkCmd.Flags().StringVarP(&gensdk.Dir, "dir", "d", "sdk", "set dir")
 	_ = genSdkCmd.MarkFlagRequired("dir")

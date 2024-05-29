@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 type JzeroApp struct {
@@ -23,7 +23,7 @@ func (ja *JzeroApp) New() error {
 			return err
 		}
 		appFileName := strings.TrimRight(file.Name(), ".tpl")
-		err = checkWrite(filepath.Join(Dir, "app", appFileName), appFileBytes)
+		err = checkWrite(filepath.Join(Output, "app", appFileName), appFileBytes)
 		if err != nil {
 			return err
 		}
@@ -32,7 +32,7 @@ func (ja *JzeroApp) New() error {
 	if err != nil {
 		return err
 	}
-	err = checkWrite(filepath.Join(Dir, "app", "internal", "config", "config.go"), configGoFile)
+	err = checkWrite(filepath.Join(Output, "app", "internal", "config", "config.go"), configGoFile)
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (ja *JzeroApp) New() error {
 			return err
 		}
 		middlewareFileName := strings.TrimRight(file.Name(), ".tpl")
-		err = checkWrite(filepath.Join(Dir, "app", "middlewares", middlewareFileName), middlewareFileBytes)
+		err = checkWrite(filepath.Join(Output, "app", "middlewares", middlewareFileName), middlewareFileBytes)
 		if err != nil {
 			return err
 		}

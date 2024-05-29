@@ -16,9 +16,9 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
 	"github.com/jaronnie/genius"
-	"github.com/jzero-io/jzero/app/pkg/stringx"
-	"github.com/jzero-io/jzero/app/pkg/templatex"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/stringx"
+	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/color"

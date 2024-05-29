@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 
 	"github.com/jaronnie/genius"
-	"github.com/jzero-io/jzero/app/pkg/stringx"
 	"github.com/jzero-io/jzero/cmd/gensdk/config"
 	"github.com/jzero-io/jzero/cmd/gensdk/generator"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
