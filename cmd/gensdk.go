@@ -6,10 +6,11 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
+	"path/filepath"
+
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gensdk"
 	"github.com/spf13/cobra"
-	"path/filepath"
 )
 
 // genSdkCmd represents the gen sdk command
