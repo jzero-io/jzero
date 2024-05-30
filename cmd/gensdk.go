@@ -9,6 +9,7 @@ import (
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gensdk"
 	"github.com/spf13/cobra"
+	"path/filepath"
 )
 
 // genSdkCmd represents the gen sdk command
@@ -32,5 +33,8 @@ func init() {
 	genSdkCmd.Flags().StringVarP(&gensdk.Module, "module", "m", "", "set module name")
 	_ = genSdkCmd.MarkFlagRequired("module")
 
+	genSdkCmd.Flags().StringVarP(&gensdk.ApiDir, "api-dir", "", filepath.Join("desc", "api"), "set input api dir")
+	genSdkCmd.Flags().StringVarP(&gensdk.ProtoDir, "proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
+	genSdkCmd.Flags().StringVarP(&gensdk.Scope, "scope", "", "", "set scope name")
 	genSdkCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set template home")
 }

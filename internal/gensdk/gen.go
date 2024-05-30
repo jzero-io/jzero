@@ -7,15 +7,15 @@ import (
 	"github.com/jzero-io/jzero/internal/gensdk/config"
 	"github.com/jzero-io/jzero/internal/gensdk/generator"
 
-	"github.com/jaronnie/genius"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/pkg/stringx"
-	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 var (
+	Scope      string
+	ApiDir     string
+	ProtoDir   string
 	Dir        string
 	WorkingDir string
 	Language   string
@@ -37,18 +37,6 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 		cobra.CheckErr(err)
 	}
 
-	wd, err := os.Getwd()
-	cobra.CheckErr(err)
-
-	configType, err := stringx.GetConfigType(wd)
-	cobra.CheckErr(err)
-
-	configBytes, err := os.ReadFile(filepath.Join(wd, "config."+configType))
-	cobra.CheckErr(err)
-
-	g, err := genius.NewFromType(configBytes, configType)
-	cobra.CheckErr(err)
-
 	if Dir != "" {
 		if !pathx.FileExists(Dir) {
 			if err := os.MkdirAll(Dir, 0o755); err != nil {
@@ -59,9 +47,11 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 
 	c := config.Config{
 		Language: Language,
-		APP:      stringx.ToCamel(cast.ToString(g.Get("APP"))),
+		APP:      Scope,
 		Module:   Module,
 		Dir:      Dir,
+		ApiDir:   ApiDir,
+		ProtoDir: ProtoDir,
 	}
 
 	gen, err := generator.New(c)

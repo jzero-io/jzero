@@ -49,7 +49,7 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	// parse api
 	var apiSpecs []*spec.ApiSpec
 
-	mainApiFilePath := gen.GetMainApiFilePath(filepath.Join("app", "desc", "api"))
+	mainApiFilePath := gen.GetMainApiFilePath(g.config.ApiDir)
 	apiSpec, err := apiparser.Parse(mainApiFilePath)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 
 	apiSpecs = append(apiSpecs, apiSpec)
 
-	protoFiles, err := gen.GetProtoFilenames(wd, "")
+	protoFiles, err := gen.GetProtoFilenames(g.config.ProtoDir)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	// parse proto
 	var protoParser protoparse.Parser
 	if len(protoFiles) > 0 {
-		protoParser.ImportPaths = []string{filepath.Join("app", "desc", "proto")}
+		protoParser.ImportPaths = []string{g.config.ProtoDir}
 		fds, err = protoParser.ParseFiles(protoFiles...)
 		if err != nil {
 			return nil, err

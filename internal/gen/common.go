@@ -10,16 +10,16 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 )
 
-func GetProtoDir(wd string, appDir string) ([]os.DirEntry, error) {
-	protoDir, err := os.ReadDir(filepath.Join(wd, appDir, "desc", "proto"))
+func GetProtoDir(protoDirPath string) ([]os.DirEntry, error) {
+	protoDir, err := os.ReadDir(protoDirPath)
 	if err != nil {
 		return nil, nil
 	}
 	return protoDir, nil
 }
 
-func GetProtoFilenames(wd string, appDir string) ([]string, error) {
-	protoDir, err := GetProtoDir(wd, appDir)
+func GetProtoFilenames(protoDirPath string) ([]string, error) {
+	protoDir, err := GetProtoDir(protoDirPath)
 	if err != nil {
 		return nil, nil
 	}

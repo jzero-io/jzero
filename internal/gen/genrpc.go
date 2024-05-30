@@ -50,7 +50,7 @@ type JzeroRpc struct {
 }
 
 func (jr *JzeroRpc) Gen() error {
-	protoDir, err := GetProtoDir(jr.Wd, jr.AppDir)
+	protoDir, err := GetProtoDir(filepath.Join(jr.Wd, jr.AppDir, "proto"))
 	if err != nil {
 		return err
 	}
