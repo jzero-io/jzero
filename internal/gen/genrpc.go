@@ -137,8 +137,8 @@ func (jr *JzeroRpc) Gen() error {
 
 			// # gen proto descriptor
 			if isNeedGenProtoDescriptor(parse) {
-				_ = os.MkdirAll(filepath.Join(jr.Wd, ".protosets"), 0o755)
-				protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=.protosets/%s.pb %s",
+				protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=%s/%s.pb %s",
+					protoDirPath,
 					protoDirPath,
 					fileBase,
 					filepath.Join(protoDirPath, v.Name()))

@@ -12,7 +12,7 @@ Gateway:
           - 0.0.0.0:8000
       Name: {{ .APP }}.gw
       ProtoSets:
-        - .protosets/hello.pb
+        - desc/proto/hello.pb
 
 Log:
   encoding: plain
