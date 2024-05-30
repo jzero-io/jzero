@@ -79,7 +79,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 func removeExtraFiles(wd string, appDir string) {
 	_ = os.Remove(filepath.Join(wd, appDir, fmt.Sprintf("%s.go", GetApiServiceName(filepath.Join(wd, appDir, "desc", "api")))))
 	_ = os.Remove(filepath.Join(wd, appDir, "etc", fmt.Sprintf("%s.yaml", GetApiServiceName(filepath.Join(wd, appDir, "desc", "api")))))
-	protoFilenames, err := GetProtoFilenames(filepath.Join(wd, appDir, "proto"))
+	protoFilenames, err := GetProtoFilenames(filepath.Join(wd, appDir, "desc", "proto"))
 	if err == nil {
 		for _, v := range protoFilenames {
 			fileBase := v[0 : len(v)-len(path.Ext(v))]
