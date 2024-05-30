@@ -12,32 +12,32 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
-var Dir string
+var (
+	Dir      string
+	ApiDir   string
+	ProtoDir string
+)
 
 func Gen(_ *cobra.Command, _ []string) error {
 	wd, _ := os.Getwd()
 
-	apiDirName := filepath.Join(wd, "app", "desc", "api")
-	protoDirName := filepath.Join(wd, "app", "desc", "proto")
-
-	mainApiFile := gen.GetMainApiFilePath(apiDirName)
+	mainApiFile := gen.GetMainApiFilePath(ApiDir)
 	defer os.Remove(mainApiFile)
 	if !pathx.FileExists(Dir) {
 		_ = os.MkdirAll(Dir, 0o755)
 	}
 
-	// gen swagger by app/desc/api
+	// gen swagger by desc/api
 	if mainApiFile != "" {
-		command := fmt.Sprintf("goctl api plugin -plugin goctl-swagger=\"swagger -filename %s.swagger.json --schemes http\" -api %s -dir %s", gen.GetApiServiceName(apiDirName), mainApiFile, Dir)
+		command := fmt.Sprintf("goctl api plugin -plugin goctl-swagger=\"swagger -filename %s.swagger.json --schemes http\" -api %s -dir %s", gen.GetApiServiceName(ApiDir), mainApiFile, Dir)
 		_, err := execx.Run(command, wd)
 		if err != nil {
 			return err
 		}
 	}
 
-	// gen swagger by app/desc/proto
-	if pathx.FileExists(protoDirName) {
-		protoDir, err := os.ReadDir(protoDirName)
+	if pathx.FileExists(ProtoDir) {
+		protoDir, err := os.ReadDir(ProtoDir)
 		if err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 				continue
 			}
 			if filepath.Ext(protoFile.Name()) == ".proto" {
-				command := fmt.Sprintf("protoc -I./app/desc/proto ./app/desc/proto/%s --openapiv2_out=./app/desc/swagger", protoFile.Name())
+				command := fmt.Sprintf("protoc -I%s %s --openapiv2_out=%s", protoDir, filepath.Join(ProtoDir, protoFile.Name()), Dir)
 				_, err := execx.Run(command, wd)
 				if err != nil {
 					return err

@@ -60,8 +60,10 @@ func init() {
 	genCmd.Flags().StringVarP(&gen.AppDir, "app-dir", "", ".", "set app dir")
 	dir, _ := os.UserHomeDir()
 	genCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(dir, ".jzero"), "set template home")
-
-	genSwaggerCmd.Flags().StringVarP(&genswagger.Dir, "dir", "d", filepath.Join("app", "desc", "swagger"), "set swagger output dir")
 	genCmd.Flags().StringVarP(&gen.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 	genCmd.Flags().BoolVarP(&gen.RemoveSuffix, "remove-suffix", "", false, "remove suffix Handler or Logic on filename or file content")
+
+	genSwaggerCmd.Flags().StringVarP(&genswagger.Dir, "dir", "d", filepath.Join("desc", "swagger"), "set swagger output dir")
+	genSwaggerCmd.Flags().StringVarP(&genswagger.ApiDir, "api-dir", "", filepath.Join("desc", "api"), "set input api dir")
+	genSwaggerCmd.Flags().StringVarP(&genswagger.ProtoDir, "proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
 }
