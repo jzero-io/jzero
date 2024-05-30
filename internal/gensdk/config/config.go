@@ -5,4 +5,6 @@ type Config struct {
 	APP      string
 	Module   string
 	Dir      string // output dir
+	ApiDir   string
+	ProtoDir string
 }

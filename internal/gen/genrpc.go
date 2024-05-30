@@ -15,17 +15,27 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
-	"github.com/jaronnie/genius"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/jzero-io/jzero/pkg/templatex"
-	"github.com/samber/lo"
-	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
+
+type (
+	ImportLines   []string
+	RegisterLines []string
+)
+
+func (l ImportLines) String() string {
+	return "\n\n\t" + strings.Join(l, "\n\t")
+}
+
+func (l RegisterLines) String() string {
+	return "\n\t\t" + strings.Join(l, "\n\t\t")
+}
 
 type ServerFile struct {
 	Path string
@@ -33,34 +43,19 @@ type ServerFile struct {
 
 type JzeroRpc struct {
 	Wd           string
+	AppDir       string
 	Module       string
 	Style        string
 	RemoveSuffix bool
 }
 
 func (jr *JzeroRpc) Gen() error {
-	protoDir, err := GetProtoDir(jr.Wd)
+	protoDirPath := filepath.Join(jr.Wd, jr.AppDir, "desc", "proto")
+	protoDir, err := GetProtoDir(protoDirPath)
 	if err != nil {
 		return err
 	}
 
-	// get configType
-	configType, err := stringx.GetConfigType(jr.Wd)
-	if err != nil {
-		return err
-	}
-
-	configBytes, err := os.ReadFile(filepath.Join(jr.Wd, "config."+configType))
-	if err != nil {
-		return err
-	}
-
-	g, err := genius.NewFromType(configBytes, configType)
-	if err != nil {
-		return err
-	}
-
-	var protosets []string
 	var serverImports ImportLines
 	var pbImports ImportLines
 	var registerServers RegisterLines
@@ -76,7 +71,7 @@ func (jr *JzeroRpc) Gen() error {
 		if strings.HasSuffix(v.Name(), "proto") {
 			// parse proto
 			protoParser := rpcparser.NewDefaultProtoParser()
-			parse, err := protoParser.Parse(filepath.Join(jr.Wd, "app", "desc", "proto", v.Name()), true)
+			parse, err := protoParser.Parse(filepath.Join(jr.Wd, jr.AppDir, "desc", "proto", v.Name()), true)
 			if err != nil {
 				return err
 			}
@@ -91,8 +86,19 @@ func (jr *JzeroRpc) Gen() error {
 				return err
 			}
 
-			fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), filepath.Join(jr.Wd, "app", "desc", "proto", v.Name()))
-			command := fmt.Sprintf("goctl rpc protoc app/desc/proto/%s  -I./app/desc/proto --go_out=./app/internal --go-grpc_out=./app/internal --zrpc_out=./app --client=false --home %s -m --style %s ", v.Name(), filepath.Join(embeded.Home, "go-zero"), jr.Style)
+			fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), filepath.Join(jr.Wd, jr.AppDir, "desc", "proto", v.Name()))
+			zrpcOut := jr.AppDir
+			if jr.AppDir == "" {
+				zrpcOut = "."
+			}
+			command := fmt.Sprintf("goctl rpc protoc %s  -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s ",
+				filepath.Join(protoDirPath, v.Name()),
+				protoDirPath,
+				filepath.Join(jr.AppDir, "internal"),
+				filepath.Join(jr.AppDir, "internal"),
+				zrpcOut,
+				filepath.Join(embeded.Home, "go-zero"),
+				jr.Style)
 
 			fileBase := v.Name()[0 : len(v.Name())-len(path.Ext(v.Name()))]
 
@@ -132,76 +138,60 @@ func (jr *JzeroRpc) Gen() error {
 			// # gen proto descriptor
 			if isNeedGenProtoDescriptor(parse) {
 				_ = os.MkdirAll(filepath.Join(jr.Wd, ".protosets"), 0o755)
-				protocCommand := fmt.Sprintf("protoc --include_imports -I./app/desc/proto --descriptor_set_out=.protosets/%s.pb app/desc/proto/%s.proto", fileBase, fileBase)
+				protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=.protosets/%s.pb %s",
+					protoDirPath,
+					fileBase,
+					filepath.Join(protoDirPath, v.Name()))
 				_, err = execx.Run(protocCommand, jr.Wd)
 				if err != nil {
 					return err
 				}
-				protosets = append(protosets, filepath.Join(".protosets", fmt.Sprintf("%s.pb", fileBase)))
 			}
 
+			importAppDir := jr.AppDir
+			if importAppDir != "" {
+				importAppDir = "/" + jr.AppDir
+			}
 			for _, s := range parse.Service {
-				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/app/internal/server/%s"`, s.Name, jr.Module, s.Name))
+				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s%s/internal/server/%s"`, s.Name, jr.Module, importAppDir, s.Name))
 				if jr.RemoveSuffix {
 					registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%s(ctx))", filepath.Base(parse.GoPackage), stringx.FirstUpper(s.Name), s.Name, stringx.FirstUpper(s.Name)))
 				} else {
 					registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%sServer(ctx))", filepath.Base(parse.GoPackage), stringx.FirstUpper(s.Name), s.Name, stringx.FirstUpper(s.Name)))
 				}
 			}
-			pbImports = append(pbImports, fmt.Sprintf(`"%s/app/internal/%s"`, jr.Module, strings.TrimPrefix(parse.GoPackage, "./")))
+			pbImports = append(pbImports, fmt.Sprintf(`"%s%s/internal/%s"`, jr.Module, importAppDir, strings.TrimPrefix(parse.GoPackage, "./")))
+		}
+
+		if err = jr.genServer(serverImports, pbImports, registerServers); err != nil {
+			return err
 		}
 	}
 
-	// 生成 app/zrpc.go
-	if pathx.FileExists(filepath.Join(jr.Wd, "app", "zrpc.go")) {
-		fmt.Printf("%s to generate app/zrpc.go\n", color.WithColor("Start", color.FgGreen))
-		zrpcFile, err := templatex.ParseTemplate(map[string]interface{}{
-			"Module":          jr.Module,
-			"APP":             cast.ToString(g.Get("APP")),
-			"ServerImports":   serverImports,
-			"PbImports":       pbImports,
-			"RegisterServers": registerServers,
-		}, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "zrpc.go.tpl")))
-		if err != nil {
-			return err
-		}
-		err = os.WriteFile(filepath.Join(jr.Wd, "app", "zrpc.go"), zrpcFile, 0o644)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("%s", color.WithColor("Done\n", color.FgGreen))
+	return nil
+}
 
-		if g.Get("Gateway") != nil {
-			// 修改 config.toml protosets 内容
-			// 检测是否需要修改 config.toml. 以及让用户选择是否自动更新文件
-			existProtosets := g.Get("Gateway.Upstreams.0.ProtoSets")
-			if len(lo.Intersect(cast.ToStringSlice(existProtosets), protosets)) != len(protosets) {
-				var in string
-				fmt.Printf("检测到 config.%s 中 Gateway.Upstreams.0.ProtoSets 配置需要更新. 是否自动更新 y/n. 更新需谨慎, 会将注释删掉\n", configType)
-				_, _ = fmt.Scanln(&in)
-				switch {
-				case strings.EqualFold(in, "y"):
-					fmt.Printf("%s to update config.%s\n", color.WithColor("Start", color.FgGreen), configType)
-					err = g.Set("Gateway.Upstreams.0.ProtoSets", protosets)
-					if err != nil {
-						return err
-					}
-					configBytes, err := g.EncodeToType(configType)
-					if err != nil {
-						return err
-					}
-					err = os.WriteFile(filepath.Join(jr.Wd, "config."+configType), configBytes, 0o644)
-					if err != nil {
-						return err
-					}
-					fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
-				case strings.EqualFold(in, "n"):
-					fmt.Printf("请手动更新 Gateway.Upstreams.0.ProtoSets 配置\n配置该值为: \n%s\n",
-						color.WithColor(fmt.Sprintf("%v", protosets), color.FgGreen))
-				}
-			}
-		}
+func (jr *JzeroRpc) genServer(serverImports ImportLines, pbImports ImportLines, registerServers RegisterLines) error {
+	fmt.Printf("%s to generate internal/server/server.go\n", color.WithColor("Start", color.FgGreen))
+	appDir := jr.AppDir
+	if appDir != "" {
+		appDir = "/" + jr.AppDir
 	}
+	serverFile, err := templatex.ParseTemplate(map[string]interface{}{
+		"Module":          jr.Module,
+		"AppDir":          appDir,
+		"ServerImports":   serverImports,
+		"PbImports":       pbImports,
+		"RegisterServers": registerServers,
+	}, embeded.ReadTemplateFile(filepath.Join("jzero", "app", "internal", "server", "server.go.tpl")))
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(jr.Wd, jr.AppDir, "internal", "server", "server.go"), serverFile, 0o644)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s", color.WithColor("Done\n", color.FgGreen))
 	return nil
 }
 
@@ -225,7 +215,7 @@ func (jr *JzeroRpc) getAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, 
 		if err != nil {
 			return nil, err
 		}
-		fp := filepath.Join(jr.Wd, "app", "internal", "server", service.Name, namingFormat+".go")
+		fp := filepath.Join(jr.Wd, jr.AppDir, "internal", "server", service.Name, namingFormat+".go")
 
 		f := ServerFile{
 			Path: fp,
@@ -245,7 +235,7 @@ func (jr *JzeroRpc) getAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, er
 				return nil, err
 			}
 
-			fp := filepath.Join(jr.Wd, "app", "internal", "logic", service.Name, namingFormat+".go")
+			fp := filepath.Join(jr.Wd, jr.AppDir, "internal", "logic", service.Name, namingFormat+".go")
 
 			f := LogicFile{
 				Path: fp,
@@ -276,7 +266,6 @@ func (jr *JzeroRpc) rewriteLogicGo(fp string) error {
 		return err
 	}
 
-	// modify NewXXLogic
 	ast.Inspect(f, func(n ast.Node) bool {
 		if fn, ok := n.(*ast.FuncDecl); ok && strings.HasSuffix(fn.Name.Name, "Logic") {
 			fn.Name.Name = strings.TrimSuffix(fn.Name.Name, "Logic")
@@ -305,7 +294,6 @@ func (jr *JzeroRpc) rewriteLogicGo(fp string) error {
 		return true
 	})
 
-	// modify XXLogic Struct
 	ast.Inspect(f, func(node ast.Node) bool {
 		if fn, ok := node.(*ast.GenDecl); ok && fn.Tok == token.TYPE {
 			for _, s := range fn.Specs {
@@ -317,7 +305,6 @@ func (jr *JzeroRpc) rewriteLogicGo(fp string) error {
 		return true
 	})
 
-	// modify XXLogic Struct methods receiver
 	ast.Inspect(f, func(n ast.Node) bool {
 		if fn, ok := n.(*ast.FuncDecl); ok && fn.Recv != nil {
 			for _, list := range fn.Recv.List {
@@ -352,7 +339,6 @@ func (jr *JzeroRpc) rewriteServerGo(fp string, needRename bool) error {
 		return err
 	}
 
-	// modify NewXXServer
 	ast.Inspect(f, func(n ast.Node) bool {
 		if fn, ok := n.(*ast.FuncDecl); ok && strings.HasSuffix(fn.Name.Name, "Server") {
 			fn.Name.Name = strings.TrimSuffix(fn.Name.Name, "Server")
@@ -381,7 +367,6 @@ func (jr *JzeroRpc) rewriteServerGo(fp string, needRename bool) error {
 		return true
 	})
 
-	// modify XXServer Struct
 	ast.Inspect(f, func(node ast.Node) bool {
 		if fn, ok := node.(*ast.GenDecl); ok && fn.Tok == token.TYPE {
 			for _, s := range fn.Specs {
@@ -393,7 +378,6 @@ func (jr *JzeroRpc) rewriteServerGo(fp string, needRename bool) error {
 		return true
 	})
 
-	// modify XXServer Struct methods receiver
 	ast.Inspect(f, func(n ast.Node) bool {
 		if fn, ok := n.(*ast.FuncDecl); ok && fn.Recv != nil {
 			for _, list := range fn.Recv.List {

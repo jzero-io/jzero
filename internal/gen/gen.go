@@ -17,15 +17,11 @@ import (
 
 var (
 	WorkingDir string
+	AppDir     string
 
 	Version      string
 	Style        string
-	RemoveSuffix bool // 是否去掉 Logic 或者 Handler 后缀
-)
-
-type (
-	ImportLines   []string
-	RegisterLines []string
+	RemoveSuffix bool
 )
 
 type ApiFileTypes struct {
@@ -34,14 +30,6 @@ type ApiFileTypes struct {
 	GenTypes []spec.Type
 
 	Base bool
-}
-
-func (l ImportLines) String() string {
-	return "\n\n\t" + strings.Join(l, "\n\t")
-}
-
-func (l RegisterLines) String() string {
-	return "\n\t\t" + strings.Join(l, "\n\t\t")
 }
 
 func Gen(_ *cobra.Command, _ []string) error {
@@ -64,25 +52,22 @@ func Gen(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 
 	defer func() {
-		removeExtraFiles(wd)
+		removeExtraFiles(wd, AppDir)
 	}()
 
-	// gen rpc code
-	jzeroRpc := JzeroRpc{Wd: wd, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
+	jzeroRpc := JzeroRpc{Wd: wd, AppDir: AppDir, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
 	err = jzeroRpc.Gen()
 	if err != nil {
 		return err
 	}
 
-	// 生成 api 代码
-	jzeroApi := JzeroApi{Wd: wd, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
+	jzeroApi := JzeroApi{Wd: wd, AppDir: AppDir, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
 	err = jzeroApi.Gen()
 	if err != nil {
 		return err
 	}
 
-	// 检测是否包含 sql
-	jzeroSql := JzeroSql{Wd: wd, Style: Style}
+	jzeroSql := JzeroSql{Wd: wd, AppDir: AppDir, Style: Style}
 	err = jzeroSql.Gen()
 	if err != nil {
 		return err
@@ -91,16 +76,17 @@ func Gen(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-func removeExtraFiles(wd string) {
-	_ = os.RemoveAll(filepath.Join(wd, "app", "etc"))
-	_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", GetApiServiceName(filepath.Join(wd, "app", "desc", "api")))))
-	protoFilenames, err := GetProtoFilenames(wd)
+func removeExtraFiles(wd string, appDir string) {
+	_ = os.Remove(filepath.Join(wd, appDir, fmt.Sprintf("%s.go", GetApiServiceName(filepath.Join(wd, appDir, "desc", "api")))))
+	_ = os.Remove(filepath.Join(wd, appDir, "etc", fmt.Sprintf("%s.yaml", GetApiServiceName(filepath.Join(wd, appDir, "desc", "api")))))
+	protoFilenames, err := GetProtoFilenames(filepath.Join(wd, appDir, "proto"))
 	if err == nil {
 		for _, v := range protoFilenames {
 			fileBase := v[0 : len(v)-len(path.Ext(v))]
 			rmf := strings.ReplaceAll(strings.ToLower(fileBase), "-", "")
 			rmf = strings.ReplaceAll(rmf, "_", "")
-			_ = os.Remove(filepath.Join(wd, "app", fmt.Sprintf("%s.go", rmf)))
+			_ = os.Remove(filepath.Join(wd, appDir, fmt.Sprintf("%s.go", rmf)))
+			_ = os.Remove(filepath.Join(wd, appDir, "etc", fmt.Sprintf("%s.yaml", rmf)))
 		}
 	}
 }

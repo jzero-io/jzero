@@ -34,22 +34,6 @@ jobs:
           cd simple && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
 
           cd ..
-          ./dist/jzero_linux_amd64_v1/jzero new simplegateway --branch gateway
-          cd simplegateway && ../dist/jzero_linux_amd64_v1/jzero gen --home ~/.jzero/templates/gateway && go mod tidy && go run main.go version        
-
-          cd ..
-          ./dist/jzero_linux_amd64_v1/jzero new simpleapi --branch api
-          cd simpleapi && ../dist/jzero_linux_amd64_v1/jzero gen --home ~/.jzero/templates/api && go mod tidy && go run main.go version
-
-          cd ..
-          ./dist/jzero_linux_amd64_v1/jzero new simplerpc --branch rpc
-          cd simplerpc && ../dist/jzero_linux_amd64_v1/jzero gen --home ~/.jzero/templates/rpc && go mod tidy && go run main.go version
-
-          cd ..
-          ./dist/jzero_linux_amd64_v1/jzero new simplecli --branch cli
-          cd simplecli && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-
-          cd ..
 
       - uses: actions/checkout@v2
       - name: golangci-lint

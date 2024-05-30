@@ -1,11 +1,7 @@
 package stringx
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 func FirstUpper(s string) string {
@@ -26,26 +22,4 @@ func ToCamel(s string) string {
 	result := strings.Join(words, "")
 
 	return result
-}
-
-func GetConfigType(wd string) (string, error) {
-	files, err := os.ReadDir(wd)
-	if err != nil {
-		return "", err
-	}
-
-	var configFile string
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		}
-		if match, _ := filepath.Match("config*", file.Name()); match {
-			configFile = filepath.Join(wd, file.Name())
-			break
-		}
-	}
-	if configFile == "" {
-		return "", errors.New("not found config")
-	}
-	return strings.TrimPrefix(filepath.Ext(configFile), "."), nil
 }

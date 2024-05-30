@@ -12,8 +12,9 @@ import (
 )
 
 type JzeroSql struct {
-	Wd    string
-	Style string
+	Wd     string
+	AppDir string
+	Style  string
 }
 
 func (js *JzeroSql) Gen() error {

@@ -53,18 +53,6 @@ var checkCmd = &cobra.Command{
 			log.Fatalln("[jzero-env] env check failed, goctl-types is not installed")
 		}
 
-		// jzero env check
-		log.Info("\n[jzero-env]: looking up task")
-		_, err = env.LookPath("task")
-		if err != nil {
-			_ = golang.Install("github.com/go-task/task/v3/cmd/task@latest")
-		}
-		if _, err = env.LookPath("task"); err == nil {
-			log.Success(`[jzero-env]: "task" is installed`)
-		} else {
-			log.Warning("[jzero-env] warning: env check failed, task is not installed")
-		}
-
 		log.Info("\n[jzero-env]: looking up goctl-swagger")
 		_, err = env.LookPath("goctl-swagger")
 		if err != nil {

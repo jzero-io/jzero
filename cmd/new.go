@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jzero-io/jzero/internal/new"
 
@@ -30,12 +31,13 @@ var newCmd = &cobra.Command{
 		new.Version = Version
 		new.AppName = args[0]
 
-		if new.Module == "" {
-			new.Module = args[0]
-		}
-
 		if new.Output == "" {
 			new.Output = args[0]
+		}
+		new.AppDir = strings.TrimPrefix(new.AppDir, ".")
+		if new.Module == "" {
+			new.Module = args[0]
+			// TODO add app dir
 		}
 
 		if new.Remote != "" && new.Branch != "" {
@@ -64,12 +66,10 @@ var newCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(newCmd)
-
 	newCmd.Flags().StringVarP(&new.Module, "module", "m", "", "set go module")
 	newCmd.Flags().StringVarP(&new.Output, "output", "o", "", "set output dir")
-	newCmd.Flags().StringVarP(&new.AppDir, "app-dir", "", "", "set app dir")
+	newCmd.Flags().StringVarP(&new.AppDir, "app-dir", "", ".", "set app dir")
 	newCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set home dir")
-	newCmd.Flags().StringVarP(&new.ConfigType, "config-type", "", "yaml", "set config type, default toml")
 	newCmd.Flags().StringVarP(&new.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringVarP(&new.Branch, "branch", "b", "", "remote templates repo branch")
 }

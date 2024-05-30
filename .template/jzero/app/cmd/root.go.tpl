@@ -3,11 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-    "github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 var cfgFile string
@@ -38,7 +36,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is project root dir config.{{ .ConfigType }} or $HOME/.{{ .APP }}/config.{{ .ConfigType }})")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "etc/etc.yaml", "set config file")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -47,29 +45,7 @@ func initConfig() {
 		return
 	}
 
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-        wd, err := os.Getwd()
-        cobra.CheckErr(err)
-
-        var configPath string
-        if pathx.FileExists(filepath.Join(wd, "config.{{ .ConfigType }}")) {
-            configPath = wd
-        } else {
-            configPath = filepath.Join(home, ".{{ .APP }}")
-        }
-
-        viper.AddConfigPath(configPath)
-        viper.SetConfigType("{{ .ConfigType }}")
-        viper.SetConfigName("config")
-	}
-
+	viper.SetConfigFile(cfgFile)
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.

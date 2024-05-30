@@ -95,12 +95,4 @@ docker run --rm -v ${PWD}/app1:/app/app1 jaronnie/jzero:latest new app1 --branch
 ```
 :::
 
-all flags:
-
-* module 设置 go module
-* dir 设置生成的项目路径
-* home 设置本地 templates 路径
-* remote 设置远程 templates repo
-* branch 远程 templates repo branch
-
 
