@@ -12,7 +12,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 var (
@@ -52,31 +51,14 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		wd, err := os.Getwd()
-		cobra.CheckErr(err)
-
-		var (
-			configPath string
-			configType string
-			configName string
-		)
-		if pathx.FileExists(filepath.Join(wd, "config.toml")) {
-			configPath = wd
-			configType = "toml"
-			configName = "config"
-		} else {
-			configPath = filepath.Join(home, ".jzero")
-			configType = "toml"
-			configName = "config"
-		}
+		configPath := filepath.Join(home, ".jzero")
 
 		viper.AddConfigPath(configPath)
-		viper.SetConfigType(configType)
-		viper.SetConfigName(configName)
+		viper.SetConfigType("yaml")
+		viper.SetConfigName("config")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -84,6 +66,5 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		_, _ = fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-		cfgFile = viper.ConfigFileUsed()
 	}
 }
