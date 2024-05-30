@@ -50,12 +50,11 @@ type JzeroRpc struct {
 }
 
 func (jr *JzeroRpc) Gen() error {
-	protoDir, err := GetProtoDir(filepath.Join(jr.Wd, jr.AppDir, "proto"))
+	protoDirPath := filepath.Join(jr.Wd, jr.AppDir, "desc", "proto")
+	protoDir, err := GetProtoDir(protoDirPath)
 	if err != nil {
 		return err
 	}
-
-	protoDirPath := filepath.Join(jr.Wd, jr.AppDir, "desc", "proto")
 
 	var serverImports ImportLines
 	var pbImports ImportLines
