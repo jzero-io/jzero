@@ -4,6 +4,7 @@ ENV CGO_ENABLED 0
 ENV GOPROXY https://goproxy.io,direct
 WORKDIR /app
 COPY config.toml /root/.jzero/config.toml
+COPY dist /dist
 
 RUN if [ `go env GOARCH` = "amd64" ]; then \
       cp /dist/jzero_linux_amd64_v1/jzero /app/jzero; \
