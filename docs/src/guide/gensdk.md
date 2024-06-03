@@ -11,7 +11,6 @@ order: 5
 * 链式调用, 调用逻辑清晰
 * 自带 fake client 支持单元测试
 * 可自定义接口进行扩展
-* 支持基于统一 api 网关的多服务 sdk 集成在一个 sdk 库中
 
 ::: code-tabs#shell
 

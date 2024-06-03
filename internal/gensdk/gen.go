@@ -13,13 +13,14 @@ import (
 )
 
 var (
-	Scope      string
-	ApiDir     string
-	ProtoDir   string
-	Dir        string
-	WorkingDir string
-	Language   string
-	Module     string
+	Scope        string
+	ApiDir       string
+	ProtoDir     string
+	WarpResponse bool
+	Dir          string
+	WorkingDir   string
+	Language     string
+	Module       string
 
 	Version string
 )
@@ -46,12 +47,13 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 	}
 
 	c := config.Config{
-		Language: Language,
-		APP:      Scope,
-		Module:   Module,
-		Dir:      Dir,
-		ApiDir:   ApiDir,
-		ProtoDir: ProtoDir,
+		Language:     Language,
+		APP:          Scope,
+		Module:       Module,
+		Dir:          Dir,
+		ApiDir:       ApiDir,
+		ProtoDir:     ProtoDir,
+		WarpResponse: WarpResponse,
 	}
 
 	gen, err := generator.New(c)

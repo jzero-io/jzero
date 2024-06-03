@@ -319,7 +319,7 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 		"Scope":              scope,
 		"Resource":           resource,
 		"HTTPInterfaces":     rhis[vars.Scope(scope)][vars.Resource(resource)],
-		"IsWarpHTTPResponse": true,
+		"IsWarpHTTPResponse": g.config.WarpResponse,
 		"GoImportPaths":      g.genImports(rhis[vars.Scope(scope)][vars.Resource(resource)]),
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-go", "typed", "resource.go.tpl")))
 	if err != nil {
@@ -375,7 +375,7 @@ func (g *Golang) genPbTypesModel() ([]*GeneratedFile, error) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	resp, err := execx.Run(fmt.Sprintf("protoc -I./app/desc/proto --go_out=%s app/desc/proto/*.proto", tmpDir), g.wd)
+	resp, err := execx.Run(fmt.Sprintf("protoc -I%s --go_out=%s %s/*.proto", g.config.ProtoDir, tmpDir, g.config.ProtoDir), g.wd)
 	if err != nil {
 		return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
 	}

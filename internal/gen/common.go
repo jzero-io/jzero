@@ -29,7 +29,9 @@ func GetProtoFilenames(protoDirPath string) ([]string, error) {
 		if protoFile.IsDir() {
 			continue
 		}
-		protoFilenames = append(protoFilenames, protoFile.Name())
+		if strings.HasSuffix(protoFile.Name(), ".proto") {
+			protoFilenames = append(protoFilenames, protoFile.Name())
+		}
 	}
 	return protoFilenames, nil
 }
