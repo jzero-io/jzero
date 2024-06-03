@@ -8,7 +8,7 @@
 <img align="center" width="150px" src="https://oss.jaronnie.com/jzero.jpg">
 </p>
 
-基于 go-zero 框架定制的企业级后端代码框架 jzero
+可支持任意框架的脚手架 jzero, 默认支持 go-zero
 
 ## Features
 
@@ -20,53 +20,15 @@
 * 一键创建项目, 快速拓展新业务, 减少心理负担
 * 一键生成服务端代码, 数据库代码, 客户端 sdk, 大大提高开发测试效率
 * 支持自定义模板, 基于模板新建项目和生成代码
-* 支持流量治理, 减少线上风险
-* 支持链路追踪, 监控等, 快速定位问题
-* 所有工具链跨平台支持
 
 ## [Quick Start](https://jzero.jaronnie.com/#快速开始)
 
-![2024-04-30_10-10-52](https://oss.jaronnie.com/2024-04-30_10-10-52.gif)
-
-### new project with grpc, gateway, api
-
 ```shell
-jzero new simple
-cd simple && jzero gen && go mod tidy
+jzero new quickstart
+cd quickstart && jzero gen && go mod tidy
 go run main.go server
 ```
 
-### new project with grpc, gateway
-
-```shell
-jzero new simplegateway --branch gateway
-cd simplegateway && jzero gen --home ~/.jzero/templates/gateway && go mod tidy
-go run main.go server
-```
-
-### new project with only grpc
-
-```shell
-jzero new simplerpc --branch rpc
-cd simplerpc && jzero gen --home ~/.jzero/templates/rpc && go mod tidy
-go run main.go server
-```
-
-### new project with only api
-
-```shell
-jzero new simpleapi --branch api
-cd simpleapi && jzero gen --home ~/.jzero/templates/api && go mod tidy
-go run main.go server
-```
-
-### new project with only cli
-
-```shell
-jzero new simplecli --branch cli
-cd simplecli && go mod tidy
-go run main.go -h
-```
 
 ## Stargazers over time
 

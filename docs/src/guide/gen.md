@@ -15,7 +15,7 @@ jzero 会自动检测对应文件夹下的内容, 然后进行自动生成, 使�
 @tab jzero
 
 ```bash
-cd app1
+cd quickstart
 jzero gen
 ```
 
@@ -23,7 +23,7 @@ jzero gen
 
 ```bash
 cd app1
-docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest gen -w app1
+docker run --rm -v ${PWD}:/app/quickstart jaronnie/jzero:latest gen -w quickstart
 ```
 :::
 
@@ -38,15 +38,4 @@ go mod tidy
 
 ```shell
 go run main.go server
-```
-
-## 测试接口
-
-```shell
-# gateway
-curl http://localhost:8001/api/v1/credential/version
-# grpc
-grpcurl -plaintext localhost:8000 credentialpb.credential/CredentialVersion
-# api
-curl http://localhost:8001/api/v1/hello/me
 ```
