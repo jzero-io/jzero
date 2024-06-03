@@ -33,10 +33,7 @@ var templateInitCmd = &cobra.Command{
 			Home = filepath.Join(dir, ".jzero", Version)
 		}
 
-		err = embeded.WriteTemplateDir(filepath.Join("go-zero"), filepath.Join(Home, "go-zero"))
-		cobra.CheckErr(err)
-
-		err = embeded.WriteTemplateDir(filepath.Join("jzero"), filepath.Join(Home, "jzero"))
+		err = embeded.WriteTemplateDir(filepath.Join(""), Home)
 		cobra.CheckErr(err)
 	},
 }

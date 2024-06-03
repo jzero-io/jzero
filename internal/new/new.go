@@ -59,7 +59,7 @@ func NewProject(_ *cobra.Command, _ []string) error {
 		AppDir:       AppDir,
 	}
 
-	err = jn.New(filepath.Join("jzero", "app"))
+	err = jn.New(filepath.Join("app"))
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func (jn *JzeroNew) New(dirname string) error {
 			return err
 		}
 		filename := strings.TrimSuffix(file.Name(), ".tpl")
-		rel, err := filepath.Rel(filepath.Join("jzero", "app"), filepath.Join(dirname, filename))
+		rel, err := filepath.Rel(filepath.Join("app"), filepath.Join(dirname, filename))
 		if err != nil {
 			return err
 		}
