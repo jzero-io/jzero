@@ -1,7 +1,6 @@
 package new
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,7 +9,6 @@ import (
 	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
@@ -45,14 +43,9 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	err = os.MkdirAll(filepath.Join(Output, AppDir), 0o755)
 	cobra.CheckErr(err)
 
-	_, err = execx.Run(fmt.Sprintf("go mod init %s", Module), filepath.Join(Output, AppDir))
+	templateData, err := newTemplateData()
 	cobra.CheckErr(err)
 
-	// template, register global data
-	templateData := map[string]interface{}{
-		"Module": Module,
-		"APP":    AppName,
-	}
 	jn := JzeroNew{
 		TemplateData: templateData,
 		AppDir:       AppDir,

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"text/template"
 
-	sprig "github.com/Masterminds/sprig/v3"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/jzero-io/jzero/pkg/stringx"
 )
 

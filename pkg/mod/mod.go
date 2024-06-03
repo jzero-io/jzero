@@ -3,10 +3,19 @@ package mod
 import (
 	"encoding/json"
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 )
+
+func GetGoVersion() (string, error) {
+	resp, err := execx.Run("go env GOVERSION", "")
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimPrefix(resp, "go"), nil
+}
 
 // GetGoMod is used to determine whether workDir is a go module project through command `go list -json -m`
 func GetGoMod(workDir string) (*ModuleStruct, error) {
