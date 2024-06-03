@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -26,7 +28,11 @@ var (
 type TemplateData struct {
 	Module string
 	APP    string
-	AppDir string
+}
+
+type JzeroNew struct {
+	TemplateData map[string]interface{}
+	AppDir       string
 }
 
 func NewProject(_ *cobra.Command, _ []string) error {
@@ -42,32 +48,21 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	_, err = execx.Run(fmt.Sprintf("go mod init %s", Module), filepath.Join(Output, AppDir))
 	cobra.CheckErr(err)
 
-	templateData := TemplateData{
-		Module: Module,
-		APP:    AppName,
-		AppDir: AppDir,
+	// template, register global data
+	templateData := map[string]interface{}{
+		"Module": Module,
+		"APP":    AppName,
+		"AppDir": AppDir,
+	}
+	jn := JzeroNew{
+		TemplateData: templateData,
+		AppDir:       AppDir,
 	}
 
-	jzeroRoot := JzeroRoot{TemplateData: templateData, AppDir: AppDir}
-	err = jzeroRoot.New()
-	cobra.CheckErr(err)
-
-	jzeroEtc := JzeroEtc{TemplateData: templateData, AppDir: AppDir}
-	err = jzeroEtc.New()
-	cobra.CheckErr(err)
-
-	jzeroCmd := JzeroCmd{TemplateData: templateData, AppDir: AppDir}
-	err = jzeroCmd.New()
-	cobra.CheckErr(err)
-
-	jzeroProto := JzeroProto{TemplateData: templateData, AppDir: AppDir}
-	err = jzeroProto.New()
-	cobra.CheckErr(err)
-
-	jzeroApi := JzeroApi{TemplateData: templateData, AppDir: AppDir}
-	err = jzeroApi.New()
-	cobra.CheckErr(err)
-
+	err = jn.New(filepath.Join("jzero", "app"))
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -92,4 +87,31 @@ func checkWrite(path string, bytes []byte) error {
 	}
 
 	return os.WriteFile(path, bytesFormat, 0o644)
+}
+
+func (jn *JzeroNew) New(dirname string) error {
+	dir := embeded.ReadTemplateDir(dirname)
+	for _, file := range dir {
+		if file.IsDir() {
+			err := jn.New(filepath.Join(dirname, file.Name()))
+			if err != nil {
+				return err
+			}
+		}
+		fileBytes, err := templatex.ParseTemplate(jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
+		if err != nil {
+			return err
+		}
+		filename := strings.TrimSuffix(file.Name(), ".tpl")
+		rel, err := filepath.Rel(filepath.Join("jzero", "app"), filepath.Join(dirname, filename))
+		if err != nil {
+			return err
+		}
+		path := filepath.Join(jn.AppDir, rel)
+		err = checkWrite(filepath.Join(Output, path), fileBytes)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

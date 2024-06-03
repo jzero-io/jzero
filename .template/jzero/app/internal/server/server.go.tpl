@@ -8,8 +8,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"{{ .Module }}{{ .AppDir }}/internal/config"
-	"{{ .Module }}{{ .AppDir }}/internal/svc"{{ if .ServerImports }}{{ .ServerImports }}{{ end }}{{ if .PbImports }}{{ .PbImports }}{{ end }}
+	"{{ .Module }}/internal/config"
+	"{{ .Module }}/internal/svc"{{ if .ServerImports }}{{ .ServerImports }}{{ end }}{{ if .PbImports }}{{ .PbImports }}{{ end }}
 )
 
 func RegisterZrpc(c config.Config, ctx *svc.ServiceContext) *zrpc.RpcServer {
