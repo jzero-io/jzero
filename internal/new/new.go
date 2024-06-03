@@ -52,7 +52,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	templateData := map[string]interface{}{
 		"Module": Module,
 		"APP":    AppName,
-		"AppDir": AppDir,
 	}
 	jn := JzeroNew{
 		TemplateData: templateData,

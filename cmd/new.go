@@ -16,7 +16,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/zeromicro/go-zero/core/color"
 
-	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -34,10 +34,11 @@ var newCmd = &cobra.Command{
 		if new.Output == "" {
 			new.Output = args[0]
 		}
-		new.AppDir = strings.TrimPrefix(new.AppDir, ".")
 		if new.Module == "" {
-			new.Module = args[0]
-			// TODO add app dir
+			appDir := new.AppDir
+			appDir = strings.TrimPrefix(appDir, ".")
+			appDir = strings.TrimPrefix(appDir, "./")
+			new.Module = filepath.ToSlash(filepath.Join(new.Output, appDir))
 		}
 
 		if new.Remote != "" && new.Branch != "" {
