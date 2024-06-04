@@ -19,9 +19,10 @@ var (
 	WorkingDir string
 	AppDir     string
 
-	Version      string
-	Style        string
-	RemoveSuffix bool
+	Version            string
+	Style              string
+	RemoveSuffix       bool
+	ChangeReplaceTypes bool
 )
 
 type ApiFileTypes struct {
@@ -61,7 +62,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	jzeroApi := JzeroApi{Wd: wd, AppDir: AppDir, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
+	jzeroApi := JzeroApi{Wd: wd, AppDir: AppDir, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix, ChangeReplaceTypes: ChangeReplaceTypes}
 	err = jzeroApi.Gen()
 	if err != nil {
 		return err

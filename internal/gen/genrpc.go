@@ -127,10 +127,8 @@ func (jr *JzeroRpc) Gen() error {
 					hasModifyServer = true
 				}
 				for _, file := range allLogicFiles {
-					if !file.Skip {
-						if err := jr.rewriteLogicGo(file.Path); err != nil {
-							return err
-						}
+					if err := jr.rewriteLogicGo(file.Path); err != nil {
+						return err
 					}
 				}
 			}

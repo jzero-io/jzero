@@ -26,23 +26,24 @@ import (
 )
 
 type JzeroApi struct {
-	Wd           string
-	AppDir       string
-	Module       string
-	Style        string
-	RemoveSuffix bool
+	Wd                 string
+	AppDir             string
+	Module             string
+	Style              string
+	RemoveSuffix       bool
+	ChangeReplaceTypes bool
 }
 
 type HandlerFile struct {
 	Group   string
 	Handler string
 	Path    string
-	Skip    bool
 }
 
 type LogicFile struct {
-	Path string
-	Skip bool
+	Group   string
+	Handler string
+	Path    string
 }
 
 func (ja *JzeroApi) Gen() error {
@@ -93,20 +94,29 @@ func (ja *JzeroApi) Gen() error {
 
 	if ja.RemoveSuffix && apiSpec != nil {
 		for _, file := range allHandlerFiles {
-			if !file.Skip {
-				if err := ja.rewriteHandlerGo(file.Path); err != nil {
-					return err
-				}
-				if err := ja.rewriteRoutesGo(file.Group, file.Handler); err != nil {
-					return err
-				}
+			if err := ja.rewriteHandlerGo(file.Path); err != nil {
+				return err
+			}
+			if err := ja.rewriteRoutesGo(file.Group, file.Handler); err != nil {
+				return err
 			}
 		}
 		for _, file := range allLogicFiles {
-			if !file.Skip {
-				if err := ja.rewriteLogicGo(file.Path); err != nil {
-					return err
-				}
+			if err := ja.rewriteLogicGo(file.Path); err != nil {
+				return err
+			}
+		}
+	}
+
+	if ja.ChangeReplaceTypes {
+		for _, file := range allLogicFiles {
+			if err := ja.changeReplaceLogicGoTypes(file, apiSpec); err != nil {
+				return err
+			}
+		}
+		for _, file := range allHandlerFiles {
+			if err := ja.changeReplaceHandlerGoTypes(file, apiSpec); err != nil {
+				return err
 			}
 		}
 	}
@@ -131,10 +141,6 @@ func (ja *JzeroApi) getAllHandlerFiles(apiSpec *spec.ApiSpec) ([]HandlerFile, er
 				Handler: route.Handler,
 			}
 
-			//if pathx.FileExists(fp) {
-			//	f.Skip = true
-			//}
-
 			handlerFiles = append(handlerFiles, f)
 		}
 	}
@@ -153,12 +159,10 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 			fp := filepath.Join(ja.Wd, ja.AppDir, "internal", "logic", group.GetAnnotation("group"), namingFormat+".go")
 
 			f := LogicFile{
-				Path: fp,
+				Path:    fp,
+				Group:   group.GetAnnotation("group"),
+				Handler: route.Handler,
 			}
-
-			//if pathx.FileExists(fp) {
-			//	f.Skip = true
-			//}
 
 			logicFiles = append(logicFiles, f)
 		}
@@ -397,4 +401,168 @@ func (ja *JzeroApi) rewriteLogicGo(fp string) error {
 	}
 
 	return os.Rename(fp, newFilePath)
+}
+
+func (ja *JzeroApi) changeReplaceLogicGoTypes(file LogicFile, apiSpec *spec.ApiSpec) error {
+	fp := file.Path // logic file path
+	if ja.RemoveSuffix {
+		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
+		fp = file.Path[:len(file.Path)-8]
+		// patch
+		fp = strings.TrimSuffix(fp, "_")
+		fp = strings.TrimSuffix(fp, "-")
+		fp += ".go"
+	}
+
+	fset := token.NewFileSet()
+
+	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+
+	var methodFunc string
+
+	var requestType string
+	var responseType string
+
+	for _, group := range apiSpec.Service.Groups {
+		for _, route := range group.Routes {
+			if route.Handler == file.Handler && group.GetAnnotation("group") == file.Group {
+				requestType = util.Title(route.RequestType.Name())
+				responseType = util.Title(route.ResponseType.Name())
+				methodFunc = route.Handler
+				methodFunc = util.Title(strings.TrimSuffix(methodFunc, "Handler"))
+			}
+		}
+	}
+
+	var needModify bool
+	ast.Inspect(f, func(node ast.Node) bool {
+		if fn, ok := node.(*ast.FuncDecl); ok && fn.Recv != nil {
+			if fn.Name.Name == methodFunc {
+				if fn.Type != nil && fn.Type.Params != nil {
+					for _, param := range fn.Type.Params.List {
+						if starExpr, ok := param.Type.(*ast.StarExpr); ok {
+							if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
+								if selectorExpr.Sel.Name != requestType {
+									selectorExpr.Sel.Name = requestType
+									needModify = true
+								}
+							}
+						}
+					}
+				}
+
+				if fn.Type != nil && fn.Type.Results != nil {
+					for _, result := range fn.Type.Results.List {
+						if starExpr, ok := result.Type.(*ast.StarExpr); ok {
+							if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
+								if selectorExpr.Sel.Name != responseType {
+									selectorExpr.Sel.Name = responseType
+									needModify = true
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return true
+	})
+
+	if needModify {
+		// Write the modified AST back to the file
+		buf := bytes.NewBuffer(nil)
+		if err := goformat.Node(buf, fset, f); err != nil {
+			return err
+		}
+
+		if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (ja *JzeroApi) changeReplaceHandlerGoTypes(file HandlerFile, apiSpec *spec.ApiSpec) error {
+	fp := file.Path // handler file path
+	if ja.RemoveSuffix {
+		fp = file.Path[:len(file.Path)-10]
+		// patch
+		fp = strings.TrimSuffix(fp, "_")
+		fp = strings.TrimSuffix(fp, "-")
+		fp += ".go"
+	}
+
+	var requestType string
+
+	for _, group := range apiSpec.Service.Groups {
+		for _, route := range group.Routes {
+			if route.Handler == file.Handler && group.GetAnnotation("group") == file.Group {
+				requestType = util.Title(route.RequestType.Name())
+			}
+		}
+	}
+
+	fset := token.NewFileSet()
+
+	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+
+	funcName := util.Title(file.Handler)
+	if ja.RemoveSuffix {
+		funcName = strings.TrimSuffix(funcName, "Handler")
+	}
+
+	ast.Inspect(f, func(n ast.Node) bool {
+		if fn, ok := n.(*ast.FuncDecl); ok {
+			if fn.Name.Name == funcName {
+				// find var req types.XXRequest
+				fmt.Println(fn.Name.Name)
+				for _, body := range fn.Body.List {
+					if returnStmt, ok := body.(*ast.ReturnStmt); ok {
+						for _, v := range returnStmt.Results {
+							if funcLit, ok := v.(*ast.FuncLit); ok {
+								for _, list := range funcLit.Body.List {
+									if declStmt, ok := list.(*ast.DeclStmt); ok {
+										if decl, ok := declStmt.Decl.(*ast.GenDecl); ok {
+											for _, declSpec := range decl.Specs {
+												if valueSpec, ok := declSpec.(*ast.ValueSpec); ok {
+													if selectorExpr, ok := valueSpec.Type.(*ast.SelectorExpr); ok {
+														if ident, ok := selectorExpr.X.(*ast.Ident); ok {
+															if ident.Name == "types" {
+																selectorExpr.Sel.Name = requestType
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return true
+	})
+
+	// Write the modified AST back to the file
+	buf := bytes.NewBuffer(nil)
+	if err := goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+		return err
+	}
+
+	return nil
 }
