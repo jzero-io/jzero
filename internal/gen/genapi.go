@@ -522,7 +522,6 @@ func (ja *JzeroApi) changeReplaceHandlerGoTypes(file HandlerFile, apiSpec *spec.
 		if fn, ok := n.(*ast.FuncDecl); ok {
 			if fn.Name.Name == funcName {
 				// find var req types.XXRequest
-				fmt.Println(fn.Name.Name)
 				for _, body := range fn.Body.List {
 					if returnStmt, ok := body.(*ast.ReturnStmt); ok {
 						for _, v := range returnStmt.Results {
