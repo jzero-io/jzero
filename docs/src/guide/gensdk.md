@@ -18,15 +18,15 @@ order: 5
 
 ```bash
 cd app1
-jzero gen sdk --module=github.com/jaronnie/app1-go --dir=app1-go --scope app1
-cd app1-go
+jzero gen sdk --module=github.com/jaronnie/quickstart-go --dir=quickstart-go --scope quickstart
+cd quickstart-go
 go mod tidy
 ```
 
 @tab Docker
 ```bash
 cd app1
-docker run --rm -v ${PWD}:/app/app1 jaronnie/jzero:latest gen sdk --module=github.com/jaronnie/app1-go --dir=app1-go --scope app1 -w app1
+docker run --rm -v ${PWD}:/app/quickstart jaronnie/jzero:latest gen sdk --module=github.com/jaronnie/quickstart-go --dir=quickstart-go --scope quickstart -w quickstart
 
 cd app1-go
 go mod tidy
