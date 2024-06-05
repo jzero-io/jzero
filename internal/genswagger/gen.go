@@ -29,19 +29,12 @@ func Gen(_ *cobra.Command, _ []string) error {
 
 	// gen swagger by desc/api
 	if mainApiFile != "" {
-		//command := fmt.Sprintf("goctl api plugin -plugin goctl-swagger=\"swagger -filename %s.swagger.json --schemes http\" -api %s -dir %s", gen.GetApiServiceName(ApiDir), mainApiFile, Dir)
-		// 对于Windows系统，可能需要对双引号和反斜杠进行适当的转义
 		apiFile := fmt.Sprintf("%s.swagger.json", gen.GetApiServiceName(ApiDir))
 		cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", mainApiFile, "-dir", Dir)
 		_, err := cmd.CombinedOutput()
 		if err != nil {
-			fmt.Println("Command failed with error:", err)
+			return err
 		}
-		//fmt.Println(string(output))
-		////_, err := execx.Run(command, wd)
-		//if err != nil {
-		//	return err
-		//}
 
 	}
 
