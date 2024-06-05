@@ -5,11 +5,9 @@ go 1.19
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/go-git/go-git/v5 v5.12.0
-	github.com/jaronnie/genius v0.4.2
 	github.com/jhump/protoreflect v1.16.0
 	github.com/pkg/errors v0.9.1
 	github.com/rinchsan/gosimports v0.3.8
-	github.com/samber/lo v1.39.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
@@ -52,7 +50,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/onsi/gomega v1.29.0 // indirect
-	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect

@@ -3,10 +3,10 @@ syntax = "v1"
 type GetVersionRequest {}
 
 type GetVersionResponse {
-    version string
-    goVersion string
-    commit string
-    date string
+    version string `json:"version"`
+    goVersion string `json:"goVersion"`
+    commit string `json:"commit"`
+    date string `json:"date"`
 }
 
 @server(
