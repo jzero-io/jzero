@@ -2,10 +2,11 @@ package genswagger
 
 import (
 	"fmt"
-	"github.com/jzero-io/jzero/internal/gen"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/jzero-io/jzero/internal/gen"
 
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
