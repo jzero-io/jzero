@@ -1,9 +1,13 @@
 package new
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/cast"
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/templatex"
@@ -72,7 +76,7 @@ func checkWrite(path string, bytes []byte) error {
 
 	bytesFormat := bytes
 	if filepath.Ext(path) == ".go" {
-		bytesFormat, err = gosimports.Process("", bytes, &gosimports.Options{FormatOnly: true})
+		bytesFormat, err = gosimports.Process("", bytes, &gosimports.Options{FormatOnly: true, Comments: true})
 		if err != nil {
 			return err
 		}
@@ -90,15 +94,17 @@ func (jn *JzeroNew) New(dirname string) error {
 				return err
 			}
 		}
-		fileBytes, err := templatex.ParseTemplate(jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
-		if err != nil {
-			return err
-		}
 		filename := strings.TrimSuffix(file.Name(), ".tpl")
 		rel, err := filepath.Rel(filepath.Join("app"), filepath.Join(dirname, filename))
 		if err != nil {
 			return err
 		}
+		fileBytes, err := templatex.ParseTemplate(jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
+		if err != nil {
+			console.Warning("parse template file [%s] error, simple replace it", rel)
+			fileBytes = bytes.ReplaceAll(embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())), []byte("{{ .Module }}"), []byte(cast.ToString(jn.TemplateData["Module"])))
+		}
+
 		path := filepath.Join(jn.AppDir, rel)
 		err = checkWrite(filepath.Join(Output, path), fileBytes)
 		if err != nil {

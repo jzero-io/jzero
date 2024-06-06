@@ -44,6 +44,13 @@ func ReadTemplateDir(dirname string) []os.DirEntry {
 	path := filepath.ToSlash(filepath.Join(".template", dirname))
 	data, err := Template.ReadDir(path)
 	if err != nil {
+		if Home != "" {
+			file, err := os.ReadDir(filepath.Join(Home, dirname))
+			if err != nil {
+				return nil
+			}
+			return file
+		}
 		return nil
 	}
 	if Home != "" {
