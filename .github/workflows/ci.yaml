@@ -32,7 +32,7 @@ jobs:
           ./dist/jzero_linux_amd64_v1/jzero check
           ./dist/jzero_linux_amd64_v1/jzero new simple
           cd simple && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-
+          ../dist/jzero_linux_amd64_v1/jzero gen swagger
           cd ..
 
       - uses: actions/checkout@v2
