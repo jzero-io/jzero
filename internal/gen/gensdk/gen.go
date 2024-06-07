@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jzero-io/jzero/internal/gensdk/config"
-	"github.com/jzero-io/jzero/internal/gensdk/generator"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/generator"
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"

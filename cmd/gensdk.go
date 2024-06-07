@@ -8,8 +8,9 @@ package cmd
 import (
 	"path/filepath"
 
+	"github.com/jzero-io/jzero/internal/gen/gensdk"
+
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/internal/gensdk"
 	"github.com/spf13/cobra"
 )
 

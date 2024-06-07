@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/internal/gensdk/config"
-	"github.com/jzero-io/jzero/internal/gensdk/jparser/api"
-	"github.com/jzero-io/jzero/internal/gensdk/jparser/gateway"
-	"github.com/jzero-io/jzero/internal/gensdk/vars"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser/api"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser/gateway"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jzero-io/jzero/pkg/stringx"

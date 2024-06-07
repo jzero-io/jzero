@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/jzero-io/jzero/internal/gensdk/vars"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jzero-io/jzero/pkg/stringx"

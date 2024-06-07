@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jzero-io/jzero/internal/gen"
-	"github.com/jzero-io/jzero/internal/genswagger"
+	"github.com/jzero-io/jzero/internal/gen/genswagger"
 
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )

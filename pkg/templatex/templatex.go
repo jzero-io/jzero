@@ -10,10 +10,13 @@ import (
 
 // ParseTemplate template
 func ParseTemplate(data interface{}, tplT []byte) ([]byte, error) {
-	t := template.Must(template.New("production").Funcs(sprig.TxtFuncMap()).Funcs(RegisterTxtFuncMap()).Parse(string(tplT)))
+	t, err := template.New("production").Funcs(sprig.TxtFuncMap()).Funcs(RegisterTxtFuncMap()).Parse(string(tplT))
+	if err != nil {
+		return nil, err
+	}
 
 	buf := new(bytes.Buffer)
-	err := t.Execute(buf, data)
+	err = t.Execute(buf, data)
 	if err != nil {
 		return nil, err
 	}

@@ -6,13 +6,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jzero-io/jzero/internal/gen"
-	"github.com/jzero-io/jzero/internal/gensdk/config"
-	"github.com/jzero-io/jzero/internal/gensdk/jparser"
-	"github.com/jzero-io/jzero/internal/gensdk/vars"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
 
 	"github.com/jhump/protoreflect/desc"
-
+	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/pkg/errors"
 
 	"github.com/jhump/protoreflect/desc/protoparse"
