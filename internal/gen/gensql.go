@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	"github.com/jzero-io/jzero/embeded"
 	"os"
 	"path"
 	"path/filepath"
@@ -33,7 +34,7 @@ func (js *JzeroSql) Gen() error {
 				if dir == "" {
 					dir = "."
 				}
-				command := fmt.Sprintf("goctl model mysql ddl --src %s/desc/sql/%s --dir %s/internal/model/%s --home %s --style %s", dir, f.Name(), dir, f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))], filepath.Join(js.Wd, ".template", "go-zero"), js.Style)
+				command := fmt.Sprintf("goctl model mysql ddl --src %s/desc/sql/%s --dir %s/internal/model/%s --home %s --style %s", dir, f.Name(), dir, f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))], filepath.Join(embeded.Home, "go-zero"), js.Style)
 				_, err = execx.Run(command, js.Wd)
 				if err != nil {
 					return err
