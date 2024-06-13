@@ -53,7 +53,9 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	if err != nil {
 		return nil, err
 	}
-	os.Remove(mainApiFilePath)
+	if mainApiFilePath != filepath.Join(g.config.ApiDir, "main.api") {
+		os.Remove(mainApiFilePath)
+	}
 
 	apiSpecs = append(apiSpecs, apiSpec)
 

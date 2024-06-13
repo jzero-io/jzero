@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/jzero-io/jzero/internal/gen/genswagger"
 
@@ -25,10 +24,6 @@ var genCmd = &cobra.Command{
 	Short: "jzero gen code",
 	Long:  `jzero gen code`,
 	PreRun: func(_ *cobra.Command, _ []string) {
-		if Debug {
-			time.Sleep(time.Second * 15)
-		}
-
 		gen.Version = Version
 		gen.AppDir = strings.TrimPrefix(gen.AppDir, ".")
 

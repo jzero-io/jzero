@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -47,6 +48,10 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if Debug {
+		time.Sleep(time.Second * 15)
+	}
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)

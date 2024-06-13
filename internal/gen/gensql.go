@@ -2,11 +2,12 @@ package gen
 
 import (
 	"fmt"
-	"github.com/jzero-io/jzero/embeded"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/jzero-io/jzero/embeded"
 
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"

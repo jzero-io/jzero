@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/jzero-io/jzero/internal/new"
 
@@ -29,10 +28,6 @@ var newCmd = &cobra.Command{
 	Short: "jzero new project",
 	Long:  `jzero new project`,
 	PreRun: func(_ *cobra.Command, args []string) {
-		if Debug {
-			time.Sleep(time.Second * 15)
-		}
-
 		new.Version = Version
 		new.AppName = args[0]
 

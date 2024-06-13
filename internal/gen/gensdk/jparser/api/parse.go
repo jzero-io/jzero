@@ -42,15 +42,38 @@ func CreateQueryParams(route *spec.Route) []*vars.QueryParam {
 		return nil
 	}
 
-	members := route.RequestType.(spec.DefineStruct).GetTagMembers("form")
+	//members := route.RequestType.(spec.DefineStruct).GetTagMembers("form")
+	//params := make([]*vars.QueryParam, 0)
+	//for _, member := range members {
+	//	name, _ := member.GetPropertyName()
+	//	param := &vars.QueryParam{
+	//		GoName: stringx.FirstUpper(member.Name),
+	//		Name:   name,
+	//	}
+	//	params = append(params, param)
+	//}
+	//return params
+
+	return extractQueryParams(route.RequestType.(spec.DefineStruct))
+}
+
+func extractQueryParams(defineStruct spec.DefineStruct) []*vars.QueryParam {
+	members := defineStruct.GetTagMembers("form")
 	params := make([]*vars.QueryParam, 0)
 	for _, member := range members {
 		name, _ := member.GetPropertyName()
-		param := &vars.QueryParam{
-			GoName: stringx.FirstUpper(member.Name),
-			Name:   name,
+		if name != "" {
+			param := &vars.QueryParam{
+				GoName: stringx.FirstUpper(member.Name),
+				Name:   name,
+			}
+			params = append(params, param)
 		}
-		params = append(params, param)
+
+		// 递归处理嵌套的 DefineStruct
+		if nestedStruct, ok := member.Type.(spec.DefineStruct); ok {
+			params = append(params, extractQueryParams(nestedStruct)...)
+		}
 	}
 	return params
 }
