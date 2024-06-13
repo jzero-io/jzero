@@ -25,6 +25,11 @@ var (
 	ChangeReplaceTypes bool
 )
 
+var (
+	// ModelIgnoreColumns goctl model flags
+	ModelIgnoreColumns []string
+)
+
 type ApiFileTypes struct {
 	Filepath string
 	ApiSpec  spec.ApiSpec
@@ -68,7 +73,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	jzeroSql := JzeroSql{Wd: wd, AppDir: AppDir, Style: Style}
+	jzeroSql := JzeroSql{Wd: wd, AppDir: AppDir, Style: Style, ModelIgnoreColumns: ModelIgnoreColumns}
 	err = jzeroSql.Gen()
 	if err != nil {
 		return err
