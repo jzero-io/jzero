@@ -28,6 +28,15 @@ var (
 var (
 	// ModelIgnoreColumns goctl model flags
 	ModelIgnoreColumns []string
+
+	// ModelDir goctl model flag
+	ModelDir   string
+	ModelCache bool
+
+	// ModelMysqlDatasource goctl model datasource
+	ModelMysqlDatasource      bool
+	ModelMysqlDatasourceUrl   string
+	ModelMysqlDatasourceTable []string
 )
 
 type ApiFileTypes struct {
@@ -73,7 +82,15 @@ func Gen(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	jzeroSql := JzeroSql{Wd: wd, AppDir: AppDir, Style: Style, ModelIgnoreColumns: ModelIgnoreColumns}
+	jzeroSql := JzeroSql{
+		Wd:                        wd,
+		AppDir:                    AppDir,
+		Style:                     Style,
+		ModelIgnoreColumns:        ModelIgnoreColumns,
+		ModelMysqlDatasource:      ModelMysqlDatasource,
+		ModelMysqlDatasourceUrl:   ModelMysqlDatasourceUrl,
+		ModelMysqlDatasourceTable: ModelMysqlDatasourceTable,
+	}
 	err = jzeroSql.Gen()
 	if err != nil {
 		return err
