@@ -1,4 +1,4 @@
-import{_ as n}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as s,c as a,b as e}from"./app-Dv1gqpp7.js";const p={},t=e(`<p>修改 config.yaml, 增加以下配置, 设置最大 qps 100</p><div class="language-yaml line-numbers-mode" data-ext="yml" data-title="yml"><pre class="language-yaml"><code><span class="token key atrule">Zrpc</span><span class="token punctuation">:</span>
+import{_ as n}from"./plugin-vue_export-helper-DlAUqK2U.js";import{o as s,c as a,b as e}from"./app-CTt6l5oY.js";const p={},t=e(`<p>修改 config.yaml, 增加以下配置, 设置最大 qps 100</p><div class="language-yaml line-numbers-mode" data-ext="yml" data-title="yml"><pre class="language-yaml"><code><span class="token key atrule">Zrpc</span><span class="token punctuation">:</span>
   <span class="token key atrule">MaxConns</span><span class="token punctuation">:</span> <span class="token number">100</span>
 <span class="token key atrule">Gateway</span><span class="token punctuation">:</span>
   <span class="token key atrule">MaxConns</span><span class="token punctuation">:</span> <span class="token number">100</span>
