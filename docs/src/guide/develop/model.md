@@ -12,10 +12,10 @@ jzero 推荐使用 go-zero sqlx 完成对数据库的 crud 操作.
 
 jzero 数据库规范:
 
-* sql 文件放在 daemon/desc/sql
-* 生成的 model 放在 daemon/model
+* sql 文件放在 desc/sql
+* 生成的 model 放在 internal/model
 
-jzero gen 时会自动检测 daemon/desc/sql 下的 sql 文件, 并将生成的 model 放在 daemon/model 下
+jzero gen 时会自动检测 desc/sql 下的 sql 文件, 并将生成的 model 放在 internal/model 下
 
 另外推荐使用 sqlbuilder 完成对 sql 的拼接. 如获取凭证列表以及支持过滤参数
 
