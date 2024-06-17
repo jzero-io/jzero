@@ -17,7 +17,7 @@ Gateway:
   MaxConns: 100
 ```
 
-由于 jzero 集成了 go-zero 三个特性
+由于 jzero 默认集成了 go-zero 三个特性
 
 * rpc
 * api

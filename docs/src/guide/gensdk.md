@@ -17,7 +17,7 @@ order: 5
 @tab jzero
 
 ```bash
-cd app1
+cd quickstart
 jzero gen sdk --module=github.com/jaronnie/quickstart-go --dir=quickstart-go --scope quickstart
 cd quickstart-go
 go mod tidy
@@ -25,10 +25,10 @@ go mod tidy
 
 @tab Docker
 ```bash
-cd app1
+cd quickstart
 docker run --rm -v ${PWD}:/app/quickstart jaronnie/jzero:latest gen sdk --module=github.com/jaronnie/quickstart-go --dir=quickstart-go --scope quickstart -w quickstart
 
-cd app1-go
+cd quickstart-go
 go mod tidy
 ```
 :::
@@ -42,13 +42,13 @@ import (
 	"context"
 	"fmt"
 	
-	"github.com/jaronnie/app1-go"
-	"github.com/jaronnie/app1-go/model/app1/types"
-	"github.com/jaronnie/app1-go/rest"
+	"github.com/jaronnie/quickstart-go"
+	"github.com/jaronnie/quickstart-go/model/quickstart/types"
+	"github.com/jaronnie/quickstart-go/rest"
 )
 
 func main() {
-	clientset, err := app1.NewClientWithOptions(
+	clientset, err := quickstart.NewClientWithOptions(
 		rest.WithAddr("127.0.0.1"),
 		rest.WithPort("8001"),
 		rest.WithProtocol("http"))
