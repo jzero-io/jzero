@@ -429,8 +429,12 @@ func (ja *JzeroApi) changeReplaceLogicGoTypes(file LogicFile, apiSpec *spec.ApiS
 	for _, group := range apiSpec.Service.Groups {
 		for _, route := range group.Routes {
 			if route.Handler == file.Handler && group.GetAnnotation("group") == file.Group {
-				requestType = util.Title(route.RequestType.Name())
-				responseType = util.Title(route.ResponseType.Name())
+				if route.RequestType != nil {
+					requestType = util.Title(route.RequestType.Name())
+				}
+				if route.ResponseType != nil {
+					responseType = util.Title(route.ResponseType.Name())
+				}
 				methodFunc = route.Handler
 				methodFunc = util.Title(strings.TrimSuffix(methodFunc, "Handler"))
 			}
