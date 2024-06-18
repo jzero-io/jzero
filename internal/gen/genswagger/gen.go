@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/pkg/errors"
+
 	"github.com/jzero-io/jzero/internal/gen"
 
 	"github.com/spf13/cobra"
@@ -23,7 +25,10 @@ func Gen(_ *cobra.Command, _ []string) error {
 	wd, _ := os.Getwd()
 
 	mainApiFile := gen.GetMainApiFilePath(ApiDir)
-	defer os.Remove(mainApiFile)
+	if mainApiFile != filepath.Join("desc", "api", "main.api") {
+		defer os.Remove(mainApiFile)
+	}
+
 	if !pathx.FileExists(Dir) {
 		_ = os.MkdirAll(Dir, 0o755)
 	}
@@ -32,11 +37,11 @@ func Gen(_ *cobra.Command, _ []string) error {
 	if mainApiFile != "" {
 		apiFile := fmt.Sprintf("%s.swagger.json", gen.GetApiServiceName(ApiDir))
 		cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", mainApiFile, "-dir", Dir)
-		_, err := cmd.CombinedOutput()
+		resp, err := cmd.CombinedOutput()
 		if err != nil {
-			return err
+			return errors.Wrap(err, string(resp))
 		}
-
+		fmt.Println(string(resp))
 	}
 
 	if pathx.FileExists(ProtoDir) {
