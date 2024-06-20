@@ -1,4 +1,4 @@
-import{_ as n}from"./plugin-vue_export-helper-DlAUqK2U.js";import{r,o as c,c as i,e as t,d as e,a as o,b as s}from"./app--ZFwTmN-.js";const m={},l={href:"https://github.com/spf13/cobra",target:"_blank",rel:"noopener noreferrer"},d={href:"https://github.com/spf13/cobra-cli",target:"_blank",rel:"noopener noreferrer"},p=s(`<div class="language-bash line-numbers-mode" data-ext="sh" data-title="sh"><pre class="language-bash"><code>go <span class="token function">install</span> github.com/spf13/cobra-cli@latest
+import{_ as n}from"./plugin-vue_export-helper-DlAUqK2U.js";import{r,o as c,c as i,e as t,d as e,a as o,b as s}from"./app-c1XJ2ERt.js";const m={},l={href:"https://github.com/spf13/cobra",target:"_blank",rel:"noopener noreferrer"},d={href:"https://github.com/spf13/cobra-cli",target:"_blank",rel:"noopener noreferrer"},p=s(`<div class="language-bash line-numbers-mode" data-ext="sh" data-title="sh"><pre class="language-bash"><code>go <span class="token function">install</span> github.com/spf13/cobra-cli@latest
 
 <span class="token builtin class-name">cd</span> quickstart
 cobra-cli <span class="token function">add</span> init
