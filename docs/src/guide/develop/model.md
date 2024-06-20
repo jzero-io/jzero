@@ -17,7 +17,14 @@ jzero 数据库规范:
 
 jzero gen 时会自动检测 desc/sql 下的 sql 文件, 并将生成的 model 放在 internal/model 下
 
-另外推荐使用 sqlbuilder 完成对 sql 的拼接. 如获取凭证列表以及支持过滤参数
+另外推荐使用 sql-builder 完成对 sql 的拼接. 如获取凭证列表以及支持过滤参数
+
+## 将默认生成的 crud 代码替换为使用 sql-builder 的方式
+
+```shell
+git clone https://github.com/jzero-io/sqlbuilder-zero
+cp -r sqlbuilder-zero/templates/go-zero/model ~/.jzero/$Version/go-zero
+```
 
 ```shell
 go get github.com/huandu/go-sqlbuilder
