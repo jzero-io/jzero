@@ -22,11 +22,10 @@ jzero gen
 @tab Docker
 
 ```bash
-cd app1
+cd quickstart
 docker run --rm -v ${PWD}:/app/quickstart jaronnie/jzero:latest gen -w quickstart
 ```
 :::
-
 
 ## 下载依赖
 

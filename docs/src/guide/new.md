@@ -4,6 +4,37 @@ icon: clone
 order: 3
 ---
 
+## new command flag
+
+```shell
+$ jzero new -h                                           
+jzero new project
+
+Usage:
+  jzero new [flags]
+
+Flags:
+      --app-dir string   set app dir (default ".")
+  -b, --branch string    remote templates repo branch
+  -h, --help             help for new
+      --home string      set home dir
+  -m, --module string    set go module
+  -o, --output string    set output dir
+  -r, --remote string    remote templates repo (default "https://github.com/jzero-io/templates")
+
+Global Flags:
+      --config string   config file (default is $HOME/.jzero/config.yaml)
+      --debug           debug mode
+```
+
+| 参数字段 | 参数类型 | 是否必填 | 默认值                                | 参数说明                       |
+| -------- | -------- | -------- | ------------------------------------- | ------------------------------ |
+| app-dir  | string   | 否       | .                                     |                                |
+| branch   | string   | 否       | 空字符串                              | 远程仓库，配合 remote 参数使用 |
+| home     | string   | 否       | 空字符串                              | 模板仓库本地路径               |
+| output   | string   | 否       | args[0]                               | 输出文件夹路径                 |
+| remote   | string   | 否       | https://github.com/jzero-io/templates | 远程仓库路                     |
+
 ## go-zero with grpc + gateway + api
 
 ::: code-tabs#shell
@@ -88,5 +119,4 @@ jzero new simplecli --branch cli
 docker run --rm -v ${PWD}/simplecli:/app/simplecli jaronnie/jzero:latest new simplecli --branch cli
 ```
 :::
-
 
