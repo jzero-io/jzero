@@ -505,7 +505,9 @@ func (ja *JzeroApi) changeReplaceHandlerGoTypes(file HandlerFile, apiSpec *spec.
 	for _, group := range apiSpec.Service.Groups {
 		for _, route := range group.Routes {
 			if route.Handler == file.Handler && group.GetAnnotation("group") == file.Group {
-				requestType = util.Title(route.RequestType.Name())
+				if route.RequestType != nil {
+					requestType = util.Title(route.RequestType.Name())
+				}
 			}
 		}
 	}
