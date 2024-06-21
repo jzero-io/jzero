@@ -11,9 +11,9 @@
     "docs:update-package": "pnpm dlx vp-update"
   },
   "devDependencies": {
-    "@vuepress/bundler-vite": "2.0.0-rc.9",
+    "@vuepress/bundler-vite": "2.0.0-rc.13",
     "vue": "^3.4.21",
-    "vuepress": "2.0.0-rc.9",
-    "vuepress-theme-hope": "2.0.0-rc.35"
+    "vuepress": "2.0.0-rc.13",
+    "vuepress-theme-hope": "2.0.0-rc.49"
   }
 }
