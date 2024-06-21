@@ -24,6 +24,8 @@
 ## [Quick Start](https://jzero.jaronnie.com/#快速开始)
 
 ```shell
+go install github.com/jzero-io/jzero@latest
+jzero check
 jzero new quickstart
 cd quickstart && jzero gen && go mod tidy
 go run main.go server
