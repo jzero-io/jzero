@@ -59,10 +59,11 @@ func init() {
 	genCmd.Flags().BoolVarP(&gen.RemoveSuffix, "remove-suffix", "", false, "remove suffix Handler and Logic on filename or file content")
 	genCmd.Flags().BoolVarP(&gen.ChangeReplaceTypes, "change-replace-types", "", false, "if api file change, e.g. Request or Response type, change handler and logic file content types but not file")
 
-	genCmd.Flags().StringSliceVarP(&gen.ModelIgnoreColumns, "model-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of model")
+	genCmd.Flags().StringSliceVarP(&gen.ModelMysqlIgnoreColumns, "model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
 	genCmd.Flags().BoolVarP(&gen.ModelMysqlDatasource, "model-mysql-datasource", "", false, "goctl model mysql datasource")
 	genCmd.Flags().StringVarP(&gen.ModelMysqlDatasourceUrl, "model-mysql-datasource-url", "", "", "goctl model mysql datasource url")
 	genCmd.Flags().StringSliceVarP(&gen.ModelMysqlDatasourceTable, "model-mysql-datasource-table", "", []string{"*"}, "goctl model mysql datasource table")
+	genCmd.Flags().BoolVarP(&gen.ModelMysqlCache, "model-mysql-cache", "", false, "goctl model mysql cache")
 
 	genSwaggerCmd.Flags().StringVarP(&genswagger.Dir, "dir", "d", filepath.Join("desc", "swagger"), "set swagger output dir")
 	genSwaggerCmd.Flags().StringVarP(&genswagger.ApiDir, "api-dir", "", filepath.Join("desc", "api"), "set input api dir")

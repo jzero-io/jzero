@@ -26,12 +26,10 @@ var (
 )
 
 var (
-	// ModelIgnoreColumns goctl model flags
-	ModelIgnoreColumns []string
+	// ModelMysqlIgnoreColumns goctl model flags
+	ModelMysqlIgnoreColumns []string
 
-	// ModelDir goctl model flag
-	ModelDir   string
-	ModelCache bool
+	ModelMysqlCache bool
 
 	// ModelMysqlDatasource goctl model datasource
 	ModelMysqlDatasource      bool
@@ -86,10 +84,11 @@ func Gen(_ *cobra.Command, _ []string) error {
 		Wd:                        wd,
 		AppDir:                    AppDir,
 		Style:                     Style,
-		ModelIgnoreColumns:        ModelIgnoreColumns,
+		ModelIgnoreColumns:        ModelMysqlIgnoreColumns,
 		ModelMysqlDatasource:      ModelMysqlDatasource,
 		ModelMysqlDatasourceUrl:   ModelMysqlDatasourceUrl,
 		ModelMysqlDatasourceTable: ModelMysqlDatasourceTable,
+		ModelMysqlCache:           ModelMysqlCache,
 	}
 	err = jzeroSql.Gen()
 	if err != nil {

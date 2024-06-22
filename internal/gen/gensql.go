@@ -24,6 +24,7 @@ type JzeroSql struct {
 	ModelMysqlDatasource      bool
 	ModelMysqlDatasourceUrl   string
 	ModelMysqlDatasourceTable []string
+	ModelMysqlCache           bool
 }
 
 func (js *JzeroSql) Gen() error {
@@ -39,13 +40,15 @@ func (js *JzeroSql) Gen() error {
 
 		for _, table := range tables {
 			fmt.Printf("%s table %s\n", color.WithColor("Using", color.FgGreen), table)
-			command := fmt.Sprintf("goctl model mysql datasource --url '%s' --table %s --dir %s --home %s --style %s -i '%s'",
+			command := fmt.Sprintf("goctl model mysql datasource --url '%s' --table %s --dir %s --home %s --style %s -i '%s' --cache=%t",
 				js.ModelMysqlDatasourceUrl,
 				table,
 				filepath.Join(dir, "internal", "model", strings.ToLower(table)),
 				filepath.Join(embeded.Home, "go-zero"),
 				js.Style,
-				strings.Join(js.ModelIgnoreColumns, ","))
+				strings.Join(js.ModelIgnoreColumns, ","),
+				js.ModelMysqlCache,
+			)
 			_, err := execx.Run(command, js.Wd)
 			if err != nil {
 				return err
@@ -66,12 +69,14 @@ func (js *JzeroSql) Gen() error {
 				sqlFilePath := filepath.Join(sqlDir, f.Name())
 				fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), sqlFilePath)
 
-				command := fmt.Sprintf("goctl model mysql ddl --src %s --dir %s --home %s --style %s -i '%s'",
+				command := fmt.Sprintf("goctl model mysql ddl --src %s --dir %s --home %s --style %s -i '%s' --cache=%t",
 					filepath.Join(dir, "desc", "sql", f.Name()),
 					filepath.Join(dir, "internal", "model", strings.ToLower(f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))])),
 					filepath.Join(embeded.Home, "go-zero"),
 					js.Style,
-					strings.Join(js.ModelIgnoreColumns, ","))
+					strings.Join(js.ModelIgnoreColumns, ","),
+					js.ModelMysqlCache,
+				)
 				_, err = execx.Run(command, js.Wd)
 				if err != nil {
 					return err
