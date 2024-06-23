@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/spf13/cobra"
@@ -29,7 +31,8 @@ var (
 	// ModelMysqlIgnoreColumns goctl model flags
 	ModelMysqlIgnoreColumns []string
 
-	ModelMysqlCache bool
+	ModelMysqlCache       bool
+	ModelMysqlCachePrefix string
 
 	// ModelMysqlDatasource goctl model datasource
 	ModelMysqlDatasource      bool
@@ -62,7 +65,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 	}
 
 	moduleStruct, err := mod.GetGoMod(wd)
-	cobra.CheckErr(err)
+	cobra.CheckErr(errors.Wrapf(err, "get go module struct error"))
 
 	defer func() {
 		removeExtraFiles(wd, AppDir)
@@ -89,6 +92,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 		ModelMysqlDatasourceUrl:   ModelMysqlDatasourceUrl,
 		ModelMysqlDatasourceTable: ModelMysqlDatasourceTable,
 		ModelMysqlCache:           ModelMysqlCache,
+		ModelMysqlCachePrefix:     ModelMysqlCachePrefix,
 	}
 	err = jzeroSql.Gen()
 	if err != nil {

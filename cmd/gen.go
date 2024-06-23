@@ -64,6 +64,7 @@ func init() {
 	genCmd.Flags().StringVarP(&gen.ModelMysqlDatasourceUrl, "model-mysql-datasource-url", "", "", "goctl model mysql datasource url")
 	genCmd.Flags().StringSliceVarP(&gen.ModelMysqlDatasourceTable, "model-mysql-datasource-table", "", []string{"*"}, "goctl model mysql datasource table")
 	genCmd.Flags().BoolVarP(&gen.ModelMysqlCache, "model-mysql-cache", "", false, "goctl model mysql cache")
+	genCmd.Flags().StringVarP(&gen.ModelMysqlCachePrefix, "model-mysql-cache-prefix", "", "", "goctl model mysql cache prefix")
 
 	genSwaggerCmd.Flags().StringVarP(&genswagger.Dir, "dir", "d", filepath.Join("desc", "swagger"), "set swagger output dir")
 	genSwaggerCmd.Flags().StringVarP(&genswagger.ApiDir, "api-dir", "", filepath.Join("desc", "api"), "set input api dir")
