@@ -2,7 +2,6 @@ package gen
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"go/ast"
 	goformat "go/format"
@@ -11,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 
@@ -63,7 +64,10 @@ func (ja *JzeroApi) Gen() error {
 		}
 
 		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
-		mainApiFilePath := GetMainApiFilePath(apiDirName)
+		mainApiFilePath, err := GetMainApiFilePath(apiDirName)
+		if err != nil {
+			return err
+		}
 		apiSpec, err = parser.Parse(mainApiFilePath, nil)
 		if err != nil {
 			return err
@@ -170,28 +174,51 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 	return logicFiles, nil
 }
 
-func getRouteApiFilePath(apiDirName string) []string {
+func getRouteApiFilePath(apiDirName string) ([]string, error) {
 	var apiFiles []string
-	_ = filepath.Walk(apiDirName, func(path string, info os.FileInfo, err error) error {
+
+	allApiFiles, err := findApiFiles(apiDirName)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range allApiFiles {
+		apiSpec, err := parser.Parse(file, nil)
 		if err != nil {
-			return err
+			return nil, errors.Wrapf(err, "failed to parse api file %s", file)
 		}
-		if !info.IsDir() && filepath.Ext(path) == ".api" {
-			apiSpec, err := parser.Parse(path, nil)
+		if len(apiSpec.Service.Routes()) > 0 {
+			rel, err := filepath.Rel(apiDirName, file)
 			if err != nil {
-				return err
+				return nil, err
 			}
-			if len(apiSpec.Service.Routes()) > 0 {
-				rel, err := filepath.Rel(apiDirName, path)
-				if err != nil {
-					return err
-				}
-				apiFiles = append(apiFiles, filepath.ToSlash(rel))
-			}
+			apiFiles = append(apiFiles, filepath.ToSlash(rel))
 		}
-		return nil
-	})
-	return apiFiles
+	}
+
+	return apiFiles, nil
+}
+
+func findApiFiles(dir string) ([]string, error) {
+	var apiFiles []string
+
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			subFiles, err := findApiFiles(filepath.Join(dir, file.Name()))
+			if err != nil {
+				return nil, err
+			}
+			apiFiles = append(apiFiles, subFiles...)
+		} else if filepath.Ext(file.Name()) == ".api" {
+			apiFiles = append(apiFiles, filepath.Join(dir, file.Name()))
+		}
+	}
+
+	return apiFiles, nil
 }
 
 func (ja *JzeroApi) generateApiCode(mainApiFilePath string) error {

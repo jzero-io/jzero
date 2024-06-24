@@ -48,7 +48,10 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	// parse api
 	var apiSpecs []*spec.ApiSpec
 
-	mainApiFilePath := gen.GetMainApiFilePath(g.config.ApiDir)
+	mainApiFilePath, err := gen.GetMainApiFilePath(g.config.ApiDir)
+	if err != nil {
+		return nil, err
+	}
 	apiSpec, err := apiparser.Parse(mainApiFilePath)
 	if err != nil {
 		return nil, err

@@ -36,10 +36,10 @@ func GetProtoFilenames(protoDirPath string) ([]string, error) {
 	return protoFilenames, nil
 }
 
-func GetMainApiFilePath(apiDirName string) string {
+func GetMainApiFilePath(apiDirName string) (string, error) {
 	apiDir, err := os.ReadDir(apiDirName)
 	if err != nil {
-		return ""
+		return "", err
 	}
 
 	var mainApiFilePath string
@@ -52,7 +52,10 @@ func GetMainApiFilePath(apiDirName string) string {
 	}
 
 	if mainApiFilePath == "" {
-		apiFilePath := getRouteApiFilePath(apiDirName)
+		apiFilePath, err := getRouteApiFilePath(apiDirName)
+		if err != nil {
+			return "", err
+		}
 		sb := strings.Builder{}
 		sb.WriteString("syntax = \"v1\"")
 		sb.WriteString("\n")
@@ -63,21 +66,24 @@ func GetMainApiFilePath(apiDirName string) string {
 
 		f, err := os.CreateTemp(apiDirName, "*.api")
 		if err != nil {
-			return ""
+			return "", err
 		}
 
 		_, err = f.WriteString(sb.String())
 		if err != nil {
-			return ""
+			return "", err
 		}
 		mainApiFilePath = f.Name()
 		f.Close()
 	}
-	return mainApiFilePath
+	return mainApiFilePath, nil
 }
 
 func GetApiServiceName(apiDirName string) string {
-	fs := getRouteApiFilePath(apiDirName)
+	fs, err := getRouteApiFilePath(apiDirName)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
 	for _, file := range fs {
 		apiSpec, err := parser.Parse(filepath.Join(apiDirName, file), "")
 		if err != nil {

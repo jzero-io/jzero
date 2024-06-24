@@ -24,7 +24,10 @@ var (
 func Gen(_ *cobra.Command, _ []string) error {
 	wd, _ := os.Getwd()
 
-	mainApiFile := gen.GetMainApiFilePath(ApiDir)
+	mainApiFile, err := gen.GetMainApiFilePath(ApiDir)
+	if err != nil {
+		return err
+	}
 	if mainApiFile != filepath.Join("desc", "api", "main.api") {
 		defer os.Remove(mainApiFile)
 	}
