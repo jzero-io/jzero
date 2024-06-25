@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -42,9 +43,11 @@ func Gen(_ *cobra.Command, _ []string) error {
 		cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", mainApiFile, "-dir", Dir)
 		resp, err := cmd.CombinedOutput()
 		if err != nil {
-			return errors.Wrap(err, string(resp))
+			return errors.Wrap(err, strings.TrimRight(string(resp), "\r\n"))
 		}
-		fmt.Println(string(resp))
+		if strings.TrimRight(string(resp), "\r\n") != "" {
+			fmt.Println(strings.TrimRight(string(resp), "\r\n"))
+		}
 	}
 
 	if pathx.FileExists(ProtoDir) {
