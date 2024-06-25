@@ -3,7 +3,10 @@ package mod
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"golang.org/x/mod/modfile"
 
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -26,7 +29,7 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 		return nil, err
 	}
 
-	data, err := execx.Run("go list -json -m", workDir)
+	data, err := execx.Run("go list -json", workDir)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +37,16 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 	var m ModuleStruct
 	err = json.Unmarshal([]byte(data), &m)
 	if err != nil {
-		return nil, err
+		// patch. 当项目存在 go.work 文件时, 为多段 json 值, 无法正常解析
+		parse, err := modfile.Parse(filepath.Join(workDir, "go.mod"), nil, nil)
+		if err != nil {
+			return nil, err
+		}
+		m = ModuleStruct{
+			Path:      parse.Module.Mod.Path,
+			GoVersion: parse.Module.Mod.Version,
+		}
+		return &m, err
 	}
 
 	return &m, nil
