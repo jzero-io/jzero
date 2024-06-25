@@ -29,7 +29,7 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 		return nil, err
 	}
 
-	data, err := execx.Run("go list -json", workDir)
+	data, err := execx.Run("go list -json -m", workDir)
 	if err != nil {
 		return nil, err
 	}
