@@ -122,8 +122,8 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 
 				if route.ResponseType != nil {
 					httpInterface.ResponseBody = &vars.ResponseBody{
-						FakeFullName: BuildApiFakeFullName(route.ResponseType.Name()),
-						FullName:     BuildApiFullName(route.ResponseType.Name()),
+						FakeFullName: BuildApiFakeFullName(route.ResponseType),
+						FullName:     BuildApiFullName(route.ResponseType),
 						Package:      "types",
 					}
 				} else {
@@ -153,24 +153,32 @@ func BuildProtoFakeFullName(goPackage string, responseTypeName string) string {
 	return fmt.Sprintf("&%s.%s", filepath.Base(goPackage), responseTypeName)
 }
 
-func BuildApiFullName(goPackage string) string {
-	if strings.HasPrefix(goPackage, "[]") {
-		// []*types.GroupTree
-		return fmt.Sprintf("[]*types.%s", strings.TrimPrefix(goPackage, "[]"))
+func BuildApiFullName(t spec.Type) string {
+	switch v := t.(type) {
+	case spec.PrimitiveType:
+		return "*" + t.Name()
+	case spec.ArrayType:
+		if _, ok := v.Value.(spec.PrimitiveType); ok {
+			return t.Name()
+		}
+		return fmt.Sprintf("[]*types.%s", strings.TrimPrefix(t.Name(), "[]"))
+	default:
+		return fmt.Sprintf("*types.%s", stringx.FirstUpper(strings.TrimPrefix(t.Name(), "*")))
 	}
-
-	// *types.GroupTree
-	return fmt.Sprintf("*types.%s", stringx.FirstUpper(strings.TrimPrefix(goPackage, "*")))
 }
 
-func BuildApiFakeFullName(goPackage string) string {
-	if strings.HasPrefix(goPackage, "[]") {
-		// []*types.GroupTree
-		return fmt.Sprintf("[]*types.%s", strings.TrimPrefix(goPackage, "[]"))
+func BuildApiFakeFullName(t spec.Type) string {
+	switch v := t.(type) {
+	case spec.PrimitiveType:
+		return "*" + t.Name()
+	case spec.ArrayType:
+		if value, ok := v.Value.(spec.PrimitiveType); ok {
+			return value.RawName
+		}
+		return fmt.Sprintf("[]*types.%s", strings.TrimPrefix(t.Name(), "[]"))
+	default:
+		return fmt.Sprintf("&types.%s", stringx.FirstUpper(strings.TrimPrefix(t.Name(), "*")))
 	}
-
-	// &types.GroupTree
-	return fmt.Sprintf("&types.%s", stringx.FirstUpper(strings.TrimPrefix(goPackage, "*")))
 }
 
 func convertToMap(interfaces []*vars.HTTPInterface) vars.ScopeResourceHTTPInterfaceMap {
