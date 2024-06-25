@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/internal/new/newapifile"
+
 	"github.com/jzero-io/jzero/internal/new"
 
 	"github.com/go-git/go-git/v5/plumbing"
@@ -65,6 +67,12 @@ var newCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 
+var newApiFileCmd = &cobra.Command{
+	Use:   "api-file",
+	Short: "create api file",
+	RunE:  newapifile.New,
+}
+
 func init() {
 	rootCmd.AddCommand(newCmd)
 	newCmd.Flags().StringVarP(&new.Module, "module", "m", "", "set go module")
@@ -73,4 +81,11 @@ func init() {
 	newCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set home dir")
 	newCmd.Flags().StringVarP(&new.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringVarP(&new.Branch, "branch", "b", "", "remote templates repo branch")
+
+	// newApiFile command flags
+	{
+		newCmd.AddCommand(newApiFileCmd)
+		newApiFileCmd.Flags().StringVarP(&newapifile.Service, "service", "", "template", "set service")
+		newApiFileCmd.Flags().StringVarP(&newapifile.Group, "group", "", ".", "set api file group")
+	}
 }
