@@ -59,7 +59,7 @@ func new{{.Resource | FirstUpper}}Client(c *{{.Scope | FirstUpper}}Client) *{{.R
 		).
 		Body({{if eq $v.RequestBody.Body ""}}nil{{else if eq $v.RequestBody.Body "*"}}param{{else if ne $v.Method "GET"}}param.{{$v.RequestBody.RealBodyName}}{{else}}nil{{end}}).
 		Do(ctx).
-		Into(&resp, {{$.IsWarpHTTPResponse}})
+		Into(&resp, {{$.IsWrapHTTPResponse}})
 
 	if err != nil {
 		return nil, err

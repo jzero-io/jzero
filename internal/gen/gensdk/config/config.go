@@ -7,5 +7,5 @@ type Config struct {
 	Dir          string // output dir
 	ApiDir       string
 	ProtoDir     string
-	WarpResponse bool
+	WrapResponse bool
 }

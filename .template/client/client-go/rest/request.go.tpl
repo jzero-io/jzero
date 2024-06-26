@@ -358,7 +358,7 @@ func doRequest(client *http.Client, request *http.Request) (*http.Response, erro
 }
 
 // Into stores the result into obj, if possible. If obj is nil it is ignored.
-func (r Result) Into(obj interface{}, isWarpHttpResponse bool) error {
+func (r Result) Into(obj interface{}, isWrapHttpResponse bool) error {
 	if r.err != nil {
 		return r.err
 	}
@@ -374,7 +374,7 @@ func (r Result) Into(obj interface{}, isWarpHttpResponse bool) error {
 	// parse response data
 	// code message data
 	var marshalJSON []byte
-	if isWarpHttpResponse {
+	if isWrapHttpResponse {
 		code, err := j.Get("code").Int()
 		if err != nil {
 			return err

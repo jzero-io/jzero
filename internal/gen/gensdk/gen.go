@@ -16,7 +16,7 @@ var (
 	Scope        string
 	ApiDir       string
 	ProtoDir     string
-	WarpResponse bool
+	WrapResponse bool
 	Dir          string
 	WorkingDir   string
 	Language     string
@@ -53,7 +53,7 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 		Dir:          Dir,
 		ApiDir:       ApiDir,
 		ProtoDir:     ProtoDir,
-		WarpResponse: WarpResponse,
+		WrapResponse: WrapResponse,
 	}
 
 	gen, err := generator.New(c)

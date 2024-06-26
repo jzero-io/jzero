@@ -323,7 +323,7 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 		"Scope":              scope,
 		"Resource":           resource,
 		"HTTPInterfaces":     rhis[vars.Scope(scope)][vars.Resource(resource)],
-		"IsWarpHTTPResponse": g.config.WarpResponse,
+		"IsWrapHTTPResponse": g.config.WrapResponse,
 		"GoImportPaths":      g.genImports(rhis[vars.Scope(scope)][vars.Resource(resource)]),
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-go", "typed", "resource.go.tpl")))
 	if err != nil {
@@ -340,7 +340,7 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 		"Scope":              scope,
 		"Resource":           resource,
 		"HTTPInterfaces":     rhis[vars.Scope(scope)][vars.Resource(resource)],
-		"IsWarpHTTPResponse": true,
+		"IsWrapHTTPResponse": true,
 		"GoImportPaths":      g.genImports(rhis[vars.Scope(scope)][vars.Resource(resource)]),
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-go", "typed", "fake", "fake_resource.go.tpl")))
 	if err != nil {
