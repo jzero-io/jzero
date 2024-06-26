@@ -36,17 +36,19 @@ func GetProtoFilenames(protoDirPath string) ([]string, error) {
 	return protoFilenames, nil
 }
 
-func GetMainApiFilePath(apiDirName string) (string, error) {
+func GetMainApiFilePath(apiDirName string) (string, bool, error) {
 	apiDir, err := os.ReadDir(apiDirName)
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 
 	var mainApiFilePath string
+	var isDelete bool
 
 	for _, file := range apiDir {
 		if file.Name() == "main.api" {
 			mainApiFilePath = filepath.Join(apiDirName, file.Name())
+			isDelete = false
 			break
 		}
 	}
@@ -54,7 +56,7 @@ func GetMainApiFilePath(apiDirName string) (string, error) {
 	if mainApiFilePath == "" {
 		apiFilePath, err := getRouteApiFilePath(apiDirName)
 		if err != nil {
-			return "", err
+			return "", false, err
 		}
 		sb := strings.Builder{}
 		sb.WriteString("syntax = \"v1\"")
@@ -66,17 +68,18 @@ func GetMainApiFilePath(apiDirName string) (string, error) {
 
 		f, err := os.CreateTemp(apiDirName, "*.api")
 		if err != nil {
-			return "", err
+			return "", false, err
 		}
 
 		_, err = f.WriteString(sb.String())
 		if err != nil {
-			return "", err
+			return f.Name(), true, err
 		}
 		mainApiFilePath = f.Name()
+		isDelete = true
 		f.Close()
 	}
-	return mainApiFilePath, nil
+	return mainApiFilePath, isDelete, nil
 }
 
 func GetApiServiceName(apiDirName string) string {

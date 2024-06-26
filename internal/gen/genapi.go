@@ -64,10 +64,16 @@ func (ja *JzeroApi) Gen() error {
 		}
 
 		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
-		mainApiFilePath, err := GetMainApiFilePath(apiDirName)
+		mainApiFilePath, isDelete, err := GetMainApiFilePath(apiDirName)
 		if err != nil {
 			return err
 		}
+		defer func() {
+			if isDelete {
+				_ = os.Remove(mainApiFilePath)
+			}
+		}()
+
 		apiSpec, err = parser.Parse(mainApiFilePath, nil)
 		if err != nil {
 			return err
@@ -92,7 +98,7 @@ func (ja *JzeroApi) Gen() error {
 		if err != nil {
 			return err
 		}
-		_ = os.Remove(mainApiFilePath)
+
 		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
 

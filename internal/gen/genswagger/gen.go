@@ -25,13 +25,15 @@ var (
 func Gen(_ *cobra.Command, _ []string) error {
 	wd, _ := os.Getwd()
 
-	mainApiFile, err := gen.GetMainApiFilePath(ApiDir)
+	mainApiFile, isDelete, err := gen.GetMainApiFilePath(ApiDir)
 	if err != nil {
 		return err
 	}
-	if mainApiFile != filepath.Join("desc", "api", "main.api") {
-		defer os.Remove(mainApiFile)
-	}
+	defer func() {
+		if isDelete {
+			_ = os.Remove(mainApiFile)
+		}
+	}()
 
 	if !pathx.FileExists(Dir) {
 		_ = os.MkdirAll(Dir, 0o755)

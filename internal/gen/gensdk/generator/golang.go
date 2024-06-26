@@ -48,16 +48,18 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	// parse api
 	var apiSpecs []*spec.ApiSpec
 
-	mainApiFilePath, err := gen.GetMainApiFilePath(g.config.ApiDir)
+	mainApiFilePath, isDelete, err := gen.GetMainApiFilePath(g.config.ApiDir)
 	if err != nil {
 		return nil, err
 	}
+
 	apiSpec, err := apiparser.Parse(mainApiFilePath)
 	if err != nil {
 		return nil, err
 	}
-	if mainApiFilePath != filepath.Join(g.config.ApiDir, "main.api") {
-		os.Remove(mainApiFilePath)
+
+	if isDelete {
+		_ = os.Remove(mainApiFilePath)
 	}
 
 	apiSpecs = append(apiSpecs, apiSpec)
