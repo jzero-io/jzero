@@ -1,9 +1,10 @@
 package gendocs
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/jzero-io/jzero/internal/gen/gendocs/markdown"
 
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/spf13/cobra"
@@ -38,7 +39,12 @@ func Gen(cmd *cobra.Command, args []string) error {
 	docsParser := gendocsparser.NewDocsParser(p)
 
 	docsSpecs = docsParser.BuildDocsSpecHierarchy(groups)
-	fmt.Println(docsSpecs)
+
+	m := markdown.New(docsSpecs)
+	err = m.Generate()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
