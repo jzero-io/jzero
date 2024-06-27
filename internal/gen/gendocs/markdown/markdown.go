@@ -2,11 +2,9 @@ package markdown
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 
 	"github.com/jzero-io/jzero/internal/gen/gendocs/parser"
-	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 )
 
 type Markdown struct {
@@ -34,24 +32,25 @@ func (m *Markdown) Generate() error {
 	return os.WriteFile("docs.md", buf.Bytes(), 0o644)
 }
 
-func (m *Markdown) generateGroup() []byte {
-	return nil
-}
+//
+//func (m *Markdown) generateGroup() []byte {
+//	return nil
+//}
 
-func (m *Markdown) generateRequestTypeTable() []byte {
-	for _, docsSpec := range m.docsSpecs {
-		for _, route := range docsSpec.GroupSpec.Routes {
-			buf := bytes.NewBuffer(nil)
-			buf.WriteString(`
-	| 字段名   | 字段类型 | 是否必填 | 位置 | 说明               |
-	| -------- | -------- | -------- | -------- |------------------ |
-	`)
-			paths := route.RequestType.(spec.DefineStruct).GetTagMembers("path")
-			for _, path := range paths {
-				buf.Write([]byte(fmt.Sprintf("| %s | %s | %t | %s | %s |", path.Name, path.Type.Name(), true, "path", path.Docs)))
-			}
-			fmt.Println(buf.String())
-		}
-	}
-	return nil
-}
+//func (m *Markdown) generateRequestTypeTable() []byte {
+//	for _, docsSpec := range m.docsSpecs {
+//		for _, route := range docsSpec.GroupSpec.Routes {
+//			buf := bytes.NewBuffer(nil)
+//			buf.WriteString(`
+//	| 字段名   | 字段类型 | 是否必填 | 位置 | 说明               |
+//	| -------- | -------- | -------- | -------- |------------------ |
+//	`)
+//			paths := route.RequestType.(spec.DefineStruct).GetTagMembers("path")
+//			for _, path := range paths {
+//				buf.Write([]byte(fmt.Sprintf("| %s | %s | %t | %s | %s |", path.Name, path.Type.Name(), true, "path", path.Docs)))
+//			}
+//			fmt.Println(buf.String())
+//		}
+//	}
+//	return nil
+//}

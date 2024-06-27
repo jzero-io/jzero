@@ -1,43 +1,19 @@
 syntax = "v1"
 
-type List{{ .GroupCamel }}Request {}
+{{range $v := .Handlers | uniq}}type {{$v | FirstUpper}}{{ $.GroupCamel }}Request {}
 
-type List{{ .GroupCamel }}Response {}
+type {{$v | FirstUpper}}{{ $.GroupCamel }}Response {}
 
-type Create{{ .GroupCamel }}Request {}
-
-type Create{{ .GroupCamel }}Response {}
-
-type Edit{{ .GroupCamel }}Request {}
-
-type Edit{{ .GroupCamel }}Response {}
-
-type Delete{{ .GroupCamel }}Request {}
-
-type Delete{{ .GroupCamel }}Response {}
-
-type Get{{ .GroupCamel }}Request {}
-
-type Get{{ .GroupCamel }}Response {}
+{{end}}
 
 @server (
     prefix: /api/v1
     group:  {{ .Group }}
 )
 service {{ .Service }} {
-    @handler ListHandler
-    get /{{ .Group }}/list (List{{ .GroupCamel }}Request) returns (List{{ .GroupCamel }}Response)
+    {{range $v := .Handlers | uniq}}@handler {{$v}}Handler
+    post /{{ $.Group }}/{{$v | FirstLower}} ({{$v | FirstUpper}}{{ $.GroupCamel }}Request) returns ({{$v | FirstUpper}}{{ $.GroupCamel }}Response)
 
-    @handler CreateHandler
-    get /{{ .Group }}/create (Create{{ .GroupCamel }}Request) returns (Create{{ .GroupCamel }}Response)
-
-    @handler EditHandler
-    get /{{ .Group }}/edit (Edit{{ .GroupCamel }}Request) returns (Edit{{ .GroupCamel }}Response)
-
-    @handler DeleteHandler
-    get /{{ .Group }}/delete (Delete{{ .GroupCamel }}Request) returns (Delete{{ .GroupCamel }}Response)
-
-    @handler GetHandler
-    get /{{ .Group }} (Get{{ .GroupCamel }}Request) returns (Get{{ .GroupCamel }}Response)
+    {{end}}
 }
 

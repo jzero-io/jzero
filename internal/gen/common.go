@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 )
 
@@ -85,12 +84,12 @@ func GetMainApiFilePath(apiDirName string) (string, bool, error) {
 func GetApiServiceName(apiDirName string) string {
 	fs, err := getRouteApiFilePath(apiDirName)
 	if err != nil {
-		cobra.CheckErr(err)
+		return ""
 	}
 	for _, file := range fs {
 		apiSpec, err := parser.Parse(filepath.Join(apiDirName, file), "")
 		if err != nil {
-			cobra.CheckErr(err)
+			return ""
 		}
 		if apiSpec.Service.Name != "" {
 			return apiSpec.Service.Name

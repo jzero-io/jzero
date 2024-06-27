@@ -55,6 +55,10 @@ func (ja *JzeroApi) Gen() error {
 	var allHandlerFiles []HandlerFile
 	var allLogicFiles []LogicFile
 
+	if !pathx.FileExists(apiDirName) {
+		return nil
+	}
+
 	if pathx.FileExists(apiDirName) {
 		// format api dir
 		command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
@@ -105,15 +109,15 @@ func (ja *JzeroApi) Gen() error {
 	if ja.RemoveSuffix && apiSpec != nil {
 		for _, file := range allHandlerFiles {
 			if err := ja.rewriteHandlerGo(file.Path); err != nil {
-				return err
+				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
 			if err := ja.rewriteRoutesGo(file.Group, file.Handler); err != nil {
-				return err
+				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
 		}
 		for _, file := range allLogicFiles {
 			if err := ja.rewriteLogicGo(file.Path); err != nil {
-				return err
+				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
 		}
 	}
@@ -121,12 +125,12 @@ func (ja *JzeroApi) Gen() error {
 	if ja.ChangeReplaceTypes {
 		for _, file := range allLogicFiles {
 			if err := ja.changeReplaceLogicGoTypes(file, apiSpec); err != nil {
-				return err
+				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
 		}
 		for _, file := range allHandlerFiles {
 			if err := ja.changeReplaceHandlerGoTypes(file, apiSpec); err != nil {
-				return err
+				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
 		}
 	}

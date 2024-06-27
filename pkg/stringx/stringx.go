@@ -11,6 +11,13 @@ func FirstUpper(s string) string {
 	return s
 }
 
+func FirstLower(s string) string {
+	if len(s) > 0 {
+		return strings.ToLower(string(s[0])) + s[1:]
+	}
+	return s
+}
+
 func ToCamel(s string) string {
 	s = strings.ReplaceAll(s, "_", "-")
 	s = strings.ReplaceAll(s, "/", "-")

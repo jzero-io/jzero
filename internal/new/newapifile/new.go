@@ -11,12 +11,14 @@ import (
 )
 
 var (
-	Service string
-	Group   string
+	Service  string
+	Group    string
+	Handlers []string
 )
 
 func New(_ *cobra.Command, _ []string) error {
 	template, err := templatex.ParseTemplate(map[string]interface{}{
+		"Handlers":   Handlers,
 		"Service":    Service,
 		"Group":      Group,
 		"GroupCamel": stringx.FirstUpper(stringx.ToCamel(Group)),

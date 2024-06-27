@@ -87,5 +87,6 @@ func init() {
 		newCmd.AddCommand(newApiFileCmd)
 		newApiFileCmd.Flags().StringVarP(&newapifile.Service, "service", "", "template", "set service")
 		newApiFileCmd.Flags().StringVarP(&newapifile.Group, "group", "", ".", "set api file group")
+		newApiFileCmd.Flags().StringSliceVarP(&newapifile.Handlers, "handler", "", []string{"List", "Get", "Edit", "List", "Delete"}, "set api file handlers")
 	}
 }
