@@ -35,6 +35,11 @@ jobs:
           ../dist/jzero_linux_amd64_v1/jzero gen swagger
           cd ..
           
+          ./dist/jzero_linux_amd64_v1/jzero new simpleapi --branch api
+          cd simpleapi && ../dist/jzero_linux_amd64_v1/jzero gen --home ~/.jzero/templates/api && go mod tidy && go run main.go version
+          ../dist/jzero_linux_amd64_v1/jzero gen swagger
+          cd ..
+          
           ./dist/jzero_linux_amd64_v1/jzero new simplegateway --branch gateway
           cd simplegateway && ../dist/jzero_linux_amd64_v1/jzero gen --home ~/.jzero/templates/gateway && go mod tidy && go run main.go version
           ../dist/jzero_linux_amd64_v1/jzero gen swagger
