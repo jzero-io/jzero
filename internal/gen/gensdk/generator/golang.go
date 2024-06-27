@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
 	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
@@ -48,21 +50,23 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	// parse api
 	var apiSpecs []*spec.ApiSpec
 
-	mainApiFilePath, isDelete, err := gen.GetMainApiFilePath(g.config.ApiDir)
-	if err != nil {
-		return nil, err
-	}
+	if pathx.FileExists(g.config.ApiDir) {
+		mainApiFilePath, isDelete, err := gen.GetMainApiFilePath(g.config.ApiDir)
+		if err != nil {
+			return nil, err
+		}
 
-	apiSpec, err := apiparser.Parse(mainApiFilePath)
-	if err != nil {
-		return nil, err
-	}
+		apiSpec, err := apiparser.Parse(mainApiFilePath)
+		if err != nil {
+			return nil, err
+		}
 
-	if isDelete {
-		_ = os.Remove(mainApiFilePath)
-	}
+		if isDelete {
+			_ = os.Remove(mainApiFilePath)
+		}
 
-	apiSpecs = append(apiSpecs, apiSpec)
+		apiSpecs = append(apiSpecs, apiSpec)
+	}
 
 	protoFiles, err := gen.GetProtoFilenames(g.config.ProtoDir)
 	if err != nil {
@@ -116,11 +120,13 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 		files = append(files, scopeClientFiles...)
 
 		// gen api types model
-		apiTypesFile, err := g.genApiTypesModel(apiSpec.Types)
-		if err != nil {
-			return nil, err
+		if len(apiSpecs) > 0 {
+			apiTypesFile, err := g.genApiTypesModel(apiSpecs[0].Types)
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, apiTypesFile)
 		}
-		files = append(files, apiTypesFile)
 
 		if len(protoFiles) > 0 {
 			// gen pb model

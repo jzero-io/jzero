@@ -17,13 +17,13 @@ docker buildx create --use --name=mybuilder --driver docker-container --driver-o
 ## 推送多平台镜像
 
 ```shell
-cd app1
-docker buildx build --platform linux/amd64,linux/arm64 --progress=plain -t app1:latest . --push
+cd your_project
+docker buildx build --platform linux/amd64,linux/arm64 --progress=plain -t your_project:latest . --push
 ```
 
 ## 编译单平台镜像
 
 ```shell
-cd app1
-docker buildx build --platform linux/amd64 --progress=plain -t app1:latest . --load
+cd your_project
+docker buildx build --platform linux/amd64 --progress=plain -t your_project:latest . --load
 ```

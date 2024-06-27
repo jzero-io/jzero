@@ -8,7 +8,7 @@ tag:
   - Guide
 ---
 
-修改 config.yaml
+修改 etc/etc.yaml
 
 ```yaml
 Log:

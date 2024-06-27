@@ -8,7 +8,7 @@ tag:
   - Guide
 ---
 
-修改 config.yaml. 添加一下内容
+修改 etc/etc.yaml 添加一下内容
 
 ```yaml
 Zrpc:
