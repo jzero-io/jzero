@@ -160,12 +160,13 @@ func (jr *JzeroRpc) Gen() error {
 			}
 			pbImports = append(pbImports, fmt.Sprintf(`"%s%s/internal/%s"`, jr.Module, importAppDir, strings.TrimPrefix(parse.GoPackage, "./")))
 		}
+	}
 
+	if pathx.FileExists(protoDirPath) {
 		if err = jr.genServer(serverImports, pbImports, registerServers); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
