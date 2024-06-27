@@ -13,10 +13,10 @@ tag:
 ```yaml
 Zrpc:
   Telemetry:
-  Name: "app1-rpc"
-  Endpoint: "http://jaeger:14268/api/traces"
-  Sampler: 1.0
-  Batcher: "jaeger"
+    Name: "app1-rpc"
+    Endpoint: "http://jaeger:14268/api/traces"
+    Sampler: 1.0
+    Batcher: "jaeger"
 
 Gateway:
   Telemetry:
