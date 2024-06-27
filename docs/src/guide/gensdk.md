@@ -17,18 +17,18 @@ order: 5
 @tab jzero
 
 ```bash
-cd quickstart
-jzero gen sdk --module=github.com/jaronnie/quickstart-go --dir=quickstart-go --scope quickstart
-cd quickstart-go
+cd your_project
+jzero gen sdk
+cd your_project_go
 go mod tidy
 ```
 
 @tab Docker
 ```bash
 cd quickstart
-docker run --rm -v ${PWD}:/app/quickstart jaronnie/jzero:latest gen sdk --module=github.com/jaronnie/quickstart-go --dir=quickstart-go --scope quickstart -w quickstart
+docker run --rm -v ${PWD}:/app/your_project jaronnie/jzero:latest gen sdk -w your_project
 
-cd quickstart-go
+cd your_project-go
 go mod tidy
 ```
 :::
@@ -42,9 +42,9 @@ import (
 	"context"
 	"fmt"
 	
-	"github.com/jaronnie/quickstart-go"
-	"github.com/jaronnie/quickstart-go/model/quickstart/types"
-	"github.com/jaronnie/quickstart-go/rest"
+	"quickstart-go"
+	"quickstart-go/model/quickstart/types"
+	"quickstart-go/rest"
 )
 
 func main() {

@@ -5,6 +5,7 @@ order: 5.1
 ---
 
 ```shell
+cd your_project
 jzero gen swagger
 ```
 

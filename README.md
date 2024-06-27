@@ -26,8 +26,8 @@
 ```shell
 go install github.com/jzero-io/jzero@latest
 jzero check
-jzero new quickstart
-cd quickstart && jzero gen && go mod tidy
+jzero new your_project
+cd your_project && jzero gen && go mod tidy
 go run main.go server
 ```
 

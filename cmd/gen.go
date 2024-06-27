@@ -69,7 +69,7 @@ var genSdkCmd = &cobra.Command{
 		}
 
 		if gensdk.Dir == "" {
-			gensdk.Dir = fmt.Sprintf("%s-go", mod.Path)
+			gensdk.Dir = fmt.Sprintf("%s-go", filepath.Base(mod.Path))
 		}
 
 		if gensdk.Scope == "" {

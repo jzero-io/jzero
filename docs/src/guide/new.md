@@ -43,13 +43,13 @@ Global Flags:
 @tab jzero
 
 ```bash
-jzero new quickstart
+jzero new your_project
 ```
 
 @tab Docker
 
 ```bash
-docker run --rm -v ${PWD}/quickstart:/app/quickstart jaronnie/jzero:latest new quickstart
+docker run --rm -v ${PWD}/your_project:/app/your_project jaronnie/jzero:latest new your_project
 ```
 :::
 
@@ -60,13 +60,13 @@ docker run --rm -v ${PWD}/quickstart:/app/quickstart jaronnie/jzero:latest new q
 @tab jzero
 
 ```bash
-jzero new simplegateway --branch gateway
+jzero new your_project --branch gateway
 ```
 
 @tab Docker
 
 ```bash
-docker run --rm -v ${PWD}/simplegateway:/app/simplegateway jaronnie/jzero:latest new simplegateway --branch gateway
+docker run --rm -v ${PWD}/your_project:/app/your_project jaronnie/jzero:latest new your_project --branch gateway
 ```
 :::
 
@@ -77,13 +77,13 @@ docker run --rm -v ${PWD}/simplegateway:/app/simplegateway jaronnie/jzero:latest
 @tab jzero
 
 ```bash
-jzero new simpleapi --branch api
+jzero new your_project --branch api
 ```
 
 @tab Docker
 
 ```bash
-docker run --rm -v ${PWD}/simpleapi:/app/simpleapi jaronnie/jzero:latest new simpleapi --branch api
+docker run --rm -v ${PWD}/your_project:/app/your_project jaronnie/jzero:latest new your_project --branch api
 ```
 :::
 
@@ -94,13 +94,13 @@ docker run --rm -v ${PWD}/simpleapi:/app/simpleapi jaronnie/jzero:latest new sim
 @tab jzero
 
 ```bash
-jzero new simplerpc --branch rpc
+jzero new your_project --branch rpc
 ```
 
 @tab Docker
 
 ```bash
-docker run --rm -v ${PWD}/simplerpc:/app/simplerpc jaronnie/jzero:latest new simplerpc --branch rpc
+docker run --rm -v ${PWD}/your_project:/app/your_project jaronnie/jzero:latest new your_project --branch rpc
 ```
 :::
 
@@ -111,13 +111,13 @@ docker run --rm -v ${PWD}/simplerpc:/app/simplerpc jaronnie/jzero:latest new sim
 @tab jzero
 
 ```bash
-jzero new simplecli --branch cli
+jzero new your_project --branch cli
 ```
 
 @tab Docker
 
 ```bash
-docker run --rm -v ${PWD}/simplecli:/app/simplecli jaronnie/jzero:latest new simplecli --branch cli
+docker run --rm -v ${PWD}/your_project:/app/your_project jaronnie/jzero:latest new your_project --branch cli
 ```
 :::
 

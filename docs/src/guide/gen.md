@@ -15,15 +15,15 @@ jzero 会自动检测对应文件夹下的内容, 然后进行自动生成, 使�
 @tab jzero
 
 ```bash
-cd quickstart
+cd your_project
 jzero gen
 ```
 
 @tab Docker
 
 ```bash
-cd quickstart
-docker run --rm -v ${PWD}:/app/quickstart jaronnie/jzero:latest gen -w quickstart
+cd your_project
+docker run --rm -v ${PWD}:/app/your_project jaronnie/jzero:latest gen -w your_project
 ```
 :::
 

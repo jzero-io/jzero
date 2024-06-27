@@ -37,10 +37,10 @@ title: 首页
 
 ```bash
 # 一键创建项目
-docker run --rm -v ${PWD}/quickstart:/app/quickstart jaronnie/jzero:latest new quickstart
-cd quickstart 
+docker run --rm -v ${PWD}/your_project:/app/your_project jaronnie/jzero:latest new your_project
+cd your_project 
 # 一键生成代码
-docker run --rm -v ${PWD}:/app/quickstart jaronnie/jzero:latest gen -w quickstart
+docker run --rm -v ${PWD}:/app/your_project jaronnie/jzero:latest gen -w your_project
 # 下载依赖
 go mod tidy
 # 启动项目
@@ -55,8 +55,8 @@ go install github.com/jzero-io/jzero@latest
 # 一键安装所需的工具
 jzero check
 # 一键创建项目
-jzero new quickstart
-cd quickstart
+jzero new your_project
+cd your_project
 # 一键生成代码
 jzero gen
 # 下载依赖
