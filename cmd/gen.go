@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/jzero-io/jzero/internal/gen/gendocs"
 	"github.com/jzero-io/jzero/internal/gen/gensdk"
@@ -30,7 +29,6 @@ var genCmd = &cobra.Command{
 	Long:  `jzero gen code`,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		gen.Version = Version
-		gen.AppDir = strings.TrimPrefix(gen.AppDir, ".")
 
 		// check go-zero api template
 		home, _ := os.UserHomeDir()
@@ -92,7 +90,6 @@ func init() {
 		rootCmd.AddCommand(genCmd)
 
 		genCmd.Flags().StringVarP(&gen.WorkingDir, "working-dir", "w", "", "set working dir")
-		genCmd.Flags().StringVarP(&gen.AppDir, "app-dir", "", ".", "set app dir")
 		dir, _ := os.UserHomeDir()
 		genCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(dir, ".jzero"), "set template home")
 		genCmd.Flags().StringVarP(&gen.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")

@@ -19,7 +19,6 @@ import (
 
 var (
 	WorkingDir string
-	AppDir     string
 
 	Version            string
 	Style              string
@@ -68,16 +67,16 @@ func Gen(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(errors.Wrapf(err, "get go module struct error"))
 
 	defer func() {
-		removeExtraFiles(wd, AppDir)
+		removeExtraFiles(wd)
 	}()
 
-	jzeroRpc := JzeroRpc{Wd: wd, AppDir: AppDir, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
+	jzeroRpc := JzeroRpc{Wd: wd, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
 	err = jzeroRpc.Gen()
 	if err != nil {
 		return err
 	}
 
-	jzeroApi := JzeroApi{Wd: wd, AppDir: AppDir, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix, ChangeReplaceTypes: ChangeReplaceTypes}
+	jzeroApi := JzeroApi{Wd: wd, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix, ChangeReplaceTypes: ChangeReplaceTypes}
 	err = jzeroApi.Gen()
 	if err != nil {
 		return err
@@ -85,7 +84,6 @@ func Gen(_ *cobra.Command, _ []string) error {
 
 	jzeroSql := JzeroSql{
 		Wd:                        wd,
-		AppDir:                    AppDir,
 		Style:                     Style,
 		ModelIgnoreColumns:        ModelMysqlIgnoreColumns,
 		ModelMysqlDatasource:      ModelMysqlDatasource,
@@ -102,17 +100,17 @@ func Gen(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-func removeExtraFiles(wd string, appDir string) {
-	_ = os.Remove(filepath.Join(wd, appDir, fmt.Sprintf("%s.go", GetApiServiceName(filepath.Join(wd, appDir, "desc", "api")))))
-	_ = os.Remove(filepath.Join(wd, appDir, "etc", fmt.Sprintf("%s.yaml", GetApiServiceName(filepath.Join(wd, appDir, "desc", "api")))))
-	protoFilenames, err := GetProtoFilenames(filepath.Join(wd, appDir, "desc", "proto"))
+func removeExtraFiles(wd string) {
+	_ = os.Remove(filepath.Join(wd, fmt.Sprintf("%s.go", GetApiServiceName(filepath.Join(wd, "desc", "api")))))
+	_ = os.Remove(filepath.Join(wd, "etc", fmt.Sprintf("%s.yaml", GetApiServiceName(filepath.Join(wd, "desc", "api")))))
+	protoFilenames, err := GetProtoFilenames(filepath.Join(wd, "desc", "proto"))
 	if err == nil {
 		for _, v := range protoFilenames {
 			fileBase := v[0 : len(v)-len(path.Ext(v))]
 			rmf := strings.ReplaceAll(strings.ToLower(fileBase), "-", "")
 			rmf = strings.ReplaceAll(rmf, "_", "")
-			_ = os.Remove(filepath.Join(wd, appDir, fmt.Sprintf("%s.go", rmf)))
-			_ = os.Remove(filepath.Join(wd, appDir, "etc", fmt.Sprintf("%s.yaml", rmf)))
+			_ = os.Remove(filepath.Join(wd, fmt.Sprintf("%s.go", rmf)))
+			_ = os.Remove(filepath.Join(wd, "etc", fmt.Sprintf("%s.yaml", rmf)))
 		}
 	}
 }

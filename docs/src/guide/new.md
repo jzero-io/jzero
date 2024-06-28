@@ -14,7 +14,6 @@ Usage:
   jzero new [flags]
 
 Flags:
-      --app-dir string   set app dir (default ".")
   -b, --branch string    remote templates repo branch
   -h, --help             help for new
       --home string      set home dir
@@ -29,7 +28,6 @@ Global Flags:
 
 | 参数字段 | 参数类型 | 是否必填 | 默认值                                | 参数说明                       |
 | -------- | -------- | -------- | ------------------------------------- | ------------------------------ |
-| app-dir  | string   | 否       | .                                     | 输出文件夹路径: output/app-dir |
 | branch   | string   | 否       | 空字符串                              | 远程仓库，配合 remote 参数使用 |
 | home     | string   | 否       | 空字符串                              | 模板仓库本地路径               |
 | module   | String   | 否       | args[0]                               | go module                      |

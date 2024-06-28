@@ -19,7 +19,6 @@ import (
 var (
 	Module  string
 	Output  string
-	AppDir  string
 	AppName string
 	Remote  string
 	Branch  string
@@ -34,7 +33,6 @@ type TemplateData struct {
 
 type JzeroNew struct {
 	TemplateData map[string]interface{}
-	AppDir       string
 }
 
 func NewProject(_ *cobra.Command, _ []string) error {
@@ -44,7 +42,7 @@ func NewProject(_ *cobra.Command, _ []string) error {
 		embeded.Home = filepath.Join(homeDir, ".jzero", Version)
 	}
 
-	err = os.MkdirAll(filepath.Join(Output, AppDir), 0o755)
+	err = os.MkdirAll(Output, 0o755)
 	cobra.CheckErr(err)
 
 	templateData, err := newTemplateData()
@@ -52,7 +50,6 @@ func NewProject(_ *cobra.Command, _ []string) error {
 
 	jn := JzeroNew{
 		TemplateData: templateData,
-		AppDir:       AppDir,
 	}
 
 	err = jn.New(filepath.Join("app"))
@@ -105,7 +102,7 @@ func (jn *JzeroNew) New(dirname string) error {
 			fileBytes = bytes.ReplaceAll(embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())), []byte("{{ .Module }}"), []byte(cast.ToString(jn.TemplateData["Module"])))
 		}
 
-		path := filepath.Join(jn.AppDir, rel)
+		path := filepath.Join(rel)
 		err = checkWrite(filepath.Join(Output, path), fileBytes)
 		if err != nil {
 			return err
