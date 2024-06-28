@@ -12,14 +12,18 @@
 
 ## Features
 
-* 企业级代码规范
-* grpc, grpc-gateway, api 三合一, 满足绝大部分场景业务需要
-* 集成命令行框架 cobra, 轻松编写具备生产可用的命令行工具
-* 支持多 proto 多 service, 减少开发耦合性
-* 不修改源码, 完全同步 go-zero 新特性
-* 一键创建项目, 快速拓展新业务, 减少心理负担
-* 一键生成服务端代码, 数据库代码, 客户端 sdk, 大大提高开发测试效率
-* 支持自定义模板, 基于模板新建项目和生成代码
+* 企业级代码规范, 多人开发友好
+* 支持自定义模板, 基于模板新建项目和生成代码, 默认支持多场景开发模板
+  * grpc + grpc gateway + api
+  * api
+  * grpc
+  * grpc + grpc gateway
+  * cli
+* 扩展 go-zero 功能，完全同步 go-zero 新特性
+  * 支持 types 分组
+  * 支持删除冗余的 Logic, Handler, Server 等字样
+* 一键创建项目
+* 一键生成服务端代码, 数据库代码, 客户端 sdk
 
 ## [Quick Start](https://jzero.jaronnie.com/#快速开始)
 
