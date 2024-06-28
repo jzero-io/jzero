@@ -41,9 +41,10 @@ type RequestBody struct {
 }
 
 type ResponseBody struct {
-	FakeFullName string
-	FullName     string
-	Package      string
+	FakeReturnName string
+	FakeFullName   string
+	FullName       string
+	Package        string
 }
 
 type PathParam struct {

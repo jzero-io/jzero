@@ -80,11 +80,6 @@ func (r *Request) SubPath(subPath string, args ...PathParam) *Request {
 	}
 	r.subPath = r.c.gatewayPrefix + subPath
 
-	if r.c.disableGateway {
-		i := strings.Index(r.subPath, "/api")
-		r.subPath = r.subPath[i:]
-	}
-
 	return r
 }
 

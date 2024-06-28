@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	{{range $k, $v := .HTTPInterfaces}}FakeReturn{{$v.MethodName}} = {{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}rest.Request{}{{else}}{{$v.ResponseBody.FakeFullName}}{}{{end}}
+	{{range $k, $v := .HTTPInterfaces}}{{$v.ResponseBody.FakeReturnName}} = {{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}rest.Request{}{{else}}{{$v.ResponseBody.FakeFullName}}{}{{end}}
 	{{end}}
 )
 
@@ -33,7 +33,7 @@ type Fake{{.Resource | FirstUpper}} struct {
 }
 
 {{range $k, $v := .HTTPInterfaces}}func (f *Fake{{$.Resource | FirstUpper}}) {{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}}param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}{{$v.ResponseBody.FullName}}{{end}}, error) {
-	return FakeReturn{{$v.MethodName}}, nil
+	return {{$v.ResponseBody.FakeReturnName}}, nil
 }
 
 {{end}}

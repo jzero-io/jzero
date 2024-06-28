@@ -76,7 +76,6 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 					httpInterface.ResponseBody.FakeFullName = BuildProtoFakeFullName(httpInterface.ResponseBody.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
 				}
 				httpInterface.MethodName = method.GetName()
-				// TODO if multiple. Use config to get scope
 				httpInterface.Scope = vars.Scope(config.APP)
 				httpInterface.Resource = vars.Resource(service.GetName())
 
@@ -122,9 +121,10 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 
 				if route.ResponseType != nil {
 					httpInterface.ResponseBody = &vars.ResponseBody{
-						FakeFullName: BuildApiFakeFullName(route.ResponseType),
-						FullName:     BuildApiFullName(route.ResponseType),
-						Package:      "types",
+						FakeReturnName: BuildApiFakeReturnName(group.GetAnnotation("group"), httpInterface.MethodName, route.ResponseType),
+						FakeFullName:   BuildApiFakeFullName(route.ResponseType),
+						FullName:       BuildApiFullName(route.ResponseType),
+						Package:        "types",
 					}
 				} else {
 					continue
@@ -165,6 +165,10 @@ func BuildApiFullName(t spec.Type) string {
 	default:
 		return fmt.Sprintf("*types.%s", stringx.FirstUpper(strings.TrimPrefix(t.Name(), "*")))
 	}
+}
+
+func BuildApiFakeReturnName(group string, method string, t spec.Type) string {
+	return fmt.Sprintf("FakeReturn%s%s%s", stringx.FirstUpper(stringx.ToCamel(group)), stringx.FirstUpper(method), stringx.FirstUpper(t.Name()))
 }
 
 func BuildApiFakeFullName(t spec.Type) string {
