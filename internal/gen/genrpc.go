@@ -108,27 +108,15 @@ func (jr *JzeroRpc) Gen() error {
 			}
 			fmt.Println(color.WithColor("Done", color.FgGreen))
 
-			var hasModifyServer bool
-
 			if jr.RemoveSuffix {
 				for _, file := range allServerFiles {
-					newFilePath := file.Path
-					if hasModifyServer {
-						// Get the new file name of the file (without the 5 characters(Server or server) before the ".go" extension)
-						newFilePath = file.Path[:len(file.Path)-9]
-						// patch
-						newFilePath = strings.TrimSuffix(newFilePath, "_")
-						newFilePath = strings.TrimSuffix(newFilePath, "-")
-						newFilePath += ".go"
+					if err := jr.rewriteServerGo(file.Path); err != nil {
+						continue
 					}
-					if err := jr.rewriteServerGo(newFilePath, !hasModifyServer); err != nil {
-						return err
-					}
-					hasModifyServer = true
 				}
 				for _, file := range allLogicFiles {
 					if err := jr.rewriteLogicGo(file.Path); err != nil {
-						return err
+						continue
 					}
 				}
 			}
@@ -214,7 +202,7 @@ func (jr *JzeroRpc) getAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, 
 		if err != nil {
 			return nil, err
 		}
-		fp := filepath.Join(jr.Wd, jr.AppDir, "internal", "server", service.Name, namingFormat+".go")
+		fp := filepath.Join(jr.Wd, jr.AppDir, "internal", "server", strings.ToLower(service.Name), namingFormat+".go")
 
 		f := ServerFile{
 			Path: fp,
@@ -234,7 +222,7 @@ func (jr *JzeroRpc) getAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, er
 				return nil, err
 			}
 
-			fp := filepath.Join(jr.Wd, jr.AppDir, "internal", "logic", service.Name, namingFormat+".go")
+			fp := filepath.Join(jr.Wd, jr.AppDir, "internal", "logic", strings.ToLower(service.Name), namingFormat+".go")
 
 			f := LogicFile{
 				Path: fp,
@@ -330,7 +318,7 @@ func (jr *JzeroRpc) rewriteLogicGo(fp string) error {
 	return os.Rename(fp, newFilePath)
 }
 
-func (jr *JzeroRpc) rewriteServerGo(fp string, needRename bool) error {
+func (jr *JzeroRpc) rewriteServerGo(fp string) error {
 	fset := token.NewFileSet()
 
 	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
@@ -412,15 +400,13 @@ func (jr *JzeroRpc) rewriteServerGo(fp string, needRename bool) error {
 		return err
 	}
 
-	if needRename {
-		// Get the new file name of the file (without the 5 characters(Server or server) before the ".go" extension)
-		newFilePath := fp[:len(fp)-9]
-		// patch
-		newFilePath = strings.TrimSuffix(newFilePath, "_")
-		newFilePath = strings.TrimSuffix(newFilePath, "-")
-		if err = os.Rename(fp, newFilePath+".go"); err != nil {
-			return err
-		}
+	// Get the new file name of the file (without the 5 characters(Server or server) before the ".go" extension)
+	newFilePath := fp[:len(fp)-9]
+	// patch
+	newFilePath = strings.TrimSuffix(newFilePath, "_")
+	newFilePath = strings.TrimSuffix(newFilePath, "-")
+	if err = os.Rename(fp, newFilePath+".go"); err != nil {
+		return err
 	}
 
 	return nil
