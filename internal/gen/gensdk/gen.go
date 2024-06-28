@@ -18,7 +18,6 @@ var (
 	ProtoDir     string
 	WrapResponse bool
 	Dir          string
-	WorkingDir   string
 	Language     string
 	Module       string
 
@@ -30,12 +29,6 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(err)
 	if embeded.Home == "" {
 		embeded.Home = filepath.Join(homeDir, ".jzero", Version)
-	}
-
-	// change dir
-	if WorkingDir != "" {
-		err := os.Chdir(WorkingDir)
-		cobra.CheckErr(err)
 	}
 
 	if Dir != "" {

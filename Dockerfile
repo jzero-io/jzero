@@ -7,20 +7,16 @@ COPY config.toml /root/.jzero/config.toml
 COPY dist /dist
 
 RUN if [ `go env GOARCH` = "amd64" ]; then \
-      cp /dist/jzero_linux_amd64_v1/jzero /app/jzero; \
+      cp /dist/jzero_linux_amd64_v1/jzero /usr/local/bin/jzero; \
     elif [ `go env GOARCH` = "arm64" ]; then \
-      cp /dist/jzero_linux_arm64/jzero /app/jzero; \
+      cp /dist/jzero_linux_arm64/jzero /usr/local/bin/jzero; \
     fi
 
 RUN apk update --no-cache \
-  && apk add --no-cache tzdata ca-certificates protoc
+  && apk add --no-cache tzdata ca-certificates protoc \
+  && jzero check \
+  && rm -rf /dist \
+  && rm -rf /go/pkg/mod \
+  && rm -rf /go/pkg/sumdb
 
-RUN /app/jzero check
-
-RUN rm -rf /dist \
-    && rm -rf /go/pkg/mod \
-    && rm -rf /go/pkg/sumdb
-
-EXPOSE 8000 8001
-ENTRYPOINT ["./jzero"]
-CMD ["-h"]
+ENTRYPOINT ["jzero"]

@@ -9,13 +9,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jzero-io/jzero/internal/template/templateinit"
+
 	"github.com/jzero-io/jzero/internal/template/templatebuild"
 
-	"github.com/jzero-io/jzero/embeded"
 	"github.com/spf13/cobra"
 )
-
-var Home string
 
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
@@ -28,16 +27,13 @@ var templateInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "jzero template init",
 	Long:  `jzero template init`,
-	Run: func(_ *cobra.Command, _ []string) {
-		dir, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-		if Home == "" {
-			Home = filepath.Join(dir, ".jzero", Version)
+	PreRun: func(_ *cobra.Command, _ []string) {
+		if templateinit.Output == "" {
+			home, _ := os.UserHomeDir()
+			templateinit.Output = filepath.Join(home, ".jzero", Version)
 		}
-
-		err = embeded.WriteTemplateDir(filepath.Join(""), Home)
-		cobra.CheckErr(err)
 	},
+	RunE: templateinit.Init,
 }
 
 var templateBuildCmd = &cobra.Command{
@@ -58,14 +54,21 @@ var templateBuildCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(templateCmd)
 
-	templateCmd.AddCommand(templateBuildCmd)
+	{
+		templateCmd.AddCommand(templateBuildCmd)
 
-	templateBuildCmd.Flags().StringVarP(&templatebuild.WorkingDir, "working-dir", "w", ".", "default working directory")
-	templateBuildCmd.Flags().StringVarP(&templatebuild.Name, "name", "n", "", "template name")
-	_ = templateBuildCmd.MarkFlagRequired("name")
+		templateBuildCmd.Flags().StringVarP(&templatebuild.WorkingDir, "working-dir", "w", ".", "default working directory")
+		templateBuildCmd.Flags().StringVarP(&templatebuild.Name, "name", "n", "", "template name")
+		_ = templateBuildCmd.MarkFlagRequired("name")
+		templateBuildCmd.Flags().StringVarP(&templatebuild.Output, "output", "o", "", "default output directory")
 
-	templateBuildCmd.Flags().StringVarP(&templatebuild.Output, "output", "o", "", "default output directory")
+	}
 
-	templateCmd.AddCommand(templateInitCmd)
-	templateInitCmd.Flags().StringVarP(&Home, "home", "", "", "template home directory")
+	{
+		templateCmd.AddCommand(templateInitCmd)
+
+		templateInitCmd.Flags().StringVarP(&templateinit.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
+		templateInitCmd.Flags().StringVarP(&templateinit.Branch, "branch", "b", "", "remote templates repo branch")
+		templateInitCmd.Flags().StringVarP(&templateinit.Output, "output", "o", "", "template output dir")
+	}
 }

@@ -28,17 +28,20 @@ var genCmd = &cobra.Command{
 	Short: "jzero gen code",
 	Long:  `jzero gen code`,
 	PreRun: func(_ *cobra.Command, _ []string) {
-		gen.Version = Version
-
 		// check go-zero api template
 		home, _ := os.UserHomeDir()
 		if !pathx.FileExists(filepath.Join(home, ".jzero", Version, "go-zero")) {
 			err := embeded.WriteTemplateDir(filepath.Join("go-zero"), filepath.Join(home, ".jzero", Version, "go-zero"))
 			cobra.CheckErr(err)
 		}
+
+		if !pathx.FileExists(embeded.Home) {
+			home, _ := os.UserHomeDir()
+			embeded.Home = filepath.Join(home, ".jzero", Version)
+		}
 	},
 	RunE:         gen.Gen,
-	SilenceUsage: false,
+	SilenceUsage: true,
 }
 
 // genSwaggerCmd represents the genSwagger command
@@ -86,12 +89,12 @@ var genDocsCmd = &cobra.Command{
 }
 
 func init() {
+	wd, _ := os.Getwd()
+
 	{
 		rootCmd.AddCommand(genCmd)
 
-		genCmd.Flags().StringVarP(&gen.WorkingDir, "working-dir", "w", "", "set working dir")
-		dir, _ := os.UserHomeDir()
-		genCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(dir, ".jzero"), "set template home")
+		genCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(wd, ".template"), "set template home")
 		genCmd.Flags().StringVarP(&gen.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 		genCmd.Flags().BoolVarP(&gen.RemoveSuffix, "remove-suffix", "", false, "remove suffix Handler and Logic on filename or file content")
 		genCmd.Flags().BoolVarP(&gen.ChangeReplaceTypes, "change-replace-types", "", false, "if api file change, e.g. Request or Response type, change handler and logic file content types but not file")
@@ -109,13 +112,12 @@ func init() {
 
 		genSdkCmd.Flags().StringVarP(&gensdk.Language, "language", "l", "go", "set language")
 		genSdkCmd.Flags().StringVarP(&gensdk.Dir, "dir", "d", "", "set dir")
-		genSdkCmd.Flags().StringVarP(&gensdk.WorkingDir, "working-dir", "w", "", "set working dir")
 		genSdkCmd.Flags().StringVarP(&gensdk.Module, "module", "m", "", "set module name")
 		genSdkCmd.Flags().StringVarP(&gensdk.ApiDir, "api-dir", "", filepath.Join("desc", "api"), "set input api dir")
 		genSdkCmd.Flags().StringVarP(&gensdk.ProtoDir, "proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
 		genSdkCmd.Flags().BoolVarP(&gensdk.WrapResponse, "wrap-response", "", false, "warp response: code, data, message")
 		genSdkCmd.Flags().StringVarP(&gensdk.Scope, "scope", "", "", "set scope name")
-		genSdkCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set template home")
+		genSdkCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(wd, ".template"), "set template home")
 	}
 
 	{

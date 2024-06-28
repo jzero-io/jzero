@@ -9,7 +9,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
@@ -18,9 +17,6 @@ import (
 )
 
 var (
-	WorkingDir string
-
-	Version            string
 	Style              string
 	RemoveSuffix       bool
 	ChangeReplaceTypes bool
@@ -48,20 +44,9 @@ type ApiFileTypes struct {
 }
 
 func Gen(_ *cobra.Command, _ []string) error {
-	// change dir
-	if WorkingDir != "" {
-		err := os.Chdir(WorkingDir)
-		cobra.CheckErr(err)
-	}
-
 	wd, err := os.Getwd()
 	cobra.CheckErr(err)
 	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), wd)
-
-	if embeded.Home == "" {
-		home, _ := os.UserHomeDir()
-		embeded.Home = filepath.Join(home, ".jzero", Version)
-	}
 
 	moduleStruct, err := mod.GetGoMod(wd)
 	cobra.CheckErr(errors.Wrapf(err, "get go module struct error"))

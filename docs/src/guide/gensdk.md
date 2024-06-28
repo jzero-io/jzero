@@ -25,8 +25,8 @@ go mod tidy
 
 @tab Docker
 ```bash
-cd quickstart
-docker run --rm -v ${PWD}:/app/your_project jaronnie/jzero:latest gen sdk -w your_project
+cd your_project
+docker run --rm -v ${PWD}:/app jaronnie/jzero:latest gen sdk
 
 cd your_project-go
 go mod tidy
@@ -42,13 +42,13 @@ import (
 	"context"
 	"fmt"
 	
-	"quickstart-go"
-	"quickstart-go/model/quickstart/types"
-	"quickstart-go/rest"
+	"your_project-go"
+	"your_project-go/model/quickstart/types"
+	"your_project-go/rest"
 )
 
 func main() {
-	clientset, err := quickstart.NewClientWithOptions(
+	clientset, err := your_project.NewClientWithOptions(
 		rest.WithAddr("127.0.0.1"),
 		rest.WithPort("8001"),
 		rest.WithProtocol("http"))

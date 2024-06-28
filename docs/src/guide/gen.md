@@ -23,7 +23,7 @@ jzero gen
 
 ```bash
 cd your_project
-docker run --rm -v ${PWD}:/app/your_project jaronnie/jzero:latest gen -w your_project
+docker run --rm -v ${PWD}:/app jaronnie/jzero:latest gen
 ```
 :::
 

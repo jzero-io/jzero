@@ -29,7 +29,6 @@ var newCmd = &cobra.Command{
 	Short: "jzero new project",
 	Long:  `jzero new project`,
 	PreRun: func(_ *cobra.Command, args []string) {
-		new.Version = Version
 		new.AppName = args[0]
 
 		if new.Output == "" {
@@ -37,6 +36,11 @@ var newCmd = &cobra.Command{
 		}
 		if new.Module == "" {
 			new.Module = filepath.ToSlash(new.Output)
+		}
+
+		if !pathx.FileExists(embeded.Home) {
+			home, _ := os.UserHomeDir()
+			embeded.Home = filepath.Join(home, ".jzero", Version)
 		}
 
 		if new.Remote != "" && new.Branch != "" {
@@ -70,10 +74,12 @@ var newApiFileCmd = &cobra.Command{
 }
 
 func init() {
+	wd, _ := os.Getwd()
+
 	rootCmd.AddCommand(newCmd)
 	newCmd.Flags().StringVarP(&new.Module, "module", "m", "", "set go module")
 	newCmd.Flags().StringVarP(&new.Output, "output", "o", "", "set output dir")
-	newCmd.Flags().StringVarP(&embeded.Home, "home", "", "", "set home dir")
+	newCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(wd, ".template"), "set home dir")
 	newCmd.Flags().StringVarP(&new.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringVarP(&new.Branch, "branch", "b", "", "remote templates repo branch")
 

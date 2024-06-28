@@ -22,8 +22,6 @@ var (
 	AppName string
 	Remote  string
 	Branch  string
-
-	Version string
 )
 
 type TemplateData struct {
@@ -36,13 +34,7 @@ type JzeroNew struct {
 }
 
 func NewProject(_ *cobra.Command, _ []string) error {
-	homeDir, err := os.UserHomeDir()
-	cobra.CheckErr(err)
-	if embeded.Home == "" {
-		embeded.Home = filepath.Join(homeDir, ".jzero", Version)
-	}
-
-	err = os.MkdirAll(Output, 0o755)
+	err := os.MkdirAll(Output, 0o755)
 	cobra.CheckErr(err)
 
 	templateData, err := newTemplateData()
