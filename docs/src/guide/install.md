@@ -11,6 +11,9 @@ order: 2
 
 ## 安装 golang
 
+:::tip 推荐采用 go 1.21 版本以及以上
+:::
+
 使用 gvm 工具安装 golang, 并能管理 golang 的版本.
 
 [gvm Release](https://github.com/jaronnie/gvm/releases)
@@ -34,9 +37,6 @@ jzero version
 ```
 
 ## jzero 相关工具一键安装
-
-:::tip go 1.21 版本以下会有报错信息, 不影响基本使用. 推荐采用 go 1.21 版本以及以上
-:::
 
 ```shell
 jzero check
