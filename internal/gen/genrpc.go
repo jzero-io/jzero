@@ -103,6 +103,16 @@ func (jr *JzeroRpc) Gen() error {
 			if err != nil {
 				return err
 			}
+
+			command = fmt.Sprintf("protoc %s -I%s --validate_out=%s",
+				filepath.Join(protoDirPath, v.Name()),
+				protoDirPath,
+				"lang=go:internal",
+			)
+			_, err = execx.Run(command, jr.Wd)
+			if err != nil {
+				return err
+			}
 			fmt.Println(color.WithColor("Done", color.FgGreen))
 
 			if jr.RemoveSuffix {
