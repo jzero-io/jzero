@@ -49,5 +49,8 @@ jzero check
 @tab Docker
 ```shell
 docker pull jaronnie/jzero:latest
+# 如果无法 pull
+docker pull registry.cn-hangzhou.aliyuncs.com/jaronnie/jzero:latest
+docker tag registry.cn-hangzhou.aliyuncs.com/jaronnie/jzero jaronnie/jzero:latest
 ```
 :::
