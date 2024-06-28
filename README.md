@@ -20,6 +20,7 @@
   * grpc + grpc gateway
   * cli
 * 扩展 go-zero 功能，完全同步 go-zero 新特性
+  * 保持与原生 goctl 生成的目录, 易迁移过来
   * 支持 types 分组
   * 支持删除冗余的 Logic, Handler, Server 等字样
 * 一键创建项目
@@ -39,3 +40,8 @@ go run main.go server
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
+
+## Contact me
+
+* Weixin: jaronnie
+* Email: jaron@jaronnie.com

@@ -23,14 +23,13 @@ title: 首页
     * grpc + grpc gateway
     * cli
 * 扩展 go-zero 功能，完全同步 go-zero 新特性
+    * 保持与原生 goctl 生成的目录, 易迁移过来
     * 支持 types 分组
     * 支持删除冗余的 Logic, Handler, Server 等字样
 * 一键创建项目
 * 一键生成服务端代码, 数据库代码, 客户端 sdk
 
 ## 快速开始
-
-![2024-04-30_10-10-52](https://oss.jaronnie.com/2024-04-30_10-10-52.gif)
 
 :::tip Windows 用户请在 powershell 下执行所有指令
 :::
