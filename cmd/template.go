@@ -9,10 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jzero-io/jzero/internal/template/templateinit"
-
 	"github.com/jzero-io/jzero/internal/template/templatebuild"
-
+	"github.com/jzero-io/jzero/internal/template/templateinit"
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +26,9 @@ var templateInitCmd = &cobra.Command{
 	Short: "jzero template init",
 	Long:  `jzero template init`,
 	PreRun: func(_ *cobra.Command, _ []string) {
-		if templateinit.Output == "" {
+		if templateinit.Home == "" {
 			home, _ := os.UserHomeDir()
-			templateinit.Output = filepath.Join(home, ".jzero", Version)
+			templateinit.Home = filepath.Join(home, ".jzero", Version)
 		}
 	},
 	RunE: templateinit.Init,
@@ -61,7 +59,6 @@ func init() {
 		templateBuildCmd.Flags().StringVarP(&templatebuild.Name, "name", "n", "", "template name")
 		_ = templateBuildCmd.MarkFlagRequired("name")
 		templateBuildCmd.Flags().StringVarP(&templatebuild.Output, "output", "o", "", "default output directory")
-
 	}
 
 	{
@@ -69,6 +66,6 @@ func init() {
 
 		templateInitCmd.Flags().StringVarP(&templateinit.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 		templateInitCmd.Flags().StringVarP(&templateinit.Branch, "branch", "b", "", "remote templates repo branch")
-		templateInitCmd.Flags().StringVarP(&templateinit.Output, "output", "o", "", "template output dir")
+		templateInitCmd.Flags().StringVarP(&templateinit.Home, "home", "", "", "template output dir")
 	}
 }
