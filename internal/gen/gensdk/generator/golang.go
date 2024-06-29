@@ -68,9 +68,14 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 		apiSpecs = append(apiSpecs, apiSpec)
 	}
 
-	protoFiles, err := gen.GetProtoFilenames(g.config.ProtoDir)
-	if err != nil {
-		return nil, err
+	var protoFiles []string
+
+	if pathx.FileExists(g.config.ProtoDir) {
+		protoFiles, err = gen.GetProtoFilepath(g.config.ProtoDir)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	var fds []*desc.FileDescriptor
