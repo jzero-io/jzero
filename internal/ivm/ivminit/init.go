@@ -1,10 +1,8 @@
 package ivminit
 
 import (
-	"fmt"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
-	"github.com/jhump/protoreflect/desc/protoprint"
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
@@ -15,17 +13,35 @@ import (
 )
 
 var (
-	Version string // version must v1 v2 v3...
+	Version      string // version must v1 v2 v3...
+	Style        string
+	RemoveSuffix bool
 )
 
+type IvmInit struct {
+	oldVersion   string
+	newVersion   string
+	protoBaseDir string
+	oldProtoDir  string
+	newProtoDir  string
+
+	jzeroRpc gen.JzeroRpc
+}
+
 func Init(command *cobra.Command, args []string) error {
-	version, err := getOldVersion(Version)
+	var ivmInit IvmInit
+
+	err := ivmInit.setOldVersion(Version)
 	if err != nil {
 		return err
 	}
+	ivmInit.newVersion = Version
 
-	protoDir := filepath.Join("desc", "proto", version)
+	protoDir := filepath.Join("desc", "proto", ivmInit.oldVersion)
 	protoBaseDir := filepath.Join("desc", "proto")
+	ivmInit.protoBaseDir = protoBaseDir
+	ivmInit.oldProtoDir = protoDir
+	ivmInit.newProtoDir = filepath.Join("desc", "proto", Version)
 
 	var protoFiles []string
 
@@ -41,6 +57,9 @@ func Init(command *cobra.Command, args []string) error {
 
 	// parse proto
 	var protoParser protoparse.Parser
+
+	protoParser.InferImportPaths = false
+
 	if len(protoFiles) > 0 {
 		protoParser.ImportPaths = []string{protoBaseDir}
 		protoParser.IncludeSourceCodeInfo = true
@@ -55,7 +74,7 @@ func Init(command *cobra.Command, args []string) error {
 				return err
 			}
 			for _, fd := range fds {
-				err = updateProtoVersion(protoFile, fd)
+				err = ivmInit.updateProtoVersion(protoFile, fd)
 				if err != nil {
 					return err
 				}
@@ -63,43 +82,42 @@ func Init(command *cobra.Command, args []string) error {
 		}
 
 	}
-	return nil
-}
 
-func updateProtoVersion(protoFilepath string, fd *desc.FileDescriptor) error {
-	fdProto := fd.AsFileDescriptorProto()
-	newPackageName := "hellov2pb"
-	fdProto.Package = &newPackageName
-
-	// Create a new printer
-	printer := &protoprint.Printer{}
-	// Print the FileDescriptor to a string
-	protoStr, err := printer.PrintProtoToString(fd)
+	err = ivmInit.gen()
 	if err != nil {
-		return fmt.Errorf("failed to print proto: %v", err)
+		return err
 	}
-	fmt.Printf("%s\n", protoStr)
+
+	// invoke old version logic
+	newVersionProtoFilepath, err := gen.GetProtoFilepath(ivmInit.newProtoDir)
+	if err != nil {
+		return err
+	}
+
+	for _, fp := range newVersionProtoFilepath {
+		err = ivmInit.setUpdateProtoLogic(fp)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
 
-func setUpdateProtoLogic() error {
-	return nil
-}
-
-func getOldVersion(version string) (string, error) {
+func (ivm *IvmInit) setOldVersion(version string) error {
 	v := cast.ToInt(strings.TrimPrefix(version, "v"))
 	if v == 0 {
-		return "", errors.New("please set version")
+		return errors.New("please set version")
 	}
 
 	if v == 1 {
-		return "", errors.New("version is v1, no need to init")
+		return errors.New("version is v1, no need to init")
 	}
 
 	if v > 1 {
-		return "v" + cast.ToString(v-1), nil
+		ivm.oldVersion = "v" + cast.ToString(v-1)
+		return nil
 	}
 
-	return "", nil
+	return nil
 }

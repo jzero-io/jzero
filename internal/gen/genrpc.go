@@ -70,17 +70,17 @@ func (jr *JzeroRpc) Gen() error {
 			continue
 		}
 
-		allLogicFiles, err = jr.getAllLogicFiles(parse)
+		allLogicFiles, err = jr.GetAllLogicFiles(parse)
 		if err != nil {
 			return err
 		}
 
-		allServerFiles, err = jr.getAllServerFiles(parse)
+		allServerFiles, err = jr.GetAllServerFiles(parse)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), filepath.Join(jr.Wd, "desc", "proto", v))
+		fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), v)
 		zrpcOut := "."
 
 		command := fmt.Sprintf("goctl rpc protoc %s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s ",
@@ -187,7 +187,7 @@ func isNeedGenProtoDescriptor(proto rpcparser.Proto) bool {
 	return false
 }
 
-func (jr *JzeroRpc) getAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, error) {
+func (jr *JzeroRpc) GetAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, error) {
 	var serverFiles []ServerFile
 	for _, service := range protoSpec.Service {
 		namingFormat, err := format.FileNamingFormat(jr.Style, service.Name+"Server")
@@ -205,7 +205,7 @@ func (jr *JzeroRpc) getAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, 
 	return serverFiles, nil
 }
 
-func (jr *JzeroRpc) getAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, error) {
+func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, error) {
 	var logicFiles []LogicFile
 	for _, service := range protoSpec.Service {
 		for _, rpc := range service.RPC {
@@ -217,7 +217,9 @@ func (jr *JzeroRpc) getAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, er
 			fp := filepath.Join(jr.Wd, "internal", "logic", strings.ToLower(service.Name), namingFormat+".go")
 
 			f := LogicFile{
-				Path: fp,
+				Path:    fp,
+				Handler: rpc.Name,
+				Group:   service.Name,
 			}
 
 			logicFiles = append(logicFiles, f)

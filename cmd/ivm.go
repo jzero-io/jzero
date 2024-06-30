@@ -43,6 +43,8 @@ func init() {
 		ivmCmd.AddCommand(ivmInitCmd)
 
 		ivmInitCmd.Flags().StringVarP(&ivminit.Version, "version", "v", "v1", "jzero ivm init")
+		ivmInitCmd.Flags().StringVarP(&ivminit.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+		ivmInitCmd.Flags().BoolVarP(&ivminit.RemoveSuffix, "remove-suffix", "", false, "remove suffix Handler and Logic on filename or file content")
 	}
 
 	{
