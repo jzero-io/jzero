@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -57,20 +56,19 @@ func Gen(_ *cobra.Command, _ []string) error {
 
 	if pathx.FileExists(ProtoDir) {
 		_ = os.MkdirAll(Dir, 0o755)
-		protoDirFile, err := os.ReadDir(ProtoDir)
+		protoFilepath, err := gen.GetProtoFilepath(ProtoDir)
 		if err != nil {
 			return err
 		}
-		for _, protoFile := range protoDirFile {
-			if protoFile.IsDir() {
-				continue
-			}
-			if filepath.Ext(protoFile.Name()) == ".proto" {
-				command := fmt.Sprintf("protoc -I%s %s --openapiv2_out=%s", ProtoDir, filepath.Join(ProtoDir, protoFile.Name()), Dir)
-				_, err := execx.Run(command, wd)
-				if err != nil {
-					return err
-				}
+		for _, path := range protoFilepath {
+			command := fmt.Sprintf("protoc -I%s %s --openapiv2_out=%s",
+				ProtoDir,
+				path,
+				Dir,
+			)
+			_, err := execx.Run(command, wd)
+			if err != nil {
+				return err
 			}
 		}
 	}
