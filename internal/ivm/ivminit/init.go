@@ -94,8 +94,9 @@ func Init(command *cobra.Command, args []string) error {
 		return err
 	}
 
-	for _, fp := range newVersionProtoFilepath {
-		err = ivmInit.setUpdateProtoLogic(fp)
+	for i, fp := range newVersionProtoFilepath {
+		oldFp := protoFiles[i]
+		err = ivmInit.setUpdateProtoLogic(fp, oldFp)
 		if err != nil {
 			return err
 		}

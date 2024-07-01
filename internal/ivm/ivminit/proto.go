@@ -36,7 +36,7 @@ func (ivm *IvmInit) updateProtoVersion(protoFilepath string, fd *desc.FileDescri
 func (ivm *IvmInit) updateProtoPackage(fdp *descriptorpb.FileDescriptorProto) (string, error) {
 	oldPackageName := fdp.GetPackage()
 	if strings.HasSuffix(oldPackageName, "pb") {
-		newPackageName := oldPackageName[:len(oldPackageName)-len("pb")] + ivm.newVersion + "pb"
+		newPackageName := strings.TrimSuffix(oldPackageName[:len(oldPackageName)-len("pb")], ivm.oldVersion) + ivm.newVersion + "pb"
 		fdp.Package = &newPackageName
 	} else {
 		newPackageName := oldPackageName + ivm.newVersion
@@ -48,10 +48,10 @@ func (ivm *IvmInit) updateProtoPackage(fdp *descriptorpb.FileDescriptorProto) (s
 func (ivm *IvmInit) updateProtoOptionGoPackage(fdp *descriptorpb.FileDescriptorProto) error {
 	oldOptionGoPackage := fdp.GetOptions().GetGoPackage()
 	if strings.HasSuffix(oldOptionGoPackage, "pb") {
-		newOptionGoPackage := oldOptionGoPackage[:len(oldOptionGoPackage)-len("pb")] + ivm.newVersion + "pb"
+		newOptionGoPackage := strings.TrimSuffix(oldOptionGoPackage[:len(oldOptionGoPackage)-len("pb")], fmt.Sprintf("%s", ivm.oldVersion)) + ivm.newVersion + "pb"
 		fdp.Options.GoPackage = &newOptionGoPackage
 	} else {
-		newOptionGoPackage := oldOptionGoPackage + ivm.newVersion
+		newOptionGoPackage := strings.TrimSuffix(oldOptionGoPackage, ivm.oldVersion) + ivm.newVersion
 		fdp.Options.GoPackage = &newOptionGoPackage
 	}
 	return nil
@@ -60,7 +60,7 @@ func (ivm *IvmInit) updateProtoOptionGoPackage(fdp *descriptorpb.FileDescriptorP
 func (ivm *IvmInit) updateProtoService(fdp *descriptorpb.FileDescriptorProto) error {
 	for _, service := range fdp.Service {
 		oldServiceName := service.GetName()
-		newServiceName := oldServiceName + ivm.newVersion
+		newServiceName := strings.TrimSuffix(oldServiceName, ivm.oldVersion) + ivm.newVersion
 		service.Name = &newServiceName
 
 		for _, method := range service.Method {
@@ -106,14 +106,10 @@ func (ivm *IvmInit) writeNewProto(protoFilepath string, fd *desc.FileDescriptor,
 		return fmt.Errorf("failed to get relative path: %v", err)
 	}
 
-	// e.g. hello.proto to hello_v2.proto
-	newFilename := strings.TrimSuffix(rel, ".proto") + "_" + ivm.newVersion + ".proto"
+	newFilename := strings.TrimSuffix(rel, fmt.Sprintf("_%s.proto", ivm.oldVersion)) + "_" + ivm.newVersion + ".proto"
 
 	newProtoFilepath := filepath.Join(ivm.newProtoDir, newFilename)
 	_ = os.MkdirAll(filepath.Dir(newProtoFilepath), 0o755)
-
-	// TODO: fix rpc method request type
-	// find rpc line and replace some str
 
 	return os.WriteFile(newProtoFilepath, []byte(ivm.todoFixMessageTypeInRpcMethod(protoStr, oldProtoPackage)), 0644)
 }
