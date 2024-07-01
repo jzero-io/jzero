@@ -74,6 +74,7 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 					}
 					httpInterface.ResponseBody.FullName = BuildProtoFullName(httpInterface.ResponseBody.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
 					httpInterface.ResponseBody.FakeFullName = BuildProtoFakeFullName(httpInterface.ResponseBody.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
+					httpInterface.ResponseBody.FakeReturnName = BuildProtoFakeReturnName(service.GetName(), stringx.FirstUpper(method.GetOutputType().GetName()))
 				}
 				httpInterface.MethodName = method.GetName()
 				httpInterface.Scope = vars.Scope(config.APP)
@@ -165,6 +166,10 @@ func BuildApiFullName(t spec.Type) string {
 	default:
 		return fmt.Sprintf("*types.%s", stringx.FirstUpper(strings.TrimPrefix(t.Name(), "*")))
 	}
+}
+
+func BuildProtoFakeReturnName(serviceName string, responseTypeName string) string {
+	return fmt.Sprintf("FakeReturn%s%s", stringx.FirstUpper(serviceName), stringx.FirstUpper(responseTypeName))
 }
 
 func BuildApiFakeReturnName(group string, method string, t spec.Type) string {

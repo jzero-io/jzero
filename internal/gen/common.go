@@ -9,7 +9,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 )
 
-func GetProtoDir(protoDirPath string) ([]os.DirEntry, error) {
+func getProtoDir(protoDirPath string) ([]os.DirEntry, error) {
 	protoDir, err := os.ReadDir(protoDirPath)
 	if err != nil {
 		return nil, nil
@@ -17,20 +17,31 @@ func GetProtoDir(protoDirPath string) ([]os.DirEntry, error) {
 	return protoDir, nil
 }
 
-func GetProtoFilenames(protoDirPath string) ([]string, error) {
-	protoDir, err := GetProtoDir(protoDirPath)
+func GetProtoFilepath(protoDirPath string) ([]string, error) {
+	var protoFilenames []string
+
+	protoDir, err := getProtoDir(protoDirPath)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
-	var protoFilenames []string
 	for _, protoFile := range protoDir {
-		if protoFile.IsDir() {
+		if protoFile.Name() == "google" || protoFile.Name() == "validate" {
 			continue
 		}
-		if strings.HasSuffix(protoFile.Name(), ".proto") {
-			protoFilenames = append(protoFilenames, protoFile.Name())
+
+		if protoFile.IsDir() {
+			filenames, err := GetProtoFilepath(filepath.Join(protoDirPath, protoFile.Name()))
+			if err != nil {
+				return nil, err
+			}
+			protoFilenames = append(protoFilenames, filenames...)
+		} else {
+			if strings.HasSuffix(protoFile.Name(), ".proto") {
+				protoFilenames = append(protoFilenames, filepath.Join(protoDirPath, protoFile.Name()))
+			}
 		}
+
 	}
 	return protoFilenames, nil
 }

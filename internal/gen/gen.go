@@ -52,7 +52,7 @@ func Gen(_ *cobra.Command, _ []string) error {
 	cobra.CheckErr(errors.Wrapf(err, "get go module struct error"))
 
 	defer func() {
-		removeExtraFiles(wd)
+		RemoveExtraFiles(wd)
 	}()
 
 	jzeroRpc := JzeroRpc{Wd: wd, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
@@ -85,12 +85,13 @@ func Gen(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-func removeExtraFiles(wd string) {
+func RemoveExtraFiles(wd string) {
 	_ = os.Remove(filepath.Join(wd, fmt.Sprintf("%s.go", GetApiServiceName(filepath.Join(wd, "desc", "api")))))
 	_ = os.Remove(filepath.Join(wd, "etc", fmt.Sprintf("%s.yaml", GetApiServiceName(filepath.Join(wd, "desc", "api")))))
-	protoFilenames, err := GetProtoFilenames(filepath.Join(wd, "desc", "proto"))
+	protoFilenames, err := GetProtoFilepath(filepath.Join(wd, "desc", "proto"))
 	if err == nil {
 		for _, v := range protoFilenames {
+			v = filepath.Base(v)
 			fileBase := v[0 : len(v)-len(path.Ext(v))]
 			rmf := strings.ReplaceAll(strings.ToLower(fileBase), "-", "")
 			rmf = strings.ReplaceAll(rmf, "_", "")

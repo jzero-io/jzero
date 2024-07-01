@@ -50,7 +50,7 @@ type JzeroRpc struct {
 
 func (jr *JzeroRpc) Gen() error {
 	protoDirPath := filepath.Join(jr.Wd, "desc", "proto")
-	protoDir, err := GetProtoDir(protoDirPath)
+	protoFilenames, err := GetProtoFilepath(protoDirPath)
 	if err != nil {
 		return err
 	}
@@ -59,98 +59,92 @@ func (jr *JzeroRpc) Gen() error {
 	var pbImports ImportLines
 	var registerServers RegisterLines
 
-	// 实验性功能
 	var allServerFiles []ServerFile
 	var allLogicFiles []LogicFile
 
-	for _, v := range protoDir {
-		if v.IsDir() {
+	for _, v := range protoFilenames {
+		// parse proto
+		protoParser := rpcparser.NewDefaultProtoParser()
+		parse, err := protoParser.Parse(v, true)
+		if err != nil {
 			continue
 		}
-		if strings.HasSuffix(v.Name(), "proto") {
-			// parse proto
-			protoParser := rpcparser.NewDefaultProtoParser()
-			parse, err := protoParser.Parse(filepath.Join(jr.Wd, "desc", "proto", v.Name()), true)
-			if err != nil {
-				return err
-			}
 
-			allLogicFiles, err = jr.getAllLogicFiles(parse)
-			if err != nil {
-				return err
-			}
-
-			allServerFiles, err = jr.getAllServerFiles(parse)
-			if err != nil {
-				return err
-			}
-
-			fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), filepath.Join(jr.Wd, "desc", "proto", v.Name()))
-			zrpcOut := "."
-
-			command := fmt.Sprintf("goctl rpc protoc %s  -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s ",
-				filepath.Join(protoDirPath, v.Name()),
-				protoDirPath,
-				filepath.Join("internal"),
-				filepath.Join("internal"),
-				zrpcOut,
-				filepath.Join(embeded.Home, "go-zero"),
-				jr.Style)
-
-			fileBase := v.Name()[0 : len(v.Name())-len(path.Ext(v.Name()))]
-
-			_, err = execx.Run(command, jr.Wd)
-			if err != nil {
-				return err
-			}
-
-			command = fmt.Sprintf("protoc %s -I%s --validate_out=%s",
-				filepath.Join(protoDirPath, v.Name()),
-				protoDirPath,
-				"lang=go:internal",
-			)
-			_, err = execx.Run(command, jr.Wd)
-			if err != nil {
-				return err
-			}
-			fmt.Println(color.WithColor("Done", color.FgGreen))
-
-			if jr.RemoveSuffix {
-				for _, file := range allServerFiles {
-					if err := jr.rewriteServerGo(file.Path); err != nil {
-						continue
-					}
-				}
-				for _, file := range allLogicFiles {
-					if err := jr.rewriteLogicGo(file.Path); err != nil {
-						continue
-					}
-				}
-			}
-
-			// # gen proto descriptor
-			if isNeedGenProtoDescriptor(parse) {
-				protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=%s/%s.pb %s",
-					protoDirPath,
-					protoDirPath,
-					fileBase,
-					filepath.Join(protoDirPath, v.Name()))
-				_, err = execx.Run(protocCommand, jr.Wd)
-				if err != nil {
-					return err
-				}
-			}
-
-			for _, s := range parse.Service {
-				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, s.Name, jr.Module, s.Name))
-				if jr.RemoveSuffix {
-					registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%s(ctx))", filepath.Base(parse.GoPackage), stringx.FirstUpper(s.Name), s.Name, stringx.FirstUpper(s.Name)))
-				} else {
-					registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%sServer(ctx))", filepath.Base(parse.GoPackage), stringx.FirstUpper(s.Name), s.Name, stringx.FirstUpper(s.Name)))
-				}
-			}
-			pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(parse.GoPackage, "./")))
+		allLogicFiles, err = jr.GetAllLogicFiles(parse)
+		if err != nil {
+			return err
 		}
+
+		allServerFiles, err = jr.GetAllServerFiles(parse)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), v)
+		zrpcOut := "."
+
+		command := fmt.Sprintf("goctl rpc protoc %s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s ",
+			v,
+			protoDirPath,
+			filepath.Join("internal"),
+			filepath.Join("internal"),
+			zrpcOut,
+			filepath.Join(embeded.Home, "go-zero"),
+			jr.Style)
+
+		fileBase := v[0 : len(v)-len(path.Ext(v))]
+
+		_, err = execx.Run(command, jr.Wd)
+		if err != nil {
+			return err
+		}
+
+		command = fmt.Sprintf("protoc %s -I%s --validate_out=%s",
+			v,
+			protoDirPath,
+			"lang=go:internal",
+		)
+		_, err = execx.Run(command, jr.Wd)
+		if err != nil {
+			return err
+		}
+		fmt.Println(color.WithColor("Done", color.FgGreen))
+
+		if jr.RemoveSuffix {
+			for _, file := range allServerFiles {
+				if err := jr.rewriteServerGo(file.Path); err != nil {
+					continue
+				}
+			}
+			for _, file := range allLogicFiles {
+				if err := jr.rewriteLogicGo(file.Path); err != nil {
+					continue
+				}
+			}
+		}
+
+		// # gen proto descriptor
+		if isNeedGenProtoDescriptor(parse) {
+			protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=%s.pb %s",
+				protoDirPath,
+				fileBase,
+				v,
+			)
+			_, err = execx.Run(protocCommand, jr.Wd)
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, s := range parse.Service {
+			serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, s.Name, jr.Module, s.Name))
+			if jr.RemoveSuffix {
+				registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%s(ctx))", filepath.Base(parse.GoPackage), stringx.FirstUpper(s.Name), s.Name, stringx.FirstUpper(s.Name)))
+			} else {
+				registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%sServer(ctx))", filepath.Base(parse.GoPackage), stringx.FirstUpper(s.Name), s.Name, stringx.FirstUpper(s.Name)))
+			}
+		}
+		pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(parse.GoPackage, "./")))
 	}
 
 	if pathx.FileExists(protoDirPath) {
@@ -193,7 +187,7 @@ func isNeedGenProtoDescriptor(proto rpcparser.Proto) bool {
 	return false
 }
 
-func (jr *JzeroRpc) getAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, error) {
+func (jr *JzeroRpc) GetAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, error) {
 	var serverFiles []ServerFile
 	for _, service := range protoSpec.Service {
 		namingFormat, err := format.FileNamingFormat(jr.Style, service.Name+"Server")
@@ -211,7 +205,7 @@ func (jr *JzeroRpc) getAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, 
 	return serverFiles, nil
 }
 
-func (jr *JzeroRpc) getAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, error) {
+func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, error) {
 	var logicFiles []LogicFile
 	for _, service := range protoSpec.Service {
 		for _, rpc := range service.RPC {
@@ -223,7 +217,9 @@ func (jr *JzeroRpc) getAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, er
 			fp := filepath.Join(jr.Wd, "internal", "logic", strings.ToLower(service.Name), namingFormat+".go")
 
 			f := LogicFile{
-				Path: fp,
+				Path:    fp,
+				Handler: rpc.Name,
+				Group:   service.Name,
 			}
 
 			logicFiles = append(logicFiles, f)
