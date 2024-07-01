@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+	"gopkg.in/op/go-logging.v1"
 
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
@@ -420,6 +421,7 @@ func (jr *JzeroRpc) rewriteServerGo(fp string) error {
 }
 
 func (jr *JzeroRpc) updateGatewayUpstreams(protoDescriptorPaths []string) error {
+	logging.SetLevel(logging.CRITICAL, "")
 	dec := yq.NewYamlDecoder(yq.NewDefaultYamlPreferences())
 
 	file, err := os.ReadFile(jr.Etc)
