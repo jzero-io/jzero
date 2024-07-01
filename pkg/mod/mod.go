@@ -38,7 +38,11 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 	err = json.Unmarshal([]byte(data), &m)
 	if err != nil {
 		// patch. 当项目存在 go.work 文件时, 为多段 json 值, 无法正常解析
-		parse, err := modfile.Parse(filepath.Join(workDir, "go.mod"), nil, nil)
+		file, err := os.ReadFile(filepath.Join(workDir, "go.mod"))
+		if err != nil {
+			return nil, err
+		}
+		parse, err := modfile.Parse("", file, nil)
 		if err != nil {
 			return nil, err
 		}

@@ -1,9 +1,10 @@
 package ivminit
 
 import (
+	"os"
+
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/pkg/mod"
-	"os"
 )
 
 func (ivm *IvmInit) gen() error {

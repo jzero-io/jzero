@@ -84,7 +84,15 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	var protoParser protoparse.Parser
 	if len(protoFiles) > 0 {
 		protoParser.ImportPaths = []string{g.config.ProtoDir}
-		fds, err = protoParser.ParseFiles(protoFiles...)
+		var protoRelFiles []string
+		for _, v := range protoFiles {
+			rel, err := filepath.Rel(g.config.ProtoDir, v)
+			if err != nil {
+				return nil, err
+			}
+			protoRelFiles = append(protoRelFiles, rel)
+		}
+		fds, err = protoParser.ParseFiles(protoRelFiles...)
 		if err != nil {
 			return nil, err
 		}
@@ -135,7 +143,7 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 
 		if len(protoFiles) > 0 {
 			// gen pb model
-			pbFiles, err := g.genPbTypesModel()
+			pbFiles, err := g.genPbTypesModel(protoFiles)
 			if err != nil {
 				return nil, err
 			}
@@ -385,16 +393,18 @@ func (g *Golang) genApiTypesModel(types []spec.Type) (*GeneratedFile, error) {
 	}, nil
 }
 
-func (g *Golang) genPbTypesModel() ([]*GeneratedFile, error) {
+func (g *Golang) genPbTypesModel(protoFiles []string) ([]*GeneratedFile, error) {
 	tmpDir, err := os.MkdirTemp(os.TempDir(), "")
 	if err != nil {
 		return nil, err
 	}
 	defer os.RemoveAll(tmpDir)
 
-	resp, err := execx.Run(fmt.Sprintf("protoc -I%s --go_out=%s %s/*.proto", g.config.ProtoDir, tmpDir, g.config.ProtoDir), g.wd)
-	if err != nil {
-		return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
+	for _, pf := range protoFiles {
+		resp, err := execx.Run(fmt.Sprintf("protoc -I%s --go_out=%s %s", g.config.ProtoDir, tmpDir, pf), g.wd)
+		if err != nil {
+			return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
+		}
 	}
 
 	var generatedFiles []*GeneratedFile

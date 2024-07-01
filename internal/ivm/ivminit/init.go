@@ -1,6 +1,9 @@
 package ivminit
 
 import (
+	"path/filepath"
+	"strings"
+
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/jzero-io/jzero/internal/gen"
@@ -8,8 +11,6 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-	"path/filepath"
-	"strings"
 )
 
 var (

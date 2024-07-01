@@ -2,14 +2,15 @@ package ivminit
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoprint"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 func (ivm *IvmInit) updateProtoVersion(protoFilepath string, fd *desc.FileDescriptor) error {
@@ -48,7 +49,7 @@ func (ivm *IvmInit) updateProtoPackage(fdp *descriptorpb.FileDescriptorProto) (s
 func (ivm *IvmInit) updateProtoOptionGoPackage(fdp *descriptorpb.FileDescriptorProto) error {
 	oldOptionGoPackage := fdp.GetOptions().GetGoPackage()
 	if strings.HasSuffix(oldOptionGoPackage, "pb") {
-		newOptionGoPackage := strings.TrimSuffix(oldOptionGoPackage[:len(oldOptionGoPackage)-len("pb")], fmt.Sprintf("%s", ivm.oldVersion)) + ivm.newVersion + "pb"
+		newOptionGoPackage := strings.TrimSuffix(oldOptionGoPackage[:len(oldOptionGoPackage)-len("pb")], ivm.oldVersion) + ivm.newVersion + "pb"
 		fdp.Options.GoPackage = &newOptionGoPackage
 	} else {
 		newOptionGoPackage := strings.TrimSuffix(oldOptionGoPackage, ivm.oldVersion) + ivm.newVersion
@@ -111,7 +112,7 @@ func (ivm *IvmInit) writeNewProto(protoFilepath string, fd *desc.FileDescriptor,
 	newProtoFilepath := filepath.Join(ivm.newProtoDir, newFilename)
 	_ = os.MkdirAll(filepath.Dir(newProtoFilepath), 0o755)
 
-	return os.WriteFile(newProtoFilepath, []byte(ivm.todoFixMessageTypeInRpcMethod(protoStr, oldProtoPackage)), 0644)
+	return os.WriteFile(newProtoFilepath, []byte(ivm.todoFixMessageTypeInRpcMethod(protoStr, oldProtoPackage)), 0o644)
 }
 
 func (ivm *IvmInit) todoFixMessageTypeInRpcMethod(protoString string, oldProtoPackage string) string {

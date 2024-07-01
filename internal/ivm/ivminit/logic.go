@@ -3,13 +3,14 @@ package ivminit
 import (
 	"bytes"
 	"fmt"
-	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"go/ast"
 	goformat "go/format"
 	goparser "go/parser"
 	"go/token"
 	"os"
 	"strings"
+
+	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 )
 
 func (ivm *IvmInit) setUpdateProtoLogic(fp string, oldFp string) error {
@@ -326,8 +327,10 @@ func (ivm *IvmInit) astInspect(f *ast.File, oldService, newService, logicMethodN
 					Results: []ast.Expr{
 						&ast.UnaryExpr{
 							Op: token.AND,
-							X:  &ast.Ident{Name: "newResp"}},
-						&ast.Ident{Name: "nil"}},
+							X:  &ast.Ident{Name: "newResp"},
+						},
+						&ast.Ident{Name: "nil"},
+					},
 				},
 			}
 			fn.Body.List = newBody
