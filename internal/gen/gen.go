@@ -55,7 +55,13 @@ func Gen(_ *cobra.Command, _ []string) error {
 		RemoveExtraFiles(wd)
 	}()
 
-	jzeroRpc := JzeroRpc{Wd: wd, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix}
+	jzeroRpc := JzeroRpc{
+		Wd:           wd,
+		Module:       moduleStruct.Path,
+		Style:        Style,
+		RemoveSuffix: RemoveSuffix,
+		Etc:          filepath.Join("etc", "etc.yaml"),
+	}
 	err = jzeroRpc.Gen()
 	if err != nil {
 		return err

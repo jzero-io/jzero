@@ -28,7 +28,6 @@ import (
 
 type JzeroApi struct {
 	Wd                 string
-	AppDir             string
 	Module             string
 	Style              string
 	RemoveSuffix       bool
@@ -48,7 +47,7 @@ type LogicFile struct {
 }
 
 func (ja *JzeroApi) Gen() error {
-	apiDirName := filepath.Join(ja.Wd, ja.AppDir, "desc", "api")
+	apiDirName := filepath.Join(ja.Wd, "desc", "api")
 
 	var apiSpec *spec.ApiSpec
 	// 实验性功能
@@ -147,7 +146,7 @@ func (ja *JzeroApi) getAllHandlerFiles(apiSpec *spec.ApiSpec) ([]HandlerFile, er
 			if err != nil {
 				return nil, err
 			}
-			fp := filepath.Join(ja.Wd, ja.AppDir, "internal", "handler", group.GetAnnotation("group"), namingFormat+".go")
+			fp := filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group"), namingFormat+".go")
 
 			f := HandlerFile{
 				Path:    fp,
@@ -170,7 +169,7 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 				return nil, err
 			}
 
-			fp := filepath.Join(ja.Wd, ja.AppDir, "internal", "logic", group.GetAnnotation("group"), namingFormat+".go")
+			fp := filepath.Join(ja.Wd, "internal", "logic", group.GetAnnotation("group"), namingFormat+".go")
 
 			f := LogicFile{
 				Path:    fp,
@@ -237,10 +236,7 @@ func (ja *JzeroApi) generateApiCode(mainApiFilePath string) error {
 	}
 
 	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
-	dir := ja.AppDir
-	if dir == "" {
-		dir = "."
-	}
+	dir := "."
 	command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s ", mainApiFilePath, dir, filepath.Join(embeded.Home, "go-zero"), ja.Style)
 	if _, err := execx.Run(command, ja.Wd); err != nil {
 		return err
@@ -249,10 +245,7 @@ func (ja *JzeroApi) generateApiCode(mainApiFilePath string) error {
 }
 
 func (ja *JzeroApi) separateTypesGoByGoctlTypesPlugin(mainApiFilePath string) error {
-	dir := ja.AppDir
-	if dir == "" {
-		dir = "."
-	}
+	dir := "."
 	command := fmt.Sprintf("goctl api plugin -plugin goctl-types=\"gen\" -api %s --dir %s --style %s\n", mainApiFilePath, dir, ja.Style)
 	if _, err := execx.Run(command, ja.Wd); err != nil {
 		return err
@@ -323,7 +316,7 @@ func (ja *JzeroApi) rewriteHandlerGo(fp string) error {
 }
 
 func (ja *JzeroApi) rewriteRoutesGo(group string, handler string) error {
-	fp := filepath.Join(ja.Wd, ja.AppDir, "internal", "handler", "routes.go")
+	fp := filepath.Join(ja.Wd, "internal", "handler", "routes.go")
 	fset := token.NewFileSet()
 	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
 	if err != nil {

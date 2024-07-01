@@ -2,6 +2,7 @@ package gen
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"go/ast"
 	goformat "go/format"
@@ -12,12 +13,15 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/jzero-io/jzero/pkg/templatex"
+	yq "github.com/mikefarah/yq/v4/pkg/yqlib"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
@@ -46,10 +50,11 @@ type JzeroRpc struct {
 	Module       string
 	Style        string
 	RemoveSuffix bool
+	Etc          string // 配置文件路径
 }
 
 func (jr *JzeroRpc) Gen() error {
-	protoDirPath := filepath.Join(jr.Wd, "desc", "proto")
+	protoDirPath := filepath.Join("desc", "proto")
 	protoFilenames, err := GetProtoFilepath(protoDirPath)
 	if err != nil {
 		return err
@@ -58,6 +63,7 @@ func (jr *JzeroRpc) Gen() error {
 	var serverImports ImportLines
 	var pbImports ImportLines
 	var registerServers RegisterLines
+	var protoDescriptorPaths []string
 
 	var allServerFiles []ServerFile
 	var allLogicFiles []LogicFile
@@ -130,9 +136,16 @@ func (jr *JzeroRpc) Gen() error {
 				fileBase,
 				v,
 			)
+			protoDescriptorPaths = append(protoDescriptorPaths, fmt.Sprintf("%s.pb", strings.TrimSuffix(v, ".proto")))
 			_, err = execx.Run(protocCommand, jr.Wd)
 			if err != nil {
 				return err
+			}
+
+			// update gateway upstream protosets
+			err = jr.updateGatewayUpstreams(protoDescriptorPaths)
+			if err != nil {
+				console.Warning("update gateway upstreams")
 			}
 		}
 
@@ -404,4 +417,36 @@ func (jr *JzeroRpc) rewriteServerGo(fp string) error {
 	}
 
 	return nil
+}
+
+func (jr *JzeroRpc) updateGatewayUpstreams(protoDescriptorPaths []string) error {
+	dec := yq.NewYamlDecoder(yq.NewDefaultYamlPreferences())
+
+	file, err := os.ReadFile(jr.Etc)
+	if err != nil {
+		return err
+	}
+
+	if err = dec.Init(strings.NewReader(string(file))); err != nil {
+		return err
+	}
+
+	node, err := dec.Decode()
+	if err != nil {
+		return err
+	}
+
+	marshal, err := json.Marshal(protoDescriptorPaths)
+	if err != nil {
+		return err
+	}
+
+	result, _ := yq.NewAllAtOnceEvaluator().EvaluateNodes(fmt.Sprintf(`.Gateway.Upstreams.0.ProtoSets=%s`, string(marshal)), node)
+	encoder := yq.NewYamlEncoder(yq.NewDefaultYamlPreferences())
+	out := new(bytes.Buffer)
+	printer := yq.NewPrinter(encoder, yq.NewSinglePrinterWriter(out))
+	if err := printer.PrintResults(result); err != nil {
+		return err
+	}
+	return os.WriteFile(jr.Etc, out.Bytes(), 0o644)
 }
