@@ -107,7 +107,10 @@ func (ivm *IvmInit) writeNewProto(protoFilepath string, fd *desc.FileDescriptor,
 		return fmt.Errorf("failed to get relative path: %v", err)
 	}
 
-	newFilename := strings.TrimSuffix(rel, fmt.Sprintf("_%s.proto", ivm.oldVersion)) + "_" + ivm.newVersion + ".proto"
+	newFileBase := strings.TrimSuffix(rel, ".proto")
+	newFileBase = strings.TrimSuffix(newFileBase, fmt.Sprintf("_%s", ivm.oldVersion))
+
+	newFilename := newFileBase + "_" + ivm.newVersion + ".proto"
 
 	newProtoFilepath := filepath.Join(ivm.newProtoDir, newFilename)
 	_ = os.MkdirAll(filepath.Dir(newProtoFilepath), 0o755)

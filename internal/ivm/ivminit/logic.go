@@ -71,6 +71,11 @@ func (ivm *IvmInit) setUpdateProtoLogic(fp string, oldFp string) error {
 }
 
 func (ivm *IvmInit) astInspect(f *ast.File, oldService, newService, logicMethodName string) {
+	logicTypeName := fmt.Sprintf("New%sLogic", logicMethodName)
+	if ivm.jzeroRpc.RemoveSuffix {
+		logicTypeName = fmt.Sprintf("New%s", logicMethodName)
+	}
+
 	// 删除第一行注释
 	if len(f.Comments) > 0 {
 		// 获取第一个注释组
@@ -144,7 +149,7 @@ func (ivm *IvmInit) astInspect(f *ast.File, oldService, newService, logicMethodN
 					Rhs: []ast.Expr{&ast.CallExpr{
 						Fun: &ast.SelectorExpr{
 							X:   &ast.Ident{Name: fmt.Sprintf("%slogic", strings.ToLower(oldService))},
-							Sel: &ast.Ident{Name: fmt.Sprintf("New%s", logicMethodName)},
+							Sel: &ast.Ident{Name: logicTypeName},
 						},
 						Args: []ast.Expr{
 							&ast.SelectorExpr{
