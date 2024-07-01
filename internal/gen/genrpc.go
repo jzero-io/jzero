@@ -146,7 +146,7 @@ func (jr *JzeroRpc) Gen() error {
 			// update gateway upstream protosets
 			err = jr.updateGatewayUpstreams(protoDescriptorPaths)
 			if err != nil {
-				console.Warning("update gateway upstreams")
+				console.Warning("[warning] update gateway upstreams meet error: %v", err)
 			}
 		}
 
