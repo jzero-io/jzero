@@ -94,7 +94,7 @@ func (jr *JzeroRpc) Gen() error {
 		fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), v)
 		zrpcOut := "."
 
-		command := fmt.Sprintf("goctl rpc protoc %s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s ",
+		command := fmt.Sprintf("goctl rpc protoc %s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=true --home %s -m --style %s ",
 			v,
 			protoDirPath,
 			filepath.Join("internal"),

@@ -7,6 +7,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jzero-io/jzero/internal/gen/genrpcclient"
 	"os"
 	"path/filepath"
 
@@ -41,6 +42,13 @@ var genCmd = &cobra.Command{
 	},
 	RunE:         gen.Gen,
 	SilenceUsage: true,
+}
+
+// genRpcClientCmd represents the rpcClient command
+var genRpcClientCmd = &cobra.Command{
+	Use:   "rpcclient",
+	Short: `Gen rpc client code by proto`,
+	RunE:  genrpcclient.Generate,
 }
 
 // genSwaggerCmd represents the genSwagger command
@@ -127,5 +135,11 @@ func init() {
 
 	{
 		genCmd.AddCommand(genDocsCmd)
+	}
+
+	{
+		genCmd.AddCommand(genRpcClientCmd)
+
+		genRpcClientCmd.Flags().StringVarP(&genrpcclient.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 	}
 }
