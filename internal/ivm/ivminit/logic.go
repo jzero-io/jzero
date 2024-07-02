@@ -106,13 +106,17 @@ func (ivm *IvmInit) astAddImport(f *ast.File, oldService string) error {
 	return nil
 }
 
-func (ivm *IvmInit) astAddLogicBody(f *ast.File, oldService, newService, logicMethodName string, clientStream, serverStream bool) error {
+func (ivm *IvmInit) astAddLogic(f *ast.File, oldService, newService, logicMethodName string, clientStream, serverStream bool) error {
 	logicTypeName := fmt.Sprintf("New%sLogic", logicMethodName)
 	if ivm.jzeroRpc.RemoveSuffix {
 		logicTypeName = fmt.Sprintf("New%s", logicMethodName)
 	}
 
 	if !clientStream && !serverStream {
+		if err := ivm.astAddImport(f, oldService); err != nil {
+			return err
+		}
+
 		ast.Inspect(f, func(n ast.Node) bool {
 			if fn, ok := n.(*ast.FuncDecl); ok && fn.Recv != nil && fn.Name.Name == logicMethodName {
 				var requestTypeName, responseTypeName string
@@ -336,6 +340,22 @@ func (ivm *IvmInit) astAddLogicBody(f *ast.File, oldService, newService, logicMe
 		})
 	}
 
+	//if clientStream && !serverStream {
+	//	/*
+	//		func (l *SayHello) SayHello(stream hellopb.Hello_SayHelloServer) error {
+	//			return nil
+	//		}
+	//	*/
+	//}
+	//
+	//if (!clientStream && serverStream) || (clientStream && serverStream) {
+	//	/*
+	//		func (l *SayHello) SayHello(in *hellopb.SayHelloRequest, stream hellopb.Hello_SayHelloServer) error {
+	//			return nil
+	//		}
+	//	*/
+	//}
+
 	return nil
 }
 
@@ -348,11 +368,7 @@ func (ivm *IvmInit) astInspect(f *ast.File, oldLogicFile gen.LogicFile, newLogic
 		return err
 	}
 
-	if err := ivm.astAddImport(f, oldService); err != nil {
-		return err
-	}
-
-	if err := ivm.astAddLogicBody(f, oldService, newService, logicMethodName, false, false); err != nil {
+	if err := ivm.astAddLogic(f, oldService, newService, logicMethodName, newLogicFile.ClientStream, newLogicFile.ServerStream); err != nil {
 		return err
 	}
 
