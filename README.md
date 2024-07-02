@@ -8,23 +8,11 @@
 <img align="center" width="150px" src="https://oss.jaronnie.com/jzero.jpg">
 </p>
 
-可支持任意框架的脚手架 jzero, 默认支持 go-zero
+## Introduction
 
-## Features
+Used to create project from templates and generate Server/Client code by proto and api file.
 
-* 企业级代码规范, 多人开发友好
-* 支持自定义模板, 基于模板新建项目和生成代码, 默认支持多场景开发模板
-  * grpc + grpc gateway + api
-  * api
-  * grpc
-  * grpc + grpc gateway
-  * cli
-* 扩展 go-zero 功能，完全同步 go-zero 新特性
-  * 保持与原生 goctl 生成的目录, 易迁移过来
-  * 支持 types 分组
-  * 支持删除冗余的 Logic, Handler, Server 等字样
-* 一键创建项目
-* 一键生成服务端代码, 数据库代码, 客户端 sdk
+For more details please see: https://jzero.jaronnie.com
 
 ## [Quick Start](https://jzero.jaronnie.com/#快速开始)
 
@@ -35,7 +23,6 @@ jzero new your_project
 cd your_project && jzero gen && go mod tidy
 go run main.go server
 ```
-
 
 ## Stargazers over time
 
