@@ -72,9 +72,13 @@ func (jr *JzeroRpc) Gen() error {
 	for _, v := range protoFilenames {
 		// parse proto
 		protoParser := rpcparser.NewDefaultProtoParser()
-		parse, err := protoParser.Parse(v, true)
+		var parse rpcparser.Proto
+		parse, err = protoParser.Parse(v, true)
 		if err != nil {
-			continue
+			if strings.Contains(err.Error(), "rpc service not found") {
+				continue
+			}
+			return err
 		}
 
 		allLogicFiles, err = jr.GetAllLogicFiles(parse)
