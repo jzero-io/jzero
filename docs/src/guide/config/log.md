@@ -18,7 +18,7 @@ Log:
   MaxSize: 50
   Mode: file
   Rotation: size
-  ServiceName: app1
+  ServiceName: your_project
   encoding: plain
 ```
 
