@@ -18,8 +18,7 @@ import (
 // checkCmd represents the check command
 var checkCmd = &cobra.Command{
 	Use:   "check",
-	Short: "jzero env check",
-	Long:  `jzero env check.`,
+	Short: `Check and install all needed tools`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log := console.NewColorConsole(true)
 
@@ -87,7 +86,7 @@ var checkCmd = &cobra.Command{
 			log.Warning("[jzero-env] warning: env check failed, protoc-gen-validate is not installed")
 		}
 
-		log.Success("[jzero-env]: congratulations! your jzero environment is ready!")
+		log.Success("\n[jzero-env]: congratulations! your jzero environment is ready!")
 	},
 }
 

@@ -24,8 +24,7 @@ var (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "jzero version",
-	Long:  `jzero version`,
+	Short: `Print jzero version`,
 	RunE:  getVersion,
 }
 

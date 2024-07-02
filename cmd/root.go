@@ -6,28 +6,21 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
-	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
-	cfgFile string
-	Debug   bool
+	Debug bool
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "jzero",
-	Short: "jzero framework",
-	Long:  `jzero framework.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Use: "jzero",
+	Short: `Used to create project by templates and generate server/client code by proto and api file.
+`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -42,7 +35,6 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.jzero/config.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "", false, "debug mode")
 }
 
@@ -50,26 +42,5 @@ func init() {
 func initConfig() {
 	if Debug {
 		time.Sleep(time.Second * 15)
-	}
-
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		configPath := filepath.Join(home, ".jzero")
-
-		viper.AddConfigPath(configPath)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("config")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		_, _ = fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 }

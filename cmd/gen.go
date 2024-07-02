@@ -25,8 +25,7 @@ import (
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
 	Use:   "gen",
-	Short: "jzero gen code",
-	Long:  `jzero gen code`,
+	Short: `Used to generate server/client code`,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		// check go-zero api template
 		home, _ := os.UserHomeDir()
@@ -47,16 +46,14 @@ var genCmd = &cobra.Command{
 // genSwaggerCmd represents the genSwagger command
 var genSwaggerCmd = &cobra.Command{
 	Use:   "swagger",
-	Short: "jzero gen swagger",
-	Long:  `jzero gen swagger`,
+	Short: `Gen swagger json docs by proto and api file`,
 	RunE:  genswagger.Gen,
 }
 
 // genSdkCmd represents the gen sdk command
 var genSdkCmd = &cobra.Command{
 	Use:   "sdk",
-	Short: "jzero gensdk",
-	Long:  `jzero gensdk. Generate sdk client by api file and proto file`,
+	Short: `Generate sdk client by api file and proto file`,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		gensdk.Version = Version
 

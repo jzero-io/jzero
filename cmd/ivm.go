@@ -18,8 +18,7 @@ import (
 // ivmCmd represents the interface version manage command
 var ivmCmd = &cobra.Command{
 	Use:   "ivm",
-	Short: "jzero interface version manage",
-	Long:  `jzero interface version manage`,
+	Short: `Interface version manage`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},
@@ -27,24 +26,18 @@ var ivmCmd = &cobra.Command{
 
 var ivmInitCmd = &cobra.Command{
 	Use:   "init",
-	Short: "jzero ivm init",
-	Long:  `jzero ivm init`,
+	Short: `Init newer version from older version, no need to do any more`,
 	RunE:  ivminit.Init,
 }
 
 var ivmAddCmd = &cobra.Command{
 	Use:   "add",
-	Short: "jzero ivm add",
-	Long:  `jzero ivm add`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return nil
-	},
+	Short: `Add example interface descriptor files`,
 }
 
 var ivmAddProtoCmd = &cobra.Command{
 	Use:   "proto",
-	Short: "jzero ivm add proto",
-	Long:  `jzero ivm add proto`,
+	Short: `Add a example proto`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if !strings.HasPrefix(ivm.Version, "v") {
 			cobra.CheckErr(errors.New("version must has prefix v"))

@@ -17,14 +17,12 @@ import (
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
 	Use:   "template",
-	Short: "jzero template",
-	Long:  `jzero template`,
+	Short: `Used to save and build templates`,
 }
 
 var templateInitCmd = &cobra.Command{
 	Use:   "init",
-	Short: "jzero template init",
-	Long:  `jzero template init`,
+	Short: `Save template files on your disk`,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		if templateinit.Home == "" {
 			home, _ := os.UserHomeDir()
@@ -36,8 +34,7 @@ var templateInitCmd = &cobra.Command{
 
 var templateBuildCmd = &cobra.Command{
 	Use:   "build",
-	Short: "jzero template build",
-	Long:  `jzero template build`,
+	Short: `Build your current project to template`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if templatebuild.Output == "" {
 			home, _ := os.UserHomeDir()

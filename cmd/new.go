@@ -26,8 +26,7 @@ import (
 // newCmd represents the new command
 var newCmd = &cobra.Command{
 	Use:   "new",
-	Short: "jzero new project",
-	Long:  `jzero new project`,
+	Short: `Used to create project from templates`,
 	PreRun: func(_ *cobra.Command, args []string) {
 		new.AppName = args[0]
 
@@ -69,7 +68,7 @@ var newCmd = &cobra.Command{
 
 var newApiFileCmd = &cobra.Command{
 	Use:   "api-file",
-	Short: "create api file",
+	Short: "Create api file by api template",
 	RunE:  newapifile.New,
 }
 
