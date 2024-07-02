@@ -22,7 +22,7 @@ func New(_ *cobra.Command, _ []string) error {
 		"Service":    Service,
 		"Group":      Group,
 		"GroupCamel": stringx.FirstUpper(stringx.ToCamel(Group)),
-	}, embeded.ReadTemplateFile("api-file.tpl"))
+	}, embeded.ReadTemplateFile("template.api.tpl"))
 	if err != nil {
 		return err
 	}
