@@ -29,7 +29,7 @@ go run main.go server
 [![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
 
 ## Contributors
-<div align="center">
+<div>
   <a href="https://github.com/jzero-io/jzero/graphs/contributors">
     <img src="https://contrib.rocks/image?repo=jzero-io/jzero" />
   </a>
