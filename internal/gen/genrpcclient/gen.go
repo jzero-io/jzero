@@ -18,7 +18,7 @@ type DirContext struct{}
 
 func (d DirContext) GetCall() generator.Dir {
 	return generator.Dir{
-		Base:     "",
+		Base:     "client",
 		Filename: "",
 		Package:  "",
 		GetChildPackage: func(childPath string) (string, error) {
@@ -28,32 +28,26 @@ func (d DirContext) GetCall() generator.Dir {
 }
 
 func (d DirContext) GetEtc() generator.Dir {
-	//TODO implement me
 	panic("implement me")
 }
 
 func (d DirContext) GetInternal() generator.Dir {
-	//TODO implement me
 	panic("implement me")
 }
 
 func (d DirContext) GetConfig() generator.Dir {
-	//TODO implement me
 	panic("implement me")
 }
 
 func (d DirContext) GetLogic() generator.Dir {
-	//TODO implement me
 	panic("implement me")
 }
 
 func (d DirContext) GetServer() generator.Dir {
-	//TODO implement me
 	panic("implement me")
 }
 
 func (d DirContext) GetSvc() generator.Dir {
-	//TODO implement me
 	panic("implement me")
 }
 
@@ -66,17 +60,14 @@ func (d DirContext) GetProtoGo() generator.Dir {
 }
 
 func (d DirContext) GetMain() generator.Dir {
-	//TODO implement me
 	panic("implement me")
 }
 
 func (d DirContext) GetServiceName() stringx.String {
-	//TODO implement me
 	panic("implement me")
 }
 
 func (d DirContext) SetPbDir(pbDir, grpcDir string) {
-	//TODO implement me
 	panic("implement me")
 }
 
