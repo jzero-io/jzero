@@ -6,7 +6,12 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
+	"strings"
+
+	"github.com/jzero-io/jzero/internal/ivm"
+	"github.com/jzero-io/jzero/internal/ivm/ivmaddproto"
 	"github.com/jzero-io/jzero/internal/ivm/ivminit"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -36,18 +41,40 @@ var ivmAddCmd = &cobra.Command{
 	},
 }
 
+var ivmAddProtoCmd = &cobra.Command{
+	Use:   "proto",
+	Short: "jzero ivm add proto",
+	Long:  `jzero ivm add proto`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if !strings.HasPrefix(ivm.Version, "v") {
+			cobra.CheckErr(errors.New("version must has prefix v"))
+		}
+	},
+	RunE:         ivmaddproto.AddProto,
+	SilenceUsage: true,
+}
+
 func init() {
-	rootCmd.AddCommand(ivmCmd)
+	{
+		rootCmd.AddCommand(ivmCmd)
+		ivmCmd.PersistentFlags().StringVarP(&ivm.Version, "version", "v", "v1", "jzero ivm init")
+	}
 
 	{
 		ivmCmd.AddCommand(ivmInitCmd)
 
-		ivmInitCmd.Flags().StringVarP(&ivminit.Version, "version", "v", "v1", "jzero ivm init")
 		ivmInitCmd.Flags().StringVarP(&ivminit.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 		ivmInitCmd.Flags().BoolVarP(&ivminit.RemoveSuffix, "remove-suffix", "", false, "remove suffix Handler and Logic on filename or file content")
 	}
 
 	{
 		ivmCmd.AddCommand(ivmAddCmd)
+	}
+
+	{
+		ivmAddCmd.AddCommand(ivmAddProtoCmd)
+		ivmAddProtoCmd.Flags().StringVarP(&ivmaddproto.Service, "service", "", "template", "set proto service")
+
+		ivmAddProtoCmd.Flags().StringSliceVarP(&ivmaddproto.Methods, "methods", "m", []string{"Get:get"}, "set proto methods")
 	}
 }
