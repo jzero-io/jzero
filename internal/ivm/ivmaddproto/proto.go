@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	Methods []string
-	Service string
+	Methods  []string
+	Name     string
+	Services []string
 )
 
 type Method struct {
@@ -52,8 +53,9 @@ func AddProto(command *cobra.Command, args []string) error {
 	}
 
 	template, err := templatex.ParseTemplate(map[string]interface{}{
+		"Package":    Name,
 		"Methods":    methods,
-		"Service":    Service,
+		"Services":   Services,
 		"Version":    version,
 		"UrlVersion": ivm.Version,
 	}, embeded.ReadTemplateFile("template.proto.tpl"))
@@ -65,7 +67,7 @@ func AddProto(command *cobra.Command, args []string) error {
 	// Create a new printer
 	// printer := &protoprint.Printer{}
 
-	output := filepath.Join("desc", "proto", ivm.Version, fmt.Sprintf("%s%s.proto", Service, versionSuffix))
+	output := filepath.Join("desc", "proto", ivm.Version, fmt.Sprintf("%s%s.proto", Name, versionSuffix))
 
 	if pathx.FileExists(output) {
 		return errors.New("proto file already exists")

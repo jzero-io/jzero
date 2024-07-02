@@ -1,21 +1,23 @@
 syntax = "proto3";
 
-package {{ .Service }}{{ .Version }}pb;
+package {{ .Package }}{{ .Version }}pb;
 
 import "google/api/annotations.proto";
 import "validate/validate.proto";
 
-option go_package = "./pb/{{ .Service }}{{ .Version }}pb";
+option go_package = "./pb/{{ .Package }}{{ .Version }}pb";
 
 {{range $v := .Methods}}message {{$v.Name | FirstUpper}}Request {}
 message {{$v.Name | FirstUpper}}Response {}
 {{end}}
 
-service {{ .Service }}{{ .Version }} { {{range $v := .Methods}}
-    rpc {{ $v.Name }}({{$v.Name | FirstUpper}}Request) returns({{$v.Name | FirstUpper}}Response) {
+{{range $service := .Services}}
+service {{ $service }}{{ $.Version }} { {{range $m := $.Methods}}
+    rpc {{ $m.Name }}({{$m.Name | FirstUpper}}Request) returns({{$m.Name | FirstUpper}}Response) {
         option (google.api.http) = {
-            {{ $v.Verb }}: "/api/{{ $.UrlVersion }}/{{ $.Service }}/{{ $v.Name | FirstLower}}"
+            {{ $m.Verb }}: "/api/{{ $.UrlVersion }}/{{ $service }}/{{ $m.Name | FirstLower}}"
         };
     };
 {{end}}
 }
+{{end}}

@@ -16,5 +16,5 @@ jzero ivm init --version v2
 ## 新增 proto
 
 ```shell
-jzero ivm add proto --service machine
+jzero ivm add proto --name machine
 ```

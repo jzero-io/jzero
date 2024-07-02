@@ -49,6 +49,9 @@ var ivmAddProtoCmd = &cobra.Command{
 		if !strings.HasPrefix(ivm.Version, "v") {
 			cobra.CheckErr(errors.New("version must has prefix v"))
 		}
+		if len(ivmaddproto.Services) == 0 {
+			ivmaddproto.Services = []string{ivmaddproto.Name}
+		}
 	},
 	RunE:         ivmaddproto.AddProto,
 	SilenceUsage: true,
@@ -73,8 +76,9 @@ func init() {
 
 	{
 		ivmAddCmd.AddCommand(ivmAddProtoCmd)
-		ivmAddProtoCmd.Flags().StringVarP(&ivmaddproto.Service, "service", "", "template", "set proto service")
 
-		ivmAddProtoCmd.Flags().StringSliceVarP(&ivmaddproto.Methods, "methods", "m", []string{"Get:get"}, "set proto methods")
+		ivmAddProtoCmd.Flags().StringVarP(&ivmaddproto.Name, "name", "", "template", "set proto name")
+		ivmAddProtoCmd.Flags().StringSliceVarP(&ivmaddproto.Services, "services", "", nil, "set proto services")
+		ivmAddProtoCmd.Flags().StringSliceVarP(&ivmaddproto.Methods, "methods", "m", []string{"SayHello:get"}, "set proto methods")
 	}
 }
