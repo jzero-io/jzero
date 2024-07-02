@@ -235,9 +235,11 @@ func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, er
 			fp := filepath.Join(jr.Wd, "internal", "logic", strings.ToLower(service.Name), namingFormat+".go")
 
 			f := LogicFile{
-				Path:    fp,
-				Handler: rpc.Name,
-				Group:   service.Name,
+				Path:         fp,
+				Handler:      rpc.Name,
+				Group:        service.Name,
+				ClientStream: rpc.StreamsRequest,
+				ServerStream: rpc.StreamsReturns,
 			}
 
 			logicFiles = append(logicFiles, f)

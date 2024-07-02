@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/jzero-io/jzero/internal/gen"
+
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 )
 
@@ -53,8 +55,10 @@ func (ivm *IvmInit) setUpdateProtoLogic(fp string, oldFp string) error {
 			return err
 		}
 
-		logicMethodName := file.Handler
-		ivm.astInspect(f, oldFiles[i].Group, file.Group, logicMethodName)
+		err = ivm.astInspect(f, oldFiles[i], file)
+		if err != nil {
+			return err
+		}
 
 		// Write the modified AST back to the file
 		buf := bytes.NewBuffer(nil)
@@ -70,27 +74,20 @@ func (ivm *IvmInit) setUpdateProtoLogic(fp string, oldFp string) error {
 	return nil
 }
 
-func (ivm *IvmInit) astInspect(f *ast.File, oldService, newService, logicMethodName string) {
-	logicTypeName := fmt.Sprintf("New%sLogic", logicMethodName)
-	if ivm.jzeroRpc.RemoveSuffix {
-		logicTypeName = fmt.Sprintf("New%s", logicMethodName)
-	}
-
-	// 删除第一行注释
+func (ivm *IvmInit) astRemoveDefaultFirstLineComments(f *ast.File) error {
 	if len(f.Comments) > 0 {
-		// 获取第一个注释组
 		firstCommentGroup := f.Comments[0]
-		// 检查是否有注释
 		if len(firstCommentGroup.List) > 0 {
-			// 删除第一个注释
 			firstCommentGroup.List = firstCommentGroup.List[1:]
-			// 如果该注释组没有剩余的注释，则从文件的注释列表中删除该注释组
 			if len(firstCommentGroup.List) == 0 {
 				f.Comments = f.Comments[1:]
 			}
 		}
 	}
+	return nil
+}
 
+func (ivm *IvmInit) astAddImport(f *ast.File, oldService string) error {
 	// 添加 import
 	// Track added imports to avoid duplicates
 	addedImports := make(map[string]bool)
@@ -106,230 +103,260 @@ func (ivm *IvmInit) astInspect(f *ast.File, oldService, newService, logicMethodN
 	if !hasImport(f, fmt.Sprintf(`"%s/internal/pb/%spb"`, ivm.jzeroRpc.Module, strings.ToLower(oldService))) {
 		addImport(f, fmt.Sprintf(`"%s/internal/pb/%spb"`, ivm.jzeroRpc.Module, strings.ToLower(oldService)), addedImports)
 	}
+	return nil
+}
 
-	ast.Inspect(f, func(n ast.Node) bool {
-		if fn, ok := n.(*ast.FuncDecl); ok && fn.Recv != nil && fn.Name.Name == logicMethodName {
-			// get fn request type and response type name
-			var requestTypeName, responseTypeName string
-			if len(fn.Type.Params.List) > 0 {
-				requestField := fn.Type.Params.List[0]
-				if field, ok := requestField.Names[0].Obj.Decl.(*ast.Field); ok {
-					if startExpr, ok := field.Type.(*ast.StarExpr); ok {
-						if selectorExpr, ok := startExpr.X.(*ast.SelectorExpr); ok {
-							requestTypeName = selectorExpr.Sel.Name
+func (ivm *IvmInit) astAddLogicBody(f *ast.File, oldService, newService, logicMethodName string, clientStream, serverStream bool) error {
+	logicTypeName := fmt.Sprintf("New%sLogic", logicMethodName)
+	if ivm.jzeroRpc.RemoveSuffix {
+		logicTypeName = fmt.Sprintf("New%s", logicMethodName)
+	}
+
+	if !clientStream && !serverStream {
+		ast.Inspect(f, func(n ast.Node) bool {
+			if fn, ok := n.(*ast.FuncDecl); ok && fn.Recv != nil && fn.Name.Name == logicMethodName {
+				var requestTypeName, responseTypeName string
+				if len(fn.Type.Params.List) > 0 {
+					requestField := fn.Type.Params.List[0]
+					if field, ok := requestField.Names[0].Obj.Decl.(*ast.Field); ok {
+						if startExpr, ok := field.Type.(*ast.StarExpr); ok {
+							if selectorExpr, ok := startExpr.X.(*ast.SelectorExpr); ok {
+								requestTypeName = selectorExpr.Sel.Name
+							}
 						}
 					}
 				}
-			}
-			// 获取响应类型名称
-			if fn.Type.Results != nil && len(fn.Type.Results.List) > 0 {
-				responseField := fn.Type.Results.List[0]
-				if starExpr, ok := responseField.Type.(*ast.StarExpr); ok {
-					if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
-						responseTypeName = selectorExpr.Sel.Name
+				if fn.Type.Results != nil && len(fn.Type.Results.List) > 0 {
+					responseField := fn.Type.Results.List[0]
+					if starExpr, ok := responseField.Type.(*ast.StarExpr); ok {
+						if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
+							responseTypeName = selectorExpr.Sel.Name
+						}
 					}
 				}
-			}
 
-			newBody := []ast.Stmt{
-				&ast.AssignStmt{
-					Lhs: []ast.Expr{&ast.Ident{Name: "logic"}},
-					Rhs: []ast.Expr{&ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   &ast.Ident{Name: fmt.Sprintf("%slogic", strings.ToLower(oldService))},
-							Sel: &ast.Ident{Name: logicTypeName},
-						},
-						Args: []ast.Expr{
-							&ast.SelectorExpr{
-								X:   &ast.Ident{Name: "l"},
-								Sel: &ast.Ident{Name: "ctx"},
+				newBody := []ast.Stmt{
+					&ast.AssignStmt{
+						Lhs: []ast.Expr{&ast.Ident{Name: "logic"}},
+						Rhs: []ast.Expr{&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   &ast.Ident{Name: fmt.Sprintf("%slogic", strings.ToLower(oldService))},
+								Sel: &ast.Ident{Name: logicTypeName},
 							},
-							&ast.SelectorExpr{
-								X:   &ast.Ident{Name: "l"},
-								Sel: &ast.Ident{Name: "svcCtx"},
+							Args: []ast.Expr{
+								&ast.SelectorExpr{
+									X:   &ast.Ident{Name: "l"},
+									Sel: &ast.Ident{Name: "ctx"},
+								},
+								&ast.SelectorExpr{
+									X:   &ast.Ident{Name: "l"},
+									Sel: &ast.Ident{Name: "svcCtx"},
+								},
 							},
-						},
-					}},
-					Tok: token.DEFINE,
-				},
-				&ast.AssignStmt{
-					Lhs: []ast.Expr{&ast.Ident{Name: "marshal"}, &ast.Ident{Name: "err"}},
-					Rhs: []ast.Expr{&ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   &ast.Ident{Name: "proto"},
-							Sel: &ast.Ident{Name: "Marshal"},
-						},
-						Args: []ast.Expr{&ast.Ident{Name: "in"}},
-					}},
-					Tok: token.DEFINE,
-				},
-				&ast.IfStmt{
-					Cond: &ast.BinaryExpr{
-						X:  &ast.Ident{Name: "err"},
-						Op: token.NEQ,
-						Y:  &ast.Ident{Name: "nil"},
+						}},
+						Tok: token.DEFINE,
 					},
-					Body: &ast.BlockStmt{
-						List: []ast.Stmt{
-							&ast.ReturnStmt{
-								Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
+					&ast.AssignStmt{
+						Lhs: []ast.Expr{&ast.Ident{Name: "marshal"}, &ast.Ident{Name: "err"}},
+						Rhs: []ast.Expr{&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   &ast.Ident{Name: "proto"},
+								Sel: &ast.Ident{Name: "Marshal"},
 							},
-						},
+							Args: []ast.Expr{&ast.Ident{Name: "in"}},
+						}},
+						Tok: token.DEFINE,
 					},
-				},
-				&ast.DeclStmt{
-					Decl: &ast.GenDecl{
-						Tok: token.VAR,
-						Specs: []ast.Spec{
-							&ast.ValueSpec{
-								Names: []*ast.Ident{{Name: "oldIn"}},
-								Type:  &ast.SelectorExpr{X: &ast.Ident{Name: fmt.Sprintf("%spb", strings.ToLower(oldService))}, Sel: &ast.Ident{Name: requestTypeName}},
+					&ast.IfStmt{
+						Cond: &ast.BinaryExpr{
+							X:  &ast.Ident{Name: "err"},
+							Op: token.NEQ,
+							Y:  &ast.Ident{Name: "nil"},
+						},
+						Body: &ast.BlockStmt{
+							List: []ast.Stmt{
+								&ast.ReturnStmt{
+									Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
+								},
 							},
 						},
 					},
-				},
-				&ast.AssignStmt{
-					Lhs: []ast.Expr{&ast.Ident{Name: "err"}},
-					Rhs: []ast.Expr{&ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   &ast.Ident{Name: "proto"},
-							Sel: &ast.Ident{Name: "Unmarshal"},
-						},
-						Args: []ast.Expr{
-							&ast.Ident{Name: "marshal"},
-							&ast.UnaryExpr{
-								Op: token.AND,
-								X:  &ast.Ident{Name: "oldIn"},
-							},
-						},
-					}},
-					Tok: token.ASSIGN,
-				},
-				&ast.IfStmt{
-					Cond: &ast.BinaryExpr{
-						X:  &ast.Ident{Name: "err"},
-						Op: token.NEQ,
-						Y:  &ast.Ident{Name: "nil"},
-					},
-					Body: &ast.BlockStmt{
-						List: []ast.Stmt{
-							&ast.ReturnStmt{
-								Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
+					&ast.DeclStmt{
+						Decl: &ast.GenDecl{
+							Tok: token.VAR,
+							Specs: []ast.Spec{
+								&ast.ValueSpec{
+									Names: []*ast.Ident{{Name: "oldIn"}},
+									Type:  &ast.SelectorExpr{X: &ast.Ident{Name: fmt.Sprintf("%spb", strings.ToLower(oldService))}, Sel: &ast.Ident{Name: requestTypeName}},
+								},
 							},
 						},
 					},
-				},
-				&ast.AssignStmt{
-					Lhs: []ast.Expr{&ast.Ident{Name: "result"}, &ast.Ident{Name: "err"}},
-					Rhs: []ast.Expr{&ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   &ast.Ident{Name: "logic"},
-							Sel: &ast.Ident{Name: logicMethodName},
-						},
-						Args: []ast.Expr{
-							&ast.UnaryExpr{
-								Op: token.AND,
-								X:  &ast.Ident{Name: "oldIn"},
+					&ast.AssignStmt{
+						Lhs: []ast.Expr{&ast.Ident{Name: "err"}},
+						Rhs: []ast.Expr{&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   &ast.Ident{Name: "proto"},
+								Sel: &ast.Ident{Name: "Unmarshal"},
 							},
-						},
-					}},
-					Tok: token.DEFINE,
-				},
-				&ast.IfStmt{
-					Cond: &ast.BinaryExpr{
-						X:  &ast.Ident{Name: "err"},
-						Op: token.NEQ,
-						Y:  &ast.Ident{Name: "nil"},
-					},
-					Body: &ast.BlockStmt{
-						List: []ast.Stmt{
-							&ast.ReturnStmt{
-								Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
+							Args: []ast.Expr{
+								&ast.Ident{Name: "marshal"},
+								&ast.UnaryExpr{
+									Op: token.AND,
+									X:  &ast.Ident{Name: "oldIn"},
+								},
 							},
-						},
+						}},
+						Tok: token.ASSIGN,
 					},
-				},
-				&ast.AssignStmt{
-					Lhs: []ast.Expr{&ast.Ident{Name: "marshal"}, &ast.Ident{Name: "err"}},
-					Rhs: []ast.Expr{&ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   &ast.Ident{Name: "proto"},
-							Sel: &ast.Ident{Name: "Marshal"},
+					&ast.IfStmt{
+						Cond: &ast.BinaryExpr{
+							X:  &ast.Ident{Name: "err"},
+							Op: token.NEQ,
+							Y:  &ast.Ident{Name: "nil"},
 						},
-						Args: []ast.Expr{&ast.Ident{Name: "result"}},
-					}},
-					Tok: token.ASSIGN,
-				},
-				&ast.IfStmt{
-					Cond: &ast.BinaryExpr{
-						X:  &ast.Ident{Name: "err"},
-						Op: token.NEQ,
-						Y:  &ast.Ident{Name: "nil"},
-					},
-					Body: &ast.BlockStmt{
-						List: []ast.Stmt{
-							&ast.ReturnStmt{
-								Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
+						Body: &ast.BlockStmt{
+							List: []ast.Stmt{
+								&ast.ReturnStmt{
+									Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
+								},
 							},
 						},
 					},
-				},
-				&ast.DeclStmt{
-					Decl: &ast.GenDecl{
-						Tok: token.VAR,
-						Specs: []ast.Spec{
-							&ast.ValueSpec{
-								Names: []*ast.Ident{{Name: "newResp"}},
-								Type:  &ast.SelectorExpr{X: &ast.Ident{Name: fmt.Sprintf("%spb", strings.ToLower(newService))}, Sel: &ast.Ident{Name: responseTypeName}},
+					&ast.AssignStmt{
+						Lhs: []ast.Expr{&ast.Ident{Name: "result"}, &ast.Ident{Name: "err"}},
+						Rhs: []ast.Expr{&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   &ast.Ident{Name: "logic"},
+								Sel: &ast.Ident{Name: logicMethodName},
+							},
+							Args: []ast.Expr{
+								&ast.UnaryExpr{
+									Op: token.AND,
+									X:  &ast.Ident{Name: "oldIn"},
+								},
+							},
+						}},
+						Tok: token.DEFINE,
+					},
+					&ast.IfStmt{
+						Cond: &ast.BinaryExpr{
+							X:  &ast.Ident{Name: "err"},
+							Op: token.NEQ,
+							Y:  &ast.Ident{Name: "nil"},
+						},
+						Body: &ast.BlockStmt{
+							List: []ast.Stmt{
+								&ast.ReturnStmt{
+									Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
+								},
 							},
 						},
 					},
-				},
-				&ast.AssignStmt{
-					Lhs: []ast.Expr{&ast.Ident{Name: "err"}},
-					Rhs: []ast.Expr{&ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   &ast.Ident{Name: "proto"},
-							Sel: &ast.Ident{Name: "Unmarshal"},
+					&ast.AssignStmt{
+						Lhs: []ast.Expr{&ast.Ident{Name: "marshal"}, &ast.Ident{Name: "err"}},
+						Rhs: []ast.Expr{&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   &ast.Ident{Name: "proto"},
+								Sel: &ast.Ident{Name: "Marshal"},
+							},
+							Args: []ast.Expr{&ast.Ident{Name: "result"}},
+						}},
+						Tok: token.ASSIGN,
+					},
+					&ast.IfStmt{
+						Cond: &ast.BinaryExpr{
+							X:  &ast.Ident{Name: "err"},
+							Op: token.NEQ,
+							Y:  &ast.Ident{Name: "nil"},
 						},
-						Args: []ast.Expr{
-							&ast.Ident{Name: "marshal"},
+						Body: &ast.BlockStmt{
+							List: []ast.Stmt{
+								&ast.ReturnStmt{
+									Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
+								},
+							},
+						},
+					},
+					&ast.DeclStmt{
+						Decl: &ast.GenDecl{
+							Tok: token.VAR,
+							Specs: []ast.Spec{
+								&ast.ValueSpec{
+									Names: []*ast.Ident{{Name: "newResp"}},
+									Type:  &ast.SelectorExpr{X: &ast.Ident{Name: fmt.Sprintf("%spb", strings.ToLower(newService))}, Sel: &ast.Ident{Name: responseTypeName}},
+								},
+							},
+						},
+					},
+					&ast.AssignStmt{
+						Lhs: []ast.Expr{&ast.Ident{Name: "err"}},
+						Rhs: []ast.Expr{&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   &ast.Ident{Name: "proto"},
+								Sel: &ast.Ident{Name: "Unmarshal"},
+							},
+							Args: []ast.Expr{
+								&ast.Ident{Name: "marshal"},
+								&ast.UnaryExpr{
+									Op: token.AND,
+									X:  &ast.Ident{Name: "newResp"},
+								},
+							},
+						}},
+						Tok: token.ASSIGN,
+					},
+					&ast.IfStmt{
+						Cond: &ast.BinaryExpr{
+							X:  &ast.Ident{Name: "err"},
+							Op: token.NEQ,
+							Y:  &ast.Ident{Name: "nil"},
+						},
+						Body: &ast.BlockStmt{
+							List: []ast.Stmt{
+								&ast.ReturnStmt{
+									Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
+								},
+							},
+						},
+					},
+					&ast.ReturnStmt{
+						Results: []ast.Expr{
 							&ast.UnaryExpr{
 								Op: token.AND,
 								X:  &ast.Ident{Name: "newResp"},
 							},
-						},
-					}},
-					Tok: token.ASSIGN,
-				},
-				&ast.IfStmt{
-					Cond: &ast.BinaryExpr{
-						X:  &ast.Ident{Name: "err"},
-						Op: token.NEQ,
-						Y:  &ast.Ident{Name: "nil"},
-					},
-					Body: &ast.BlockStmt{
-						List: []ast.Stmt{
-							&ast.ReturnStmt{
-								Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
-							},
+							&ast.Ident{Name: "nil"},
 						},
 					},
-				},
-				&ast.ReturnStmt{
-					Results: []ast.Expr{
-						&ast.UnaryExpr{
-							Op: token.AND,
-							X:  &ast.Ident{Name: "newResp"},
-						},
-						&ast.Ident{Name: "nil"},
-					},
-				},
+				}
+				fn.Body.List = newBody
 			}
-			fn.Body.List = newBody
-		}
-		return true
-	})
+			return true
+		})
+	}
+
+	return nil
+}
+
+func (ivm *IvmInit) astInspect(f *ast.File, oldLogicFile gen.LogicFile, newLogicFile gen.LogicFile) error {
+	logicMethodName := newLogicFile.Handler
+	oldService := oldLogicFile.Group
+	newService := newLogicFile.Group
+
+	if err := ivm.astRemoveDefaultFirstLineComments(f); err != nil {
+		return err
+	}
+
+	if err := ivm.astAddImport(f, oldService); err != nil {
+		return err
+	}
+
+	if err := ivm.astAddLogicBody(f, oldService, newService, logicMethodName, false, false); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // hasImport checks if the given import path is already declared in the file.

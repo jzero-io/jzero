@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/internal/ivm"
+
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/jzero-io/jzero/internal/gen"
@@ -14,7 +16,6 @@ import (
 )
 
 var (
-	Version      string // version must v1 v2 v3...
 	Style        string
 	RemoveSuffix bool
 )
@@ -32,17 +33,17 @@ type IvmInit struct {
 func Init(command *cobra.Command, args []string) error {
 	var ivmInit IvmInit
 
-	err := ivmInit.setOldVersion(Version)
+	err := ivmInit.setOldVersion(ivm.Version)
 	if err != nil {
 		return err
 	}
-	ivmInit.newVersion = Version
+	ivmInit.newVersion = ivm.Version
 
 	protoDir := filepath.Join("desc", "proto", ivmInit.oldVersion)
 	protoBaseDir := filepath.Join("desc", "proto")
 	ivmInit.protoBaseDir = protoBaseDir
 	ivmInit.oldProtoDir = protoDir
-	ivmInit.newProtoDir = filepath.Join("desc", "proto", Version)
+	ivmInit.newProtoDir = filepath.Join("desc", "proto", ivm.Version)
 
 	var protoFiles []string
 
