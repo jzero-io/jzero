@@ -7,9 +7,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jzero-io/jzero/internal/gen/genrpcclient"
 	"os"
 	"path/filepath"
+
+	"github.com/jzero-io/jzero/internal/gen/genrpcclient"
 
 	"github.com/jzero-io/jzero/internal/gen/gendocs"
 	"github.com/jzero-io/jzero/internal/gen/gensdk"
@@ -44,10 +45,10 @@ var genCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
-// genRpcClientCmd represents the rpcClient command
-var genRpcClientCmd = &cobra.Command{
-	Use:   "rpcclient",
-	Short: `Gen rpc client code by proto`,
+// genZRpcClientCmd represents the rpcClient command
+var genZRpcClientCmd = &cobra.Command{
+	Use:   "zrpcclient",
+	Short: `Gen zrpc client code by proto`,
 	RunE:  genrpcclient.Generate,
 }
 
@@ -138,8 +139,10 @@ func init() {
 	}
 
 	{
-		genCmd.AddCommand(genRpcClientCmd)
+		genCmd.AddCommand(genZRpcClientCmd)
 
-		genRpcClientCmd.Flags().StringVarP(&genrpcclient.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+		genZRpcClientCmd.Flags().StringVarP(&genrpcclient.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+		genZRpcClientCmd.Flags().StringVarP(&genrpcclient.Output, "output", "o", "rpclient-go", "generate rpcclient code")
+
 	}
 }

@@ -60,8 +60,5 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 // which is the result of the command go list
 type ModuleStruct struct {
 	Path      string
-	Main      bool
-	Dir       string
-	GoMod     string
 	GoVersion string
 }
