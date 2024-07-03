@@ -17,11 +17,12 @@ import (
 )
 
 var (
-	Module  string
-	Output  string
-	AppName string
-	Remote  string
-	Branch  string
+	Module       string
+	Output       string
+	AppName      string
+	Remote       string
+	Branch       string
+	WithTemplate bool
 )
 
 type TemplateData struct {

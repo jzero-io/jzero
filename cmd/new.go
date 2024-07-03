@@ -60,6 +60,22 @@ var newCmd = &cobra.Command{
 				fmt.Printf("%s cache: %s\n", color.WithColor("Using", color.FgGreen), filepath.Join(home, ".jzero", "templates", new.Branch))
 			}
 			embeded.Home = filepath.Join(home, ".jzero", "templates", new.Branch)
+
+			if new.WithTemplate {
+				fmt.Printf("%s templates into '%s/.template', please wait...\n", color.WithColor("Cloning", color.FgGreen), new.Output)
+				_, err := git.PlainClone(filepath.Join(new.Output, ".template"), false, &git.CloneOptions{
+					SingleBranch:  true,
+					URL:           new.Remote,
+					Depth:         0,
+					ReferenceName: plumbing.ReferenceName("refs/heads/" + new.Branch),
+				})
+				cobra.CheckErr(err)
+				fmt.Println(color.WithColor("Done", color.FgGreen))
+
+				if pathx.FileExists(filepath.Join(new.Output, ".template", "go-zero")) {
+					fmt.Printf("If you want to use all go-zero templates. Please exec `goctl template init --home %s/.template/go-zero`\n", new.Output)
+				}
+			}
 		}
 	},
 	RunE: new.NewProject,
@@ -81,6 +97,7 @@ func init() {
 	newCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(wd, ".template"), "set home dir")
 	newCmd.Flags().StringVarP(&new.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringVarP(&new.Branch, "branch", "b", "", "remote templates repo branch")
+	newCmd.Flags().BoolVarP(&new.WithTemplate, "with-template", "", false, "with template files in your project")
 
 	// newApiFile command flags
 	{
