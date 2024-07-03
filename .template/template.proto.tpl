@@ -4,8 +4,15 @@ package {{ .Package }}{{ .Version }}pb;
 
 import "google/api/annotations.proto";
 import "validate/validate.proto";
+import "grpc-gateway/protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "./pb/{{ .Package }}{{ .Version }}pb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        version: "{{ .UrlVersion }}";
+    };
+};
 
 {{range $v := .Methods}}message {{$v.Name | FirstUpper}}Request {}
 message {{$v.Name | FirstUpper}}Response {}

@@ -26,6 +26,11 @@ func (ivm *IvmInit) updateProtoVersion(protoFilepath string, fd *desc.FileDescri
 		return err
 	}
 
+	err = ivm.updateProtoGenOpenapiv2InfoVersion(fdProto)
+	if err != nil {
+		return err
+	}
+
 	err = ivm.updateProtoService(fdProto)
 	if err != nil {
 		return err
@@ -55,6 +60,11 @@ func (ivm *IvmInit) updateProtoOptionGoPackage(fdp *descriptorpb.FileDescriptorP
 		newOptionGoPackage := strings.TrimSuffix(oldOptionGoPackage, ivm.oldVersion) + ivm.newVersion
 		fdp.Options.GoPackage = &newOptionGoPackage
 	}
+	return nil
+}
+
+func (ivm *IvmInit) updateProtoGenOpenapiv2InfoVersion(fdp *descriptorpb.FileDescriptorProto) error {
+	println(fdp.Options.String())
 	return nil
 }
 

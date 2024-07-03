@@ -4,8 +4,15 @@ package hellopb;
 
 import "google/api/annotations.proto";
 import "validate/validate.proto";
+import "grpc-gateway/protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "./pb/hellopb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        version: "v1";
+    };
+};
 
 message SayHelloRequest {
     string message = 1 [(validate.rules).string = {

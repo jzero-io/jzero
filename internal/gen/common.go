@@ -26,10 +26,6 @@ func GetProtoFilepath(protoDirPath string) ([]string, error) {
 	}
 
 	for _, protoFile := range protoDir {
-		if protoFile.Name() == "google" || protoFile.Name() == "validate" {
-			continue
-		}
-
 		if protoFile.IsDir() {
 			filenames, err := GetProtoFilepath(filepath.Join(protoDirPath, protoFile.Name()))
 			if err != nil {
@@ -41,7 +37,6 @@ func GetProtoFilepath(protoDirPath string) ([]string, error) {
 				protoFilenames = append(protoFilenames, filepath.Join(protoDirPath, protoFile.Name()))
 			}
 		}
-
 	}
 	return protoFilenames, nil
 }

@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"strings"
 
+	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
+
 	"github.com/pkg/errors"
 
 	"github.com/jzero-io/jzero/internal/gen"
@@ -60,7 +62,17 @@ func Gen(_ *cobra.Command, _ []string) error {
 		if err != nil {
 			return err
 		}
+
 		for _, path := range protoFilepath {
+			protoParser := rpcparser.NewDefaultProtoParser()
+			_, err = protoParser.Parse(path, true)
+			if err != nil {
+				if strings.Contains(err.Error(), "rpc service not found") {
+					continue
+				}
+				return err
+			}
+
 			command := fmt.Sprintf("protoc -I%s %s --openapiv2_out=%s",
 				ProtoDir,
 				path,
