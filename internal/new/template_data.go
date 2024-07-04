@@ -2,6 +2,7 @@ package new
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 
 	"github.com/hashicorp/go-version"
@@ -37,6 +38,7 @@ func newTemplateData() (map[string]interface{}, error) {
 		"Module":    Module,
 		"APP":       AppName,
 		"GoVersion": goVersion,
+		"GoArch":    runtime.GOARCH,
 	}
 
 	return templateData, nil
