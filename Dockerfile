@@ -5,7 +5,6 @@ ENV GOPROXY https://goproxy.io,direct
 
 WORKDIR /app
 
-COPY config.toml /root/.jzero/config.toml
 COPY dist/jzero_linux_amd64_v1/jzero /dist/jzero_linux_amd64_v1/jzero
 COPY dist/jzero_linux_arm64/jzero /dist/jzero_linux_arm64/jzero
 
