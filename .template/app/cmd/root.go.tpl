@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/zeromicro/go-zero/core/color"
 )
 
 var cfgFile string
@@ -50,9 +51,14 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
+	    printBanner()
 		_, _ = fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 		cfgFile = viper.ConfigFileUsed()
 	} else {
 		cobra.CheckErr(err)
 	}
+}
+
+func printBanner() {
+	fmt.Println(color.WithColor("       __   ________   _______ .______        ______   \n      |  | |       /  |   ____||   _  \\      /  __  \\  \n      |  | `---/  /   |  |__   |  |_)  |    |  |  |  | \n.--.  |  |    /  /    |   __|  |      /     |  |  |  | \n|  `--'  |   /  /----.|  |____ |  |\\  \\----.|  `--'  | \n \\______/   /________||_______|| _| `._____| \\______/  \n", color.FgGreen))
 }
