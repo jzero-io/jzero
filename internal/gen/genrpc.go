@@ -75,9 +75,6 @@ func (jr *JzeroRpc) Gen() error {
 		var parse rpcparser.Proto
 		parse, err = protoParser.Parse(v, true)
 		if err != nil {
-			if strings.Contains(err.Error(), "rpc service not found") {
-				continue
-			}
 			return err
 		}
 

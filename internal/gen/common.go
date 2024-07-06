@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jhump/protoreflect/desc/protoparse"
+
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 )
 
@@ -34,11 +36,36 @@ func GetProtoFilepath(protoDirPath string) ([]string, error) {
 			protoFilenames = append(protoFilenames, filenames...)
 		} else {
 			if strings.HasSuffix(protoFile.Name(), ".proto") {
-				protoFilenames = append(protoFilenames, filepath.Join(protoDirPath, protoFile.Name()))
+				if b, err := protoHasService(filepath.Join(protoDirPath, protoFile.Name())); err == nil && b {
+					protoFilenames = append(protoFilenames, filepath.Join(protoDirPath, protoFile.Name()))
+				} else if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
 	return protoFilenames, nil
+}
+
+func protoHasService(fp string) (bool, error) {
+	protoBaseDir := filepath.Join("desc", "proto")
+
+	var protoParser protoparse.Parser
+	protoParser.ImportPaths = []string{protoBaseDir}
+	rel, err := filepath.Rel(protoBaseDir, fp)
+	if err != nil {
+		return false, err
+	}
+	fds, err := protoParser.ParseFiles(rel)
+	if err != nil {
+		return false, err
+	}
+	if len(fds) == 1 {
+		if len(fds[0].GetServices()) >= 1 {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func GetMainApiFilePath(apiDirName string) (string, bool, error) {

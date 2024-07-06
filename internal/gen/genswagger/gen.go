@@ -67,9 +67,6 @@ func Gen(_ *cobra.Command, _ []string) error {
 			protoParser := rpcparser.NewDefaultProtoParser()
 			_, err = protoParser.Parse(path, true)
 			if err != nil {
-				if strings.Contains(err.Error(), "rpc service not found") {
-					continue
-				}
 				return err
 			}
 
