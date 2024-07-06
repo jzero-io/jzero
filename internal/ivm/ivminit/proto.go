@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
 	openapi_options "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoprint"
@@ -136,6 +138,11 @@ func (ivm *IvmInit) writeNewProto(protoFilepath string, fd *desc.FileDescriptor,
 	newFilename := newFileBase + "_" + ivm.newVersion + ".proto"
 
 	newProtoFilepath := filepath.Join(ivm.newProtoDir, newFilename)
+
+	if pathx.FileExists(newProtoFilepath) {
+		return nil
+	}
+
 	_ = os.MkdirAll(filepath.Dir(newProtoFilepath), 0o755)
 
 	return os.WriteFile(newProtoFilepath, []byte(ivm.todoFixMessageTypeInRpcMethod(protoStr, oldProtoPackage)), 0o644)

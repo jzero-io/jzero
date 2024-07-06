@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
 	"github.com/jzero-io/jzero/internal/gen"
 
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
@@ -46,6 +48,9 @@ func (ivm *IvmInit) setUpdateProtoLogic(fp string, oldFp string) error {
 			newFilePath = strings.TrimSuffix(newFilePath, "_")
 			newFilePath = strings.TrimSuffix(newFilePath, "-")
 			newFilePath += ".go"
+		}
+		if pathx.FileExists(newFilePath) {
+			return nil
 		}
 
 		fset := token.NewFileSet()
