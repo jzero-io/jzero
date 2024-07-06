@@ -55,7 +55,7 @@ var checkCmd = &cobra.Command{
 		log.Info("\n[jzero-env]: looking up goctl-swagger")
 		_, err = env.LookPath("goctl-swagger")
 		if err != nil {
-			_ = golang.Install("github.com/zeromicro/goctl-swagger@latest")
+			_ = golang.Install("github.com/jzero-io/goctl-swagger@latest")
 		}
 		if _, err = env.LookPath("goctl-swagger"); err == nil {
 			log.Success(`[jzero-env]: "goctl-swagger" is installed`)
