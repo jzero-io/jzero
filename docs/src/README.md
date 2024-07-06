@@ -4,30 +4,16 @@ icon: home
 title: 首页
 ---
 
-可支持任意框架的脚手架 jzero, 默认支持 go-zero
-
-::: tip 目前还在定制规范中, 不能保证兼容性. 待 v1.0 后保证兼容性
-:::
-
 <div style="text-align: center;">
   <img src="https://oss.jaronnie.com/jzero.jpg" style="width: 33%;" alt=""/>
 </div>
 
 ## 特性
 
-* 企业级代码规范, 多人开发友好
+* 企业级代码规范
 * 支持自定义模板, 基于模板新建项目和生成代码, 默认支持多场景开发模板
-    * grpc + grpc gateway + api
-    * api
-    * grpc
-    * grpc + grpc gateway
-    * cli
-* 扩展 go-zero 功能，完全同步 go-zero 新特性
-    * 保持与原生 goctl 生成的目录, 易迁移过来
-    * 支持 types 分组
-    * 支持删除冗余的 Logic, Handler, Server 等字样
-* 一键创建项目
-* 一键生成服务端代码, 数据库代码, 客户端 sdk
+* 一键创建项目, 一键生成服务端代码, 数据库代码, 客户端代码
+* 基于 go-zero 框架, 扩展 go-zero 功能，并能完全同步 go-zero 新特性
 
 ## 快速开始
 

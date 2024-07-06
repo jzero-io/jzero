@@ -20,4 +20,6 @@ docker run --rm -v ${PWD}:/app jaronnie/jzero:latest gen swagger
 ```
 :::
 
-访问 localhost:8001/swagger 即可访问 swagger ui
+## 在线访问 swagger ui
+
+ip:port/swagger
