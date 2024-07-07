@@ -345,7 +345,7 @@ func (ivm *IvmInit) astAddLogic(f *ast.File, oldService, newService, logicMethod
 		})
 	}
 
-	//if clientStream && !serverStream {
+	//if clientStream {
 	//	/*
 	//		func (l *SayHello) SayHello(stream hellopb.Hello_SayHelloServer) error {
 	//			return nil
@@ -353,7 +353,7 @@ func (ivm *IvmInit) astAddLogic(f *ast.File, oldService, newService, logicMethod
 	//	*/
 	//}
 	//
-	//if (!clientStream && serverStream) || (clientStream && serverStream) {
+	//if (!clientStream && serverStream) {
 	//	/*
 	//		func (l *SayHello) SayHello(in *hellopb.SayHelloRequest, stream hellopb.Hello_SayHelloServer) error {
 	//			return nil

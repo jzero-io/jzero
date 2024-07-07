@@ -59,7 +59,7 @@ func AddProto(command *cobra.Command, args []string) error {
 		"Version":    version,
 		"UrlVersion": ivm.Version,
 		"ProtoPath":  filepath.Join(ivm.Version, fmt.Sprintf("%s%s.proto", Name, versionSuffix)),
-	}, embeded.ReadTemplateFile("template.proto.tpl"))
+	}, embeded.ReadTemplateFile(filepath.Join("ivm", "add", "template.proto.tpl")))
 	if err != nil {
 		return err
 	}

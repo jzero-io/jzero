@@ -10,8 +10,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jzero-io/jzero/internal/new/newapifile"
-
 	"github.com/jzero-io/jzero/internal/new"
 
 	"github.com/go-git/go-git/v5/plumbing"
@@ -82,12 +80,6 @@ var newCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 
-var newApiFileCmd = &cobra.Command{
-	Use:   "api-file",
-	Short: "Create api file by api template",
-	RunE:  newapifile.New,
-}
-
 func init() {
 	wd, _ := os.Getwd()
 
@@ -98,12 +90,4 @@ func init() {
 	newCmd.Flags().StringVarP(&new.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringVarP(&new.Branch, "branch", "b", "", "remote templates repo branch")
 	newCmd.Flags().BoolVarP(&new.WithTemplate, "with-template", "", false, "with template files in your project")
-
-	// newApiFile command flags
-	{
-		newCmd.AddCommand(newApiFileCmd)
-		newApiFileCmd.Flags().StringVarP(&newapifile.Service, "service", "", "template", "set service")
-		newApiFileCmd.Flags().StringVarP(&newapifile.Group, "group", "", ".", "set api file group")
-		newApiFileCmd.Flags().StringSliceVarP(&newapifile.Handlers, "handler", "", []string{"List", "Get", "Edit", "List", "Delete"}, "set api file handlers")
-	}
 }

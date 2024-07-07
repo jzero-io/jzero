@@ -1,4 +1,4 @@
-package newapifile
+package ivmaddapi
 
 import (
 	"os"
@@ -16,13 +16,13 @@ var (
 	Handlers []string
 )
 
-func New(_ *cobra.Command, _ []string) error {
+func AddApi(_ *cobra.Command, _ []string) error {
 	template, err := templatex.ParseTemplate(map[string]interface{}{
 		"Handlers":   Handlers,
 		"Service":    Service,
 		"Group":      Group,
 		"GroupCamel": stringx.FirstUpper(stringx.ToCamel(Group)),
-	}, embeded.ReadTemplateFile("template.api.tpl"))
+	}, embeded.ReadTemplateFile(filepath.Join("ivm", "add", "template.api.tpl")))
 	if err != nil {
 		return err
 	}

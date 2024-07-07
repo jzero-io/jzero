@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/jzero-io/jzero/internal/ivm"
+	"github.com/jzero-io/jzero/internal/ivm/ivmaddapi"
 	"github.com/jzero-io/jzero/internal/ivm/ivmaddproto"
 	"github.com/jzero-io/jzero/internal/ivm/ivminit"
 	"github.com/pkg/errors"
@@ -50,6 +51,18 @@ var ivmAddProtoCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
+var ivmAddApiCmd = &cobra.Command{
+	Use:   "api",
+	Short: `Add a example api`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if !strings.HasPrefix(ivm.Version, "v") {
+			cobra.CheckErr(errors.New("version must has prefix v"))
+		}
+	},
+	RunE:         ivmaddapi.AddApi,
+	SilenceUsage: true,
+}
+
 func init() {
 	{
 		rootCmd.AddCommand(ivmCmd)
@@ -73,5 +86,12 @@ func init() {
 		ivmAddProtoCmd.Flags().StringVarP(&ivmaddproto.Name, "name", "", "template", "set proto name")
 		ivmAddProtoCmd.Flags().StringSliceVarP(&ivmaddproto.Services, "services", "", nil, "set proto services")
 		ivmAddProtoCmd.Flags().StringSliceVarP(&ivmaddproto.Methods, "methods", "m", []string{"SayHello:get"}, "set proto methods")
+	}
+
+	{
+		ivmAddCmd.AddCommand(ivmAddApiCmd)
+		ivmAddApiCmd.Flags().StringVarP(&ivmaddapi.Service, "service", "", "template", "set service")
+		ivmAddApiCmd.Flags().StringVarP(&ivmaddapi.Group, "group", "", ".", "set api file group")
+		ivmAddApiCmd.Flags().StringSliceVarP(&ivmaddapi.Handlers, "handler", "", []string{"List", "Get", "Edit", "List", "Delete"}, "set api file handlers")
 	}
 }
