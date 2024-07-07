@@ -8,16 +8,19 @@ import (
 	goparser "go/parser"
 	"go/token"
 	"os"
+	"path/filepath"
 	"strings"
 
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/templatex"
+	"github.com/rinchsan/gosimports"
 
 	"github.com/jzero-io/jzero/internal/gen"
 
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 )
 
-func (ivm *IvmInit) setUpdateProtoLogic(fp string, oldFp string) error {
+func (ivm *IvmInit) updateProtoLogic(fp string, oldFp string) error {
 	protoParser := rpcparser.NewDefaultProtoParser()
 	parse, err := protoParser.Parse(fp, true)
 	if err != nil {
@@ -49,9 +52,6 @@ func (ivm *IvmInit) setUpdateProtoLogic(fp string, oldFp string) error {
 			newFilePath = strings.TrimSuffix(newFilePath, "-")
 			newFilePath += ".go"
 		}
-		if pathx.FileExists(newFilePath) {
-			return nil
-		}
 
 		fset := token.NewFileSet()
 
@@ -71,7 +71,98 @@ func (ivm *IvmInit) setUpdateProtoLogic(fp string, oldFp string) error {
 			return err
 		}
 
-		if err = os.WriteFile(newFilePath, buf.Bytes(), 0o644); err != nil {
+		fileContent := strings.ReplaceAll(buf.String(), "__TEMPLATE_BODY__", "{{ .Body }}")
+		fileContent = strings.ReplaceAll(fileContent, "var __TEMPLATE_ADAPTOR__ string", "{{ .Adaptor }}")
+
+		logicTypeName := fmt.Sprintf("%sLogic", file.Handler)
+		if ivm.jzeroRpc.RemoveSuffix {
+			logicTypeName = file.Handler
+		}
+
+		templateValue := map[string]interface{}{
+			"Service":          file.Group,
+			"OldService":       oldFiles[i].Group,
+			"LogicTypeName":    logicTypeName,
+			"MethodName":       file.Handler,
+			"RequestTypeName":  file.RequestTypeName,
+			"ResponseTypeName": file.ResponseTypeName,
+		}
+
+		var templateFile []byte
+		if !file.ClientStream && !file.ServerStream {
+			templateLogicBody, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-body.tpl")))
+			if err != nil {
+				return err
+			}
+
+			templateFile, err = templatex.ParseTemplate(map[string]interface{}{
+				"Body": string(templateLogicBody),
+			}, []byte(fileContent))
+			if err != nil {
+				return err
+			}
+		} else if file.ClientStream && file.ServerStream {
+			templateLogicBody, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-server-stream-body.tpl")))
+			if err != nil {
+				return err
+			}
+
+			templateLogicAdaptor, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-server-stream-adaptor.tpl")))
+			if err != nil {
+				return err
+			}
+
+			templateFile, err = templatex.ParseTemplate(map[string]interface{}{
+				"Body":    string(templateLogicBody),
+				"Adaptor": string(templateLogicAdaptor),
+			}, []byte(fileContent))
+			if err != nil {
+				return err
+			}
+		} else if file.ClientStream && !file.ServerStream {
+			templateLogicBody, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-stream-body.tpl")))
+			if err != nil {
+				return err
+			}
+
+			templateLogicAdaptor, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-stream-adaptor.tpl")))
+			if err != nil {
+				return err
+			}
+
+			templateFile, err = templatex.ParseTemplate(map[string]interface{}{
+				"Body":    string(templateLogicBody),
+				"Adaptor": string(templateLogicAdaptor),
+			}, []byte(fileContent))
+			if err != nil {
+				return err
+			}
+		} else if file.ServerStream && !file.ClientStream {
+			templateLogicBody, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-server-stream-body.tpl")))
+			if err != nil {
+				return err
+			}
+
+			templateLogicAdaptor, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-server-stream-adaptor.tpl")))
+			if err != nil {
+				return err
+			}
+
+			templateFile, err = templatex.ParseTemplate(map[string]interface{}{
+				"Body":    string(templateLogicBody),
+				"Adaptor": string(templateLogicAdaptor),
+			}, []byte(fileContent))
+			if err != nil {
+				return err
+			}
+		}
+
+		templateFileFormat, err := gosimports.Process("", templateFile, &gosimports.Options{FormatOnly: true, Comments: true})
+		if err != nil {
+			continue
+		}
+
+		if err = os.WriteFile(newFilePath, templateFileFormat, 0o644); err != nil {
 			return err
 		}
 	}
@@ -92,7 +183,7 @@ func (ivm *IvmInit) astRemoveDefaultFirstLineComments(f *ast.File) error {
 	return nil
 }
 
-func (ivm *IvmInit) astAddImport(f *ast.File, oldService string) error {
+func (ivm *IvmInit) astAddImport(f *ast.File, oldService string, clientStream, serverStream bool) error {
 	// 添加 import
 	// Track added imports to avoid duplicates
 	addedImports := make(map[string]bool)
@@ -108,258 +199,47 @@ func (ivm *IvmInit) astAddImport(f *ast.File, oldService string) error {
 	if !hasImport(f, fmt.Sprintf(`"%s/internal/pb/%spb"`, ivm.jzeroRpc.Module, strings.ToLower(oldService))) {
 		addImport(f, fmt.Sprintf(`"%s/internal/pb/%spb"`, ivm.jzeroRpc.Module, strings.ToLower(oldService)), addedImports)
 	}
+	if clientStream || serverStream {
+		if !hasImport(f, `"io"`) {
+			addImport(f, `"io"`, addedImports)
+		}
+	}
 	return nil
 }
 
-func (ivm *IvmInit) astAddLogic(f *ast.File, oldService, newService, logicMethodName string, clientStream, serverStream bool) error {
-	logicTypeName := fmt.Sprintf("New%sLogic", logicMethodName)
-	if ivm.jzeroRpc.RemoveSuffix {
-		logicTypeName = fmt.Sprintf("New%s", logicMethodName)
+func (ivm *IvmInit) astAddLogic(f *ast.File, oldService, logicMethodName string, clientStream, serverStream bool) error {
+	if err := ivm.astAddImport(f, oldService, clientStream, serverStream); err != nil {
+		return err
 	}
 
-	if !clientStream && !serverStream {
-		if err := ivm.astAddImport(f, oldService); err != nil {
-			return err
+	if clientStream || serverStream {
+		varDecl := &ast.GenDecl{
+			Tok: token.VAR,
+			Specs: []ast.Spec{
+				&ast.ValueSpec{
+					Names: []*ast.Ident{
+						ast.NewIdent("__TEMPLATE_ADAPTOR__"),
+					},
+					Type: &ast.Ident{Name: "string"},
+				},
+			},
 		}
-
-		ast.Inspect(f, func(n ast.Node) bool {
-			if fn, ok := n.(*ast.FuncDecl); ok && fn.Recv != nil && fn.Name.Name == logicMethodName {
-				var requestTypeName, responseTypeName string
-				if len(fn.Type.Params.List) > 0 {
-					requestField := fn.Type.Params.List[0]
-					if field, ok := requestField.Names[0].Obj.Decl.(*ast.Field); ok {
-						if startExpr, ok := field.Type.(*ast.StarExpr); ok {
-							if selectorExpr, ok := startExpr.X.(*ast.SelectorExpr); ok {
-								requestTypeName = selectorExpr.Sel.Name
-							}
-						}
-					}
-				}
-				if fn.Type.Results != nil && len(fn.Type.Results.List) > 0 {
-					responseField := fn.Type.Results.List[0]
-					if starExpr, ok := responseField.Type.(*ast.StarExpr); ok {
-						if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
-							responseTypeName = selectorExpr.Sel.Name
-						}
-					}
-				}
-
-				newBody := []ast.Stmt{
-					&ast.AssignStmt{
-						Lhs: []ast.Expr{&ast.Ident{Name: "logic"}},
-						Rhs: []ast.Expr{&ast.CallExpr{
-							Fun: &ast.SelectorExpr{
-								X:   &ast.Ident{Name: fmt.Sprintf("%slogic", strings.ToLower(oldService))},
-								Sel: &ast.Ident{Name: logicTypeName},
-							},
-							Args: []ast.Expr{
-								&ast.SelectorExpr{
-									X:   &ast.Ident{Name: "l"},
-									Sel: &ast.Ident{Name: "ctx"},
-								},
-								&ast.SelectorExpr{
-									X:   &ast.Ident{Name: "l"},
-									Sel: &ast.Ident{Name: "svcCtx"},
-								},
-							},
-						}},
-						Tok: token.DEFINE,
-					},
-					&ast.AssignStmt{
-						Lhs: []ast.Expr{&ast.Ident{Name: "marshal"}, &ast.Ident{Name: "err"}},
-						Rhs: []ast.Expr{&ast.CallExpr{
-							Fun: &ast.SelectorExpr{
-								X:   &ast.Ident{Name: "proto"},
-								Sel: &ast.Ident{Name: "Marshal"},
-							},
-							Args: []ast.Expr{&ast.Ident{Name: "in"}},
-						}},
-						Tok: token.DEFINE,
-					},
-					&ast.IfStmt{
-						Cond: &ast.BinaryExpr{
-							X:  &ast.Ident{Name: "err"},
-							Op: token.NEQ,
-							Y:  &ast.Ident{Name: "nil"},
-						},
-						Body: &ast.BlockStmt{
-							List: []ast.Stmt{
-								&ast.ReturnStmt{
-									Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
-								},
-							},
-						},
-					},
-					&ast.DeclStmt{
-						Decl: &ast.GenDecl{
-							Tok: token.VAR,
-							Specs: []ast.Spec{
-								&ast.ValueSpec{
-									Names: []*ast.Ident{{Name: "oldIn"}},
-									Type:  &ast.SelectorExpr{X: &ast.Ident{Name: fmt.Sprintf("%spb", strings.ToLower(oldService))}, Sel: &ast.Ident{Name: requestTypeName}},
-								},
-							},
-						},
-					},
-					&ast.AssignStmt{
-						Lhs: []ast.Expr{&ast.Ident{Name: "err"}},
-						Rhs: []ast.Expr{&ast.CallExpr{
-							Fun: &ast.SelectorExpr{
-								X:   &ast.Ident{Name: "proto"},
-								Sel: &ast.Ident{Name: "Unmarshal"},
-							},
-							Args: []ast.Expr{
-								&ast.Ident{Name: "marshal"},
-								&ast.UnaryExpr{
-									Op: token.AND,
-									X:  &ast.Ident{Name: "oldIn"},
-								},
-							},
-						}},
-						Tok: token.ASSIGN,
-					},
-					&ast.IfStmt{
-						Cond: &ast.BinaryExpr{
-							X:  &ast.Ident{Name: "err"},
-							Op: token.NEQ,
-							Y:  &ast.Ident{Name: "nil"},
-						},
-						Body: &ast.BlockStmt{
-							List: []ast.Stmt{
-								&ast.ReturnStmt{
-									Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
-								},
-							},
-						},
-					},
-					&ast.AssignStmt{
-						Lhs: []ast.Expr{&ast.Ident{Name: "result"}, &ast.Ident{Name: "err"}},
-						Rhs: []ast.Expr{&ast.CallExpr{
-							Fun: &ast.SelectorExpr{
-								X:   &ast.Ident{Name: "logic"},
-								Sel: &ast.Ident{Name: logicMethodName},
-							},
-							Args: []ast.Expr{
-								&ast.UnaryExpr{
-									Op: token.AND,
-									X:  &ast.Ident{Name: "oldIn"},
-								},
-							},
-						}},
-						Tok: token.DEFINE,
-					},
-					&ast.IfStmt{
-						Cond: &ast.BinaryExpr{
-							X:  &ast.Ident{Name: "err"},
-							Op: token.NEQ,
-							Y:  &ast.Ident{Name: "nil"},
-						},
-						Body: &ast.BlockStmt{
-							List: []ast.Stmt{
-								&ast.ReturnStmt{
-									Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
-								},
-							},
-						},
-					},
-					&ast.AssignStmt{
-						Lhs: []ast.Expr{&ast.Ident{Name: "marshal"}, &ast.Ident{Name: "err"}},
-						Rhs: []ast.Expr{&ast.CallExpr{
-							Fun: &ast.SelectorExpr{
-								X:   &ast.Ident{Name: "proto"},
-								Sel: &ast.Ident{Name: "Marshal"},
-							},
-							Args: []ast.Expr{&ast.Ident{Name: "result"}},
-						}},
-						Tok: token.ASSIGN,
-					},
-					&ast.IfStmt{
-						Cond: &ast.BinaryExpr{
-							X:  &ast.Ident{Name: "err"},
-							Op: token.NEQ,
-							Y:  &ast.Ident{Name: "nil"},
-						},
-						Body: &ast.BlockStmt{
-							List: []ast.Stmt{
-								&ast.ReturnStmt{
-									Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
-								},
-							},
-						},
-					},
-					&ast.DeclStmt{
-						Decl: &ast.GenDecl{
-							Tok: token.VAR,
-							Specs: []ast.Spec{
-								&ast.ValueSpec{
-									Names: []*ast.Ident{{Name: "newResp"}},
-									Type:  &ast.SelectorExpr{X: &ast.Ident{Name: fmt.Sprintf("%spb", strings.ToLower(newService))}, Sel: &ast.Ident{Name: responseTypeName}},
-								},
-							},
-						},
-					},
-					&ast.AssignStmt{
-						Lhs: []ast.Expr{&ast.Ident{Name: "err"}},
-						Rhs: []ast.Expr{&ast.CallExpr{
-							Fun: &ast.SelectorExpr{
-								X:   &ast.Ident{Name: "proto"},
-								Sel: &ast.Ident{Name: "Unmarshal"},
-							},
-							Args: []ast.Expr{
-								&ast.Ident{Name: "marshal"},
-								&ast.UnaryExpr{
-									Op: token.AND,
-									X:  &ast.Ident{Name: "newResp"},
-								},
-							},
-						}},
-						Tok: token.ASSIGN,
-					},
-					&ast.IfStmt{
-						Cond: &ast.BinaryExpr{
-							X:  &ast.Ident{Name: "err"},
-							Op: token.NEQ,
-							Y:  &ast.Ident{Name: "nil"},
-						},
-						Body: &ast.BlockStmt{
-							List: []ast.Stmt{
-								&ast.ReturnStmt{
-									Results: []ast.Expr{&ast.Ident{Name: "nil"}, &ast.Ident{Name: "err"}},
-								},
-							},
-						},
-					},
-					&ast.ReturnStmt{
-						Results: []ast.Expr{
-							&ast.UnaryExpr{
-								Op: token.AND,
-								X:  &ast.Ident{Name: "newResp"},
-							},
-							&ast.Ident{Name: "nil"},
-						},
-					},
-				}
-				fn.Body.List = newBody
-			}
-			return true
-		})
+		f.Decls = append(f.Decls, varDecl)
 	}
 
-	//if clientStream {
-	//	/*
-	//		func (l *SayHello) SayHello(stream hellopb.Hello_SayHelloServer) error {
-	//			return nil
-	//		}
-	//	*/
-	//}
-	//
-	//if (!clientStream && serverStream) {
-	//	/*
-	//		func (l *SayHello) SayHello(in *hellopb.SayHelloRequest, stream hellopb.Hello_SayHelloServer) error {
-	//			return nil
-	//		}
-	//	*/
-	//}
+	ast.Inspect(f, func(n ast.Node) bool {
+		if fn, ok := n.(*ast.FuncDecl); ok && fn.Recv != nil && fn.Name.Name == logicMethodName {
+			newBody := []ast.Stmt{
+				&ast.ExprStmt{
+					X: &ast.Ident{
+						Name: "__TEMPLATE_BODY__",
+					},
+				},
+			}
+			fn.Body.List = newBody
+		}
+		return true
+	})
 
 	return nil
 }
@@ -367,13 +247,12 @@ func (ivm *IvmInit) astAddLogic(f *ast.File, oldService, newService, logicMethod
 func (ivm *IvmInit) astInspect(f *ast.File, oldLogicFile gen.LogicFile, newLogicFile gen.LogicFile) error {
 	logicMethodName := newLogicFile.Handler
 	oldService := oldLogicFile.Group
-	newService := newLogicFile.Group
 
 	if err := ivm.astRemoveDefaultFirstLineComments(f); err != nil {
 		return err
 	}
 
-	if err := ivm.astAddLogic(f, oldService, newService, logicMethodName, newLogicFile.ClientStream, newLogicFile.ServerStream); err != nil {
+	if err := ivm.astAddLogic(f, oldService, logicMethodName, newLogicFile.ClientStream, newLogicFile.ServerStream); err != nil {
 		return err
 	}
 

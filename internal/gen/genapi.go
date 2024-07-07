@@ -45,8 +45,10 @@ type LogicFile struct {
 	Handler string
 	Path    string
 
-	ClientStream bool
-	ServerStream bool
+	RequestTypeName  string
+	ResponseTypeName string
+	ClientStream     bool
+	ServerStream     bool
 }
 
 func (ja *JzeroApi) Gen() error {
