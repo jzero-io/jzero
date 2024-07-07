@@ -1,6 +1,6 @@
 ---
 home: false
-icon: home
+icon: fluent:home-heart-20-filled
 title: 首页
 ---
 

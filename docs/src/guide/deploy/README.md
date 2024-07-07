@@ -1,6 +1,6 @@
 ---
 title: 部署
-icon: puzzle-piece
+icon: icon-park:rocket-one
 index: false
 dir:
   order: 8

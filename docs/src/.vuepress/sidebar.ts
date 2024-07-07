@@ -5,7 +5,7 @@ export default sidebar({
     "",
     {
       text: "文档",
-      icon: "book",
+      icon: "vscode-icons:folder-type-docs",
       prefix: "guide/",
       children: "structure",
     },

@@ -1,6 +1,6 @@
 ---
 title: model 数据库
-icon: puzzle-piece
+icon: icon-park-twotone:database-code
 star: true
 order: 5
 category: 开发

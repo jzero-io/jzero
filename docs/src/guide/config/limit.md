@@ -1,6 +1,6 @@
 ---
 title: 限流配置
-icon: gears
+icon: mdi:car-speed-limiter
 star: true
 order: 5
 category: 配置

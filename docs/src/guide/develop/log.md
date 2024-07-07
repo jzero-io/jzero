@@ -1,6 +1,6 @@
 ---
 title: 日志打印规范
-icon: puzzle-piece
+icon: mdi:math-log
 star: true
 order: 4
 category: 开发

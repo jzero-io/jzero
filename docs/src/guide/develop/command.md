@@ -1,6 +1,6 @@
 ---
 title: 新增 command
-icon: puzzle-piece
+icon: clarity:command-line
 star: true
 order: 0.1
 category: 开发

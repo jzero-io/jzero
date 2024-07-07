@@ -1,6 +1,6 @@
 ---
 title: 环境准备
-icon: download
+icon: marketeq:download-alt-4
 order: 2
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: 配置
-icon: gears
+icon: vscode-icons:file-type-gleamconfig
 index: false
 dir:
   order: 6

@@ -1,6 +1,6 @@
 ---
 title: 镜像制作与推送
-icon: rocket
+icon: vscode-icons:file-type-docker2
 star: true
 order: 1
 category: 开发

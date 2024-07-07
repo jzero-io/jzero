@@ -1,6 +1,6 @@
 ---
 title: 链路追踪配置
-icon: gears
+icon: tabler:http-trace
 star: true
 order: 3
 category: 配置

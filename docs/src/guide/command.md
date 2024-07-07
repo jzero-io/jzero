@@ -1,6 +1,6 @@
 ---
 title: jzero 命令行
-icon: terminal
+icon: heroicons:command-line
 order: 2.1
 ---
 

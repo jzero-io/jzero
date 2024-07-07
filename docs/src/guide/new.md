@@ -1,6 +1,6 @@
 ---
 title: 新建项目
-icon: clone
+icon: mdi:new-box
 order: 3
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: 概念介绍
-icon: lightbulb
+icon: icon-park:concept-sharing
 order: 1
 ---
 

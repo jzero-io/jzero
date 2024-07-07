@@ -1,6 +1,6 @@
 ---
 title: 模版
-icon: puzzle-piece
+icon: vscode-icons:folder-type-template
 star: true
 order: 5.2
 category: 开发

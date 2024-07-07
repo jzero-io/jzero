@@ -1,6 +1,6 @@
 ---
 title: 日志配置
-icon: gears
+icon: mdi:math-log
 star: true
 order: 1
 category: 配置

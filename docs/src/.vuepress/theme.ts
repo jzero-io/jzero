@@ -11,7 +11,7 @@ export default hopeTheme({
     url: "https://github.com/jaronnie",
   },
 
-  iconAssets: "fontawesome-with-brands",
+  iconAssets: "iconify",
 
   // made by https://gopherize.me
   // favicon.ico made by https://www.bitbug.net

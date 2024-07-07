@@ -1,6 +1,6 @@
 ---
 title: proto 规范
-icon: puzzle-piece
+icon: vscode-icons:file-type-protobuf
 star: true
 order: 1
 category: 开发

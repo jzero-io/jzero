@@ -1,6 +1,6 @@
 ---
 title: 生成服务端代码
-icon: code
+icon: vscode-icons:folder-type-api-opened
 order: 4
 ---
 

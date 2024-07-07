@@ -1,6 +1,6 @@
 ---
 title: prometheus 配置
-icon: gears
+icon: vscode-icons:file-type-prometheus
 star: true
 order: 2
 category: 配置

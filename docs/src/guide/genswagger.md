@@ -1,6 +1,6 @@
 ---
 title: 生成 swagger 文档
-icon: lightbulb
+icon: vscode-icons:file-type-swagger
 order: 5.1
 ---
 
