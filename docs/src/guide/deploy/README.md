@@ -1,9 +1,9 @@
 ---
-title: 开发
+title: 部署
 icon: puzzle-piece
 index: false
 dir:
-  order: 7
+  order: 8
 ---
 
 <Catalog />

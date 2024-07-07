@@ -1,5 +1,5 @@
 ---
-title: 配置模块
+title: 配置
 icon: gears
 index: false
 dir:

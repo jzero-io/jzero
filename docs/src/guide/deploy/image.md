@@ -1,8 +1,8 @@
 ---
-title: 镜像推送
-icon: puzzle-piece
+title: 镜像制作与推送
+icon: rocket
 star: true
-order: 3
+order: 1
 category: 开发
 tag:
   - Guide
