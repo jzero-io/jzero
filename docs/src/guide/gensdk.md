@@ -4,7 +4,7 @@ icon: carbon:sdk
 order: 5
 ---
 
-## 自动生成客户端 sdk
+## 自动生成 go http sdk
 
 * kubernetes client-go style
 * 根据 api group 和 proto service 进行业务分组
@@ -33,7 +33,7 @@ go mod tidy
 ```
 :::
 
-## sdk 使用实例
+### 使用实例
 
 ```go
 package main
@@ -64,4 +64,15 @@ func main() {
 	}
 	fmt.Println(result.Message)
 }
+```
+
+## 自动生成 ts http sdk
+
+:::tip working...
+:::
+
+## 自动生成 zrpc client
+
+```shell
+jzero gen zrpcclient
 ```
