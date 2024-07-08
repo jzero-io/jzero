@@ -1,10 +1,18 @@
 ---
-title: jzero 命令行
+title: 命令行说明
 icon: heroicons:command-line
 order: 2.1
 ---
 
-## jzero 命令行补全
+## 命令
+
+* check: 一键安装所有所需的工具
+* new: 基于模板新建一个完整的项目
+* gen: 生成服务端代码
+* ivm: 接口版本管理
+* template: 模板的新增与初始化到本地
+
+## 命令行补全
 
 ### macOS
 
