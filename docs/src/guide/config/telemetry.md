@@ -8,7 +8,7 @@ tag:
   - Guide
 ---
 
-## go-zero api 项目
+## Rest
 
 修改 etc/etc.yaml 添加一下内容
 
@@ -21,7 +21,7 @@ Rest:
     Batcher: "jaeger"
 ```
 
-## go-zero grpc + grpc-gateway 项目
+## Gateway
 
 修改 etc/etc.yaml 添加一下内容
 
