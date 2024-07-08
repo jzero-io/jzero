@@ -58,6 +58,9 @@ var ivmAddApiCmd = &cobra.Command{
 		if !strings.HasPrefix(ivm.Version, "v") {
 			cobra.CheckErr(errors.New("version must has prefix v"))
 		}
+		if ivmaddapi.Group == "" {
+			ivmaddapi.Group = ivmaddapi.Name
+		}
 	},
 	RunE:         ivmaddapi.AddApi,
 	SilenceUsage: true,
@@ -83,15 +86,19 @@ func init() {
 	{
 		ivmAddCmd.AddCommand(ivmAddProtoCmd)
 
-		ivmAddProtoCmd.Flags().StringVarP(&ivmaddproto.Name, "name", "", "template", "set proto name")
+		ivmAddProtoCmd.Flags().StringVarP(&ivmaddproto.Name, "name", "", "template", "set proto file name")
+		_ = ivmAddProtoCmd.MarkFlagRequired("name")
+
 		ivmAddProtoCmd.Flags().StringSliceVarP(&ivmaddproto.Services, "services", "", nil, "set proto services")
 		ivmAddProtoCmd.Flags().StringSliceVarP(&ivmaddproto.Methods, "methods", "m", []string{"SayHello:get"}, "set proto methods")
 	}
 
 	{
 		ivmAddCmd.AddCommand(ivmAddApiCmd)
-		ivmAddApiCmd.Flags().StringVarP(&ivmaddapi.Service, "service", "", "template", "set service")
-		ivmAddApiCmd.Flags().StringVarP(&ivmaddapi.Group, "group", "", ".", "set api file group")
+		ivmAddApiCmd.Flags().StringVarP(&ivmaddapi.Name, "name", "", "template", "set api file name")
+		_ = ivmAddApiCmd.MarkFlagRequired("name")
+
+		ivmAddApiCmd.Flags().StringVarP(&ivmaddapi.Group, "group", "", "", "set api file group")
 		ivmAddApiCmd.Flags().StringSliceVarP(&ivmaddapi.Handlers, "handler", "", []string{"List", "Get", "Edit", "List", "Delete"}, "set api file handlers")
 	}
 }

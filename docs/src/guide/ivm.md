@@ -23,8 +23,6 @@ desc
         └── hello_v2.proto
 ```
 
-> 当前不支持 proto stream 的情况
-
 ## 初始化新版本
 
 > 请依次进行变更, 如初始化 v3 版本时必须已有 v2 版本
@@ -37,9 +35,18 @@ jzero ivm init --version v2
 
 ## 新增 proto
 
-可基于该命令自动生成一个带版本的 proto example, 可以快速生成一个 proto
+可基于该命令自动生成一个带版本的 proto example, 可以快速生成一个 proto 文件
 
 ```shell
 # 在 desc/proto/v2 文件夹新增一个 machine.proto, service 默认与 name 同名, 可以指定 services, 也可以指定 service methods
 jzero ivm add proto --name machine --version v2
+```
+
+## 新增 api
+
+可基于该命令自动生成 api example, 可以快速生成一个 api 文件
+
+```shell
+# 在 desc/api 文件夹新增一个 machine.api 文件, 默认 group 为 machine, 可以使用 --group 进行指定
+jzero ivm add api --name machine
 ```
