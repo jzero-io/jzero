@@ -13,7 +13,7 @@ jzero 基于 [cobra](https://github.com/spf13/cobra) 库实现命令行管理. �
 ```shell
 go install github.com/spf13/cobra-cli@latest
 
-cd quickstart
+cd your_project
 cobra-cli add init
 go run main.go -h
 ```

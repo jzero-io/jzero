@@ -43,7 +43,7 @@ import (
 	"fmt"
 	
 	"your_project-go"
-	"your_project-go/model/quickstart/types"
+	"your_project-go/model/your_project/types"
 	"your_project-go/rest"
 )
 
