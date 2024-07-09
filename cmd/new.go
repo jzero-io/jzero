@@ -45,7 +45,7 @@ var newCmd = &cobra.Command{
 			home, _ := os.UserHomeDir()
 			_ = os.MkdirAll(filepath.Join(home, ".jzero"), 0o755)
 			if !pathx.FileExists(filepath.Join(home, ".jzero", "templates", new.Branch)) {
-				fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(home, ".jzero"), new.Branch)
+				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(home, ".jzero", "templates", new.Branch))
 				_, err := git.PlainClone(filepath.Join(home, ".jzero", "templates", new.Branch), false, &git.CloneOptions{
 					SingleBranch:  true,
 					URL:           new.Remote,
@@ -60,7 +60,7 @@ var newCmd = &cobra.Command{
 			embeded.Home = filepath.Join(home, ".jzero", "templates", new.Branch)
 
 			if new.WithTemplate {
-				fmt.Printf("%s templates into '%s/.template', please wait...\n", color.WithColor("Cloning", color.FgGreen), new.Output)
+				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(new.Output, ".template"))
 				_, err := git.PlainClone(filepath.Join(new.Output, ".template"), false, &git.CloneOptions{
 					SingleBranch:  true,
 					URL:           new.Remote,

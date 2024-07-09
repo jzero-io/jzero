@@ -6,9 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jhump/protoreflect/desc/protoparse"
-
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
+	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 )
 
 func getProtoDir(protoDirPath string) ([]os.DirEntry, error) {
@@ -48,24 +47,16 @@ func GetProtoFilepath(protoDirPath string) ([]string, error) {
 }
 
 func protoHasService(fp string) (bool, error) {
-	protoBaseDir := filepath.Join("desc", "proto")
+	r := rpcparser.DefaultProtoParser{}
 
-	var protoParser protoparse.Parser
-	protoParser.ImportPaths = []string{protoBaseDir}
-	rel, err := filepath.Rel(protoBaseDir, fp)
+	parse, err := r.Parse(fp, true)
 	if err != nil {
-		return false, err
-	}
-	fds, err := protoParser.ParseFiles(rel)
-	if err != nil {
-		return false, err
-	}
-	if len(fds) == 1 {
-		if len(fds[0].GetServices()) >= 1 {
-			return true, nil
+		if strings.Contains(err.Error(), "rpc service not found") {
+			return false, nil
 		}
+		return false, err
 	}
-	return false, nil
+	return len(parse.Service) > 0, nil
 }
 
 func GetMainApiFilePath(apiDirName string) (string, bool, error) {
