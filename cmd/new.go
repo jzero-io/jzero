@@ -6,18 +6,19 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/jzero-io/jzero/internal/new"
-
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/zeromicro/go-zero/core/color"
+	"time"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/internal/new"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
@@ -30,6 +31,10 @@ var newCmd = &cobra.Command{
 
 		if new.Output == "" {
 			new.Output = args[0]
+
+			if pathx.FileExists(new.Output) {
+				cobra.CheckErr(errors.Errorf("%s already exists", new.Output))
+			}
 		}
 		if new.Module == "" {
 			new.Module = filepath.ToSlash(new.Output)
@@ -61,7 +66,10 @@ var newCmd = &cobra.Command{
 
 			if new.WithTemplate {
 				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(new.Output, ".template"))
-				_, err := git.PlainClone(filepath.Join(new.Output, ".template"), false, &git.CloneOptions{
+				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
+				defer cancel()
+
+				_, err := git.PlainCloneContext(ctx, filepath.Join(new.Output, ".template"), false, &git.CloneOptions{
 					SingleBranch:  true,
 					URL:           new.Remote,
 					Depth:         0,
