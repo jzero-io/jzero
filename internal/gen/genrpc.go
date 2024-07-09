@@ -138,7 +138,7 @@ func (jr *JzeroRpc) Gen() error {
 				fileBase,
 				v,
 			)
-			protoDescriptorPaths = append(protoDescriptorPaths, fmt.Sprintf("%s.pb", strings.TrimSuffix(v, ".proto")))
+			protoDescriptorPaths = append(protoDescriptorPaths, filepath.ToSlash(fmt.Sprintf("%s.pb", strings.TrimSuffix(v, ".proto"))))
 			_, err = execx.Run(protocCommand, jr.Wd)
 			if err != nil {
 				return err
