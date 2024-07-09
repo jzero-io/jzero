@@ -1,9 +1,11 @@
 package templateinit
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -22,7 +24,10 @@ func Init(_ *cobra.Command, _ []string) error {
 	if Remote != "" && Branch != "" {
 		_ = os.MkdirAll(Home, 0o755)
 		fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), Home, Branch)
-		_, err := git.PlainClone(filepath.Join(Home), false, &git.CloneOptions{
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		_, err := git.PlainCloneContext(ctx, filepath.Join(Home), false, &git.CloneOptions{
 			SingleBranch:  true,
 			URL:           Remote,
 			Depth:         0,

@@ -49,9 +49,14 @@ var newCmd = &cobra.Command{
 			// clone to local
 			home, _ := os.UserHomeDir()
 			_ = os.MkdirAll(filepath.Join(home, ".jzero"), 0o755)
+
 			if !pathx.FileExists(filepath.Join(home, ".jzero", "templates", new.Branch)) {
 				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(home, ".jzero", "templates", new.Branch))
-				_, err := git.PlainClone(filepath.Join(home, ".jzero", "templates", new.Branch), false, &git.CloneOptions{
+
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+				defer cancel()
+
+				_, err := git.PlainCloneContext(ctx, filepath.Join(home, ".jzero", "templates", new.Branch), false, &git.CloneOptions{
 					SingleBranch:  true,
 					URL:           new.Remote,
 					Depth:         0,
@@ -66,7 +71,7 @@ var newCmd = &cobra.Command{
 
 			if new.WithTemplate {
 				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(new.Output, ".template"))
-				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 				defer cancel()
 
 				_, err := git.PlainCloneContext(ctx, filepath.Join(new.Output, ".template"), false, &git.CloneOptions{
