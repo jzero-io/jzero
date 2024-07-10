@@ -76,3 +76,66 @@ func main() {
 ```shell
 jzero gen zrpcclient
 ```
+
+### 使用实例一: 直连 rpc 服务
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/zeromicro/go-zero/zrpc"
+	"your_project/zrpcclient-go/hello"
+	"your_project/zrpcclient-go/pb/hellopb"
+)
+
+func main() {
+	target, err := zrpc.NewClientWithTarget("localhost:8000")
+	if err != nil {
+		panic(err)
+	}
+
+	logic := hello.NewHello(target)
+	sayHello, err := logic.SayHello(context.Background(), &hellopb.SayHelloRequest{
+		Message: "12345",
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(sayHello.Message)
+}
+```
+
+### 使用实例二: 基于 etcd 连接
+
+使用之前请修改服务端配置 etc/etc.yaml, [请查看 etcd 配置](config/etcd.md), 然后重启程序
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/zeromicro/go-zero/zrpc"
+	"your_project/zrpcclient-go/hello"
+	"your_project/zrpcclient-go/pb/hellopb"
+)
+
+func main() {
+	client, err := zrpc.NewClient(zrpc.NewEtcdClientConf([]string{"127.0.0.1:2379"}, "your_project.rpc", "", ""))
+	if err != nil {
+		panic(err)
+	}
+	logic := hello.NewHello(client)
+
+	sayHello, err := logic.SayHello(context.Background(), &hellopb.SayHelloRequest{
+		Message: "12345",
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(sayHello.Message)
+}
+```
+

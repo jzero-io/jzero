@@ -32,7 +32,7 @@ func (d DirContext) GetCall() generator.Dir {
 	return generator.Dir{
 		Filename: Output,
 		GetChildPackage: func(childPath string) (string, error) {
-			return childPath, nil
+			return strings.ToLower(childPath), nil
 		},
 	}
 }
@@ -117,7 +117,7 @@ func Generate(_ *cobra.Command, _ []string) error {
 			OptionGoPackage: parse.GoPackage,
 		}
 		for _, service := range parse.Service {
-			_ = os.MkdirAll(filepath.Join(dirContext.GetCall().Filename, service.Name), 0o755)
+			_ = os.MkdirAll(filepath.Join(dirContext.GetCall().Filename, strings.ToLower(service.Name)), 0o755)
 		}
 
 		// gen pb model
