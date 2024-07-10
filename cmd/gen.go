@@ -80,7 +80,7 @@ var genSdkCmd = &cobra.Command{
 		if gensdk.Scope == "" {
 			gensdk.Scope = filepath.Base(mod.Path)
 			// go 中不支持 - 命令的 package, type 等.
-			gensdk.Scope = strings.ReplaceAll(gensdk.Scope, "-", "")
+			gensdk.Scope = strings.ReplaceAll(gensdk.Scope, "-", "_")
 		}
 	},
 	RunE: gensdk.GenSdk,
