@@ -13,7 +13,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jaronnie/genius"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+
 	"gopkg.in/op/go-logging.v1"
 
 	"github.com/zeromicro/go-zero/tools/goctl/util"
@@ -68,6 +70,8 @@ func (jr *JzeroRpc) Gen() error {
 
 	var allServerFiles []ServerFile
 	var allLogicFiles []LogicFile
+
+	var isNeedGenerateProtoDescriptor bool
 
 	for _, v := range protoFilenames {
 		// parse proto
@@ -133,6 +137,7 @@ func (jr *JzeroRpc) Gen() error {
 
 		// # gen proto descriptor
 		if isNeedGenProtoDescriptor(parse) {
+			isNeedGenerateProtoDescriptor = true
 			protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=%s.pb %s",
 				protoDirPath,
 				fileBase,
@@ -142,12 +147,6 @@ func (jr *JzeroRpc) Gen() error {
 			_, err = execx.Run(protocCommand, jr.Wd)
 			if err != nil {
 				return err
-			}
-
-			// update gateway upstream protosets
-			err = jr.updateGatewayUpstreams(protoDescriptorPaths)
-			if err != nil {
-				console.Warning("[warning] update gateway upstreams meet error: %v", err)
 			}
 		}
 
@@ -165,6 +164,13 @@ func (jr *JzeroRpc) Gen() error {
 	if pathx.FileExists(protoDirPath) {
 		if err = jr.genServer(serverImports, pbImports, registerServers); err != nil {
 			return err
+		}
+	}
+	if isNeedGenerateProtoDescriptor {
+		// update gateway upstream protosets
+		err = jr.updateGatewayUpstreams(protoDescriptorPaths)
+		if err != nil {
+			console.Warning("[warning] update gateway upstreams meet error: %v", err)
 		}
 	}
 	return nil
@@ -448,7 +454,23 @@ func (jr *JzeroRpc) updateGatewayUpstreams(protoDescriptorPaths []string) error 
 		return err
 	}
 
-	result, _ := yq.NewAllAtOnceEvaluator().EvaluateNodes(fmt.Sprintf(`.Gateway.Upstreams.0.ProtoSets=%s`, string(marshal)), node)
+	yaml, err := genius.NewFromYaml(file)
+	if err != nil {
+		return err
+	}
+
+	key := ".gateway.upstreams.0.protoSets"
+
+	protosetsConfig := yaml.Get(strings.TrimPrefix(key, "."))
+	if protosetsConfig == nil {
+		key = ".Gateway.Upstreams.0.ProtoSets"
+	}
+
+	result, err := yq.NewAllAtOnceEvaluator().EvaluateNodes(fmt.Sprintf(`%s=%s`, key, string(marshal)), node)
+	if err != nil {
+		return err
+	}
+
 	encoder := yq.NewYamlEncoder(yq.NewDefaultYamlPreferences())
 	out := new(bytes.Buffer)
 	printer := yq.NewPrinter(encoder, yq.NewSinglePrinterWriter(out))

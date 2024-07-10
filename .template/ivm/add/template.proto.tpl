@@ -19,7 +19,7 @@ message {{$v.Name | FirstUpper}}Response {}
 {{end}}
 
 {{range $service := .Services}}
-service {{ $service }}{{ $.Version }} { {{range $m := $.Methods}}
+service {{ $service | FirstUpper }}{{ $.Version | FirstUpper }} { {{range $m := $.Methods}}
     rpc {{ $m.Name }}({{$m.Name | FirstUpper}}Request) returns({{$m.Name | FirstUpper}}Response) {
         option (google.api.http) = {
             {{ $m.Verb }}: "/api/{{ $.UrlVersion }}/{{ $service }}/{{ $m.Name | FirstLower}}"
