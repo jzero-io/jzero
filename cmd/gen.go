@@ -9,17 +9,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/jzero-io/jzero/internal/gen/genrpcclient"
-
-	"github.com/jzero-io/jzero/internal/gen/gendocs"
-	"github.com/jzero-io/jzero/internal/gen/gensdk"
-	"github.com/jzero-io/jzero/pkg/mod"
-
-	"github.com/jzero-io/jzero/internal/gen/genswagger"
+	"strings"
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/internal/gen/gendocs"
+	"github.com/jzero-io/jzero/internal/gen/genrpcclient"
+	"github.com/jzero-io/jzero/internal/gen/gensdk"
+	"github.com/jzero-io/jzero/internal/gen/genswagger"
+	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
@@ -81,6 +79,8 @@ var genSdkCmd = &cobra.Command{
 
 		if gensdk.Scope == "" {
 			gensdk.Scope = filepath.Base(mod.Path)
+			// go 中不支持 - 命令的 package, type 等.
+			gensdk.Scope = strings.ReplaceAll(gensdk.Scope, "-", "")
 		}
 	},
 	RunE: gensdk.GenSdk,
