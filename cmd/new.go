@@ -50,8 +50,10 @@ var newCmd = &cobra.Command{
 			home, _ := os.UserHomeDir()
 			_ = os.MkdirAll(filepath.Join(home, ".jzero"), 0o755)
 
-			if !pathx.FileExists(filepath.Join(home, ".jzero", "templates", new.Branch)) {
+			if !pathx.FileExists(filepath.Join(home, ".jzero", "templates", new.Branch)) || !new.Cache {
 				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(home, ".jzero", "templates", new.Branch))
+
+				_ = os.RemoveAll(filepath.Join(home, ".jzero", "templates", new.Branch))
 
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 				defer cancel()
@@ -102,5 +104,6 @@ func init() {
 	newCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(wd, ".template"), "set home dir")
 	newCmd.Flags().StringVarP(&new.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringVarP(&new.Branch, "branch", "b", "", "remote templates repo branch")
+	newCmd.Flags().BoolVarP(&new.Cache, "cache", "", false, "get templates in local templates dir")
 	newCmd.Flags().BoolVarP(&new.WithTemplate, "with-template", "", false, "with template files in your project")
 }

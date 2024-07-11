@@ -21,6 +21,7 @@ var (
 	Output       string
 	AppName      string
 	Remote       string
+	Cache        bool
 	Branch       string
 	WithTemplate bool
 )
