@@ -102,7 +102,7 @@ func init() {
 
 		genCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(wd, ".template"), "set template home")
 		genCmd.Flags().StringVarP(&gen.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
-		genCmd.Flags().BoolVarP(&gen.RemoveSuffix, "remove-suffix", "", false, "remove suffix Handler and Logic on filename or file content")
+		genCmd.Flags().BoolVarP(&gen.RemoveSuffix, "remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
 		genCmd.Flags().BoolVarP(&gen.ChangeReplaceTypes, "change-replace-types", "", false, "if api file change, e.g. Request or Response type, change handler and logic file content types but not file")
 
 		genCmd.Flags().StringSliceVarP(&gen.ModelMysqlIgnoreColumns, "model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
