@@ -80,8 +80,8 @@ func (ivm *IvmInit) updateProtoLogic(fp string, oldFp string) error {
 		}
 
 		templateValue := map[string]interface{}{
-			"Service":          file.Group,
-			"OldService":       oldFiles[i].Group,
+			"Service":          strings.ToLower(file.Group),
+			"OldService":       strings.ToLower(oldFiles[i].Group),
 			"LogicTypeName":    logicTypeName,
 			"MethodName":       file.Handler,
 			"RequestTypeName":  file.RequestTypeName,
