@@ -62,19 +62,23 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 					} else {
 						requestBodyName = method.GetInputType().GetName()
 					}
-					httpInterface.RequestBody = &vars.RequestBody{
+					httpInterface.IsStreamClient = method.IsClientStreaming()
+					httpInterface.IsStreamServer = method.IsServerStreaming()
+					httpInterface.Request = &vars.Request{
 						RealBodyName: requestBodyName,
 						Name:         stringx.FirstUpper(method.GetInputType().GetName()),
 						Body:         rule.Body,
 						Type:         "proto",
 						Package:      strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./"),
+						// param *{{.Request.Package | base}}.{{.Request.Name}}
+						FullName: fmt.Sprintf("param *%s.%s", filepath.Base(strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./")), stringx.FirstUpper(method.GetInputType().GetName())),
 					}
-					httpInterface.ResponseBody = &vars.ResponseBody{
+					httpInterface.Response = &vars.Response{
 						Package: strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./"),
 					}
-					httpInterface.ResponseBody.FullName = BuildProtoFullName(httpInterface.ResponseBody.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
-					httpInterface.ResponseBody.FakeFullName = BuildProtoFakeFullName(httpInterface.ResponseBody.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
-					httpInterface.ResponseBody.FakeReturnName = BuildProtoFakeReturnName(service.GetName(), stringx.FirstUpper(method.GetOutputType().GetName()))
+					httpInterface.Response.FullName = BuildProtoResponseFullName(httpInterface.Response.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
+					httpInterface.Response.FakeFullName = BuildProtoFakeFullName(httpInterface.Response.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
+					httpInterface.Response.FakeReturnName = BuildProtoFakeReturnName(service.GetName(), stringx.FirstUpper(method.GetOutputType().GetName()))
 				}
 				httpInterface.MethodName = method.GetName()
 				httpInterface.Scope = vars.Scope(config.APP)
@@ -103,32 +107,34 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 					Resource:   vars.Resource(stringx.ToCamel(group.Annotation.Properties["group"])),
 					Method:     strings.ToUpper(route.Method),
 					URL:        path,
-					MethodName: route.Handler,
+					MethodName: strings.TrimSuffix(route.Handler, "Handler"),
 					Comments:   route.AtDoc.Text,
 				}
 				if route.RequestType != nil {
-					httpInterface.RequestBody = &vars.RequestBody{
+					httpInterface.Request = &vars.Request{
 						Name:         stringx.FirstUpper(route.RequestType.Name()),
 						RealBodyName: stringx.FirstUpper(route.RequestType.Name()),
 						Package:      "types",
 						Type:         "api",
+						FullName:     fmt.Sprintf("param %s.%s", "types", stringx.FirstUpper(route.RequestType.Name())),
 					}
 					if strings.ToUpper(route.Method) == http.MethodPost {
-						httpInterface.RequestBody.Body = "*"
+						httpInterface.Request.Body = "*"
 					}
 				} else {
-					continue
+					httpInterface.IsStreamClient = true
+					httpInterface.Request = &vars.Request{}
 				}
 
 				if route.ResponseType != nil {
-					httpInterface.ResponseBody = &vars.ResponseBody{
+					httpInterface.Response = &vars.Response{
 						FakeReturnName: BuildApiFakeReturnName(group.GetAnnotation("group"), httpInterface.MethodName, route.ResponseType),
 						FakeFullName:   BuildApiFakeFullName(route.ResponseType),
-						FullName:       BuildApiFullName(route.ResponseType),
+						FullName:       BuildApiResponseFullName(route.ResponseType),
 						Package:        "types",
 					}
 				} else {
-					continue
+					httpInterface.IsStreamServer = true
 				}
 
 				pathParams, err := api.CreatePathParam(httpInterface.URL, &route)
@@ -146,7 +152,7 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 	return httpInterfaces, nil
 }
 
-func BuildProtoFullName(goPackage string, responseTypeName string) string {
+func BuildProtoResponseFullName(goPackage string, responseTypeName string) string {
 	return fmt.Sprintf("*%s.%s", filepath.Base(goPackage), responseTypeName)
 }
 
@@ -154,7 +160,7 @@ func BuildProtoFakeFullName(goPackage string, responseTypeName string) string {
 	return fmt.Sprintf("&%s.%s", filepath.Base(goPackage), responseTypeName)
 }
 
-func BuildApiFullName(t spec.Type) string {
+func BuildApiResponseFullName(t spec.Type) string {
 	switch v := t.(type) {
 	case spec.PrimitiveType:
 		return "*" + t.Name()

@@ -17,8 +17,8 @@ type HTTPInterface struct {
 	MethodName string
 
 	// body
-	RequestBody  *RequestBody
-	ResponseBody *ResponseBody
+	Request  *Request
+	Response *Response
 
 	// param
 	PathParams  []*PathParam
@@ -32,15 +32,16 @@ type HTTPInterface struct {
 	IsSpecified    bool
 }
 
-type RequestBody struct {
+type Request struct {
 	Body         string // if proto. it takes effect. * or others
 	RealBodyName string // if proto and body is not *. use it
 	Name         string // request type name
 	Type         string // proto or api
 	Package      string // for example. types. *types.HelloParamRequest
+	FullName     string
 }
 
-type ResponseBody struct {
+type Response struct {
 	FakeReturnName string
 	FakeFullName   string
 	FullName       string
