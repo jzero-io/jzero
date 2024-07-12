@@ -4,21 +4,21 @@
 package {{.Scope}}
 
 import (
-	"{{.Module}}/rest"
+	"github.com/jzero-io/restc"
 )
 
 type {{.Scope | FirstUpper}}Interface interface {
-	RESTClient() rest.Interface
+	RESTClient() restc.Interface
 	
 	{{range $v := .Resources}}{{$v | FirstUpper}}Getter
 	{{end}}
 }
 
 type {{.Scope | FirstUpper}}Client struct {
-	restClient rest.Interface
+	restClient restc.Interface
 }
 
-func (x *{{.Scope | FirstUpper}}Client) RESTClient() rest.Interface {
+func (x *{{.Scope | FirstUpper}}Client) RESTClient() restc.Interface {
 	if x == nil {
 		return nil
 	}
@@ -31,11 +31,6 @@ func (x *{{.Scope | FirstUpper}}Client) RESTClient() rest.Interface {
 
 {{end}}
 // NewForConfig creates a new {{.Scope | FirstUpper}}Client for the given config.
-func NewForConfig(x *rest.RESTClient) (*{{.Scope | FirstUpper}}Client, error) {
-	config := *x
-	client, err := rest.RESTClientFor(&config)
-	if err != nil {
-		return nil, err
-	}
-	return &{{.Scope | FirstUpper}}Client{client}, nil
+func NewForConfig(x *restc.RESTClient) (*{{.Scope | FirstUpper}}Client, error) {
+	return &{{.Scope | FirstUpper}}Client{x}, nil
 }

@@ -121,11 +121,11 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	}
 	files = append(files, directClientFiles...)
 
-	restFrameFiles, err := g.genRestFrame()
-	if err != nil {
-		return nil, err
-	}
-	files = append(files, restFrameFiles...)
+	//restFrameFiles, err := g.genRestFrame()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//files = append(files, restFrameFiles...)
 
 	for _, scope := range getScopes(rhis) {
 		scopeClientFiles, err := g.genScopeClients(scope, getScopeResources(rhis[vars.Scope(scope)]))
@@ -256,28 +256,28 @@ func (g *Golang) genDirectClients() ([]*GeneratedFile, error) {
 	return directClientFiles, nil
 }
 
-func (g *Golang) genRestFrame() ([]*GeneratedFile, error) {
-	var restFrameFiles []*GeneratedFile
-	var err error
-
-	// gen rest frame
-	restFrameFiles = append(restFrameFiles, &GeneratedFile{
-		Path:    filepath.Join("rest", "client.go"),
-		Content: *bytes.NewBuffer(embeded.ReadTemplateFile(filepath.Join("client", "client-go", "rest", "client.go.tpl"))),
-	})
-
-	restFrameFiles = append(restFrameFiles, &GeneratedFile{
-		Path:    filepath.Join("rest", "option.go"),
-		Content: *bytes.NewBuffer(embeded.ReadTemplateFile(filepath.Join("client", "client-go", "rest", "option.go.tpl"))),
-	})
-
-	restFrameFiles = append(restFrameFiles, &GeneratedFile{
-		Path:    filepath.Join("rest", "request.go"),
-		Content: *bytes.NewBuffer(embeded.ReadTemplateFile(filepath.Join("client", "client-go", "rest", "request.go.tpl"))),
-	})
-
-	return restFrameFiles, err
-}
+//func (g *Golang) genRestFrame() ([]*GeneratedFile, error) {
+//	var restFrameFiles []*GeneratedFile
+//	var err error
+//
+//	// gen rest frame
+//	restFrameFiles = append(restFrameFiles, &GeneratedFile{
+//		Path:    filepath.Join("rest", "client.go"),
+//		Content: *bytes.NewBuffer(embeded.ReadTemplateFile(filepath.Join("client", "client-go", "rest", "client.go.tpl"))),
+//	})
+//
+//	restFrameFiles = append(restFrameFiles, &GeneratedFile{
+//		Path:    filepath.Join("rest", "option.go"),
+//		Content: *bytes.NewBuffer(embeded.ReadTemplateFile(filepath.Join("client", "client-go", "rest", "option.go.tpl"))),
+//	})
+//
+//	restFrameFiles = append(restFrameFiles, &GeneratedFile{
+//		Path:    filepath.Join("rest", "request.go"),
+//		Content: *bytes.NewBuffer(embeded.ReadTemplateFile(filepath.Join("client", "client-go", "rest", "request.go.tpl"))),
+//	})
+//
+//	return restFrameFiles, err
+//}
 
 func (g *Golang) genScopeClients(scope string, resources []string) ([]*GeneratedFile, error) {
 	var scopeClientFiles []*GeneratedFile

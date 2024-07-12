@@ -4,19 +4,19 @@
 package typed
 
 import (
-	"{{.Module}}/rest"
+	"github.com/jzero-io/restc"
 )
 
 
 type DirectInterface interface {
-	RESTClient() rest.Interface
+	RESTClient() restc.Interface
 }
 
 type DirectClient struct {
-	restClient rest.Interface
+	restClient restc.Interface
 }
 
-func (x *DirectClient) RESTClient() rest.Interface {
+func (x *DirectClient) RESTClient() restc.Interface {
 	if x == nil {
 		return nil
 	}
@@ -24,11 +24,6 @@ func (x *DirectClient) RESTClient() rest.Interface {
 }
 
 // NewForConfig creates a new DirectClient for the given config.
-func NewForConfig(x *rest.RESTClient) (*DirectClient, error) {
-	config := *x
-	client, err := rest.RESTClientFor(&config)
-	if err != nil {
-		return nil, err
-	}
-	return &DirectClient{client}, nil
+func NewForConfig(x *restc.RESTClient) (*DirectClient, error) {
+	return &DirectClient{x}, nil
 }

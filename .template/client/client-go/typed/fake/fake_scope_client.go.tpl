@@ -4,14 +4,14 @@
 package fake
 
 import (
-	"{{.Module}}/rest"
+	"github.com/jzero-io/restc"
 	"{{$.Module}}/typed/{{.Scope}}"
-)
+)g
 
 type Fake{{.Scope | FirstUpper}} struct {}
 
-func (f *Fake{{.Scope | FirstUpper}}) RESTClient() rest.Interface {
-	var ret *rest.RESTClient
+func (f *Fake{{.Scope | FirstUpper}}) RESTClient() restc.Interface {
+	var ret *restc.RESTClient
 	return ret
 }
 

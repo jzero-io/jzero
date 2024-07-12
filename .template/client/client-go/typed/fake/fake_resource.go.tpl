@@ -6,14 +6,14 @@ package fake
 import (
 	"context"
 
-	{{range $k, $v := .HTTPInterfaces}}{{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}"{{$.Module}}/rest"{{break}}{{end}}{{end}}
+	{{range $k, $v := .HTTPInterfaces}}{{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}"github.com/jzero-io/restc"{{break}}{{end}}{{end}}
 
 	{{range $v := .GoImportPaths | uniq}}"{{$v}}"
 	{{end}}
 )
 
 var (
-	{{range $k, $v := .HTTPInterfaces}}{{$v.ResponseBody.FakeReturnName}} = {{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}rest.Request{}{{else}}{{$v.ResponseBody.FakeFullName}}{}{{end}}
+	{{range $k, $v := .HTTPInterfaces}}{{$v.ResponseBody.FakeReturnName}} = {{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}restc.Request{}{{else}}{{$v.ResponseBody.FakeFullName}}{}{{end}}
 	{{end}}
 )
 
@@ -24,7 +24,7 @@ type {{.Resource | FirstUpper}}Getter interface {
 }
 
 type {{.Resource | FirstUpper}}Interface interface {
-	{{range $k, $v := .HTTPInterfaces}}{{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}} param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}{{$v.ResponseBody.FullName}}{{end}}, error)
+	{{range $k, $v := .HTTPInterfaces}}{{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}} param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*restc.Request{{else}}{{$v.ResponseBody.FullName}}{{end}}, error)
 	{{end}}
 }
 
@@ -32,7 +32,7 @@ type Fake{{.Resource | FirstUpper}} struct {
 	Fake *Fake{{.Scope | FirstUpper}}
 }
 
-{{range $k, $v := .HTTPInterfaces}}func (f *Fake{{$.Resource | FirstUpper}}) {{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}}param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*rest.Request{{else}}{{$v.ResponseBody.FullName}}{{end}}, error) {
+{{range $k, $v := .HTTPInterfaces}}func (f *Fake{{$.Resource | FirstUpper}}) {{$v.MethodName}}({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}{{else}}ctx context.Context,{{end}}param *{{$v.RequestBody.Package | base}}.{{$v.RequestBody.Name}}) ({{if or $v.IsStreamServer $v.IsStreamClient $v.IsSpecified}}*restc.Request{{else}}{{$v.ResponseBody.FullName}}{{end}}, error) {
 	return {{$v.ResponseBody.FakeReturnName}}, nil
 }
 

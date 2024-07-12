@@ -4,7 +4,7 @@
 package {{.APP}}
 
 import (
-	"{{.Module}}/rest"
+	"github.com/jzero-io/restc"
 	"{{.Module}}/typed"
 
 	{{range $v := .Scopes}}"{{$.Module}}/typed/{{$v}}"{{end}}
@@ -31,8 +31,8 @@ func (x *Clientset) Direct() typed.DirectInterface {
 	return x.{{$v}}
 }
 
-{{end}}func NewClientWithOptions(ops ...rest.Opt) ({{if eq (len .Scopes) 1}}{{index .Scopes 0}}.{{index .Scopes 0 | FirstUpper}}Interface{{else}}*Clientset{{end}}, error) {
-	c := &rest.RESTClient{}
+{{end}}func NewClientWithOptions(ops ...restc.Opt) ({{if eq (len .Scopes) 1}}{{index .Scopes 0}}.{{index .Scopes 0 | FirstUpper}}Interface{{else}}*Clientset{{end}}, error) {
+	c := &restc.RESTClient{}
 	for _, op := range ops {
 		if err := op(c); err != nil {
 			return nil, err
