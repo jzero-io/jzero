@@ -18,13 +18,13 @@ jzero 框架的理念是:
 
 * 不同模块分在不同的 proto 文件下. 如一个系统, 凭证模块即 credential.proto, 主机模块即 machine.proto.
 * 每个 proto 文件可以有多个 service. 对于复杂模块可以使用多个 service.
-* 如需对模块进行版本管理, 应该是 credential.proto, credential_v2.proto 规范.
+* 应该考虑接口版本控制, 如 v1/hello.proto, v2/hello_v2.proto
 
-proto 规范:
+jzero 中 proto 规范:
 
-* 依据于 go-zero 的 proto 规范. 即 service 的 rpc 方法中 入参和出参的 proto 不能是 import 的 proto 文件
+* proto 文件引用规范: 依据于 go-zero 的 proto 规范， 即 service 的 rpc 方法中入参和出参的 proto 不能是 import 的 proto 文件中的 message, 只能在当前文件
 
-规范文件实例:
+## proto 文件示例
 
 ::: code-tabs
 
@@ -166,3 +166,33 @@ service namespace {
 }
 ```
 :::
+
+## proto 字段校验
+
+基于 [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate) 进行二次开发, 支持了自定义错误信息
+
+插件地址: [protoc-gen-validate](https://github.com/jzero-io/protoc-gen-validate)
+
+```shell
+go install github.com/jzero-io/protoc-gen-validate@latest
+```
+
+:::tip
+需要自定义错误信息时, 在原始校验规则后加上 _message 即可
+:::
+
+```protobuf
+syntax = "proto3";
+
+package hellopb;
+
+import "validate/validate.proto";
+option go_package = "./pb/hellopb";
+
+message SayHelloRequest {
+  string message = 1 [(validate.rules).string = {
+    max_len: 10,
+    max_len_message: "最大长度为 10"  // 自定义错误信息
+  }];
+}
+```
