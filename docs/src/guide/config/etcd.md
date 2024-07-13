@@ -1,5 +1,5 @@
 ---
-title: etcd
+title: etcd 配置
 icon: carbon:database-etcd
 star: true
 order: 5
