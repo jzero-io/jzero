@@ -11,14 +11,14 @@ tag:
 修改 etc/etc.yaml
 
 ```yaml
-Log:
-  KeepDays: 30
-  Level: info
-  MaxBackups: 7
-  MaxSize: 50
-  Mode: file
-  Rotation: size
-  ServiceName: your_project
+log:
+  keepDays: 30
+  level: info
+  maxBackups: 7
+  maxSize: 50
+  mode: file
+  rotation: size
+  serviceName: your_project
   encoding: plain
 ```
 

@@ -13,9 +13,9 @@ tag:
 修改 etc/etc.yaml 添加一下内容
 
 ```yaml
-Rest:
-  DevServer:
-    Enabled: true
+rest:
+  devServer:
+    enabled: true
 ```
 
 
@@ -24,10 +24,10 @@ Rest:
 修改 etc/etc.yaml 添加一下内容
 
 ```shell
-Zrpc:
-  DevServer:
-    Enabled: true
-Gateway:
-  DevServer:
-    Enabled: true
+zrpc:
+  devServer:
+    enabled: true
+gateway:
+  devServer:
+    enabled: true
 ```
