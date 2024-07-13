@@ -78,7 +78,7 @@ var checkCmd = &cobra.Command{
 		log.Info("\n[jzero-env]: looking up protoc-gen-validate")
 		_, err = env.LookPath("protoc-gen-validate")
 		if err != nil {
-			_ = golang.Install("github.com/envoyproxy/protoc-gen-validate@latest")
+			_ = golang.Install("github.com/jzero-io/protoc-gen-validate@latest")
 		}
 		if _, err = env.LookPath("protoc-gen-validate"); err == nil {
 			log.Success(`[jzero-env]: "protoc-gen-validate" is installed`)
