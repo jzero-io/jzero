@@ -41,6 +41,11 @@ export default hopeTheme({
 
   // 在这里配置主题提供的插件
   plugins: {
+    blog: {
+      category: "category",
+      tag: "tag",
+      star: "star",
+    },
     comment: {
       provider: "Giscus",
       repo: "jzero-io/jzero",
