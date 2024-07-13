@@ -10,9 +10,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 )
 
-var (
-	Channel string
-)
+var Channel string
 
 var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
