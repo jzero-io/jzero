@@ -86,13 +86,9 @@ var genSdkCmd = &cobra.Command{
 		}
 
 		if gensdk.Scope == "" {
-			if gensdk.Language == "go" {
-				gensdk.Scope = filepath.Base(mod.Path)
-				// go 中不支持 - 命令的 package, type 等.
-				gensdk.Scope = strings.ReplaceAll(gensdk.Scope, "-", "_")
-			} else if gensdk.Language == "ts" {
-				gensdk.Scope = filepath.Base(mod.Path)
-			}
+			gensdk.Scope = filepath.Base(mod.Path)
+			// 不支持 -, replace to _
+			gensdk.Scope = strings.ReplaceAll(gensdk.Scope, "-", "_")
 		}
 	},
 	RunE: gensdk.GenSdk,
