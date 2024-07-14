@@ -103,7 +103,10 @@ var genDocsCmd = &cobra.Command{
 	Use:   "docs",
 	Short: "jzero gen docs",
 	Long:  `jzero gen docs`,
-	RunE:  gendocs.Gen,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		console.Warning("[warning] generate docs is still working...")
+	},
+	RunE: gendocs.Gen,
 }
 
 func init() {
