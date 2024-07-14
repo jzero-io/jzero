@@ -7,6 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/hashicorp/go-version v1.7.0
+	github.com/jaronnie/genius v0.4.2
 	github.com/jhump/protoreflect v1.16.0
 	github.com/mikefarah/yq/v4 v4.44.2
 	github.com/pkg/errors v0.9.1
@@ -58,7 +59,6 @@ require (
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/jaronnie/genius v0.4.2 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
