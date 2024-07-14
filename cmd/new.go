@@ -106,4 +106,5 @@ func init() {
 	newCmd.Flags().StringVarP(&new.Branch, "branch", "b", "", "remote templates repo branch")
 	newCmd.Flags().BoolVarP(&new.Cache, "cache", "", false, "get templates in local templates dir")
 	newCmd.Flags().BoolVarP(&new.WithTemplate, "with-template", "", false, "with template files in your project")
+	newCmd.Flags().StringVarP(&new.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 }

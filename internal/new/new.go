@@ -1,13 +1,11 @@
 package new
 
 import (
-	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/spf13/cast"
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/templatex"
@@ -24,6 +22,7 @@ var (
 	Cache        bool
 	Branch       string
 	WithTemplate bool
+	Style        string
 )
 
 type TemplateData struct {
@@ -33,6 +32,7 @@ type TemplateData struct {
 
 type JzeroNew struct {
 	TemplateData map[string]interface{}
+	Style        string
 }
 
 func NewProject(_ *cobra.Command, _ []string) error {
@@ -44,6 +44,7 @@ func NewProject(_ *cobra.Command, _ []string) error {
 
 	jn := JzeroNew{
 		TemplateData: templateData,
+		Style:        Style,
 	}
 
 	err = jn.New(filepath.Join("app"))
@@ -92,12 +93,16 @@ func (jn *JzeroNew) New(dirname string) error {
 		}
 		fileBytes, err := templatex.ParseTemplate(jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
 		if err != nil {
-			console.Warning("parse template file [%s] error, simple replace it", rel)
-			fileBytes = bytes.ReplaceAll(embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())), []byte("{{ .Module }}"), []byte(cast.ToString(jn.TemplateData["Module"])))
+			return err
 		}
 
-		path := filepath.Join(rel)
-		err = checkWrite(filepath.Join(Output, path), fileBytes)
+		formatFilename, err := format.FileNamingFormat(jn.Style, filename[0:len(filename)-len(filepath.Ext(filename))])
+		if err != nil {
+			return err
+		}
+		stylePath := filepath.Join(filepath.Dir(rel), formatFilename+filepath.Ext(filename))
+
+		err = checkWrite(filepath.Join(Output, stylePath), fileBytes)
 		if err != nil {
 			return err
 		}
