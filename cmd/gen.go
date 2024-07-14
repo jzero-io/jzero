@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/internal/gen/gendocs"
@@ -62,6 +64,10 @@ var genSdkCmd = &cobra.Command{
 	Use:   "sdk",
 	Short: `Generate sdk client by api file and proto file`,
 	PreRun: func(_ *cobra.Command, _ []string) {
+		if gensdk.Language == "ts" {
+			console.Warning("[warning] ts client is still working...")
+		}
+
 		gensdk.Version = Version
 
 		wd, err := os.Getwd()
@@ -70,17 +76,23 @@ var genSdkCmd = &cobra.Command{
 		cobra.CheckErr(err)
 
 		if gensdk.Module == "" {
-			gensdk.Module = fmt.Sprintf("%s-go", mod.Path)
+			if gensdk.Language == "go" {
+				gensdk.Module = fmt.Sprintf("%s-go", mod.Path)
+			}
 		}
 
 		if gensdk.Dir == "" {
-			gensdk.Dir = fmt.Sprintf("%s-go", filepath.Base(mod.Path))
+			gensdk.Dir = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), gensdk.Language)
 		}
 
 		if gensdk.Scope == "" {
-			gensdk.Scope = filepath.Base(mod.Path)
-			// go 中不支持 - 命令的 package, type 等.
-			gensdk.Scope = strings.ReplaceAll(gensdk.Scope, "-", "_")
+			if gensdk.Language == "go" {
+				gensdk.Scope = filepath.Base(mod.Path)
+				// go 中不支持 - 命令的 package, type 等.
+				gensdk.Scope = strings.ReplaceAll(gensdk.Scope, "-", "_")
+			} else if gensdk.Language == "ts" {
+				gensdk.Scope = filepath.Base(mod.Path)
+			}
 		}
 	},
 	RunE: gensdk.GenSdk,
