@@ -107,6 +107,11 @@ message FloatRules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // DoubleRules describes the constraints applied to `double` values
@@ -151,6 +156,11 @@ message DoubleRules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // Int32Rules describes the constraints applied to `int32` values
@@ -195,6 +205,11 @@ message Int32Rules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // Int64Rules describes the constraints applied to `int64` values
@@ -239,6 +254,11 @@ message Int64Rules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // UInt32Rules describes the constraints applied to `uint32` values
@@ -283,6 +303,11 @@ message UInt32Rules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // UInt64Rules describes the constraints applied to `uint64` values
@@ -327,6 +352,11 @@ message UInt64Rules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // SInt32Rules describes the constraints applied to `sint32` values
@@ -371,6 +401,11 @@ message SInt32Rules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // SInt64Rules describes the constraints applied to `sint64` values
@@ -415,6 +450,11 @@ message SInt64Rules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // Fixed32Rules describes the constraints applied to `fixed32` values
@@ -459,6 +499,11 @@ message Fixed32Rules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // Fixed64Rules describes the constraints applied to `fixed64` values
@@ -503,6 +548,11 @@ message Fixed64Rules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // SFixed32Rules describes the constraints applied to `sfixed32` values
@@ -547,6 +597,11 @@ message SFixed32Rules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // SFixed64Rules describes the constraints applied to `sfixed64` values
@@ -591,6 +646,11 @@ message SFixed64Rules {
   // evaluated only if the field is not empty
   optional bool ignore_empty = 8;
   optional string ignore_empty_message = 15;
+
+  optional string lt_gt_message = 17;
+  optional string lt_gte_message = 18;
+  optional string lte_gt_message = 19;
+  optional string lte_gte_message = 20;
 }
 
 // BoolRules describes the constraints applied to `bool` values
