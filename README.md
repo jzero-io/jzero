@@ -28,6 +28,10 @@ go run main.go server
 
 [![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
 
+## Roadmap
+
+please see: https://jzero.jaronnie.com/guide/roadmap
+
 ## Contributors
 <div>
   <a href="https://github.com/jzero-io/jzero/graphs/contributors">
