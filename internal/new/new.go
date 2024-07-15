@@ -96,11 +96,14 @@ func (jn *JzeroNew) New(dirname string) error {
 			return err
 		}
 
-		formatFilename, err := format.FileNamingFormat(jn.Style, filename[0:len(filename)-len(filepath.Ext(filename))])
-		if err != nil {
-			return err
+		stylePath := filepath.Join(filepath.Dir(rel), filename)
+		if filepath.Ext(filename) == ".go" {
+			formatFilename, err := format.FileNamingFormat(jn.Style, filename[0:len(filename)-len(filepath.Ext(filename))])
+			if err != nil {
+				return err
+			}
+			stylePath = filepath.Join(filepath.Dir(rel), formatFilename+filepath.Ext(filename))
 		}
-		stylePath := filepath.Join(filepath.Dir(rel), formatFilename+filepath.Ext(filename))
 
 		err = checkWrite(filepath.Join(Output, stylePath), fileBytes)
 		if err != nil {
