@@ -177,6 +177,8 @@ service namespace {
 go install github.com/jzero-io/protoc-gen-validate@latest
 ```
 
+[确保 validate.proto 文件内容](https://github.com/jzero-io/protoc-gen-validate/blob/main/validate/validate.proto)
+
 :::tip
 需要自定义错误信息时, 在原始校验规则后加上 _message 即可
 :::
