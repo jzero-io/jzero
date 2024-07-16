@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/rinchsan/gosimports"
 
@@ -359,7 +360,7 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 	}
 
 	scopeResourceFiles = append(scopeResourceFiles, &GeneratedFile{
-		Path:    filepath.Join("typed", scope, resource+".go"),
+		Path:    filepath.Join("typed", scope, strings.ToLower(resource)+".go"),
 		Content: *bytes.NewBuffer(resourceGoFormatBytes),
 	})
 
