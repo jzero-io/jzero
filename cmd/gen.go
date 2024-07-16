@@ -16,9 +16,9 @@ import (
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/internal/gen/gendocs"
-	"github.com/jzero-io/jzero/internal/gen/genrpcclient"
 	"github.com/jzero-io/jzero/internal/gen/gensdk"
 	"github.com/jzero-io/jzero/internal/gen/genswagger"
+	"github.com/jzero-io/jzero/internal/gen/genzrpcclient"
 	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -49,7 +49,16 @@ var genCmd = &cobra.Command{
 var genZRpcClientCmd = &cobra.Command{
 	Use:   "zrpcclient",
 	Short: `Gen zrpc client code by proto`,
-	RunE:  genrpcclient.Generate,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		wd, err := os.Getwd()
+		cobra.CheckErr(err)
+		mod, err := mod.GetGoMod(wd)
+		cobra.CheckErr(err)
+		if genzrpcclient.Scope == "" {
+			genzrpcclient.Scope = filepath.Base(mod.Path)
+		}
+	},
+	RunE: genzrpcclient.Generate,
 }
 
 // genSwaggerCmd represents the genSwagger command
@@ -152,8 +161,8 @@ func init() {
 	{
 		genCmd.AddCommand(genZRpcClientCmd)
 
-		genZRpcClientCmd.Flags().StringVarP(&genrpcclient.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
-		genZRpcClientCmd.Flags().StringVarP(&genrpcclient.Output, "output", "o", "zrpcclient-go", "generate rpcclient code")
-
+		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Output, "output", "o", "zrpcclient-go", "generate rpcclient code")
+		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Scope, "scope", "", "", "set scope name")
 	}
 }

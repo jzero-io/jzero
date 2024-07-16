@@ -1,10 +1,13 @@
-package genrpcclient
+package genzrpcclient
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/templatex"
 
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/pkg/mod"
@@ -19,6 +22,7 @@ import (
 
 var (
 	Style  string
+	Scope  string
 	Output string
 )
 
@@ -30,7 +34,7 @@ type DirContext struct {
 
 func (d DirContext) GetCall() generator.Dir {
 	return generator.Dir{
-		Filename: Output,
+		Filename: filepath.Join(Output, "typed", Scope),
 		GetChildPackage: func(childPath string) (string, error) {
 			return strings.ToLower(childPath), nil
 		},
@@ -63,14 +67,14 @@ func (d DirContext) GetSvc() generator.Dir {
 
 func (d DirContext) GetPb() generator.Dir {
 	return generator.Dir{
-		Package: filepath.ToSlash(fmt.Sprintf("%s/%s", d.ImportBase, strings.TrimPrefix(d.OptionGoPackage, "./"))),
+		Package: filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, Scope, strings.TrimPrefix(d.OptionGoPackage, "./"))),
 	}
 }
 
 func (d DirContext) GetProtoGo() generator.Dir {
 	return generator.Dir{
 		Filename: d.OptionGoPackage,
-		Package:  filepath.ToSlash(fmt.Sprintf("%s/%s", d.ImportBase, strings.TrimPrefix(d.OptionGoPackage, "./"))),
+		Package:  filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, Scope, strings.TrimPrefix(d.OptionGoPackage, "./"))),
 	}
 }
 
@@ -105,6 +109,8 @@ func Generate(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
+	var services []string
+
 	for _, fp := range fps {
 		parser := rpcparser.NewDefaultProtoParser()
 		parse, err := parser.Parse(fp, true)
@@ -117,11 +123,16 @@ func Generate(_ *cobra.Command, _ []string) error {
 			OptionGoPackage: parse.GoPackage,
 		}
 		for _, service := range parse.Service {
+			services = append(services, service.Name)
 			_ = os.MkdirAll(filepath.Join(dirContext.GetCall().Filename, strings.ToLower(service.Name)), 0o755)
 		}
 
 		// gen pb model
-		resp, err := execx.Run(fmt.Sprintf("protoc -I%s --go_out=%s --go-grpc_out=%s %s", baseProtoDir, dirContext.GetCall().Filename, dirContext.GetCall().Filename, fp), wd)
+		err = os.MkdirAll(filepath.Join(Output, "model", Scope), 0o755)
+		if err != nil {
+			return err
+		}
+		resp, err := execx.Run(fmt.Sprintf("protoc -I%s --go_out=%s --go-grpc_out=%s %s", baseProtoDir, filepath.Join(Output, "model", Scope), filepath.Join(Output, "model", Scope), fp), wd)
 		if err != nil {
 			return errors.Errorf("err: [%v], resp: [%s]", err, resp)
 		}
@@ -135,6 +146,47 @@ func Generate(_ *cobra.Command, _ []string) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	// gen clientset and options
+	template, err := templatex.ParseTemplate(map[string]interface{}{
+		"Module": filepath.ToSlash(filepath.Join(module.Path, Output)),
+		"APP":    Scope,
+		"Scopes": []string{Scope},
+	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "clientset.go.tpl"))))
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(Output, "clientset.go"), template, 0o644)
+	if err != nil {
+		return err
+	}
+
+	template, err = templatex.ParseTemplate(map[string]interface{}{
+		"Module": filepath.ToSlash(filepath.Join(module.Path, Output)),
+		"APP":    Scope,
+		"Scopes": []string{Scope},
+	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "options.go.tpl"))))
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(Output, "options.go"), template, 0o644)
+	if err != nil {
+		return err
+	}
+
+	// generate scope client
+	template, err = templatex.ParseTemplate(map[string]interface{}{
+		"Module":   filepath.ToSlash(filepath.Join(module.Path, Output)),
+		"Scope":    Scope,
+		"Services": services,
+	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "typed", "scope_client.go.tpl"))))
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filepath.Join(Output, "typed", Scope, fmt.Sprintf("%s_client.go", Scope)), template, 0o644)
+	if err != nil {
+		return err
 	}
 
 	return nil
