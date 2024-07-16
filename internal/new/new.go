@@ -23,6 +23,8 @@ var (
 	Branch       string
 	WithTemplate bool
 	Style        string
+
+	Features []string
 )
 
 type TemplateData struct {
@@ -39,7 +41,7 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	err := os.MkdirAll(Output, 0o755)
 	cobra.CheckErr(err)
 
-	templateData, err := newTemplateData()
+	templateData, err := newTemplateData(Features)
 	cobra.CheckErr(err)
 
 	jn := JzeroNew{

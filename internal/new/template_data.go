@@ -13,7 +13,7 @@ const (
 	go1_21_0 = "1.21.0"
 )
 
-func newTemplateData() (map[string]interface{}, error) {
+func newTemplateData(features []string) (map[string]interface{}, error) {
 	goVersion, err := mod.GetGoVersion()
 	if err != nil {
 		return nil, err
@@ -39,6 +39,7 @@ func newTemplateData() (map[string]interface{}, error) {
 		"APP":       AppName,
 		"GoVersion": goVersion,
 		"GoArch":    runtime.GOARCH,
+		"Features":  features,
 	}
 
 	return templateData, nil
