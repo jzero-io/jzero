@@ -22,7 +22,7 @@ func New(c zrpc.Client) *Client {
 }
 
 {{ range $v := .Services }}
-func (x *Client) {{ $v | FirstUpper }}() hello.Hello {
+func (x *Client) {{ $v | FirstUpper }}() {{ $v | FirstLower }}.{{ $v | FirstUpper }} {
 	return {{ $v | FirstLower }}.New{{ $v | FirstUpper }}(x.client)
 }
 {{ end }}
