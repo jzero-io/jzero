@@ -86,8 +86,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/zeromicro/go-zero/zrpc"
-	"your_project/zrpcclient-go/hello"
-	"your_project/zrpcclient-go/pb/hellopb"
+	your_project "your_project/zrpcclient-go"
+	"your_project/zrpcclient-go/model/your_project/pb/hellopb"
 )
 
 func main() {
@@ -95,15 +95,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	var cs your_project.Interface
 
-	logic := hello.NewHello(target)
-	sayHello, err := logic.SayHello(context.Background(), &hellopb.SayHelloRequest{
-		Message: "12345",
+	cs = your_project.NewClientset(your_project.WithYour_projectClient(target))
+
+	hello, err := cs.Your_project().Hello().SayHello(context.Background(), &hellopb.SayHelloRequest{
+		Message: "hello",
 	})
+
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(sayHello.Message)
+	fmt.Println(hello)
 }
 ```
 
@@ -118,24 +121,29 @@ import (
 	"context"
 	"fmt"
 	"github.com/zeromicro/go-zero/zrpc"
-	"your_project/zrpcclient-go/hello"
-	"your_project/zrpcclient-go/pb/hellopb"
+	your_project "your_project/zrpcclient-go"
+	"your_project/zrpcclient-go/model/your_project/pb/hellopb"
 )
 
 func main() {
-	client, err := zrpc.NewClient(zrpc.NewEtcdClientConf([]string{"127.0.0.1:2379"}, "your_project.rpc", "", ""))
-	if err != nil {
-		panic(err)
-	}
-	logic := hello.NewHello(client)
-
-	sayHello, err := logic.SayHello(context.Background(), &hellopb.SayHelloRequest{
-		Message: "12345",
+	target, err := zrpc.NewClient(zrpc.RpcClientConf{
+		Etcd: discov.EtcdConf{
+			Hosts: []string{"127.0.0.1:2379"},
+			Key:   "your_project.rpc",
+		},
 	})
+	var cs your_project.Interface
+
+	cs = your_project.NewClientset(your_project.WithYour_projectClient(target))
+
+	hello, err := cs.Your_project().Hello().SayHello(context.Background(), &hellopb.SayHelloRequest{
+		Message: "hello",
+	})
+
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(sayHello.Message)
+	fmt.Println(hello)
 }
 ```
 
