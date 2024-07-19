@@ -12,7 +12,7 @@ import (
 	"github.com/zeromicro/go-zero/gateway"
 	"{{ .Module }}/internal/config"
 	"{{ .Module }}/internal/handler"
-	"{{ .Module }}/internal/middlewares"
+	"{{ .Module }}/internal/middleware"
 	"{{ .Module }}/internal/svc"
 	"{{ .Module }}/internal/server"
 )
