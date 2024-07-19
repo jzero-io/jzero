@@ -56,7 +56,7 @@ var genZRpcClientCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		if genzrpcclient.Scope == "" {
 			genzrpcclient.Scope = filepath.Base(mod.Path)
-			genzrpcclient.Scope = strings.ReplaceAll(gensdk.Scope, "-", "_")
+			genzrpcclient.Scope = strings.ReplaceAll(genzrpcclient.Scope, "-", "_")
 		}
 	},
 	RunE: genzrpcclient.Generate,

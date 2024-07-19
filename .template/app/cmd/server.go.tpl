@@ -42,7 +42,7 @@ func Start(cfgFile string) {
 
 func start(ctx *svc.ServiceContext) {
 	s := server.RegisterZrpc(ctx.Config, ctx)
-	s.AddUnaryInterceptors(middlewares.ServerValidationUnaryInterceptor)
+	s.AddUnaryInterceptors(middleware.ServerValidationUnaryInterceptor)
 	gw := gateway.MustNewServer(ctx.Config.Gateway.GatewayConf)
 
     // gw add api routes
