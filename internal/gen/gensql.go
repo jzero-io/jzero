@@ -13,6 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
@@ -60,7 +62,8 @@ func (js *JzeroSql) Gen() error {
 			)
 			_, err := execx.Run(command, js.Wd)
 			if err != nil {
-				return err
+				console.Warning("[warning]: %s", err.Error())
+				continue
 			}
 
 			if js.ModelMysqlCachePrefix != "" && js.ModelMysqlCache {
@@ -105,7 +108,8 @@ func (js *JzeroSql) Gen() error {
 				)
 				_, err = execx.Run(command, js.Wd)
 				if err != nil {
-					return err
+					console.Warning("[warning]: %s", err.Error())
+					continue
 				}
 				if js.ModelMysqlCachePrefix != "" && js.ModelMysqlCache {
 					for _, table := range tables {

@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+
 	"github.com/pkg/errors"
 
 	"github.com/zeromicro/go-zero/tools/goctl/util"
@@ -129,12 +131,14 @@ func (ja *JzeroApi) Gen() error {
 	if ja.ChangeReplaceTypes {
 		for _, file := range allLogicFiles {
 			if err := ja.changeReplaceLogicGoTypes(file, apiSpec); err != nil {
-				return errors.Wrapf(err, "rewrite %s", file.Path)
+				console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
+				continue
 			}
 		}
 		for _, file := range allHandlerFiles {
 			if err := ja.changeReplaceHandlerGoTypes(file, apiSpec); err != nil {
-				return errors.Wrapf(err, "rewrite %s", file.Path)
+				console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
+				continue
 			}
 		}
 	}
