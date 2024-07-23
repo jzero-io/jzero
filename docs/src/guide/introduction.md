@@ -16,7 +16,7 @@ jzero 基于 go-zero 原生低代码脚手架 goctl 进行二次封装, 使用�
   * 支持 types 文件分组(原生 goctl 将所有 api 文件生成的 types 放到单文件 types.go 中, 导致该文件爆炸)
 * rpc 场景
   * 支持多个 proto(原生 goctl 仅支持单 proto, 多人开发下不够友好)
-  * 默认支持 proto message 的字段校验
+  * 默认支持 proto message 的字段校验, 且支持自定义错误信息
 * gateway 场景
   * 默认可新增 rpc + gateway 的项目
   * 新增接口版本控制特性, 默认为 v1, 可一键初始化 v2, v3等版本的接口, 无需任何配置
