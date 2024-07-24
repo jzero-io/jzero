@@ -3,13 +3,13 @@ package {{.Scope}}
 import (
 	"github.com/zeromicro/go-zero/zrpc"
 	{{ range $v := .Services}}
-	"{{ $.Module }}/typed/{{$.Scope}}/{{ $v | FirstLower }}"
+	"{{ $.Module }}/typed/{{$.Scope}}/{{ $v | lower }}"
 	{{ end }}
 )
 
 type Interface interface {
 	{{ range $v := .Services }}
-	{{ $v | FirstUpper }}() {{ $v | FirstLower }}.{{ $v | FirstUpper }}
+	{{ $v | FirstUpper }}() {{ $v | lower }}.{{ $v | FirstUpper }}
 	{{ end }}
 }
 
@@ -22,7 +22,7 @@ func New(c zrpc.Client) *Client {
 }
 
 {{ range $v := .Services }}
-func (x *Client) {{ $v | FirstUpper }}() {{ $v | FirstLower }}.{{ $v | FirstUpper }} {
-	return {{ $v | FirstLower }}.New{{ $v | FirstUpper }}(x.client)
+func (x *Client) {{ $v | FirstUpper }}() {{ $v | lower }}.{{ $v | FirstUpper }} {
+	return {{ $v | lower }}.New{{ $v | FirstUpper }}(x.client)
 }
 {{ end }}
