@@ -9,7 +9,6 @@ import (
 	goparser "go/parser"
 	"go/token"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -104,8 +103,6 @@ func (jr *JzeroRpc) Gen() error {
 			filepath.Join(embeded.Home, "go-zero"),
 			jr.Style)
 
-		fileBase := v[0 : len(v)-len(path.Ext(v))]
-
 		_, err = execx.Run(command, jr.Wd)
 		if err != nil {
 			return err
@@ -137,13 +134,16 @@ func (jr *JzeroRpc) Gen() error {
 
 		// # gen proto descriptor
 		if isNeedGenProtoDescriptor(parse) {
+			if !pathx.FileExists(generateProtoDescriptorPath(v)) {
+				_ = os.MkdirAll(filepath.Dir(generateProtoDescriptorPath(v)), 0o755)
+			}
 			isNeedGenerateProtoDescriptor = true
-			protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=%s.pb %s",
+			protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=%s %s",
 				protoDirPath,
-				fileBase,
+				generateProtoDescriptorPath(v),
 				v,
 			)
-			protoDescriptorPaths = append(protoDescriptorPaths, filepath.ToSlash(fmt.Sprintf("%s.pb", fileBase)))
+			protoDescriptorPaths = append(protoDescriptorPaths, generateProtoDescriptorPath(v))
 			_, err = execx.Run(protocCommand, jr.Wd)
 			if err != nil {
 				return err
@@ -177,7 +177,12 @@ func (jr *JzeroRpc) Gen() error {
 }
 
 func generateProtoDescriptorPath(protoPath string) string {
-	return ""
+	rel, err := filepath.Rel(filepath.Join("desc", "proto"), protoPath)
+	if err != nil {
+		return ""
+	}
+
+	return filepath.Join("desc", "pb", strings.TrimSuffix(rel, ".proto")+".pb")
 }
 
 func (jr *JzeroRpc) genServer(serverImports ImportLines, pbImports ImportLines, registerServers RegisterLines) error {
