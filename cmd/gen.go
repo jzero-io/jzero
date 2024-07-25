@@ -85,14 +85,18 @@ var genSdkCmd = &cobra.Command{
 		mod, err := mod.GetGoMod(wd)
 		cobra.CheckErr(err)
 
-		if gensdk.Module == "" {
-			if gensdk.Language == "go" {
-				gensdk.Module = fmt.Sprintf("%s-go", mod.Path)
-			}
-		}
-
 		if gensdk.Output == "" {
 			gensdk.Output = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), gensdk.Language)
+		}
+
+		if gensdk.Module == "" {
+			// module 为空, sdk 作为服务端的一个 package
+			if gensdk.Language == "go" {
+				gensdk.Module = filepath.ToSlash(filepath.Join(mod.Path, gensdk.Output))
+			}
+		} else {
+			// module 不为空, 则生成 go.mod 文件
+			gensdk.GenModule = true
 		}
 
 		if gensdk.Scope == "" {

@@ -157,11 +157,13 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	}
 
 	// go mod file
-	goModFile, err := g.genGoMod()
-	if err != nil {
-		return nil, err
+	if g.config.GenModule {
+		goModFile, err := g.genGoMod()
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, goModFile)
 	}
-	files = append(files, goModFile)
 
 	return files, nil
 }

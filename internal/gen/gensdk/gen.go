@@ -21,7 +21,8 @@ var (
 	Language     string
 	Module       string
 
-	Version string
+	Version   string
+	GenModule bool
 )
 
 func GenSdk(_ *cobra.Command, _ []string) error {
@@ -40,8 +41,11 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 	}
 
 	c := config.Config{
-		Language:     Language,
-		APP:          Scope,
+		Language: Language,
+		APP:      Scope,
+
+		// 是否生成 go.mod 文件
+		GenModule:    GenModule,
 		Module:       Module,
 		Output:       Output,
 		ApiDir:       ApiDir,
