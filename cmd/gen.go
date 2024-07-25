@@ -165,5 +165,6 @@ func init() {
 		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Output, "output", "o", "zrpcclient-go", "generate rpcclient code")
 		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Scope, "scope", "", "", "set scope name")
+		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Module, "module", "m", "", "set module name")
 	}
 }

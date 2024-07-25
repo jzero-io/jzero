@@ -10,6 +10,7 @@ import (
 	"github.com/jzero-io/jzero/pkg/templatex"
 
 	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/internal/new"
 	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -24,6 +25,7 @@ var (
 	Style  string
 	Scope  string
 	Output string
+	Module string
 )
 
 type DirContext struct {
@@ -108,6 +110,11 @@ func Generate(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
+	if Module != "" {
+		module.Path = Module
+	} else {
+		module.Path = filepath.ToSlash(filepath.Join(module.Path, Output))
+	}
 
 	var services []string
 
@@ -118,7 +125,7 @@ func Generate(_ *cobra.Command, _ []string) error {
 			return err
 		}
 		dirContext := DirContext{
-			ImportBase:      filepath.Join(module.Path, Output),
+			ImportBase:      filepath.Join(module.Path),
 			PbPackage:       parse.PbPackage,
 			OptionGoPackage: parse.GoPackage,
 		}
@@ -150,7 +157,7 @@ func Generate(_ *cobra.Command, _ []string) error {
 
 	// gen clientset and options
 	template, err := templatex.ParseTemplate(map[string]interface{}{
-		"Module": filepath.ToSlash(filepath.Join(module.Path, Output)),
+		"Module": module.Path,
 		"APP":    Scope,
 		"Scopes": []string{Scope},
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "clientset.go.tpl"))))
@@ -163,7 +170,7 @@ func Generate(_ *cobra.Command, _ []string) error {
 	}
 
 	template, err = templatex.ParseTemplate(map[string]interface{}{
-		"Module": filepath.ToSlash(filepath.Join(module.Path, Output)),
+		"Module": module.Path,
 		"APP":    Scope,
 		"Scopes": []string{Scope},
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "options.go.tpl"))))
@@ -177,7 +184,7 @@ func Generate(_ *cobra.Command, _ []string) error {
 
 	// generate scope client
 	template, err = templatex.ParseTemplate(map[string]interface{}{
-		"Module":   filepath.ToSlash(filepath.Join(module.Path, Output)),
+		"Module":   module.Path,
 		"Scope":    Scope,
 		"Services": services,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "typed", "scope_client.go.tpl"))))
@@ -187,6 +194,23 @@ func Generate(_ *cobra.Command, _ []string) error {
 	err = os.WriteFile(filepath.Join(Output, "typed", Scope, fmt.Sprintf("%s_client.go", Scope)), template, 0o644)
 	if err != nil {
 		return err
+	}
+
+	// if set --module flag
+	if Module != "" {
+		data, err := new.NewTemplateData(nil)
+		if err != nil {
+			return err
+		}
+		data["Module"] = Module
+		template, err = templatex.ParseTemplate(data, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl"))))
+		if err != nil {
+			return err
+		}
+		err = os.WriteFile(filepath.Join(Output, "go.mod"), template, 0o644)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -41,7 +41,7 @@ func NewProject(_ *cobra.Command, _ []string) error {
 	err := os.MkdirAll(Output, 0o755)
 	cobra.CheckErr(err)
 
-	templateData, err := newTemplateData(Features)
+	templateData, err := NewTemplateData(Features)
 	cobra.CheckErr(err)
 
 	jn := JzeroNew{
