@@ -4,7 +4,7 @@ type Config struct {
 	Language     string
 	APP          string
 	Module       string
-	Dir          string // output dir
+	Output       string // output dir
 	ApiDir       string
 	ProtoDir     string
 	WrapResponse bool

@@ -17,7 +17,7 @@ var (
 	ApiDir       string
 	ProtoDir     string
 	WrapResponse bool
-	Dir          string
+	Output       string
 	Language     string
 	Module       string
 
@@ -31,9 +31,9 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 		embeded.Home = filepath.Join(homeDir, ".jzero", Version)
 	}
 
-	if Dir != "" {
-		if !pathx.FileExists(Dir) {
-			if err := os.MkdirAll(Dir, 0o755); err != nil {
+	if Output != "" {
+		if !pathx.FileExists(Output) {
+			if err := os.MkdirAll(Output, 0o755); err != nil {
 				cobra.CheckErr(err)
 			}
 		}
@@ -43,7 +43,7 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 		Language:     Language,
 		APP:          Scope,
 		Module:       Module,
-		Dir:          Dir,
+		Output:       Output,
 		ApiDir:       ApiDir,
 		ProtoDir:     ProtoDir,
 		WrapResponse: WrapResponse,
@@ -60,15 +60,15 @@ func GenSdk(_ *cobra.Command, _ []string) error {
 	}
 
 	for _, v := range files {
-		if !pathx.FileExists(filepath.Dir(filepath.Join(Dir, v.Path))) {
-			if err = os.MkdirAll(filepath.Dir(filepath.Join(Dir, v.Path)), 0o755); err != nil {
+		if !pathx.FileExists(filepath.Dir(filepath.Join(Output, v.Path))) {
+			if err = os.MkdirAll(filepath.Dir(filepath.Join(Output, v.Path)), 0o755); err != nil {
 				return err
 			}
 		}
-		if pathx.FileExists(filepath.Join(Dir, v.Path)) && v.Skip {
+		if pathx.FileExists(filepath.Join(Output, v.Path)) && v.Skip {
 			continue
 		}
-		if err = os.WriteFile(filepath.Join(Dir, v.Path), v.Content.Bytes(), 0o644); err != nil {
+		if err = os.WriteFile(filepath.Join(Output, v.Path), v.Content.Bytes(), 0o644); err != nil {
 			return err
 		}
 	}

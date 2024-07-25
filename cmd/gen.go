@@ -91,8 +91,8 @@ var genSdkCmd = &cobra.Command{
 			}
 		}
 
-		if gensdk.Dir == "" {
-			gensdk.Dir = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), gensdk.Language)
+		if gensdk.Output == "" {
+			gensdk.Output = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), gensdk.Language)
 		}
 
 		if gensdk.Scope == "" {
@@ -138,7 +138,7 @@ func init() {
 		genCmd.AddCommand(genSdkCmd)
 
 		genSdkCmd.Flags().StringVarP(&gensdk.Language, "language", "l", "go", "set language")
-		genSdkCmd.Flags().StringVarP(&gensdk.Dir, "dir", "d", "", "set dir")
+		genSdkCmd.Flags().StringVarP(&gensdk.Output, "output", "o", "", "set output dir")
 		genSdkCmd.Flags().StringVarP(&gensdk.Module, "module", "m", "", "set module name")
 		genSdkCmd.Flags().StringVarP(&gensdk.ApiDir, "api-dir", "", filepath.Join("desc", "api"), "set input api dir")
 		genSdkCmd.Flags().StringVarP(&gensdk.ProtoDir, "proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
