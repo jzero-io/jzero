@@ -9,7 +9,6 @@ order: 5
 * kubernetes client-go style
 * 根据 api group 和 proto service 进行业务分组
 * 链式调用, 调用逻辑清晰
-* 自带 fake client 支持单元测试
 * 可自定义接口进行扩展
 
 ::: code-tabs#shell
@@ -56,8 +55,8 @@ func main() {
 		panic(err)
 	}
 
-	result, err := clientset.Hello().HelloPathHandler(context.Background(), &types.PathRequest{
-		Name: "jzero",
+	result, err := clientset.Hello().SayHello(context.Background(), &types.SayHelloRequest{
+		Message: "jzero",
 	})
 	if err != nil {
 		panic(err)
