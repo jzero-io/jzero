@@ -42,16 +42,16 @@ import (
 	"context"
 	"fmt"
 	
+	"github.com/jzero-restc"
 	"your_project-go"
 	"your_project-go/model/your_project/types"
-	"your_project-go/rest"
 )
 
 func main() {
 	clientset, err := your_project.NewClientWithOptions(
-		rest.WithAddr("127.0.0.1"),
-		rest.WithPort("8001"),
-		rest.WithProtocol("http"))
+		restc.WithAddr("127.0.0.1"),
+		restc.WithPort("8001"),
+		restc.WithProtocol("http"))
 	if err != nil {
 		panic(err)
 	}
