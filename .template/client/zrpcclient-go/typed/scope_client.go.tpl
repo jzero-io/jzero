@@ -9,7 +9,7 @@ import (
 
 type Interface interface {
 	{{ range $v := .Services }}
-	{{ $v | FirstUpper }}() {{ $v | lower }}.{{ $v | FirstUpper }}
+	{{ $v | FirstUpper | ToCamel }}() {{ $v | lower }}.{{ $v | FirstUpper | ToCamel }}
 	{{ end }}
 }
 
@@ -22,7 +22,7 @@ func New(c zrpc.Client) *Client {
 }
 
 {{ range $v := .Services }}
-func (x *Client) {{ $v | FirstUpper }}() {{ $v | lower }}.{{ $v | FirstUpper }} {
-	return {{ $v | lower }}.New{{ $v | FirstUpper }}(x.client)
+func (x *Client) {{ $v | FirstUpper | ToCamel }}() {{ $v | lower }}.{{ $v | FirstUpper | ToCamel }} {
+	return {{ $v | lower }}.New{{ $v | FirstUpper | ToCamel }}(x.client)
 }
 {{ end }}

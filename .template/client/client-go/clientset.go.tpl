@@ -20,7 +20,7 @@ type Clientset struct {
 	// direct client to request
 	direct *typed.DirectClient
 
-	{{range $v := .Scopes}}{{$v}} *{{$v | lower}}.{{$v | FirstUpper| ToCamel}}Client{{end}}
+	{{range $v := .Scopes}}{{$v | ToCamel}} *{{$v | lower}}.{{$v | FirstUpper| ToCamel}}Client{{end}}
 }
 
 func (x *Clientset) Direct() typed.DirectInterface {
@@ -28,7 +28,7 @@ func (x *Clientset) Direct() typed.DirectInterface {
 }
 
 {{range $v := .Scopes}}func (x *Clientset) {{$v | FirstUpper| ToCamel}}() {{$v | lower}}.{{$v | FirstUpper| ToCamel}}Interface {
-	return x.{{$v}}
+	return x.{{$v | ToCamel}}
 }
 
 {{end}}func NewClientWithOptions(ops ...restc.Opt) ({{if eq (len .Scopes) 1}}{{index .Scopes 0  | lower}}.{{index .Scopes 0 | FirstUpper| ToCamel}}Interface{{else}}*Clientset{{end}}, error) {
@@ -45,7 +45,7 @@ func (x *Clientset) Direct() typed.DirectInterface {
 	if err != nil {
 		return nil, err
 	}
-	{{range $v := .Scopes}}cs.{{$v}}, err = {{$v | lower}}.NewForConfig(&configShallowCopy)
+	{{range $v := .Scopes}}cs.{{$v | ToCamel}}, err = {{$v | lower}}.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}

@@ -1,19 +1,19 @@
-package {{ .APP }}
+package {{ .APP | lower }}
 
 import (
-	{{range $v := .Scopes}}"{{$.Module}}/typed/{{$v}}"{{end}}
+	{{range $v := .Scopes}}"{{$.Module}}/typed/{{$v | lower}}"{{end}}
 )
 
 type Interface interface {
-	{{range $v := .Scopes}}{{$v | FirstUpper}}() {{$v}}.Interface{{end}}
+	{{range $v := .Scopes}}{{$v | FirstUpper | ToCamel}}() {{$v | lower}}.Interface{{end}}
 }
 
 type Clientset struct {
-	{{range $v := .Scopes}}{{$v}} *{{$v}}.Client{{end}}
+	{{range $v := .Scopes}}{{$v | ToCamel}} *{{$v}}.Client{{end}}
 }
 
-{{range $v := .Scopes}}func (x *Clientset) {{$v | FirstUpper}}() {{$v}}.Interface {
-	return x.{{$v}}
+{{range $v := .Scopes}}func (x *Clientset) {{$v | FirstUpper | ToCamel}}() {{$v | lower}}.Interface {
+	return x.{{$v | ToCamel}}
 }
 {{ end }}
 
