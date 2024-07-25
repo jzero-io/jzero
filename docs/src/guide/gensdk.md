@@ -41,7 +41,7 @@ import (
 	"context"
 	"fmt"
 	
-	"github.com/jzero-restc"
+	"github.com/jzero-io/restc"
 	"your_project-go"
 	"your_project-go/model/your_project/types"
 )
