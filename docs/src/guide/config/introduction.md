@@ -1,7 +1,7 @@
 ---
 title: 配置说明
 icon: vscode-icons:file-type-gleamconfig
-order: 0
+order: -1
 category: 配置
 tag:
   - Guide
