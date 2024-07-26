@@ -143,7 +143,7 @@ func (t *Typescript) Gen() ([]*GeneratedFile, error) {
 
 func (t *Typescript) genClientSet(scopes []string) (*GeneratedFile, error) {
 	clientBytes, err := templatex.ParseTemplate(map[string]interface{}{
-		"APP":    t.config.APP,
+		"APP":    t.config.Scope,
 		"Scopes": scopes,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "index.ts.tpl")))
 	if err != nil {
@@ -157,7 +157,7 @@ func (t *Typescript) genClientSet(scopes []string) (*GeneratedFile, error) {
 
 func (t *Typescript) genPackageJson(scopes []string) (*GeneratedFile, error) {
 	packageJsonBytes, err := templatex.ParseTemplate(map[string]interface{}{
-		"APP": t.config.APP,
+		"APP": t.config.Scope,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "package.json.tpl")))
 	if err != nil {
 		return nil, err
@@ -171,7 +171,6 @@ func (t *Typescript) genPackageJson(scopes []string) (*GeneratedFile, error) {
 func (t *Typescript) genScopeClient(scope string, resources []string) (*GeneratedFile, error) {
 	scopeClientBytes, err := templatex.ParseTemplate(map[string]interface{}{
 		"Scope":     scope,
-		"Module":    t.config.Module,
 		"Resources": resources,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "typed", "scope_client.ts.tpl")))
 	if err != nil {
@@ -221,7 +220,7 @@ func (t *Typescript) genApiTypesModel(types []spec.Type) (*GeneratedFile, error)
 	}
 
 	return &GeneratedFile{
-		Path:    filepath.Join("model", t.config.APP, "types", "types.ts"),
+		Path:    filepath.Join("model", t.config.Scope, "types", "types.ts"),
 		Content: *bytes.NewBuffer([]byte(typesGoString)),
 	}, nil
 }

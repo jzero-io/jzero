@@ -11,7 +11,6 @@ import (
 
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/internal/new"
-	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	conf "github.com/zeromicro/go-zero/tools/goctl/config"
@@ -22,10 +21,13 @@ import (
 )
 
 var (
-	Style  string
-	Scope  string
-	Output string
-	Module string
+	Style     string
+	Scope     string
+	Output    string
+	GoModule  string
+	GoPackage string
+
+	GenModule bool
 )
 
 type DirContext struct {
@@ -106,15 +108,6 @@ func Generate(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	module, err := mod.GetGoMod(wd)
-	if err != nil {
-		return err
-	}
-	if Module != "" {
-		module.Path = Module
-	} else {
-		module.Path = filepath.ToSlash(filepath.Join(module.Path, Output))
-	}
 
 	var services []string
 
@@ -125,7 +118,7 @@ func Generate(_ *cobra.Command, _ []string) error {
 			return err
 		}
 		dirContext := DirContext{
-			ImportBase:      filepath.Join(module.Path),
+			ImportBase:      filepath.Join(GoModule),
 			PbPackage:       parse.PbPackage,
 			OptionGoPackage: parse.GoPackage,
 		}
@@ -157,9 +150,9 @@ func Generate(_ *cobra.Command, _ []string) error {
 
 	// gen clientset and options
 	template, err := templatex.ParseTemplate(map[string]interface{}{
-		"Module": module.Path,
-		"APP":    Scope,
-		"Scopes": []string{Scope},
+		"Module":  GoModule,
+		"Package": GoPackage,
+		"Scopes":  []string{Scope},
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "clientset.go.tpl"))))
 	if err != nil {
 		return err
@@ -170,9 +163,9 @@ func Generate(_ *cobra.Command, _ []string) error {
 	}
 
 	template, err = templatex.ParseTemplate(map[string]interface{}{
-		"Module": module.Path,
-		"APP":    Scope,
-		"Scopes": []string{Scope},
+		"Module":  GoModule,
+		"Package": GoPackage,
+		"Scopes":  []string{Scope},
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "options.go.tpl"))))
 	if err != nil {
 		return err
@@ -184,7 +177,7 @@ func Generate(_ *cobra.Command, _ []string) error {
 
 	// generate scope client
 	template, err = templatex.ParseTemplate(map[string]interface{}{
-		"Module":   module.Path,
+		"Module":   GoModule,
 		"Scope":    Scope,
 		"Services": services,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "typed", "scope_client.go.tpl"))))
@@ -197,12 +190,12 @@ func Generate(_ *cobra.Command, _ []string) error {
 	}
 
 	// if set --module flag
-	if Module != "" {
+	if GenModule {
 		data, err := new.NewTemplateData(nil)
 		if err != nil {
 			return err
 		}
-		data["Module"] = Module
+		data["Module"] = GoModule
 		template, err = templatex.ParseTemplate(data, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl"))))
 		if err != nil {
 			return err

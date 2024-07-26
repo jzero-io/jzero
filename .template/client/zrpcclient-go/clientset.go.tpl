@@ -1,4 +1,4 @@
-package {{ .APP | lower }}
+package {{ .Package }}
 
 import (
 	{{range $v := .Scopes}}"{{$.Module}}/typed/{{$v | lower}}"{{end}}
@@ -17,7 +17,7 @@ type Clientset struct {
 }
 {{ end }}
 
-func NewClientset(ops ...Opt) *Clientset {
+func NewClientWithOptions(ops ...Opt) *Clientset {
 	cs := &Clientset{}
 
 	for _, op := range ops {

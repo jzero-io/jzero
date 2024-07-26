@@ -175,7 +175,7 @@ func (g *Golang) genGoMod() (*GeneratedFile, error) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	resp, err := execx.Run(fmt.Sprintf("go mod init %s", g.config.Module), tmpDir)
+	resp, err := execx.Run(fmt.Sprintf("go mod init %s", g.config.GoModule), tmpDir)
 	if err != nil {
 		return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
 	}
@@ -196,9 +196,9 @@ func (g *Golang) genClientSets(scopes []string) ([]*GeneratedFile, error) {
 	var clientSetFiles []*GeneratedFile
 
 	clientGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
-		"APP":    g.config.APP,
-		"Module": g.config.Module,
-		"Scopes": scopes,
+		"Package": g.config.GoPackage,
+		"Module":  g.config.GoModule,
+		"Scopes":  scopes,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-go", "clientset.go.tpl")))
 	if err != nil {
 		return nil, err
@@ -215,7 +215,7 @@ func (g *Golang) genDirectClients() ([]*GeneratedFile, error) {
 	var directClientFiles []*GeneratedFile
 
 	directClientGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
-		"Module": g.config.Module,
+		"Module": g.config.GoModule,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-go", "typed", "direct_client.go.tpl")))
 	if err != nil {
 		return nil, err
@@ -233,7 +233,7 @@ func (g *Golang) genScopeClients(scope string, resources []string) ([]*Generated
 
 	scopeClientGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
 		"Scope":     scope,
-		"Module":    g.config.Module,
+		"Module":    g.config.GoModule,
 		"Resources": resources,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-go", "typed", "scope_client.go.tpl")))
 	if err != nil {
@@ -253,7 +253,7 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 
 	// resource_expansion.go
 	resourceExpansionGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
-		"Module":   g.config.Module,
+		"Module":   g.config.GoModule,
 		"Scope":    scope,
 		"Resource": resource,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-go", "typed", "resource_expansion.go.tpl")))
@@ -266,7 +266,7 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 	})
 
 	resourceGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
-		"GoModule":           g.config.Module,
+		"GoModule":           g.config.GoModule,
 		"Scope":              scope,
 		"Resource":           resource,
 		"HTTPInterfaces":     rhis[vars.Scope(scope)][vars.Resource(resource)],
@@ -303,7 +303,7 @@ func (g *Golang) genApiTypesModel(types []spec.Type) (*GeneratedFile, error) {
 		return nil, err
 	}
 	return &GeneratedFile{
-		Path:    filepath.Join("model", strings.ToLower(g.config.APP), "types", "types.go"),
+		Path:    filepath.Join("model", strings.ToLower(g.config.Scope), "types", "types.go"),
 		Content: *bytes.NewBuffer(typesGoBytes),
 	}, nil
 }
@@ -344,7 +344,7 @@ func (g *Golang) genPbTypesModel(protoFiles []string) ([]*GeneratedFile, error) 
 		}
 
 		generatedFile := &GeneratedFile{
-			Path:    filepath.Join("model", strings.ToLower(g.config.APP), rel),
+			Path:    filepath.Join("model", strings.ToLower(g.config.Scope), rel),
 			Content: *bytes.NewBuffer(content),
 		}
 
@@ -363,10 +363,10 @@ func (g *Golang) genImports(infs []*vars.HTTPInterface) []string {
 	var imports []string
 	for _, inf := range infs {
 		if inf.Request != nil && inf.Request.Package != "" {
-			imports = append(imports, fmt.Sprintf("%s/model/%s/%s", g.config.Module, strings.ToLower(g.config.APP), inf.Request.Package))
+			imports = append(imports, fmt.Sprintf("%s/model/%s/%s", g.config.GoModule, strings.ToLower(g.config.Scope), inf.Request.Package))
 		}
 		if inf.Response != nil && inf.Response.Package != "" {
-			imports = append(imports, fmt.Sprintf("%s/model/%s/%s", g.config.Module, strings.ToLower(g.config.APP), inf.Response.Package))
+			imports = append(imports, fmt.Sprintf("%s/model/%s/%s", g.config.GoModule, strings.ToLower(g.config.Scope), inf.Response.Package))
 		}
 	}
 	return imports

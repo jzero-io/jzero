@@ -81,7 +81,7 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 					httpInterface.Response.FakeReturnName = BuildProtoFakeReturnName(service.GetName(), stringx.FirstUpper(method.GetOutputType().GetName()))
 				}
 				httpInterface.MethodName = method.GetName()
-				httpInterface.Scope = vars.Scope(config.APP)
+				httpInterface.Scope = vars.Scope(config.Scope)
 				httpInterface.Resource = vars.Resource(service.GetName())
 
 				pathParams, err := gateway.PathParam(httpInterface.URL)
@@ -103,7 +103,7 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 				path, _ := url.JoinPath(group.Annotation.Properties["prefix"], route.Path)
 
 				httpInterface := vars.HTTPInterface{
-					Scope:      vars.Scope(config.APP),
+					Scope:      vars.Scope(config.Scope),
 					Resource:   vars.Resource(stringx.ToCamel(group.Annotation.Properties["group"])),
 					Method:     strings.ToUpper(route.Method),
 					URL:        path,

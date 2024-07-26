@@ -58,6 +58,16 @@ var genZRpcClientCmd = &cobra.Command{
 			genzrpcclient.Scope = filepath.Base(mod.Path)
 			genzrpcclient.Scope = strings.ReplaceAll(genzrpcclient.Scope, "-", "_")
 		}
+
+		if genzrpcclient.GoModule == "" {
+			genzrpcclient.GoModule = filepath.ToSlash(filepath.Join(mod.Path, genzrpcclient.Output))
+		} else {
+			genzrpcclient.GenModule = true
+		}
+
+		if genzrpcclient.GoPackage == "" {
+			genzrpcclient.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(genzrpcclient.GoModule)), "-", "_")
+		}
 	},
 	RunE: genzrpcclient.Generate,
 }
@@ -89,14 +99,18 @@ var genSdkCmd = &cobra.Command{
 			gensdk.Output = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), gensdk.Language)
 		}
 
-		if gensdk.Module == "" {
+		if gensdk.GoModule == "" {
 			// module 为空, sdk 作为服务端的一个 package
 			if gensdk.Language == "go" {
-				gensdk.Module = filepath.ToSlash(filepath.Join(mod.Path, gensdk.Output))
+				gensdk.GoModule = filepath.ToSlash(filepath.Join(mod.Path, gensdk.Output))
 			}
 		} else {
 			// module 不为空, 则生成 go.mod 文件
 			gensdk.GenModule = true
+		}
+
+		if gensdk.GoPackage == "" {
+			gensdk.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(gensdk.GoModule)), "-", "_")
 		}
 
 		if gensdk.Scope == "" {
@@ -143,7 +157,8 @@ func init() {
 
 		genSdkCmd.Flags().StringVarP(&gensdk.Language, "language", "l", "go", "set language")
 		genSdkCmd.Flags().StringVarP(&gensdk.Output, "output", "o", "", "set output dir")
-		genSdkCmd.Flags().StringVarP(&gensdk.Module, "module", "m", "", "set module name")
+		genSdkCmd.Flags().StringVarP(&gensdk.GoModule, "goModule", "", "", "set module name")
+		genSdkCmd.Flags().StringVarP(&gensdk.GoPackage, "goPackage", "", "", "set package name")
 		genSdkCmd.Flags().StringVarP(&gensdk.ApiDir, "api-dir", "", filepath.Join("desc", "api"), "set input api dir")
 		genSdkCmd.Flags().StringVarP(&gensdk.ProtoDir, "proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
 		genSdkCmd.Flags().BoolVarP(&gensdk.WrapResponse, "wrap-response", "", false, "warp response: code, data, message")
@@ -169,6 +184,7 @@ func init() {
 		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Output, "output", "o", "zrpcclient-go", "generate rpcclient code")
 		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Scope, "scope", "", "", "set scope name")
-		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Module, "module", "m", "", "set module name")
+		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.GoModule, "goModule", "", "", "set go module name")
+		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.GoPackage, "goPackage", "", "", "set package name")
 	}
 }

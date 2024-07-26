@@ -2,10 +2,11 @@ package config
 
 type Config struct {
 	Language     string
-	APP          string
+	Scope        string
 	GenModule    bool
-	Module       string
-	Output       string // output dir
+	GoPackage    string
+	GoModule     string
+	Output       string
 	ApiDir       string
 	ProtoDir     string
 	WrapResponse bool

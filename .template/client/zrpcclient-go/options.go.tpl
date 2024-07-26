@@ -1,4 +1,4 @@
-package {{ .APP }}
+package {{ .Package }}
 
 import (
 	"github.com/zeromicro/go-zero/zrpc"
