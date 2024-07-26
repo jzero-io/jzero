@@ -1,18 +1,15 @@
-APP: {{ .APP }}
-Zrpc:
-  ListenOn: 0.0.0.0:8000
-  Mode: dev
-  Name: {{ .APP }}.rpc
-Gateway:
-  Name: {{ .APP }}.gw
-  Port: 8001
-  Upstreams:
-    - Grpc:
-        Endpoints:
+zrpc:
+  listenOn: 0.0.0.0:8000
+  mode: dev
+  name: {{ .APP }}.rpc
+gateway:
+  name: {{ .APP }}.gw
+  port: 8001
+  upstreams:
+    - grpc:
+        endpoints:
           - 0.0.0.0:8000
-      Name: {{ .APP }}.gw
-      ProtoSets:
-        - desc/proto/hello.pb
+      name: {{ .APP }}.gw
 
-Log:
+log:
   encoding: plain

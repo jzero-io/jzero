@@ -12,8 +12,7 @@ COPY ./ ./
 RUN --mount=type=cache,target=/go/pkg CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -a -ldflags="$LDFLAGS" -o /dist/app main.go \
     && jzero gen swagger \
     && cp -r etc /dist/etc \
-    && mkdir -p /dist/desc && cp -r desc/swagger /dist/desc \
-    && find desc/proto -type f -name '*.pb' | while read file; do mkdir -p /dist/$(dirname $file) && cp $file /dist/$file; done
+    && mkdir -p /dist/desc && cp -r desc/swagger /dist/desc
 
 
 FROM --platform=$TARGETPLATFORM alpine:latest

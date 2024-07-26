@@ -16,13 +16,17 @@ jzero check
 jzero gen
 ```
 
+### Generate client go code
+
+```shell
+jzero gen sdk
+```
+
 ### Generate swagger code
 
 ```shell
 jzero gen swagger
 ```
-
-you can see generated swagger json in `desc/swagger`
 
 ## Build docker image
 
