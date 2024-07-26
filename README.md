@@ -12,6 +12,11 @@
 
 Used to create project from templates and generate Server/Client code by proto and api file.
 
+Support development templates for different scenarios:
+* api
+* zrpc
+* gateway
+
 For more details please see: https://jzero.jaronnie.com
 
 ## [Quick Start](https://jzero.jaronnie.com/#快速开始)
@@ -41,5 +46,6 @@ please see: https://jzero.jaronnie.com/guide/roadmap
 
 ## Contact me
 
-* Weixin: jaronnie
-* Email: jaron@jaronnie.com
+<p align="center">
+<img align="left" width="250px" height="350px" src="https://oss.jaronnie.com/weixin2.jpg">
+</p>
