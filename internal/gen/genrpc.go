@@ -2,7 +2,6 @@ package gen
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"go/ast"
 	goformat "go/format"
@@ -12,18 +11,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jaronnie/genius"
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
-
-	"gopkg.in/op/go-logging.v1"
-
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/jzero-io/jzero/pkg/templatex"
-	yq "github.com/mikefarah/yq/v4/pkg/yqlib"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
@@ -65,12 +58,12 @@ func (jr *JzeroRpc) Gen() error {
 	var serverImports ImportLines
 	var pbImports ImportLines
 	var registerServers RegisterLines
-	var protoDescriptorPaths []string
+	// var protoDescriptorPaths []string
 
 	var allServerFiles []ServerFile
 	var allLogicFiles []LogicFile
 
-	var isNeedGenerateProtoDescriptor bool
+	// var isNeedGenerateProtoDescriptor bool
 
 	for _, v := range protoFilenames {
 		// parse proto
@@ -137,13 +130,13 @@ func (jr *JzeroRpc) Gen() error {
 			if !pathx.FileExists(generateProtoDescriptorPath(v)) {
 				_ = os.MkdirAll(filepath.Dir(generateProtoDescriptorPath(v)), 0o755)
 			}
-			isNeedGenerateProtoDescriptor = true
+			// isNeedGenerateProtoDescriptor = true
 			protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=%s %s",
 				protoDirPath,
 				generateProtoDescriptorPath(v),
 				v,
 			)
-			protoDescriptorPaths = append(protoDescriptorPaths, generateProtoDescriptorPath(v))
+			// protoDescriptorPaths = append(protoDescriptorPaths, generateProtoDescriptorPath(v))
 			_, err = execx.Run(protocCommand, jr.Wd)
 			if err != nil {
 				return err
@@ -166,13 +159,13 @@ func (jr *JzeroRpc) Gen() error {
 			return err
 		}
 	}
-	if isNeedGenerateProtoDescriptor {
-		// update gateway upstream protosets
-		err = jr.updateGatewayUpstreams(protoDescriptorPaths)
-		if err != nil {
-			console.Warning("[warning] update gateway upstreams meet error: %v", err)
-		}
-	}
+	//if isNeedGenerateProtoDescriptor {
+	//	// update gateway upstream protosets
+	//	err = jr.updateGatewayUpstreams(protoDescriptorPaths)
+	//	if err != nil {
+	//		console.Warning("[warning] update gateway upstreams meet error: %v", err)
+	//	}
+	//}
 	return nil
 }
 
@@ -440,51 +433,51 @@ func (jr *JzeroRpc) rewriteServerGo(fp string) error {
 	return nil
 }
 
-func (jr *JzeroRpc) updateGatewayUpstreams(protoDescriptorPaths []string) error {
-	logging.SetLevel(logging.CRITICAL, "")
-	dec := yq.NewYamlDecoder(yq.NewDefaultYamlPreferences())
-
-	file, err := os.ReadFile(jr.Etc)
-	if err != nil {
-		return err
-	}
-
-	if err = dec.Init(strings.NewReader(string(file))); err != nil {
-		return err
-	}
-
-	node, err := dec.Decode()
-	if err != nil {
-		return err
-	}
-
-	marshal, err := json.Marshal(protoDescriptorPaths)
-	if err != nil {
-		return err
-	}
-
-	yaml, err := genius.NewFromYaml(file)
-	if err != nil {
-		return err
-	}
-
-	key := ".gateway.upstreams.0.protoSets"
-
-	protosetsConfig := yaml.Get(strings.TrimPrefix(key, "."))
-	if protosetsConfig == nil {
-		key = ".Gateway.Upstreams.0.ProtoSets"
-	}
-
-	result, err := yq.NewAllAtOnceEvaluator().EvaluateNodes(fmt.Sprintf(`%s=%s`, key, string(marshal)), node)
-	if err != nil {
-		return err
-	}
-
-	encoder := yq.NewYamlEncoder(yq.NewDefaultYamlPreferences())
-	out := new(bytes.Buffer)
-	printer := yq.NewPrinter(encoder, yq.NewSinglePrinterWriter(out))
-	if err := printer.PrintResults(result); err != nil {
-		return err
-	}
-	return os.WriteFile(jr.Etc, out.Bytes(), 0o644)
-}
+//func (jr *JzeroRpc) updateGatewayUpstreams(protoDescriptorPaths []string) error {
+//	logging.SetLevel(logging.CRITICAL, "")
+//	dec := yq.NewYamlDecoder(yq.NewDefaultYamlPreferences())
+//
+//	file, err := os.ReadFile(jr.Etc)
+//	if err != nil {
+//		return err
+//	}
+//
+//	if err = dec.Init(strings.NewReader(string(file))); err != nil {
+//		return err
+//	}
+//
+//	node, err := dec.Decode()
+//	if err != nil {
+//		return err
+//	}
+//
+//	marshal, err := json.Marshal(protoDescriptorPaths)
+//	if err != nil {
+//		return err
+//	}
+//
+//	yaml, err := genius.NewFromYaml(file)
+//	if err != nil {
+//		return err
+//	}
+//
+//	key := ".gateway.upstreams.0.protoSets"
+//
+//	protosetsConfig := yaml.Get(strings.TrimPrefix(key, "."))
+//	if protosetsConfig == nil {
+//		key = ".Gateway.Upstreams.0.ProtoSets"
+//	}
+//
+//	result, err := yq.NewAllAtOnceEvaluator().EvaluateNodes(fmt.Sprintf(`%s=%s`, key, string(marshal)), node)
+//	if err != nil {
+//		return err
+//	}
+//
+//	encoder := yq.NewYamlEncoder(yq.NewDefaultYamlPreferences())
+//	out := new(bytes.Buffer)
+//	printer := yq.NewPrinter(encoder, yq.NewSinglePrinterWriter(out))
+//	if err := printer.PrintResults(result); err != nil {
+//		return err
+//	}
+//	return os.WriteFile(jr.Etc, out.Bytes(), 0o644)
+//}
