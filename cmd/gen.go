@@ -161,7 +161,7 @@ func init() {
 		genSdkCmd.Flags().StringVarP(&gensdk.GoPackage, "goPackage", "", "", "set package name")
 		genSdkCmd.Flags().StringVarP(&gensdk.ApiDir, "api-dir", "", filepath.Join("desc", "api"), "set input api dir")
 		genSdkCmd.Flags().StringVarP(&gensdk.ProtoDir, "proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
-		genSdkCmd.Flags().BoolVarP(&gensdk.WrapResponse, "wrap-response", "", false, "warp response: code, data, message")
+		genSdkCmd.Flags().BoolVarP(&gensdk.WrapResponse, "wrap-response", "", true, "warp response: code, data, message")
 		genSdkCmd.Flags().StringVarP(&gensdk.Scope, "scope", "", "", "set scope name")
 		genSdkCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(wd, ".template"), "set template home")
 	}
