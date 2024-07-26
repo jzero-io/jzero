@@ -8,9 +8,9 @@ tag:
   - Guide
 ---
 
-## Rest
+## rest
 
-修改 etc/etc.yaml 添加一下内容
+修改 etc/etc.yaml, 增加以下配置
 
 ```yaml
 rest:
@@ -18,10 +18,19 @@ rest:
     enabled: true
 ```
 
+## zrpc
 
-## Gateway
+修改 etc/etc.yaml, 增加以下配置
 
-修改 etc/etc.yaml 添加一下内容
+```shell
+zrpc:
+  devServer:
+    enabled: true
+```
+
+## gateway
+
+修改 etc/etc.yaml, 增加以下配置
 
 ```shell
 zrpc:

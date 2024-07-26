@@ -8,9 +8,9 @@ tag:
   - Guide
 ---
 
-## Zrpc
+## zrpc
 
-新增 zrpc 中关于 etcd 的配置
+修改 etc/etc.yaml, 增加以下配置, 设置 etcd endpoints 和该服务在 etcd 上的 key
 
 ```yaml
 zrpc:

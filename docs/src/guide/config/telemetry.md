@@ -8,7 +8,7 @@ tag:
   - Guide
 ---
 
-## Rest
+## rest
 
 修改 etc/etc.yaml 添加一下内容
 
@@ -21,7 +21,20 @@ rest:
     batcher: "jaeger"
 ```
 
-## Gateway
+## zrpc
+
+修改 etc/etc.yaml, 增加以下配置
+
+```yaml
+zrpc:
+  telemetry:
+    name: "your_project-rpc"
+    endpoint: "http://jaeger:14268/api/traces"
+    sampler: 1.0
+    batcher: "jaeger"
+```    
+
+## gateway
 
 修改 etc/etc.yaml 添加一下内容
 

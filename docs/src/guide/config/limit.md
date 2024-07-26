@@ -8,7 +8,7 @@ tag:
   - Guide
 ---
 
-## Rest
+## rest
 
 修改 etc/etc.yaml, 增加以下配置, 设置最大 qps 100
 
@@ -17,7 +17,7 @@ rest:
   maxConns: 100
 ```
 
-## Gateway
+## gateway
 
 修改 etc/etc.yaml, 增加以下配置, 设置最大 qps 100
 
