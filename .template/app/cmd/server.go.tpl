@@ -5,7 +5,6 @@ import (
 
 	"github.com/common-nighthawk/go-figure"
 	"github.com/jzero-io/jzero-contrib/gwx"
-	"github.com/jzero-io/jzero-contrib/logtoconsole"
 	"github.com/jzero-io/jzero-contrib/swaggerv2"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/conf"
