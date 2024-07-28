@@ -1,6 +1,8 @@
 package cmd
 
 import (
+    "os"
+
 	"github.com/common-nighthawk/go-figure"
 	"github.com/jzero-io/jzero-contrib/gwx"
 	"github.com/jzero-io/jzero-contrib/logtoconsole"
@@ -46,7 +48,9 @@ func Start(cfgFile string) {
 	if err = logx.SetUp(c.Log.LogConf); err != nil {
 		logx.Must(err)
 	}
-	logtoconsole.Must(c.Log.LogConf)
+	if c.Log.LogConf.Mode != "console" {
+	    logx.AddWriter(logx.NewWriter(os.Stdout))
+	}
 
 	ctx := svc.NewServiceContext(c)
 	start(ctx)
