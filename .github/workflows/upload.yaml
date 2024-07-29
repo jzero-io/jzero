@@ -36,7 +36,7 @@ jobs:
           jzero gen sdk
           jzero gen zrpcclient
           go mod tidy
-          go run main.go server
+          go run main.go version
           git add .
           git commit -m "chore(quickstart): update quickstart"
           git push -f

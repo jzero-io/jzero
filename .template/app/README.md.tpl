@@ -1,4 +1,4 @@
-# {{ .APP }}g
+# {{ .APP }}
 
 ## Install Jzero Framework
 
