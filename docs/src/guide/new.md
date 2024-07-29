@@ -15,21 +15,6 @@ order: 3
 默认远程模板仓库: [https://github.com/jzero-io/templates](https://github.com/jzero-io/templates)
 :::
 
-```shell
-app: 服务端代码模板
-go-zero: go-zero 框架模板
-client:
-  client-go: go 客户端代码模板
-  client-ts: ts 客户端代码模板
-docs:
-  markdown: markdown 文档模板
-ivm:
-  init: 新版本接口初始化代码模板
-  add:
-    api: example api 文件模板
-    proto: example proto 文件模板
-```
-
 ## 新建项目命令参数
 
 ```shell

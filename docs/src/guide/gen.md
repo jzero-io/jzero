@@ -27,13 +27,6 @@ docker run --rm -v ${PWD}:/app jaronnie/jzero:latest gen
 ```
 :::
 
-### 高级用法
-
-```shell
-# 删除多余的生成的文件中后缀带 logic 和 handler 和 server. 以及在文件内容中多余的 Logic 和 Handler 和 Server
-jzero gen --remove--suffix
-```
-
 ## 下载依赖
 
 ```shell
