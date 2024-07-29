@@ -37,25 +37,11 @@ jobs:
           go run main.go version
           cd ../..
 
-      - name: Check for changes in the .template directory
-        id: changes
-        run: |
-          git fetch origin main
-          CHANGED_FILES=$(git diff --name-only origin/main HEAD)
-          echo "Changed files: $CHANGED_FILES"
-          if echo "$CHANGED_FILES" | grep -q '^.template'; then
-            echo ".template directory has changes."
-            echo "::set-output name=template_changed::true"
-          else
-            echo ".template directory has no changes."
-            echo "::set-output name=template_changed::false" 
-          fi
-
-      - name: Upload project to examples repo
-        if: steps.changes.outputs.template_changed == 'true'
-        run: |
-          cd examples
-          git push
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: examples-artifact
+          path: examples
 
       - uses: actions/checkout@v2
       - name: golangci-lint

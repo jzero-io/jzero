@@ -1,0 +1,24 @@
+name: jzero-ci
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.template/**'
+
+jobs:
+  golangci:
+    name: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: examples-artifact
+          path: examples
+
+      - name: Upload project to examples repo
+        run: |
+          cd examples
+          git push -f

@@ -1,5 +1,7 @@
 # {{ .APP }}
 
+build by jzero framework
+
 ## Install Jzero Framework
 
 ```shell
