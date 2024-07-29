@@ -19,36 +19,42 @@ jobs:
         with:
           go-version: '1.22.3'
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
-        with:
-          distribution: goreleaser
-          args: build --single-target --snapshot --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-
-      - name: Test Usage
+      - name: Install Jzero and Grum
         run: |
-          ./dist/jzero_linux_amd64_v1/jzero check
-          ./dist/jzero_linux_amd64_v1/jzero new quickstart
-          cd quickstart && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-          ../dist/jzero_linux_amd64_v1/jzero gen swagger
-          cd ..
-          
-          ./dist/jzero_linux_amd64_v1/jzero new simpleapi --branch api
-          cd simpleapi && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-          ../dist/jzero_linux_amd64_v1/jzero gen swagger
-          cd ..
-          
-          ./dist/jzero_linux_amd64_v1/jzero new simplegateway --branch gateway
-          cd simplegateway && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-          ../dist/jzero_linux_amd64_v1/jzero gen swagger
-          cd ..
-          
-          ./dist/jzero_linux_amd64_v1/jzero new simplerpc --branch rpc
-          cd simplerpc && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-          ../dist/jzero_linux_amd64_v1/jzero gen swagger
-          cd ..
+          go install
+          jzero check
+          go install github.com/jaronnie/grum@latest
+
+      - name: Test new project and run server
+        run: |
+          GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum clone https://github.com/jzero-io/examples
+          cd examples
+          rm -rf quickstart
+          jzero new quickstart
+          cd quickstart && jzero gen && go mod tidy
+          git add .
+          git commit -m "chore(quickstart): update quickstart"
+          go run main.go server
+          cd ../..
+
+      - name: Check for changes in the .template directory
+        id: changes
+        run: |
+          git fetch origin main
+          CHANGED_FILES=$(git diff --name-only origin/main HEAD)
+          echo "Changed files: $CHANGED_FILES"
+          if echo "$CHANGED_FILES" | grep -q '^.template/'; then
+            echo ".template directory has changes."
+            echo "::set-output name=template_changed::true"
+          else
+            echo ".template directory has no changes."
+            echo "::set-output name=template_changed::false"          
+
+      - name: Upload project to examples repo
+        if: steps.changes.outputs.template_changed == 'true'
+        run: |
+          cd examples
+          git push
 
       - uses: actions/checkout@v2
       - name: golangci-lint
