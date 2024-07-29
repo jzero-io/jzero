@@ -1,26 +1,42 @@
 name: jzero-upload-examples-ci
 
 on:
-  workflow_run:
-    workflows:
-      - "jzero-ci"
+  push:
     branches:
       - main
-    types:
-      - completed
 
 jobs:
   golangci:
     name: ci
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v2
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          name: examples-artifact
-          path: examples
+          fetch-depth: 0
 
-      - name: Upload project to examples repo
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.22.3'
+
+      - name: Install Jzero and Grum
         run: |
+          go install
+          jzero check
+          go install github.com/jaronnie/grum@latest
+
+      - name: upload
+        run: |
+          GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum clone https://github.com/jzero-io/examples
           cd examples
+          rm -rf quickstart
+          jzero new quickstart
+          cd quickstart && jzero gen
+          jzero gen swagger
+          jzero gen sdk
+          jzero gen zrpcclient
+          go mod tidy
+          go run main.go server
+          git add .
+          git commit -m "chore(quickstart): update quickstart"
           git push -f
