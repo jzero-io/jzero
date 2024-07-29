@@ -19,7 +19,7 @@ Support development templates for different scenarios:
 
 For more details please see: https://jzero.jaronnie.com
 
-## [Quick Start](https://jzero.jaronnie.com/#快速开始)
+## Quick start
 
 ```shell
 go install github.com/jzero-io/jzero@latest
@@ -29,13 +29,15 @@ cd your_project && jzero gen && go mod tidy
 go run main.go server
 ```
 
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
+For more examples code please see: https://github.com/jzero-io/examples
 
 ## Roadmap
 
 please see: https://jzero.jaronnie.com/guide/roadmap
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
 
 ## Contributors
 <div>
