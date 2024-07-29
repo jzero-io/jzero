@@ -29,6 +29,7 @@ jobs:
         run: |
           GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum clone https://github.com/jzero-io/examples
           cd examples
+          git fetch 
           rm -rf quickstart
           jzero new quickstart
           cd quickstart && jzero gen
@@ -38,5 +39,5 @@ jobs:
           go mod tidy
           go run main.go version
           git add .
-          git commit -m "chore(quickstart): update quickstart"
-          git push -f
+          git diff-index --quiet HEAD || git commit -m "chore(quickstart): update quickstart"
+          git diff-index --quiet HEAD || git push -f
