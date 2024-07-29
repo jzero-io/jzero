@@ -1,11 +1,13 @@
-name: jzero-ci
+name: jzero-upload-examples-ci
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - "jzero-ci"
     branches:
       - main
-    paths:
-      - '.template/**'
+    types:
+      - completed
 
 jobs:
   golangci:

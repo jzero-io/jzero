@@ -1,6 +1,4 @@
-# {{ .APP }}
-
-build by jzero framework
+# {{ .APP }}g
 
 ## Install Jzero Framework
 
