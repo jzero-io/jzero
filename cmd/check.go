@@ -41,6 +41,17 @@ var checkCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		fmt.Println(resp)
 
+		log.Info("\n[jzero-env]: looking up protoc-gen-go-grpc")
+		_, err = env.LookPath("protoc-gen-go-grpc")
+		if err != nil {
+			_ = golang.Install("google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.4.0")
+		}
+		if _, err = env.LookPath("protoc-gen-go-grpc"); err == nil {
+			log.Success(`[jzero-env]: "protoc-gen-go-grpc" is installed`)
+		} else {
+			log.Fatalln("[jzero-env] env check failed, protoc-gen-go-grpc is not installed")
+		}
+
 		log.Info("\n[jzero-env]: looking up goctl-types")
 		_, err = env.LookPath("goctl-types")
 		if err != nil {
