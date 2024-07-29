@@ -28,12 +28,3 @@ go.work
 
 # logs
 logs
-
-# goreleaser output
-dist
-
-# binary
-{{ .APP }}
-
-# unix sock
-*.sock
