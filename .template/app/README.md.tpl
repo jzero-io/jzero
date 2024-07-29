@@ -1,4 +1,4 @@
-# {{ .APP }}
+# {{ .APP }}g
 
 ## Install Jzero Framework
 
@@ -16,10 +16,16 @@ jzero check
 jzero gen
 ```
 
-### Generate client go code
+### Generate http client go code
 
 ```shell
 jzero gen sdk
+```
+
+### Generate zrpc client go code
+
+```shell
+jzero gen zrpcclient
 ```
 
 ### Generate swagger code

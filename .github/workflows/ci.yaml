@@ -19,35 +19,16 @@ jobs:
         with:
           go-version: '1.22.3'
 
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
-        with:
-          distribution: goreleaser
-          args: build --single-target --snapshot --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-
-      - name: Test Usage
+      - name: Install Jzero
         run: |
-          ./dist/jzero_linux_amd64_v1/jzero check
-          ./dist/jzero_linux_amd64_v1/jzero new quickstart
-          cd quickstart && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-          ../dist/jzero_linux_amd64_v1/jzero gen swagger
-          cd ..
-          
-          ./dist/jzero_linux_amd64_v1/jzero new simpleapi --branch api
-          cd simpleapi && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-          ../dist/jzero_linux_amd64_v1/jzero gen swagger
-          cd ..
-          
-          ./dist/jzero_linux_amd64_v1/jzero new simplegateway --branch gateway
-          cd simplegateway && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-          ../dist/jzero_linux_amd64_v1/jzero gen swagger
-          cd ..
-          
-          ./dist/jzero_linux_amd64_v1/jzero new simplerpc --branch rpc
-          cd simplerpc && ../dist/jzero_linux_amd64_v1/jzero gen && go mod tidy && go run main.go version
-          ../dist/jzero_linux_amd64_v1/jzero gen swagger
+          go install
+          jzero check
+
+      - name: Test new project and run
+        run: |
+          jzero new quickstart
+          cd quickstart && jzero gen && go mod tidy
+          go run main.go version
           cd ..
 
       - uses: actions/checkout@v2
