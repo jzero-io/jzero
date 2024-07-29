@@ -261,7 +261,7 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 		return nil, err
 	}
 	scopeResourceFiles = append(scopeResourceFiles, &GeneratedFile{
-		Path:    filepath.Join("typed", strings.ToLower(scope), strings.ToLower(scope)+"_expansion.go"),
+		Path:    filepath.Join("typed", strings.ToLower(scope), strings.ToLower(resource)+"_expansion.go"),
 		Content: *bytes.NewBuffer(resourceExpansionGoBytes),
 	})
 
