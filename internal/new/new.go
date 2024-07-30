@@ -107,9 +107,16 @@ func (jn *JzeroNew) New(dirname string) error {
 			stylePath = filepath.Join(filepath.Dir(rel), formatFilename+filepath.Ext(filename))
 		}
 
-		err = checkWrite(filepath.Join(Output, stylePath), fileBytes)
-		if err != nil {
-			return err
+		// Because this is a special directory for jzero
+		// It is deleted to support generating all server code under the premise of only desc directory
+		// Or if this file has been existed, just ignore write
+		if pathx.FileExists(filepath.Join(Output, "desc")) && strings.HasPrefix(rel, "desc") {
+			continue
+		} else {
+			err = checkWrite(filepath.Join(Output, stylePath), fileBytes)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

@@ -37,7 +37,7 @@ var newCmd = &cobra.Command{
 			}
 		}
 		if new.Module == "" {
-			new.Module = filepath.ToSlash(new.Output)
+			new.Module = new.AppName
 		}
 
 		if !pathx.FileExists(embeded.Home) {
