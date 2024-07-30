@@ -341,6 +341,10 @@ func (ja *JzeroApi) rewriteRoutesGo(group string, handler string) error {
 						sel.Sel.Name = util.Title(strings.TrimSuffix(handler, "Handler"))
 					}
 				}
+			} else if indent, ok := n.Fun.(*ast.Ident); ok {
+				if indent.Name == util.Title(strings.TrimSuffix(handler, "Handler"))+"Handler" {
+					indent.Name = util.Title(strings.TrimSuffix(handler, "Handler"))
+				}
 			}
 		}
 		return true
