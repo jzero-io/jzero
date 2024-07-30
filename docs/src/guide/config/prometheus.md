@@ -2,7 +2,7 @@
 title: prometheus 配置
 icon: vscode-icons:file-type-prometheus
 star: true
-order: 2
+order: 4
 category: 配置
 tag:
   - Guide

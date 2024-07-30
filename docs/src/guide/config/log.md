@@ -2,7 +2,7 @@
 title: 日志配置
 icon: mdi:math-log
 star: true
-order: 1
+order: 3
 category: 配置
 tag:
   - Guide

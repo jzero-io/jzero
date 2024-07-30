@@ -1,7 +1,7 @@
 ---
 title: 超时配置
 icon: eos-icons:timeout
-order: 0
+order: 2
 star: true
 category: 配置
 tag:

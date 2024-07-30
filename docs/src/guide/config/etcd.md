@@ -2,7 +2,7 @@
 title: etcd 配置
 icon: carbon:database-etcd
 star: true
-order: 5
+order: 7
 category: 配置
 tag:
   - Guide

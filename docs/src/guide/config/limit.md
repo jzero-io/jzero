@@ -2,7 +2,7 @@
 title: 限流配置
 icon: mdi:car-speed-limiter
 star: true
-order: 5
+order: 6
 category: 配置
 tag:
   - Guide

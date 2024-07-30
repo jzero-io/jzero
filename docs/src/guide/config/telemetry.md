@@ -2,7 +2,7 @@
 title: 链路追踪配置
 icon: tabler:http-trace
 star: true
-order: 3
+order: 5
 category: 配置
 tag:
   - Guide
