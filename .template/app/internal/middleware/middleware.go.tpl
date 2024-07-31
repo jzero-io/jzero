@@ -1,4 +1,4 @@
-package middlewares
+package middleware
 
 import (
 	"github.com/zeromicro/go-zero/gateway"
@@ -6,7 +6,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func RegisterGrpc(z *zrpc.RpcServer) {
+func RegisterZrpc(z *zrpc.RpcServer) {
 	z.AddUnaryInterceptors(ServerValidationUnaryInterceptor)
 }
 
