@@ -36,3 +36,5 @@ docker run --rm -v ${PWD}:/app jaronnie/jzero:latest gen swagger
 ## 在线访问 swagger ui
 
 ip:port/swagger
+
+![](https://oss.jaronnie.com/image-20240731134511973.png)
