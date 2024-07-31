@@ -8,14 +8,14 @@ tag:
   - Guide
 ---
 
-## 简介
+## 1. 简介
 
 gateway 项目包含以下技术栈:
 * cobra: 提供命令行框架
 * zrpc: 基于 go-zero zrpc 框架提供 rpc 服务
 * gateway: 基于 go-zero gateway 框架, 支持以 http 方式调用 rpc 服务
 
-## 新建项目
+## 2. 新建项目
 
 ```shell
 jzero new simplegateway --branch gateway
@@ -24,30 +24,34 @@ jzero gen
 go mod tidy
 ```
 
-## 生成 swagger
+## 3. 生成 swagger
 
 ```shell
 jzero gen swagger
 ```
 
-## 测试
+## 4. 测试
 
 ```shell
 go run main.go server
 # 访问 localhost:8001/swagger 进行测试
 ```
 
-![image-20240731134511973](https://oss.jaronnie.com/image-20240731134511973.png)
+![](https://oss.jaronnie.com/image-20240731134511973.png)
 
 至此, 你已经拥有了一个可用的 gateway 服务.
 
-## 开发教程
+## 5. 开发教程
 
-### 鉴权
+### 5.1. 鉴权
 
 在实际的项目中, 鉴权是必不可少的, 那么在 jzero 的 gateway 模板中, 如何进行鉴权呢?
 
-gateway 模板内置了中间件 `header_processor`, 位置在 `internal/middlewares/header_processor.go`, 内容如下:
+gateway 模板内置了中间件 `header_processor`
+
+位置在 `internal/middlewares/header_processor.go`
+
+内容如下:
 
 ```go
 package middleware
