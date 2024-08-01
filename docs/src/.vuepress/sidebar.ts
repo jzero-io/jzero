@@ -9,5 +9,26 @@ export default sidebar({
       prefix: "guide/",
       children: "structure",
     },
+    {
+      text: "项目实战",
+      icon: "mdi:arrow-projectile-multiple",
+      prefix: "project/",
+      children: "structure",
+      collapsible: true,
+    },
+    {
+      text: "问题与解决",
+      icon: "mdi:faq",
+      prefix: "faq/",
+      children: "structure",
+      collapsible: true,
+    },
+    {
+      text: "RoadMap",
+      icon: "mdi:roadmap",
+      prefix: "roadmap/",
+      children: "structure",
+      collapsible: true,
+    },
   ],
 });
