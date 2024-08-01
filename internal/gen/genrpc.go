@@ -41,11 +41,12 @@ type ServerFile struct {
 }
 
 type JzeroRpc struct {
-	Wd           string
-	Module       string
-	Style        string
-	RemoveSuffix bool
-	Etc          string // 配置文件路径
+	Wd                 string
+	Module             string
+	Style              string
+	RemoveSuffix       bool
+	ChangeReplaceTypes bool
+	Etc                string // 配置文件路径
 }
 
 func (jr *JzeroRpc) Gen() error {
@@ -125,6 +126,14 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 
+		if jr.ChangeReplaceTypes {
+			for _, file := range allLogicFiles {
+				if err := jr.changeReplaceLogicGoTypes(file); err != nil {
+					continue
+				}
+			}
+		}
+
 		// # gen proto descriptor
 		if isNeedGenProtoDescriptor(parse) {
 			if !pathx.FileExists(generateProtoDescriptorPath(v)) {
@@ -159,13 +168,6 @@ func (jr *JzeroRpc) Gen() error {
 			return err
 		}
 	}
-	//if isNeedGenerateProtoDescriptor {
-	//	// update gateway upstream protosets
-	//	err = jr.updateGatewayUpstreams(protoDescriptorPaths)
-	//	if err != nil {
-	//		console.Warning("[warning] update gateway upstreams meet error: %v", err)
-	//	}
-	//}
 	return nil
 }
 
@@ -433,51 +435,69 @@ func (jr *JzeroRpc) rewriteServerGo(fp string) error {
 	return nil
 }
 
-//func (jr *JzeroRpc) updateGatewayUpstreams(protoDescriptorPaths []string) error {
-//	logging.SetLevel(logging.CRITICAL, "")
-//	dec := yq.NewYamlDecoder(yq.NewDefaultYamlPreferences())
-//
-//	file, err := os.ReadFile(jr.Etc)
-//	if err != nil {
-//		return err
-//	}
-//
-//	if err = dec.Init(strings.NewReader(string(file))); err != nil {
-//		return err
-//	}
-//
-//	node, err := dec.Decode()
-//	if err != nil {
-//		return err
-//	}
-//
-//	marshal, err := json.Marshal(protoDescriptorPaths)
-//	if err != nil {
-//		return err
-//	}
-//
-//	yaml, err := genius.NewFromYaml(file)
-//	if err != nil {
-//		return err
-//	}
-//
-//	key := ".gateway.upstreams.0.protoSets"
-//
-//	protosetsConfig := yaml.Get(strings.TrimPrefix(key, "."))
-//	if protosetsConfig == nil {
-//		key = ".Gateway.Upstreams.0.ProtoSets"
-//	}
-//
-//	result, err := yq.NewAllAtOnceEvaluator().EvaluateNodes(fmt.Sprintf(`%s=%s`, key, string(marshal)), node)
-//	if err != nil {
-//		return err
-//	}
-//
-//	encoder := yq.NewYamlEncoder(yq.NewDefaultYamlPreferences())
-//	out := new(bytes.Buffer)
-//	printer := yq.NewPrinter(encoder, yq.NewSinglePrinterWriter(out))
-//	if err := printer.PrintResults(result); err != nil {
-//		return err
-//	}
-//	return os.WriteFile(jr.Etc, out.Bytes(), 0o644)
-//}
+func (jr *JzeroRpc) changeReplaceLogicGoTypes(file LogicFile) error {
+	fp := file.Path // logic file path
+	if jr.RemoveSuffix {
+		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
+		fp = file.Path[:len(file.Path)-8]
+		// patch
+		fp = strings.TrimSuffix(fp, "_")
+		fp = strings.TrimSuffix(fp, "-")
+		fp += ".go"
+	}
+
+	fset := token.NewFileSet()
+
+	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+
+	var needModify bool
+	ast.Inspect(f, func(node ast.Node) bool {
+		if fn, ok := node.(*ast.FuncDecl); ok && fn.Recv != nil {
+			if fn.Name.Name == file.Handler {
+				if fn.Type != nil && fn.Type.Params != nil {
+					for _, param := range fn.Type.Params.List {
+						if starExpr, ok := param.Type.(*ast.StarExpr); ok {
+							if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
+								if selectorExpr.Sel.Name != file.RequestTypeName {
+									selectorExpr.Sel.Name = file.RequestTypeName
+									needModify = true
+								}
+							}
+						}
+					}
+				}
+
+				if fn.Type != nil && fn.Type.Results != nil {
+					for _, result := range fn.Type.Results.List {
+						if starExpr, ok := result.Type.(*ast.StarExpr); ok {
+							if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
+								if selectorExpr.Sel.Name != file.ResponseTypeName {
+									selectorExpr.Sel.Name = file.ResponseTypeName
+									needModify = true
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return true
+	})
+
+	if needModify {
+		// Write the modified AST back to the file
+		buf := bytes.NewBuffer(nil)
+		if err := goformat.Node(buf, fset, f); err != nil {
+			return err
+		}
+
+		if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

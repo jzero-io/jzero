@@ -56,11 +56,12 @@ func Gen(_ *cobra.Command, _ []string) error {
 	}()
 
 	jzeroRpc := JzeroRpc{
-		Wd:           wd,
-		Module:       moduleStruct.Path,
-		Style:        Style,
-		RemoveSuffix: RemoveSuffix,
-		Etc:          filepath.Join("etc", "etc.yaml"),
+		Wd:                 wd,
+		Module:             moduleStruct.Path,
+		Style:              Style,
+		RemoveSuffix:       RemoveSuffix,
+		ChangeReplaceTypes: ChangeReplaceTypes,
+		Etc:                filepath.Join("etc", "etc.yaml"),
 	}
 	err = jzeroRpc.Gen()
 	if err != nil {
