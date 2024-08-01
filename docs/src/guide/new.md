@@ -60,12 +60,16 @@ Global Flags:
 
 ```bash
 jzero new your_project --branch api
+# 如果需要与原生 goctl 保持同样的目录结构请使用
+jzero new your_project --branch api-goctl
 ```
 
 @tab Docker
 
 ```bash
 docker run --rm -v ${PWD}/your_project:/app/your_project jaronnie/jzero:latest new your_project --branch api
+# 如果需要与原生 goctl 保持同样的目录结构请使用
+docker run --rm -v ${PWD}/your_project:/app/your_project jaronnie/jzero:latest new your_project --branch api-goctl
 ```
 :::
 
