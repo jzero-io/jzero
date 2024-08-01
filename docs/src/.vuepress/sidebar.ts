@@ -8,6 +8,8 @@ export default sidebar({
       icon: "vscode-icons:folder-type-docs",
       prefix: "guide/",
       children: "structure",
+      collapsible: true,
+      expanded: true,
     },
     {
       text: "项目实战",
