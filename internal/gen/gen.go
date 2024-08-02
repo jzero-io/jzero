@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/format"
+
 	"github.com/pkg/errors"
 
 	"github.com/jzero-io/jzero/pkg/mod"
@@ -93,19 +95,61 @@ func Gen(_ *cobra.Command, _ []string) error {
 }
 
 func RemoveExtraFiles(wd string) {
-	_ = os.Remove(filepath.Join(wd, fmt.Sprintf("%s.go", GetApiServiceName(filepath.Join(wd, "desc", "api")))))
-	_ = os.Remove(filepath.Join(wd, "etc", fmt.Sprintf("%s.yaml", GetApiServiceName(filepath.Join(wd, "desc", "api")))))
+	_ = os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd)))
+	_ = os.Remove(filepath.Join(wd, "etc", getApiFrameEtcFilename(wd)))
+
 	protoFilenames, err := GetProtoFilepath(filepath.Join("desc", "proto"))
 	if err == nil {
 		for _, v := range protoFilenames {
 			v = filepath.Base(v)
 			fileBase := v[0 : len(v)-len(path.Ext(v))]
-			rmf := strings.ReplaceAll(strings.ToLower(fileBase), "-", "")
-			rmf = strings.ReplaceAll(rmf, "_", "")
-			_ = os.Remove(filepath.Join(wd, fmt.Sprintf("%s.go", rmf)))
-			_ = os.Remove(filepath.Join(wd, "etc", fmt.Sprintf("%s.yaml", rmf)))
+			_ = os.Remove(filepath.Join(wd, getProtoFrameMainGoFilename(fileBase)))
+			_ = os.Remove(filepath.Join(wd, "etc", getProtoFrameEtcFilename(fileBase)))
 		}
 	}
+}
+
+// getApiFrameMainGoFilename: goctl/api/gogen/genmain.go
+func getApiFrameMainGoFilename(wd string) string {
+	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
+	serviceName = strings.ToLower(serviceName)
+	filename, err := format.FileNamingFormat(Style, serviceName)
+	if err != nil {
+		return ""
+	}
+
+	if strings.HasSuffix(filename, "-api") {
+		filename = strings.ReplaceAll(filename, "-api", "")
+	}
+	return filename + ".go"
+}
+
+// getApiFrameEtcFilename: goctl/api/gogen/genetc.go
+func getApiFrameEtcFilename(wd string) string {
+	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
+	filename, err := format.FileNamingFormat(Style, serviceName)
+	if err != nil {
+		return ""
+	}
+	return filename + ".yaml"
+}
+
+// getProtoFrameMainGoFilename: goctl/rpc/generator/genmain.go
+func getProtoFrameMainGoFilename(source string) string {
+	filename, err := format.FileNamingFormat(Style, source)
+	if err != nil {
+		return ""
+	}
+	return filename + ".go"
+}
+
+// getProtoFrameEtcFilename: goctl/rpc/generator/genetc.go
+func getProtoFrameEtcFilename(source string) string {
+	filename, err := format.FileNamingFormat(Style, source)
+	if err != nil {
+		return ""
+	}
+	return filename + ".yaml"
 }
 
 func init() {
