@@ -10,12 +10,14 @@
 
 ## Introduction
 
-Used to create project from templates and generate Server/Client code by proto and api file.
+Used to create project from templates and generate Server/Client code by proto and api file based on [go-zero](https://go-zero.dev) framework.
 
 Support development templates for different scenarios:
 * api
 * zrpc
 * gateway
+
+But jzero is not limited to go-zero, it can support any framework through template feature.
 
 For more details please see: https://jzero.jaronnie.com
 
