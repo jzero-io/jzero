@@ -95,16 +95,24 @@ func Gen(_ *cobra.Command, _ []string) error {
 }
 
 func RemoveExtraFiles(wd string) {
-	_ = os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd)))
-	_ = os.Remove(filepath.Join(wd, "etc", getApiFrameEtcFilename(wd)))
+	if err := os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd))); err != nil {
+		logx.Debugf("remove api frame main go file error: %s", err.Error())
+	}
+	if err := os.Remove(filepath.Join(wd, "etc", getApiFrameEtcFilename(wd))); err != nil {
+		logx.Debugf("remove api etc file error: %s", err.Error())
+	}
 
 	protoFilenames, err := GetProtoFilepath(filepath.Join("desc", "proto"))
 	if err == nil {
 		for _, v := range protoFilenames {
 			v = filepath.Base(v)
 			fileBase := v[0 : len(v)-len(path.Ext(v))]
-			_ = os.Remove(filepath.Join(wd, getProtoFrameMainGoFilename(fileBase)))
-			_ = os.Remove(filepath.Join(wd, "etc", getProtoFrameEtcFilename(fileBase)))
+			if err = os.Remove(filepath.Join(wd, getProtoFrameMainGoFilename(fileBase))); err != nil {
+				logx.Debugf("remove proto frame main go file error: %s", err.Error())
+			}
+			if err = os.Remove(filepath.Join(wd, "etc", getProtoFrameEtcFilename(fileBase))); err != nil {
+				logx.Debugf("remove proto etc file error: %s", err.Error())
+			}
 		}
 	}
 }
@@ -150,8 +158,4 @@ func getProtoFrameEtcFilename(source string) string {
 		return ""
 	}
 	return filename + ".yaml"
-}
-
-func init() {
-	logx.Disable()
 }

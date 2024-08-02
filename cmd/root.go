@@ -9,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/zeromicro/go-zero/core/logx"
+
 	"github.com/spf13/cobra"
 )
 
@@ -39,6 +41,11 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if Debug {
-		time.Sleep(time.Second * 15)
+		logx.MustSetup(logx.LogConf{Encoding: "plain"})
+		logx.SetLevel(logx.DebugLevel)
+		logx.Debugf("using jzero frame debug mode, please wait time.Sleep(time.Second * 10)")
+		time.Sleep(time.Second * 10)
+	} else {
+		logx.Disable()
 	}
 }
