@@ -17,25 +17,42 @@ Support development templates for different scenarios:
 * zrpc
 * gateway
 
-But jzero is not limited to go-zero, it can support any framework through template feature.
+But jzero is not limited to go-zero, it can support any framework through template feature with remote [template repo](https://github.com/jzero-io/templates).
 
 For more details please see: https://jzero.jaronnie.com
+
+## Install
+
+```shell
+go install github.com/jzero-io/jzero@latest
+# check tools
+jzero check
+```
 
 ## Quick start
 
 ```shell
-go install github.com/jzero-io/jzero@latest
-jzero check
+# new project
 jzero new your_project
+# generate server code
 cd your_project && jzero gen && go mod tidy
+# generate swagger json
+jzero gen swagger
+# generate http sdk
+jzero gen sdk
+# generate zrpcclient
+jzero gen zrpcclient
+# run
 go run main.go server
 ```
 
 For more examples code please see: https://github.com/jzero-io/examples
 
+Project Practice please see: https://jzero.jaronnie.com/project
+
 ## Roadmap
 
-please see: https://jzero.jaronnie.com/guide/roadmap
+please see: https://jzero.jaronnie.com/roadmap
 
 ## Stargazers over time
 
