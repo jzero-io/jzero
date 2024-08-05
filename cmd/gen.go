@@ -11,8 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
-
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/internal/gen/gendocs"
@@ -21,14 +20,39 @@ import (
 	"github.com/jzero-io/jzero/internal/gen/genzrpcclient"
 	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/spf13/cobra"
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+)
+
+var (
+	Style              string
+	RemoveSuffix       bool
+	ChangeReplaceTypes bool
+)
+
+var (
+	// ModelMysqlIgnoreColumns goctl model flags
+	ModelMysqlIgnoreColumns []string
+
+	ModelMysqlCache       bool
+	ModelMysqlCachePrefix string
+
+	// ModelMysqlDatasource goctl model datasource
+	ModelMysqlDatasource      bool
+	ModelMysqlDatasourceUrl   string
+	ModelMysqlDatasourceTable []string
 )
 
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: `Used to generate server/client code`,
-	PreRun: func(_ *cobra.Command, _ []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		c, err := config.SetConfig(CfgFile, cmd.Use, cmd.Flags())
+		if err != nil {
+			return err
+		}
+
 		// check go-zero api template
 		home, _ := os.UserHomeDir()
 		if !pathx.FileExists(filepath.Join(home, ".jzero", Version, "go-zero")) {
@@ -36,12 +60,12 @@ var genCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 
-		if !pathx.FileExists(embeded.Home) {
+		if !pathx.FileExists(c.Gen.Home) {
 			home, _ := os.UserHomeDir()
 			embeded.Home = filepath.Join(home, ".jzero", Version)
 		}
+		return gen.Gen(c.Gen)
 	},
-	RunE:         gen.Gen,
 	SilenceUsage: true,
 }
 
@@ -141,17 +165,17 @@ func init() {
 
 		// used for jzero
 		genCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(wd, ".template"), "set template home")
-		genCmd.Flags().BoolVarP(&gen.RemoveSuffix, "remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
-		genCmd.Flags().BoolVarP(&gen.ChangeReplaceTypes, "change-replace-types", "", true, "if api file change, e.g. Request or Response type, change handler and logic file content types but not file")
+		genCmd.Flags().BoolVarP(&RemoveSuffix, "remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
+		genCmd.Flags().BoolVarP(&ChangeReplaceTypes, "change-replace-types", "", true, "if api file change, e.g. Request or Response type, change handler and logic file content types but not file")
 
 		// used for goctl
-		genCmd.Flags().StringVarP(&gen.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
-		genCmd.Flags().StringSliceVarP(&gen.ModelMysqlIgnoreColumns, "model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
-		genCmd.Flags().BoolVarP(&gen.ModelMysqlDatasource, "model-mysql-datasource", "", false, "goctl model mysql datasource")
-		genCmd.Flags().StringVarP(&gen.ModelMysqlDatasourceUrl, "model-mysql-datasource-url", "", "", "goctl model mysql datasource url")
-		genCmd.Flags().StringSliceVarP(&gen.ModelMysqlDatasourceTable, "model-mysql-datasource-table", "", []string{"*"}, "goctl model mysql datasource table")
-		genCmd.Flags().BoolVarP(&gen.ModelMysqlCache, "model-mysql-cache", "", false, "goctl model mysql cache")
-		genCmd.Flags().StringVarP(&gen.ModelMysqlCachePrefix, "model-mysql-cache-prefix", "", "", "goctl model mysql cache prefix")
+		genCmd.Flags().StringVarP(&Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+		genCmd.Flags().StringSliceVarP(&ModelMysqlIgnoreColumns, "model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
+		genCmd.Flags().BoolVarP(&ModelMysqlDatasource, "model-mysql-datasource", "", false, "goctl model mysql datasource")
+		genCmd.Flags().StringVarP(&ModelMysqlDatasourceUrl, "model-mysql-datasource-url", "", "", "goctl model mysql datasource url")
+		genCmd.Flags().StringSliceVarP(&ModelMysqlDatasourceTable, "model-mysql-datasource-table", "", []string{"*"}, "goctl model mysql datasource table")
+		genCmd.Flags().BoolVarP(&ModelMysqlCache, "model-mysql-cache", "", false, "goctl model mysql cache")
+		genCmd.Flags().StringVarP(&ModelMysqlCachePrefix, "model-mysql-cache-prefix", "", "", "goctl model mysql cache prefix")
 	}
 
 	{

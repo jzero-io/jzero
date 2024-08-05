@@ -9,7 +9,7 @@ import (
 )
 
 func (ivm *IvmInit) gen() error {
-	defer gen.RemoveExtraFiles(ivm.jzeroRpc.Wd)
+	defer gen.RemoveExtraFiles(ivm.jzeroRpc.Wd, Style)
 
 	wd, err := os.Getwd()
 	if err != nil {

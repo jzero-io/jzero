@@ -9,12 +9,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/zeromicro/go-zero/core/logx"
-
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
-var Debug bool
+var (
+	Debug   bool
+	CfgFile string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -35,11 +39,20 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	rootCmd.PersistentFlags().StringVarP(&CfgFile, "config", "f", ".jzero.yaml", "set config file")
 	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "", false, "debug mode")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if pathx.FileExists(CfgFile) {
+		viper.SetConfigFile(CfgFile)
+		// If a config file is found, read it in.
+		if err := viper.ReadInConfig(); err != nil {
+			cobra.CheckErr(err)
+		}
+	}
+
 	if Debug {
 		logx.MustSetup(logx.LogConf{Encoding: "plain"})
 		logx.SetLevel(logx.DebugLevel)

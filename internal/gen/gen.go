@@ -7,62 +7,36 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zeromicro/go-zero/tools/goctl/util/format"
-
-	"github.com/pkg/errors"
-
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/pkg/mod"
-	"github.com/spf13/cobra"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
+	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 )
 
-var (
-	Style              string
-	RemoveSuffix       bool
-	ChangeReplaceTypes bool
-)
-
-var (
-	// ModelMysqlIgnoreColumns goctl model flags
-	ModelMysqlIgnoreColumns []string
-
-	ModelMysqlCache       bool
-	ModelMysqlCachePrefix string
-
-	// ModelMysqlDatasource goctl model datasource
-	ModelMysqlDatasource      bool
-	ModelMysqlDatasourceUrl   string
-	ModelMysqlDatasourceTable []string
-)
-
-type ApiFileTypes struct {
-	Filepath string
-	ApiSpec  spec.ApiSpec
-	GenTypes []spec.Type
-
-	Base bool
-}
-
-func Gen(_ *cobra.Command, _ []string) error {
+func Gen(gcf config.GenConfig) error {
 	wd, err := os.Getwd()
-	cobra.CheckErr(err)
+	if err != nil {
+		return err
+	}
 	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), wd)
 
 	moduleStruct, err := mod.GetGoMod(wd)
-	cobra.CheckErr(errors.Wrapf(err, "get go module struct error"))
+	if err != nil {
+		return errors.Wrapf(err, "get go module struct error")
+	}
 
 	defer func() {
-		RemoveExtraFiles(wd)
+		RemoveExtraFiles(wd, gcf.Style)
 	}()
 
 	jzeroRpc := JzeroRpc{
 		Wd:                 wd,
 		Module:             moduleStruct.Path,
-		Style:              Style,
-		RemoveSuffix:       RemoveSuffix,
-		ChangeReplaceTypes: ChangeReplaceTypes,
+		Style:              gcf.Style,
+		RemoveSuffix:       gcf.RemoveSuffix,
+		ChangeReplaceTypes: gcf.ChangeReplaceTypes,
 		Etc:                filepath.Join("etc", "etc.yaml"),
 	}
 	err = jzeroRpc.Gen()
@@ -70,7 +44,13 @@ func Gen(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	jzeroApi := JzeroApi{Wd: wd, Module: moduleStruct.Path, Style: Style, RemoveSuffix: RemoveSuffix, ChangeReplaceTypes: ChangeReplaceTypes}
+	jzeroApi := JzeroApi{
+		Wd:                 wd,
+		Module:             moduleStruct.Path,
+		Style:              gcf.Style,
+		RemoveSuffix:       gcf.RemoveSuffix,
+		ChangeReplaceTypes: gcf.ChangeReplaceTypes,
+	}
 	err = jzeroApi.Gen()
 	if err != nil {
 		return err
@@ -78,13 +58,13 @@ func Gen(_ *cobra.Command, _ []string) error {
 
 	jzeroSql := JzeroSql{
 		Wd:                        wd,
-		Style:                     Style,
-		ModelIgnoreColumns:        ModelMysqlIgnoreColumns,
-		ModelMysqlDatasource:      ModelMysqlDatasource,
-		ModelMysqlDatasourceUrl:   ModelMysqlDatasourceUrl,
-		ModelMysqlDatasourceTable: ModelMysqlDatasourceTable,
-		ModelMysqlCache:           ModelMysqlCache,
-		ModelMysqlCachePrefix:     ModelMysqlCachePrefix,
+		Style:                     gcf.Style,
+		ModelIgnoreColumns:        gcf.ModelMysqlIgnoreColumns,
+		ModelMysqlDatasource:      gcf.ModelMysqlDatasource,
+		ModelMysqlDatasourceUrl:   gcf.ModelMysqlDatasourceUrl,
+		ModelMysqlDatasourceTable: gcf.ModelMysqlDatasourceTable,
+		ModelMysqlCache:           gcf.ModelMysqlCache,
+		ModelMysqlCachePrefix:     gcf.ModelMysqlCachePrefix,
 	}
 	err = jzeroSql.Gen()
 	if err != nil {
@@ -94,11 +74,11 @@ func Gen(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-func RemoveExtraFiles(wd string) {
-	if err := os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd))); err != nil {
+func RemoveExtraFiles(wd string, style string) {
+	if err := os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd, style))); err != nil {
 		logx.Debugf("remove api frame main go file error: %s", err.Error())
 	}
-	if err := os.Remove(filepath.Join(wd, "etc", getApiFrameEtcFilename(wd))); err != nil {
+	if err := os.Remove(filepath.Join(wd, "etc", getApiFrameEtcFilename(wd, style))); err != nil {
 		logx.Debugf("remove api etc file error: %s", err.Error())
 	}
 
@@ -107,10 +87,10 @@ func RemoveExtraFiles(wd string) {
 		for _, v := range protoFilenames {
 			v = filepath.Base(v)
 			fileBase := v[0 : len(v)-len(path.Ext(v))]
-			if err = os.Remove(filepath.Join(wd, getProtoFrameMainGoFilename(fileBase))); err != nil {
+			if err = os.Remove(filepath.Join(wd, getProtoFrameMainGoFilename(fileBase, style))); err != nil {
 				logx.Debugf("remove proto frame main go file error: %s", err.Error())
 			}
-			if err = os.Remove(filepath.Join(wd, "etc", getProtoFrameEtcFilename(fileBase))); err != nil {
+			if err = os.Remove(filepath.Join(wd, "etc", getProtoFrameEtcFilename(fileBase, style))); err != nil {
 				logx.Debugf("remove proto etc file error: %s", err.Error())
 			}
 		}
@@ -118,10 +98,10 @@ func RemoveExtraFiles(wd string) {
 }
 
 // getApiFrameMainGoFilename: goctl/api/gogen/genmain.go
-func getApiFrameMainGoFilename(wd string) string {
+func getApiFrameMainGoFilename(wd string, style string) string {
 	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
 	serviceName = strings.ToLower(serviceName)
-	filename, err := format.FileNamingFormat(Style, serviceName)
+	filename, err := format.FileNamingFormat(style, serviceName)
 	if err != nil {
 		return ""
 	}
@@ -133,9 +113,9 @@ func getApiFrameMainGoFilename(wd string) string {
 }
 
 // getApiFrameEtcFilename: goctl/api/gogen/genetc.go
-func getApiFrameEtcFilename(wd string) string {
+func getApiFrameEtcFilename(wd string, style string) string {
 	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
-	filename, err := format.FileNamingFormat(Style, serviceName)
+	filename, err := format.FileNamingFormat(style, serviceName)
 	if err != nil {
 		return ""
 	}
@@ -143,8 +123,8 @@ func getApiFrameEtcFilename(wd string) string {
 }
 
 // getProtoFrameMainGoFilename: goctl/rpc/generator/genmain.go
-func getProtoFrameMainGoFilename(source string) string {
-	filename, err := format.FileNamingFormat(Style, source)
+func getProtoFrameMainGoFilename(source string, style string) string {
+	filename, err := format.FileNamingFormat(style, source)
 	if err != nil {
 		return ""
 	}
@@ -152,8 +132,8 @@ func getProtoFrameMainGoFilename(source string) string {
 }
 
 // getProtoFrameEtcFilename: goctl/rpc/generator/genetc.go
-func getProtoFrameEtcFilename(source string) string {
-	filename, err := format.FileNamingFormat(Style, source)
+func getProtoFrameEtcFilename(source string, style string) string {
+	filename, err := format.FileNamingFormat(style, source)
 	if err != nil {
 		return ""
 	}
