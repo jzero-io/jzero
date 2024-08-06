@@ -15,19 +15,19 @@ import (
 )
 
 var (
-	Home   string
+	Output string
 	Remote string
 	Branch string
 )
 
 func Init(_ *cobra.Command, _ []string) error {
 	if Remote != "" && Branch != "" {
-		_ = os.MkdirAll(Home, 0o755)
-		fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), Home, Branch)
+		_ = os.MkdirAll(Output, 0o755)
+		fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), Output, Branch)
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
-		_, err := git.PlainCloneContext(ctx, filepath.Join(Home), false, &git.CloneOptions{
+		_, err := git.PlainCloneContext(ctx, filepath.Join(Output), false, &git.CloneOptions{
 			SingleBranch:  true,
 			URL:           Remote,
 			Depth:         0,
@@ -41,6 +41,6 @@ func Init(_ *cobra.Command, _ []string) error {
 		return nil
 	}
 
-	err := embeded.WriteTemplateDir("", Home)
+	err := embeded.WriteTemplateDir("", Output)
 	return err
 }

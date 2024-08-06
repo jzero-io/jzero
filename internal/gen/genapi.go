@@ -49,7 +49,7 @@ type LogicFile struct {
 }
 
 func (ja *JzeroApi) Gen() error {
-	apiDirName := filepath.Join(ja.Wd, "desc", "api")
+	apiDirName := filepath.Join("desc", "api")
 
 	var apiSpec *spec.ApiSpec
 	var allHandlerFiles []HandlerFile

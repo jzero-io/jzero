@@ -6,25 +6,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-)
-
-var (
-	Module       string
-	Output       string
-	AppName      string
-	Remote       string
-	Cache        bool
-	Branch       string
-	WithTemplate bool
-	Style        string
-
-	Features []string
 )
 
 type TemplateData struct {
@@ -34,7 +22,7 @@ type TemplateData struct {
 
 type JzeroNew struct {
 	TemplateData map[string]interface{}
-	Style        string
+	nc           config.NewConfig
 }
 
 type GeneratedFile struct {
@@ -43,16 +31,19 @@ type GeneratedFile struct {
 	Skip    bool
 }
 
-func NewProject(_ *cobra.Command, _ []string) error {
-	err := os.MkdirAll(Output, 0o755)
+func NewProject(nc config.NewConfig, appName string) error {
+	err := os.MkdirAll(nc.Output, 0o755)
 	cobra.CheckErr(err)
 
-	templateData, err := NewTemplateData(Features)
+	templateData, err := NewTemplateData()
 	cobra.CheckErr(err)
+	templateData["Features"] = nc.Features
+	templateData["Module"] = nc.Module
+	templateData["APP"] = appName
 
 	jn := JzeroNew{
 		TemplateData: templateData,
-		Style:        Style,
+		nc:           nc,
 	}
 
 	gfs, err := jn.New(filepath.Join("app"))
@@ -118,7 +109,7 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 
 		stylePath := filepath.Join(filepath.Dir(rel), filename)
 		if filepath.Ext(filename) == ".go" {
-			formatFilename, err := format.FileNamingFormat(jn.Style, filename[0:len(filename)-len(filepath.Ext(filename))])
+			formatFilename, err := format.FileNamingFormat(jn.nc.Style, filename[0:len(filename)-len(filepath.Ext(filename))])
 			if err != nil {
 				return nil, err
 			}
@@ -126,12 +117,12 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 		}
 
 		gsf = append(gsf, &GeneratedFile{
-			Path:    filepath.Join(Output, stylePath),
+			Path:    filepath.Join(jn.nc.Output, stylePath),
 			Content: *bytes.NewBuffer(fileBytes),
 			// Because this is a special directory for jzero
 			// It is deleted to support generating all server code under the premise of only desc directory
 			// Or if this file has been existed, just ignore write
-			Skip: pathx.FileExists(filepath.Join(Output, "desc")) && strings.HasPrefix(rel, "desc"),
+			Skip: pathx.FileExists(filepath.Join(jn.nc.Output, "desc")) && strings.HasPrefix(rel, "desc"),
 		})
 	}
 	return gsf, nil

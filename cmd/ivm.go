@@ -8,7 +8,7 @@ package cmd
 import (
 	"strings"
 
-	"github.com/jzero-io/jzero/internal/ivm"
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/ivm/ivmaddapi"
 	"github.com/jzero-io/jzero/internal/ivm/ivmaddproto"
 	"github.com/jzero-io/jzero/internal/ivm/ivminit"
@@ -28,7 +28,9 @@ var ivmCmd = &cobra.Command{
 var ivmInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: `Init newer version from older version, no need to do any more`,
-	RunE:  ivminit.Init,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return ivminit.Init(config.C.Ivm)
+	},
 }
 
 var ivmAddCmd = &cobra.Command{
@@ -39,44 +41,45 @@ var ivmAddCmd = &cobra.Command{
 var ivmAddProtoCmd = &cobra.Command{
 	Use:   "proto",
 	Short: `Add a example proto`,
-	PreRun: func(cmd *cobra.Command, args []string) {
-		if !strings.HasPrefix(ivm.Version, "v") {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if !strings.HasPrefix(config.C.Ivm.Version, "v") {
 			cobra.CheckErr(errors.New("version must has prefix v"))
 		}
-		if len(ivmaddproto.Services) == 0 {
-			ivmaddproto.Services = []string{ivmaddproto.Name}
+		if len(config.C.Ivm.Add.Proto.Services) == 0 {
+			config.C.Ivm.Add.Proto.Services = []string{config.C.Ivm.Add.Proto.Name}
 		}
+		return ivmaddproto.AddProto(config.C.Ivm)
 	},
-	RunE:         ivmaddproto.AddProto,
 	SilenceUsage: true,
 }
 
 var ivmAddApiCmd = &cobra.Command{
 	Use:   "api",
 	Short: `Add a example api`,
-	PreRun: func(cmd *cobra.Command, args []string) {
-		if !strings.HasPrefix(ivm.Version, "v") {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if !strings.HasPrefix(config.C.Ivm.Version, "v") {
 			cobra.CheckErr(errors.New("version must has prefix v"))
 		}
-		if ivmaddapi.Group == "" {
-			ivmaddapi.Group = ivmaddapi.Name
+		if config.C.Ivm.Add.Api.Group == "" {
+			config.C.Ivm.Add.Api.Group = config.C.Ivm.Add.Api.Name
 		}
+		return ivmaddapi.AddApi(config.C.Ivm)
 	},
-	RunE:         ivmaddapi.AddApi,
 	SilenceUsage: true,
 }
 
 func init() {
 	{
 		rootCmd.AddCommand(ivmCmd)
-		ivmCmd.PersistentFlags().StringVarP(&ivm.Version, "version", "v", "v1", "jzero ivm init")
+		ivmCmd.PersistentFlags().StringP("version", "v", "v1", "jzero ivm version")
 	}
 
 	{
 		ivmCmd.AddCommand(ivmInitCmd)
 
-		ivmInitCmd.Flags().StringVarP(&ivminit.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
-		ivmInitCmd.Flags().BoolVarP(&ivminit.RemoveSuffix, "remove-suffix", "", false, "remove suffix Handler and Logic on filename or file content")
+		ivmInitCmd.Flags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+		ivmInitCmd.Flags().BoolP("remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
+		ivmInitCmd.Flags().BoolP("change-replace-types", "", true, "if api file or proto change, e.g. Request or Response type, change handler and logic file content types but not file")
 	}
 
 	{
@@ -86,19 +89,19 @@ func init() {
 	{
 		ivmAddCmd.AddCommand(ivmAddProtoCmd)
 
-		ivmAddProtoCmd.Flags().StringVarP(&ivmaddproto.Name, "name", "", "template", "set proto file name")
+		ivmAddProtoCmd.Flags().StringP("name", "n", "template", "set proto file name")
 		_ = ivmAddProtoCmd.MarkFlagRequired("name")
 
-		ivmAddProtoCmd.Flags().StringSliceVarP(&ivmaddproto.Services, "services", "", nil, "set proto services")
-		ivmAddProtoCmd.Flags().StringSliceVarP(&ivmaddproto.Methods, "methods", "m", []string{"SayHello:get"}, "set proto methods")
+		ivmAddProtoCmd.Flags().StringSliceP("services", "", nil, "set proto services")
+		ivmAddProtoCmd.Flags().StringSliceP("methods", "m", []string{"SayHello:get"}, "set proto methods")
 	}
 
 	{
 		ivmAddCmd.AddCommand(ivmAddApiCmd)
-		ivmAddApiCmd.Flags().StringVarP(&ivmaddapi.Name, "name", "", "template", "set api file name")
+		ivmAddApiCmd.Flags().StringP("name", "n", "template", "set api file name")
 		_ = ivmAddApiCmd.MarkFlagRequired("name")
 
-		ivmAddApiCmd.Flags().StringVarP(&ivmaddapi.Group, "group", "", "", "set api file group")
-		ivmAddApiCmd.Flags().StringSliceVarP(&ivmaddapi.Handlers, "handler", "", []string{"List", "Get", "Edit", "List", "Delete"}, "set api file handlers")
+		ivmAddApiCmd.Flags().StringP("group", "", "", "set api file group")
+		ivmAddApiCmd.Flags().StringSliceP("handler", "", []string{"List", "Get", "Edit", "List", "Delete"}, "set api file handlers")
 	}
 }

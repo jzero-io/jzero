@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	openapi_options "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
+	openapioptions "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoprint"
 	"google.golang.org/genproto/googleapis/api/annotations"
@@ -68,11 +68,11 @@ func (ivm *IvmInit) updateProtoGenOpenapiv2InfoVersion(fdp *descriptorpb.FileDes
 	if fdp.Options == nil {
 		return nil
 	}
-	if !proto.HasExtension(fdp.Options, openapi_options.E_Openapiv2Swagger) {
+	if !proto.HasExtension(fdp.Options, openapioptions.E_Openapiv2Swagger) {
 		return nil
 	}
-	ext := proto.GetExtension(fdp.Options, openapi_options.E_Openapiv2Swagger)
-	opts, ok := ext.(*openapi_options.Swagger)
+	ext := proto.GetExtension(fdp.Options, openapioptions.E_Openapiv2Swagger)
+	opts, ok := ext.(*openapioptions.Swagger)
 	if !ok {
 		return fmt.Errorf("extension is %T; want a OpenAPI object", ext)
 	}

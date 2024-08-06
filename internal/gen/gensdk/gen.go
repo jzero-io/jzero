@@ -10,23 +10,23 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
-func GenSdk(gsc config.GenSdkConfig, genModule bool) error {
-	if !pathx.FileExists(gsc.Output) {
-		if err := os.MkdirAll(gsc.Output, 0o755); err != nil {
+func GenSdk(gc config.GenConfig, genModule bool) error {
+	if !pathx.FileExists(gc.Sdk.Output) {
+		if err := os.MkdirAll(gc.Sdk.Output, 0o755); err != nil {
 			return err
 		}
 	}
 
 	c := gensdkconfig.Config{
-		Language:     gsc.Language,
-		Scope:        gsc.Scope,
+		Language:     gc.Sdk.Language,
+		Scope:        gc.Sdk.Scope,
 		GenModule:    genModule,
-		GoModule:     gsc.GoModule,
-		GoPackage:    gsc.GoPackage,
-		Output:       gsc.Output,
-		ApiDir:       gsc.ApiDir,
-		ProtoDir:     gsc.ProtoDir,
-		WrapResponse: gsc.WrapResponse,
+		GoModule:     gc.Sdk.GoModule,
+		GoPackage:    gc.Sdk.GoPackage,
+		Output:       gc.Sdk.Output,
+		ApiDir:       gc.Sdk.ApiDir,
+		ProtoDir:     gc.Sdk.ProtoDir,
+		WrapResponse: gc.Sdk.WrapResponse,
 	}
 
 	gen, err := generator.New(c)
@@ -40,15 +40,15 @@ func GenSdk(gsc config.GenSdkConfig, genModule bool) error {
 	}
 
 	for _, v := range files {
-		if !pathx.FileExists(filepath.Dir(filepath.Join(gsc.Output, v.Path))) {
-			if err = os.MkdirAll(filepath.Dir(filepath.Join(gsc.Output, v.Path)), 0o755); err != nil {
+		if !pathx.FileExists(filepath.Dir(filepath.Join(gc.Sdk.Output, v.Path))) {
+			if err = os.MkdirAll(filepath.Dir(filepath.Join(gc.Sdk.Output, v.Path)), 0o755); err != nil {
 				return err
 			}
 		}
-		if pathx.FileExists(filepath.Join(gsc.Output, v.Path)) && v.Skip {
+		if pathx.FileExists(filepath.Join(gc.Sdk.Output, v.Path)) && v.Skip {
 			continue
 		}
-		if err = os.WriteFile(filepath.Join(gsc.Output, v.Path), v.Content.Bytes(), 0o644); err != nil {
+		if err = os.WriteFile(filepath.Join(gc.Sdk.Output, v.Path), v.Content.Bytes(), 0o644); err != nil {
 			return err
 		}
 	}

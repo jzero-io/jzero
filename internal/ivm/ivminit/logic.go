@@ -12,11 +12,9 @@ import (
 	"strings"
 
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/rinchsan/gosimports"
-
-	"github.com/jzero-io/jzero/internal/gen"
-
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 )
 

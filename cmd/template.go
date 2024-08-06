@@ -24,9 +24,9 @@ var templateInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: `Save template files on your disk`,
 	PreRun: func(_ *cobra.Command, _ []string) {
-		if templateinit.Home == "" {
+		if templateinit.Output == "" {
 			home, _ := os.UserHomeDir()
-			templateinit.Home = filepath.Join(home, ".jzero", Version)
+			templateinit.Output = filepath.Join(home, ".jzero", Version)
 		}
 	},
 	RunE: templateinit.Init,
@@ -63,6 +63,6 @@ func init() {
 
 		templateInitCmd.Flags().StringVarP(&templateinit.Remote, "remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 		templateInitCmd.Flags().StringVarP(&templateinit.Branch, "branch", "b", "", "remote templates repo branch")
-		templateInitCmd.Flags().StringVarP(&templateinit.Home, "home", "", "", "template output dir")
+		templateInitCmd.Flags().StringVarP(&templateinit.Output, "output", "o", "", "template output dir")
 	}
 }

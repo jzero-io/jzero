@@ -6,18 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/internal/ivm"
 	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-)
-
-var (
-	Methods  []string
-	Name     string
-	Services []string
 )
 
 type Method struct {
@@ -25,9 +18,9 @@ type Method struct {
 	Verb string
 }
 
-func AddProto(command *cobra.Command, args []string) error {
+func AddProto(ic config.IvmConfig) error {
 	var methods []Method
-	for _, v := range Methods {
+	for _, v := range ic.Add.Proto.Methods {
 		split := strings.Split(v, ":")
 		var method Method
 		if len(split) == 2 {
@@ -44,21 +37,21 @@ func AddProto(command *cobra.Command, args []string) error {
 	var version string
 	var versionSuffix string
 
-	if ivm.Version == "v1" {
+	if ic.Version == "v1" {
 		version = ""
 		versionSuffix = ""
 	} else {
-		version = ivm.Version
-		versionSuffix = "_" + ivm.Version
+		version = ic.Version
+		versionSuffix = "_" + ic.Version
 	}
 
 	template, err := templatex.ParseTemplate(map[string]interface{}{
-		"Package":    Name,
+		"Package":    ic.Add.Proto.Name,
 		"Methods":    methods,
-		"Services":   Services,
+		"Services":   ic.Add.Proto.Services,
 		"Version":    version,
-		"UrlVersion": ivm.Version,
-		"ProtoPath":  filepath.Join(ivm.Version, fmt.Sprintf("%s%s.proto", Name, versionSuffix)),
+		"UrlVersion": ic.Version,
+		"ProtoPath":  filepath.Join(ic.Version, fmt.Sprintf("%s%s.proto", ic.Add.Proto.Name, versionSuffix)),
 	}, embeded.ReadTemplateFile(filepath.Join("ivm", "add", "template.proto.tpl")))
 	if err != nil {
 		return err
@@ -68,7 +61,7 @@ func AddProto(command *cobra.Command, args []string) error {
 	// Create a new printer
 	// printer := &protoprint.Printer{}
 
-	output := filepath.Join("desc", "proto", ivm.Version, fmt.Sprintf("%s%s.proto", Name, versionSuffix))
+	output := filepath.Join("desc", "proto", ic.Version, fmt.Sprintf("%s%s.proto", ic.Add.Proto.Name, versionSuffix))
 
 	if pathx.FileExists(output) {
 		return errors.New("proto file already exists")

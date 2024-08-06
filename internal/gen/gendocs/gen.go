@@ -4,16 +4,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jzero-io/jzero/internal/gen/gendocs/markdown"
-
 	"github.com/jzero-io/jzero/internal/gen"
-	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
-
+	"github.com/jzero-io/jzero/internal/gen/gendocs/markdown"
 	gendocsparser "github.com/jzero-io/jzero/internal/gen/gendocs/parser"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 )
 
-func Gen(cmd *cobra.Command, args []string) error {
+func Gen() error {
 	mainApiFile, isDelete, err := gen.GetMainApiFilePath(filepath.Join("desc", "api"))
 	if err != nil {
 		return err

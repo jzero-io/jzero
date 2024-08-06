@@ -6,29 +6,18 @@ import (
 	"os/exec"
 	"strings"
 
-	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
-
-	"github.com/pkg/errors"
-
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/gen"
-
-	"github.com/spf13/cobra"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
-var (
-	Dir      string
-	ApiDir   string
-	ProtoDir string
-)
-
-func Gen(_ *cobra.Command, _ []string) error {
-	wd, _ := os.Getwd()
-
-	if pathx.FileExists(ApiDir) {
-		_ = os.MkdirAll(Dir, 0o755)
-		mainApiFile, isDelete, err := gen.GetMainApiFilePath(ApiDir)
+func Gen(gc config.GenConfig) error {
+	if pathx.FileExists(gc.Swagger.ApiDir) {
+		_ = os.MkdirAll(gc.Swagger.Output, 0o755)
+		mainApiFile, isDelete, err := gen.GetMainApiFilePath(gc.Swagger.ApiDir)
 		if err != nil {
 			return err
 		}
@@ -38,14 +27,14 @@ func Gen(_ *cobra.Command, _ []string) error {
 			}
 		}()
 
-		if !pathx.FileExists(Dir) {
-			_ = os.MkdirAll(Dir, 0o755)
+		if !pathx.FileExists(gc.Swagger.Output) {
+			_ = os.MkdirAll(gc.Swagger.Output, 0o755)
 		}
 
 		// gen swagger by desc/api
 		if mainApiFile != "" {
-			apiFile := fmt.Sprintf("%s.swagger.json", gen.GetApiServiceName(ApiDir))
-			cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", mainApiFile, "-dir", Dir)
+			apiFile := fmt.Sprintf("%s.swagger.json", gen.GetApiServiceName(gc.Swagger.ApiDir))
+			cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", mainApiFile, "-dir", gc.Swagger.Output)
 			resp, err := cmd.CombinedOutput()
 			if err != nil {
 				return errors.Wrap(err, strings.TrimRight(string(resp), "\r\n"))
@@ -56,9 +45,9 @@ func Gen(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	if pathx.FileExists(ProtoDir) {
-		_ = os.MkdirAll(Dir, 0o755)
-		protoFilepath, err := gen.GetProtoFilepath(ProtoDir)
+	if pathx.FileExists(gc.Swagger.ProtoDir) {
+		_ = os.MkdirAll(gc.Swagger.Output, 0o755)
+		protoFilepath, err := gen.GetProtoFilepath(gc.Swagger.ProtoDir)
 		if err != nil {
 			return err
 		}
@@ -71,11 +60,11 @@ func Gen(_ *cobra.Command, _ []string) error {
 			}
 
 			command := fmt.Sprintf("protoc -I%s %s --openapiv2_out=%s",
-				ProtoDir,
+				gc.Swagger.ProtoDir,
 				path,
-				Dir,
+				gc.Swagger.Output,
 			)
-			_, err := execx.Run(command, wd)
+			_, err := execx.Run(command, gc.Swagger.Wd())
 			if err != nil {
 				return err
 			}

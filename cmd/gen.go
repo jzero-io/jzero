@@ -29,11 +29,6 @@ var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: `Used to generate server/client code`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := config.SetConfig(CfgFile, cmd.Use, cmd.Flags())
-		if err != nil {
-			return err
-		}
-
 		// check go-zero api template
 		home, _ := os.UserHomeDir()
 		if !pathx.FileExists(filepath.Join(home, ".jzero", Version, "go-zero")) {
@@ -41,11 +36,12 @@ var genCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 
-		if !pathx.FileExists(c.Gen.Home) {
+		if !pathx.FileExists(config.C.Gen.Home) {
 			home, _ := os.UserHomeDir()
-			embeded.Home = filepath.Join(home, ".jzero", Version)
+			config.C.Gen.Home = filepath.Join(home, ".jzero", Version)
 		}
-		return gen.Gen(c.Gen)
+		embeded.Home = config.C.Gen.Home
+		return gen.Gen(config.C.Gen)
 	},
 	SilenceUsage: true,
 }
@@ -54,34 +50,37 @@ var genCmd = &cobra.Command{
 var genZRpcClientCmd = &cobra.Command{
 	Use:   "zrpcclient",
 	Short: `Gen zrpc client code by proto`,
-	PreRun: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		wd, err := os.Getwd()
 		cobra.CheckErr(err)
 		mod, err := mod.GetGoMod(wd)
 		cobra.CheckErr(err)
-		if genzrpcclient.Scope == "" {
-			genzrpcclient.Scope = filepath.Base(mod.Path)
-			genzrpcclient.Scope = strings.ReplaceAll(genzrpcclient.Scope, "-", "_")
+		if config.C.Gen.Zrpcclient.Scope == "" {
+			config.C.Gen.Zrpcclient.Scope = filepath.Base(mod.Path)
+			config.C.Gen.Zrpcclient.Scope = strings.ReplaceAll(config.C.Gen.Zrpcclient.Scope, "-", "_")
 		}
 
-		if genzrpcclient.GoModule == "" {
-			genzrpcclient.GoModule = filepath.ToSlash(filepath.Join(mod.Path, genzrpcclient.Output))
+		var genModule bool
+		if config.C.Gen.Zrpcclient.GoModule == "" {
+			config.C.Gen.Zrpcclient.GoModule = filepath.ToSlash(filepath.Join(mod.Path, config.C.Gen.Zrpcclient.Output))
 		} else {
-			genzrpcclient.GenModule = true
+			genModule = true
 		}
 
-		if genzrpcclient.GoPackage == "" {
-			genzrpcclient.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(genzrpcclient.GoModule)), "-", "_")
+		if config.C.Gen.Zrpcclient.GoPackage == "" {
+			config.C.Gen.Zrpcclient.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(config.C.Gen.Zrpcclient.GoModule)), "-", "_")
 		}
+		return genzrpcclient.Generate(config.C.Gen, genModule)
 	},
-	RunE: genzrpcclient.Generate,
 }
 
 // genSwaggerCmd represents the genSwagger command
 var genSwaggerCmd = &cobra.Command{
 	Use:   "swagger",
 	Short: `Gen swagger json docs by proto and api file`,
-	RunE:  genswagger.Gen,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return genswagger.Gen(config.C.Gen)
+	},
 }
 
 // genSdkCmd represents the gen sdk command
@@ -89,41 +88,36 @@ var genSdkCmd = &cobra.Command{
 	Use:   "sdk",
 	Short: `Generate sdk client by api file and proto file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c, err := config.SetConfig(CfgFile, cmd.Parent().Use+"."+cmd.Use, cmd.Flags())
-		if err != nil {
-			return err
-		}
-
-		if c.Gen.Sdk.Language == "ts" {
+		if config.C.Gen.Sdk.Language == "ts" {
 			console.Warning("[warning] ts client is still working...")
 		}
 
-		mod, err := mod.GetGoMod(c.Gen.Wd())
+		mod, err := mod.GetGoMod(config.C.Gen.Wd())
 		cobra.CheckErr(err)
 
-		if c.Gen.Sdk.Output == "" {
-			c.Gen.Sdk.Output = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), c.Gen.Sdk.Language)
+		if config.C.Gen.Sdk.Output == "" {
+			config.C.Gen.Sdk.Output = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), config.C.Gen.Sdk.Language)
 		}
 
 		var genModule bool
-		if c.Gen.Sdk.GoModule == "" {
+		if config.C.Gen.Sdk.GoModule == "" {
 			// module 为空, sdk 作为服务端的一个 package
-			if c.Gen.Sdk.Language == "go" {
-				c.Gen.Sdk.GoModule = filepath.ToSlash(filepath.Join(mod.Path, c.Gen.Sdk.Output))
+			if config.C.Gen.Sdk.Language == "go" {
+				config.C.Gen.Sdk.GoModule = filepath.ToSlash(filepath.Join(mod.Path, config.C.Gen.Sdk.Output))
 			}
 		} else {
 			// module 不为空, 则生成 go.mod 文件
 			genModule = true
 		}
 
-		if c.Gen.Sdk.GoPackage == "" {
-			c.Gen.Sdk.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(c.Gen.Sdk.GoModule)), "-", "_")
+		if config.C.Gen.Sdk.GoPackage == "" {
+			config.C.Gen.Sdk.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(config.C.Gen.Sdk.GoModule)), "-", "_")
 		}
 
-		if c.Gen.Sdk.Scope == "" {
-			c.Gen.Sdk.Scope = filepath.Base(mod.Path)
+		if config.C.Gen.Sdk.Scope == "" {
+			config.C.Gen.Sdk.Scope = filepath.Base(mod.Path)
 			// 不支持 -, replace to _
-			c.Gen.Sdk.Scope = strings.ReplaceAll(c.Gen.Sdk.Scope, "-", "_")
+			config.C.Gen.Sdk.Scope = strings.ReplaceAll(config.C.Gen.Sdk.Scope, "-", "_")
 		}
 
 		homeDir, err := os.UserHomeDir()
@@ -131,7 +125,7 @@ var genSdkCmd = &cobra.Command{
 		if embeded.Home == "" {
 			embeded.Home = filepath.Join(homeDir, ".jzero", Version)
 		}
-		return gensdk.GenSdk(c.Gen.Sdk, genModule)
+		return gensdk.GenSdk(config.C.Gen, genModule)
 	},
 }
 
@@ -143,7 +137,9 @@ var genDocsCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		console.Warning("[warning] generate docs is still working...")
 	},
-	RunE: gendocs.Gen,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return gendocs.Gen()
+	},
 }
 
 func init() {
@@ -153,12 +149,14 @@ func init() {
 		rootCmd.AddCommand(genCmd)
 
 		// used for jzero
-		genCmd.Flags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
 		genCmd.Flags().BoolP("remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
-		genCmd.Flags().BoolP("change-replace-types", "", true, "if api file change, e.g. Request or Response type, change handler and logic file content types but not file")
+		genCmd.Flags().BoolP("change-replace-types", "", true, "if api file or proto change, e.g. Request or Response type, change handler and logic file content types but not file")
 
 		// used for goctl
-		genCmd.Flags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+		// gen command persistentFlags
+		genCmd.PersistentFlags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+		genCmd.PersistentFlags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
+
 		genCmd.Flags().StringSliceP("model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
 		genCmd.Flags().BoolP("model-mysql-datasource", "", false, "goctl model mysql datasource")
 		genCmd.Flags().StringP("model-mysql-datasource-url", "", "", "goctl model mysql datasource url")
@@ -178,15 +176,14 @@ func init() {
 		genSdkCmd.Flags().StringP("proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
 		genSdkCmd.Flags().BoolP("wrap-response", "", true, "warp response: code, data, message")
 		genSdkCmd.Flags().StringP("scope", "", "", "set scope name")
-		genSdkCmd.Flags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
 	}
 
 	{
 		genCmd.AddCommand(genSwaggerCmd)
 
-		genSwaggerCmd.Flags().StringVarP(&genswagger.Dir, "dir", "d", filepath.Join("desc", "swagger"), "set swagger output dir")
-		genSwaggerCmd.Flags().StringVarP(&genswagger.ApiDir, "api-dir", "", filepath.Join("desc", "api"), "set input api dir")
-		genSwaggerCmd.Flags().StringVarP(&genswagger.ProtoDir, "proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
+		genSwaggerCmd.Flags().StringP("output", "o", filepath.Join("desc", "swagger"), "set swagger output dir")
+		genSwaggerCmd.Flags().StringP("api-dir", "", filepath.Join("desc", "api"), "set input api dir")
+		genSwaggerCmd.Flags().StringP("proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
 	}
 
 	{
@@ -196,10 +193,9 @@ func init() {
 	{
 		genCmd.AddCommand(genZRpcClientCmd)
 
-		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
-		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Output, "output", "o", "zrpcclient-go", "generate rpcclient code")
-		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.Scope, "scope", "", "", "set scope name")
-		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.GoModule, "goModule", "", "", "set go module name")
-		genZRpcClientCmd.Flags().StringVarP(&genzrpcclient.GoPackage, "goPackage", "", "", "set package name")
+		genZRpcClientCmd.Flags().StringP("output", "o", "zrpcclient-go", "generate rpcclient code")
+		genZRpcClientCmd.Flags().StringP("scope", "", "", "set scope name")
+		genZRpcClientCmd.Flags().StringP("goModule", "", "", "set go module name")
+		genZRpcClientCmd.Flags().StringP("goPackage", "", "", "set package name")
 	}
 }

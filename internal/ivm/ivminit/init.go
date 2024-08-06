@@ -1,23 +1,18 @@
 package ivminit
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/internal/ivm"
-
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
-	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-)
-
-var (
-	Style        string
-	RemoveSuffix bool
 )
 
 type IvmInit struct {
@@ -30,20 +25,20 @@ type IvmInit struct {
 	jzeroRpc gen.JzeroRpc
 }
 
-func Init(command *cobra.Command, args []string) error {
+func Init(ic config.IvmConfig) error {
 	var ivmInit IvmInit
 
-	err := ivmInit.setOldVersion(ivm.Version)
+	err := ivmInit.setOldVersion(ic.Version)
 	if err != nil {
 		return err
 	}
-	ivmInit.newVersion = ivm.Version
+	ivmInit.newVersion = ic.Version
 
 	protoDir := filepath.Join("desc", "proto", ivmInit.oldVersion)
 	protoBaseDir := filepath.Join("desc", "proto")
 	ivmInit.protoBaseDir = protoBaseDir
 	ivmInit.oldProtoDir = protoDir
-	ivmInit.newProtoDir = filepath.Join("desc", "proto", ivm.Version)
+	ivmInit.newProtoDir = filepath.Join("desc", "proto", ic.Version)
 
 	var protoFiles []string
 
@@ -85,6 +80,23 @@ func Init(command *cobra.Command, args []string) error {
 
 	}
 
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	moduleStruct, err := mod.GetGoMod(wd)
+	if err != nil {
+		return err
+	}
+
+	jzeroRpc := gen.JzeroRpc{
+		Wd:                 wd,
+		Module:             moduleStruct.Path,
+		Style:              ic.Init.Style,
+		RemoveSuffix:       ic.Init.RemoveSuffix,
+		ChangeReplaceTypes: ic.Init.ChangeReplaceTypes,
+	}
+	ivmInit.jzeroRpc = jzeroRpc
 	err = ivmInit.gen()
 	if err != nil {
 		return err
