@@ -11,15 +11,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zeromicro/go-zero/tools/goctl/util"
-	"github.com/zeromicro/go-zero/tools/goctl/util/format"
-
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
+	"github.com/zeromicro/go-zero/tools/goctl/util"
+	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
@@ -46,7 +45,6 @@ type JzeroRpc struct {
 	Style              string
 	RemoveSuffix       bool
 	ChangeReplaceTypes bool
-	Etc                string // 配置文件路径
 }
 
 func (jr *JzeroRpc) Gen() error {

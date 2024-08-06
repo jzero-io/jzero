@@ -11,21 +11,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
-
-	"github.com/pkg/errors"
-
-	"github.com/zeromicro/go-zero/tools/goctl/util"
-
-	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
-	"github.com/zeromicro/go-zero/tools/goctl/util/format"
-
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/color"
+	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	"github.com/zeromicro/go-zero/tools/goctl/util"
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+	"github.com/zeromicro/go-zero/tools/goctl/util/format"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 type JzeroApi struct {
@@ -57,7 +52,6 @@ func (ja *JzeroApi) Gen() error {
 	apiDirName := filepath.Join(ja.Wd, "desc", "api")
 
 	var apiSpec *spec.ApiSpec
-	// 实验性功能
 	var allHandlerFiles []HandlerFile
 	var allLogicFiles []LogicFile
 

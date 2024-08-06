@@ -24,25 +24,6 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
-var (
-	Style              string
-	RemoveSuffix       bool
-	ChangeReplaceTypes bool
-)
-
-var (
-	// ModelMysqlIgnoreColumns goctl model flags
-	ModelMysqlIgnoreColumns []string
-
-	ModelMysqlCache       bool
-	ModelMysqlCachePrefix string
-
-	// ModelMysqlDatasource goctl model datasource
-	ModelMysqlDatasource      bool
-	ModelMysqlDatasourceUrl   string
-	ModelMysqlDatasourceTable []string
-)
-
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
 	Use:   "gen",
@@ -107,43 +88,51 @@ var genSwaggerCmd = &cobra.Command{
 var genSdkCmd = &cobra.Command{
 	Use:   "sdk",
 	Short: `Generate sdk client by api file and proto file`,
-	PreRun: func(_ *cobra.Command, _ []string) {
-		if gensdk.Language == "ts" {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		c, err := config.SetConfig(CfgFile, cmd.Parent().Use+"."+cmd.Use, cmd.Flags())
+		if err != nil {
+			return err
+		}
+
+		if c.Gen.Sdk.Language == "ts" {
 			console.Warning("[warning] ts client is still working...")
 		}
 
-		gensdk.Version = Version
-
-		wd, err := os.Getwd()
-		cobra.CheckErr(err)
-		mod, err := mod.GetGoMod(wd)
+		mod, err := mod.GetGoMod(c.Gen.Wd())
 		cobra.CheckErr(err)
 
-		if gensdk.Output == "" {
-			gensdk.Output = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), gensdk.Language)
+		if c.Gen.Sdk.Output == "" {
+			c.Gen.Sdk.Output = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), c.Gen.Sdk.Language)
 		}
 
-		if gensdk.GoModule == "" {
+		var genModule bool
+		if c.Gen.Sdk.GoModule == "" {
 			// module 为空, sdk 作为服务端的一个 package
-			if gensdk.Language == "go" {
-				gensdk.GoModule = filepath.ToSlash(filepath.Join(mod.Path, gensdk.Output))
+			if c.Gen.Sdk.Language == "go" {
+				c.Gen.Sdk.GoModule = filepath.ToSlash(filepath.Join(mod.Path, c.Gen.Sdk.Output))
 			}
 		} else {
 			// module 不为空, 则生成 go.mod 文件
-			gensdk.GenModule = true
+			genModule = true
 		}
 
-		if gensdk.GoPackage == "" {
-			gensdk.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(gensdk.GoModule)), "-", "_")
+		if c.Gen.Sdk.GoPackage == "" {
+			c.Gen.Sdk.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(c.Gen.Sdk.GoModule)), "-", "_")
 		}
 
-		if gensdk.Scope == "" {
-			gensdk.Scope = filepath.Base(mod.Path)
+		if c.Gen.Sdk.Scope == "" {
+			c.Gen.Sdk.Scope = filepath.Base(mod.Path)
 			// 不支持 -, replace to _
-			gensdk.Scope = strings.ReplaceAll(gensdk.Scope, "-", "_")
+			c.Gen.Sdk.Scope = strings.ReplaceAll(c.Gen.Sdk.Scope, "-", "_")
 		}
+
+		homeDir, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+		if embeded.Home == "" {
+			embeded.Home = filepath.Join(homeDir, ".jzero", Version)
+		}
+		return gensdk.GenSdk(c.Gen.Sdk, genModule)
 	},
-	RunE: gensdk.GenSdk,
 }
 
 // genDocsCmd represents the genDocs command
@@ -164,32 +153,32 @@ func init() {
 		rootCmd.AddCommand(genCmd)
 
 		// used for jzero
-		genCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(wd, ".template"), "set template home")
-		genCmd.Flags().BoolVarP(&RemoveSuffix, "remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
-		genCmd.Flags().BoolVarP(&ChangeReplaceTypes, "change-replace-types", "", true, "if api file change, e.g. Request or Response type, change handler and logic file content types but not file")
+		genCmd.Flags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
+		genCmd.Flags().BoolP("remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
+		genCmd.Flags().BoolP("change-replace-types", "", true, "if api file change, e.g. Request or Response type, change handler and logic file content types but not file")
 
 		// used for goctl
-		genCmd.Flags().StringVarP(&Style, "style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
-		genCmd.Flags().StringSliceVarP(&ModelMysqlIgnoreColumns, "model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
-		genCmd.Flags().BoolVarP(&ModelMysqlDatasource, "model-mysql-datasource", "", false, "goctl model mysql datasource")
-		genCmd.Flags().StringVarP(&ModelMysqlDatasourceUrl, "model-mysql-datasource-url", "", "", "goctl model mysql datasource url")
-		genCmd.Flags().StringSliceVarP(&ModelMysqlDatasourceTable, "model-mysql-datasource-table", "", []string{"*"}, "goctl model mysql datasource table")
-		genCmd.Flags().BoolVarP(&ModelMysqlCache, "model-mysql-cache", "", false, "goctl model mysql cache")
-		genCmd.Flags().StringVarP(&ModelMysqlCachePrefix, "model-mysql-cache-prefix", "", "", "goctl model mysql cache prefix")
+		genCmd.Flags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+		genCmd.Flags().StringSliceP("model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
+		genCmd.Flags().BoolP("model-mysql-datasource", "", false, "goctl model mysql datasource")
+		genCmd.Flags().StringP("model-mysql-datasource-url", "", "", "goctl model mysql datasource url")
+		genCmd.Flags().StringSliceP("model-mysql-datasource-table", "", []string{"*"}, "goctl model mysql datasource table")
+		genCmd.Flags().BoolP("model-mysql-cache", "", false, "goctl model mysql cache")
+		genCmd.Flags().StringP("model-mysql-cache-prefix", "", "", "goctl model mysql cache prefix")
 	}
 
 	{
 		genCmd.AddCommand(genSdkCmd)
 
-		genSdkCmd.Flags().StringVarP(&gensdk.Language, "language", "l", "go", "set language")
-		genSdkCmd.Flags().StringVarP(&gensdk.Output, "output", "o", "", "set output dir")
-		genSdkCmd.Flags().StringVarP(&gensdk.GoModule, "goModule", "", "", "set module name")
-		genSdkCmd.Flags().StringVarP(&gensdk.GoPackage, "goPackage", "", "", "set package name")
-		genSdkCmd.Flags().StringVarP(&gensdk.ApiDir, "api-dir", "", filepath.Join("desc", "api"), "set input api dir")
-		genSdkCmd.Flags().StringVarP(&gensdk.ProtoDir, "proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
-		genSdkCmd.Flags().BoolVarP(&gensdk.WrapResponse, "wrap-response", "", true, "warp response: code, data, message")
-		genSdkCmd.Flags().StringVarP(&gensdk.Scope, "scope", "", "", "set scope name")
-		genSdkCmd.Flags().StringVarP(&embeded.Home, "home", "", filepath.Join(wd, ".template"), "set template home")
+		genSdkCmd.Flags().StringP("language", "l", "go", "set language")
+		genSdkCmd.Flags().StringP("output", "o", "", "set output dir")
+		genSdkCmd.Flags().StringP("goModule", "", "", "set module name")
+		genSdkCmd.Flags().StringP("goPackage", "", "", "set package name")
+		genSdkCmd.Flags().StringP("api-dir", "", filepath.Join("desc", "api"), "set input api dir")
+		genSdkCmd.Flags().StringP("proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
+		genSdkCmd.Flags().BoolP("wrap-response", "", true, "warp response: code, data, message")
+		genSdkCmd.Flags().StringP("scope", "", "", "set scope name")
+		genSdkCmd.Flags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
 	}
 
 	{

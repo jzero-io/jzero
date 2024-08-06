@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -24,6 +26,24 @@ type GenConfig struct {
 	ModelMysqlDatasourceTable []string `mapstructure:"model-mysql-datasource-table"`
 	ModelMysqlCache           bool     `mapstructure:"model-mysql-cache"`
 	ModelMysqlCachePrefix     string   `mapstructure:"model-mysql-cache-prefix"`
+
+	Sdk GenSdkConfig `mapstructure:"sdk"`
+}
+
+type GenSdkConfig struct {
+	Scope        string `mapstructure:"scope"`
+	ApiDir       string `mapstructure:"api-dir"`
+	ProtoDir     string `mapstructure:"proto-dir"`
+	WrapResponse bool   `mapstructure:"wrap-response"`
+	Output       string `mapstructure:"output"`
+	Language     string `mapstructure:"language"`
+	GoModule     string `mapstructure:"goModule"`
+	GoPackage    string `mapstructure:"goPackage"`
+}
+
+func (gc *GenConfig) Wd() string {
+	wd, _ := os.Getwd()
+	return wd
 }
 
 func SetConfig(cfgFile string, command string, flagSet *pflag.FlagSet) (*Config, error) {

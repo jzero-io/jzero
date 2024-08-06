@@ -20,14 +20,16 @@ func CreatePathParam(pattern string, route *spec.Route) ([]*vars.PathParam, erro
 				Name:  segment[1:],
 			}
 			// get GoName
-			members := route.RequestType.(spec.DefineStruct).GetTagMembers("path")
-			for _, member := range members {
-				name, _ := member.GetPropertyName()
-				if name == segment[1:] {
-					param.GoName = stringx.FirstUpper(member.Name)
+			if _, ok := route.RequestType.(spec.DefineStruct); ok {
+				members := route.RequestType.(spec.DefineStruct).GetTagMembers("path")
+				for _, member := range members {
+					name, _ := member.GetPropertyName()
+					if name == segment[1:] {
+						param.GoName = stringx.FirstUpper(member.Name)
+					}
 				}
+				params = append(params, param)
 			}
-			params = append(params, param)
 		}
 	}
 	return params, nil

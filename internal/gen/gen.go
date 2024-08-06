@@ -16,28 +16,23 @@ import (
 )
 
 func Gen(gcf config.GenConfig) error {
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), wd)
+	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), gcf.Wd())
 
-	moduleStruct, err := mod.GetGoMod(wd)
+	moduleStruct, err := mod.GetGoMod(gcf.Wd())
 	if err != nil {
 		return errors.Wrapf(err, "get go module struct error")
 	}
 
 	defer func() {
-		RemoveExtraFiles(wd, gcf.Style)
+		RemoveExtraFiles(gcf.Wd(), gcf.Style)
 	}()
 
 	jzeroRpc := JzeroRpc{
-		Wd:                 wd,
+		Wd:                 gcf.Wd(),
 		Module:             moduleStruct.Path,
 		Style:              gcf.Style,
 		RemoveSuffix:       gcf.RemoveSuffix,
 		ChangeReplaceTypes: gcf.ChangeReplaceTypes,
-		Etc:                filepath.Join("etc", "etc.yaml"),
 	}
 	err = jzeroRpc.Gen()
 	if err != nil {
@@ -45,7 +40,7 @@ func Gen(gcf config.GenConfig) error {
 	}
 
 	jzeroApi := JzeroApi{
-		Wd:                 wd,
+		Wd:                 gcf.Wd(),
 		Module:             moduleStruct.Path,
 		Style:              gcf.Style,
 		RemoveSuffix:       gcf.RemoveSuffix,
@@ -57,7 +52,7 @@ func Gen(gcf config.GenConfig) error {
 	}
 
 	jzeroSql := JzeroSql{
-		Wd:                        wd,
+		Wd:                        gcf.Wd(),
 		Style:                     gcf.Style,
 		ModelIgnoreColumns:        gcf.ModelMysqlIgnoreColumns,
 		ModelMysqlDatasource:      gcf.ModelMysqlDatasource,

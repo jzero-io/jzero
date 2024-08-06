@@ -2,7 +2,6 @@ package ivminit
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/pkg/mod"
@@ -25,7 +24,6 @@ func (ivm *IvmInit) gen() error {
 		Module:       moduleStruct.Path,
 		Style:        Style,
 		RemoveSuffix: RemoveSuffix,
-		Etc:          filepath.Join("etc", "etc.yaml"),
 	}
 	ivm.jzeroRpc = jzeroRpc
 
