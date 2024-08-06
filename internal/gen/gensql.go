@@ -24,7 +24,6 @@ import (
 
 type JzeroSql struct {
 	Wd                        string
-	AppDir                    string
 	Style                     string
 	ModelIgnoreColumns        []string
 	ModelMysqlDatasource      bool
@@ -35,15 +34,15 @@ type JzeroSql struct {
 }
 
 func (js *JzeroSql) Gen() error {
-	dir := js.AppDir
-	if dir == "" {
-		dir = "."
-	}
+	dir := "."
 
 	if js.ModelMysqlDatasource {
 		fmt.Printf("%s to generate model code from url %s.\n", color.WithColor("Start", color.FgGreen), js.ModelMysqlDatasourceUrl)
 		// get tables from url
-		tables := getMysqlAllTables(js.ModelMysqlDatasourceUrl)
+		tables, err := getMysqlAllTables(js.ModelMysqlDatasourceUrl)
+		if err != nil {
+			return err
+		}
 
 		for _, table := range tables {
 			fmt.Printf("%s table %s\n", color.WithColor("Using", color.FgGreen), table)
@@ -72,58 +71,58 @@ func (js *JzeroSql) Gen() error {
 					return err
 				}
 			}
+			fmt.Println(color.WithColor("Done", color.FgGreen))
 		}
 		return nil
-	}
+	} else {
+		sqlDir := filepath.Join(js.Wd, "desc", "sql")
+		if f, err := os.Stat(sqlDir); err == nil && f.IsDir() {
+			fs, err := os.ReadDir(sqlDir)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%s to generate model code.\n", color.WithColor("Start", color.FgGreen))
+			for _, f := range fs {
+				if !f.IsDir() && strings.HasSuffix(f.Name(), ".sql") {
+					sqlFilePath := filepath.Join(sqlDir, f.Name())
+					fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), sqlFilePath)
 
-	sqlDir := filepath.Join(js.Wd, js.AppDir, "desc", "sql")
-	if f, err := os.Stat(sqlDir); err == nil && f.IsDir() {
-		fs, err := os.ReadDir(sqlDir)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("%s to generate model code.\n", color.WithColor("Start", color.FgGreen))
-		for _, f := range fs {
-			if !f.IsDir() && strings.HasSuffix(f.Name(), ".sql") {
-				sqlFilePath := filepath.Join(sqlDir, f.Name())
-				fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), sqlFilePath)
+					tables, err := parser.Parse(sqlFilePath, "", false)
+					if err != nil {
+						return err
+					}
 
-				tables, err := parser.Parse(sqlFilePath, "", false)
-				if err != nil {
-					return err
-				}
-
-				modelDir := filepath.Join(dir, "internal", "model", strings.ToLower(f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))]))
-				command := fmt.Sprintf("goctl model mysql ddl --src %s --dir %s --home %s --style %s -i '%s' --cache=%t",
-					filepath.Join(dir, "desc", "sql", f.Name()),
-					modelDir,
-					filepath.Join(embeded.Home, "go-zero"),
-					js.Style,
-					strings.Join(js.ModelIgnoreColumns, ","),
-					js.ModelMysqlCache,
-				)
-				_, err = execx.Run(command, js.Wd)
-				if err != nil {
-					console.Warning("[warning]: %s", err.Error())
-					continue
-				}
-				if js.ModelMysqlCachePrefix != "" && js.ModelMysqlCache {
-					for _, table := range tables {
-						namingFormat, err := format.FileNamingFormat(js.Style, table.Name.Source())
-						if err != nil {
-							return err
-						}
-						err = js.addModelMysqlCachePrefix(filepath.Join(modelDir, namingFormat+"model_gen.go"))
-						if err != nil {
-							return err
+					modelDir := filepath.Join(dir, "internal", "model", strings.ToLower(f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))]))
+					command := fmt.Sprintf("goctl model mysql ddl --src %s --dir %s --home %s --style %s -i '%s' --cache=%t",
+						filepath.Join(dir, "desc", "sql", f.Name()),
+						modelDir,
+						filepath.Join(embeded.Home, "go-zero"),
+						js.Style,
+						strings.Join(js.ModelIgnoreColumns, ","),
+						js.ModelMysqlCache,
+					)
+					_, err = execx.Run(command, js.Wd)
+					if err != nil {
+						console.Warning("[warning]: %s", err.Error())
+						continue
+					}
+					if js.ModelMysqlCachePrefix != "" && js.ModelMysqlCache {
+						for _, table := range tables {
+							namingFormat, err := format.FileNamingFormat(js.Style, table.Name.Source())
+							if err != nil {
+								return err
+							}
+							err = js.addModelMysqlCachePrefix(filepath.Join(modelDir, namingFormat+"model_gen.go"))
+							if err != nil {
+								return err
+							}
 						}
 					}
 				}
 			}
+			fmt.Println(color.WithColor("Done", color.FgGreen))
 		}
-		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
-
 	return nil
 }
 
@@ -167,13 +166,13 @@ type Table struct {
 	Name string `db:"name"`
 }
 
-func getMysqlAllTables(url string) []string {
+func getMysqlAllTables(url string) ([]string, error) {
 	sqlConn := sqlx.NewSqlConn("mysql", url)
 
 	var tables []string
 	err := sqlConn.QueryRowsCtx(context.Background(), &tables, "show tables")
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return tables
+	return tables, nil
 }
