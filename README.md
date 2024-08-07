@@ -59,11 +59,20 @@ please see: https://jzero.jaronnie.com/roadmap
 [![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
 
 ## Contributors
+
 <div>
   <a href="https://github.com/jzero-io/jzero/graphs/contributors">
     <img src="https://contrib.rocks/image?repo=jzero-io/jzero" />
   </a>
 </div>
+
+## Acknowledgements
+
+This project is supported by JetBrains Open Source development License.
+
+![JetBrains Logo](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)
+
+Special thanks to [JetBrains](https://www.jetbrains.com/?from=jzero) for providing a free open source license for their products.
 
 ## Contact me
 
