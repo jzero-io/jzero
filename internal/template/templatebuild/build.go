@@ -11,16 +11,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spf13/cobra"
+	"github.com/jzero-io/jzero/config"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-
 	"golang.org/x/mod/modfile"
-)
-
-var (
-	Output     string
-	WorkingDir string
-	Name       string
 )
 
 func checkWrite(path string, bytes []byte) error {
@@ -38,10 +31,10 @@ func checkWrite(path string, bytes []byte) error {
 	return os.WriteFile(path, bytes, 0o644)
 }
 
-func Build(cmd *cobra.Command, args []string) error {
+func Build(tc config.TemplateConfig) error {
 	wd, _ := os.Getwd()
 
-	modfileBytes, err := os.ReadFile(filepath.Join(WorkingDir, "go.mod"))
+	modfileBytes, err := os.ReadFile(filepath.Join(tc.Build.WorkingDir, "go.mod"))
 	if err != nil {
 		return err
 	}
@@ -50,11 +43,11 @@ func Build(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	WorkingDir = filepath.Join(wd, WorkingDir)
-	return build(WorkingDir, mod)
+	tc.Build.WorkingDir = filepath.Join(wd, tc.Build.WorkingDir)
+	return build(tc, tc.Build.WorkingDir, mod)
 }
 
-func build(dirname string, mod *modfile.File) error {
+func build(tc config.TemplateConfig, dirname string, mod *modfile.File) error {
 	dir, err := os.ReadDir(dirname)
 	if err != nil {
 		return err
@@ -65,7 +58,7 @@ func build(dirname string, mod *modfile.File) error {
 			continue
 		}
 		if file.IsDir() {
-			err := build(filepath.Join(dirname, file.Name()), mod)
+			err := build(tc, filepath.Join(dirname, file.Name()), mod)
 			if err != nil {
 				return err
 			}
@@ -87,11 +80,11 @@ func build(dirname string, mod *modfile.File) error {
 					return err
 				}
 			}
-			rel, err := filepath.Rel(WorkingDir, dirname)
+			rel, err := filepath.Rel(tc.Build.WorkingDir, dirname)
 			if err != nil {
 				return err
 			}
-			err = checkWrite(filepath.Join(Output, rel, filename), fileBytes)
+			err = checkWrite(filepath.Join(tc.Build.Output, rel, filename), fileBytes)
 			if err != nil {
 				return err
 			}

@@ -23,6 +23,10 @@ type Config struct {
 	Gen GenConfig `mapstructure:"gen"`
 	// ivm command
 	Ivm IvmConfig `mapstructure:"ivm"`
+	// template command
+	Template TemplateConfig `mapstructure:"template"`
+	// upgrade command
+	Upgrade UpgradeConfig `mapstructure:"upgrade"`
 }
 
 type NewConfig struct {
@@ -109,6 +113,27 @@ type IvmAddProtoConfig struct {
 	Methods  []string
 	Name     string
 	Services []string
+}
+
+type TemplateConfig struct {
+	Init  TemplateInitConfig  `mapstructure:"init"`
+	Build TemplateBuildConfig `mapstructure:"build"`
+}
+
+type TemplateInitConfig struct {
+	Output string `mapstructure:"output"`
+	Remote string `mapstructure:"remote"`
+	Branch string `mapstructure:"branch"`
+}
+
+type TemplateBuildConfig struct {
+	Output     string `mapstructure:"output"`
+	WorkingDir string `mapstructure:"working-dir"`
+	Name       string `mapstructure:"name"`
+}
+
+type UpgradeConfig struct {
+	Channel string `mapstructure:"channel"`
 }
 
 func (gc *GenSwaggerConfig) Wd() string {

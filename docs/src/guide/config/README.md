@@ -1,5 +1,5 @@
 ---
-title: 配置
+title: 服务端配置
 icon: vscode-icons:file-type-gleamconfig
 index: false
 dir:

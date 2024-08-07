@@ -9,29 +9,23 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
 )
 
-var (
-	Output string
-	Remote string
-	Branch string
-)
-
-func Init(_ *cobra.Command, _ []string) error {
-	if Remote != "" && Branch != "" {
-		_ = os.MkdirAll(Output, 0o755)
-		fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), Output, Branch)
+func Init(cc config.TemplateConfig) error {
+	if cc.Init.Remote != "" && cc.Init.Branch != "" {
+		_ = os.MkdirAll(cc.Init.Output, 0o755)
+		fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), cc.Init.Output, cc.Init.Branch)
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
-		_, err := git.PlainCloneContext(ctx, filepath.Join(Output), false, &git.CloneOptions{
+		_, err := git.PlainCloneContext(ctx, filepath.Join(cc.Init.Output), false, &git.CloneOptions{
 			SingleBranch:  true,
-			URL:           Remote,
+			URL:           cc.Init.Remote,
 			Depth:         0,
-			ReferenceName: plumbing.ReferenceName("refs/heads/" + Branch),
+			ReferenceName: plumbing.ReferenceName("refs/heads/" + cc.Init.Branch),
 		})
 		if err != nil {
 			return err
@@ -41,6 +35,6 @@ func Init(_ *cobra.Command, _ []string) error {
 		return nil
 	}
 
-	err := embeded.WriteTemplateDir("", Output)
+	err := embeded.WriteTemplateDir("", cc.Init.Output)
 	return err
 }
