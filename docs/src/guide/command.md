@@ -30,7 +30,7 @@ jzero -h
 ## 基于配置文件使用 jzero
 
 :::tip
-jzero version >= v0.22.3
+jzero version >= v0.23.0
 :::
 
 由于各个命令 flag 众多, 使用起来较为麻烦, 可通过配置文件启动 jzero 命令, 使用起来更为简洁
