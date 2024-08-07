@@ -4,6 +4,9 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/jzero-io/jzero/ci.yaml?branch=main&label=jzero-ci&logo=github&style=flat-square)](https://github.com/jzero-io/jzero/actions?query=workflow%3Ajzero-ci)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jzero-io/jzero?style=flat-square)](https://goreportcard.com/report/github.com/jzero-io/jzero)
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?label=Sponsor-WePay)](https://oss.jaronnie.com/2021723027876_.pic.jpg)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?label=Sponsor-AliPay)](https://oss.jaronnie.com/2031723027877_.pic.jpg)
+
 <p align="center">
 <img align="center" width="150px" src="https://oss.jaronnie.com/jzero.jpg">
 </p>
@@ -70,12 +73,10 @@ please see: https://jzero.jaronnie.com/roadmap
 
 This project is supported by JetBrains Open Source development License.
 
-![JetBrains Logo](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)
-
-Special thanks to [JetBrains](https://www.jetbrains.com/?from=jzero) for providing a free open source license for their products.
+[![Jetbrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/?from=jzero)
 
 ## Contact me
 
 <p align="center">
-<img align="left" width="250px" height="350px" src="https://oss.jaronnie.com/weixin2.jpg">
+<img align="left" width="250px" height="250px" src="https://oss.jaronnie.com/weixin2.jpg">
 </p>
