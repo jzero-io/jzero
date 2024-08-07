@@ -31,6 +31,8 @@ jzero -h
 
 :::tip
 jzero version >= v0.23.0
+
+默认使用当前项目 .jzero.yaml 文件
 :::
 
 由于各个命令 flag 众多, 使用起来较为麻烦, 可通过配置文件启动 jzero 命令, 使用起来更为简洁
