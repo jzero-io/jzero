@@ -15,6 +15,7 @@ import (
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/zeromicro/go-zero/core/color"
+	"github.com/zeromicro/go-zero/core/mr"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -44,7 +45,11 @@ func (js *JzeroSql) Gen() error {
 			return err
 		}
 
-		for _, table := range tables {
+		mr.ForEach(func(source chan<- string) {
+			for _, table := range tables {
+				source <- table
+			}
+		}, func(table string) {
 			fmt.Printf("%s table %s\n", color.WithColor("Using", color.FgGreen), table)
 			command := fmt.Sprintf("goctl model mysql datasource --url '%s' --table %s --dir %s --home %s --style %s -i '%s' --cache=%t",
 				js.ModelMysqlDatasourceUrl,
@@ -58,21 +63,19 @@ func (js *JzeroSql) Gen() error {
 			_, err := execx.Run(command, js.Wd)
 			if err != nil {
 				console.Warning("[warning]: %s", err.Error())
-				continue
+				return
 			}
 
 			if js.ModelMysqlCachePrefix != "" && js.ModelMysqlCache {
-				namingFormat, err := format.FileNamingFormat(table, js.Style)
-				if err != nil {
-					return err
-				}
+				namingFormat, _ := format.FileNamingFormat(table, js.Style)
 				err = js.addModelMysqlCachePrefix(filepath.Join(dir, "internal", "model", strings.ToLower(table), namingFormat+"model_gen.go"))
 				if err != nil {
-					return err
+					console.Warning("[warning]: %s", err.Error())
+					return
 				}
 			}
-			fmt.Println(color.WithColor("Done", color.FgGreen))
-		}
+		}, mr.WithWorkers(len(tables)))
+		fmt.Println(color.WithColor("Done", color.FgGreen))
 		return nil
 	} else {
 		sqlDir := filepath.Join(js.Wd, "desc", "sql")

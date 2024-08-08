@@ -57,12 +57,8 @@ func (jr *JzeroRpc) Gen() error {
 	var serverImports ImportLines
 	var pbImports ImportLines
 	var registerServers RegisterLines
-	// var protoDescriptorPaths []string
-
 	var allServerFiles []ServerFile
 	var allLogicFiles []LogicFile
-
-	// var isNeedGenerateProtoDescriptor bool
 
 	for _, v := range protoFilenames {
 		// parse proto
@@ -137,13 +133,11 @@ func (jr *JzeroRpc) Gen() error {
 			if !pathx.FileExists(generateProtoDescriptorPath(v)) {
 				_ = os.MkdirAll(filepath.Dir(generateProtoDescriptorPath(v)), 0o755)
 			}
-			// isNeedGenerateProtoDescriptor = true
 			protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=%s %s",
 				protoDirPath,
 				generateProtoDescriptorPath(v),
 				v,
 			)
-			// protoDescriptorPaths = append(protoDescriptorPaths, generateProtoDescriptorPath(v))
 			_, err = execx.Run(protocCommand, jr.Wd)
 			if err != nil {
 				return err
