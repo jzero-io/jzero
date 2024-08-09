@@ -26,7 +26,7 @@ jobs:
           go-version: '1.22.3'
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           args: release --clean
