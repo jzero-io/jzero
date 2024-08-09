@@ -38,14 +38,17 @@ jzero check
 # new project
 jzero new your_project
 # generate server code
-cd your_project && jzero gen && go mod tidy
+cd your_project
+jzero gen
+# download dependencies
+go mod tidy
 # generate swagger json
 jzero gen swagger
 # generate http sdk
 jzero gen sdk
 # generate zrpcclient
 jzero gen zrpcclient
-# run
+# run server
 go run main.go server
 ```
 

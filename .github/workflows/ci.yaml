@@ -3,6 +3,9 @@ name: jzero-ci
 on:
   push:
     branches:
+    paths:
+      - '!docs/**'
+      - '!**.md'
   pull_request:
 
 jobs:
