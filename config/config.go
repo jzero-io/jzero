@@ -148,9 +148,16 @@ func (gc *GenConfig) Wd() string {
 
 func SetConfig(command string, flagSet *pflag.FlagSet) error {
 	flagSet.VisitAll(func(flag *pflag.Flag) {
-		err := viper.BindPFlag(fmt.Sprintf("%s.%s", command, flag.Name), flag)
-		if err != nil {
-			panic(err)
+		if command == "" {
+			err := viper.BindPFlag(flag.Name, flag)
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			err := viper.BindPFlag(fmt.Sprintf("%s.%s", command, flag.Name), flag)
+			if err != nil {
+				panic(err)
+			}
 		}
 	})
 
