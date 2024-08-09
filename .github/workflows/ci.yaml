@@ -2,7 +2,6 @@ name: jzero-ci
 
 on:
   push:
-    branches:
     paths:
       - '!docs/**'
       - '!**.md'
