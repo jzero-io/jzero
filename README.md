@@ -63,6 +63,8 @@ please see: https://jzero.jaronnie.com/roadmap
 
 ## Contributors
 
+[CONTRIBUTING](CONTRIBUTING.md)
+
 <div>
   <a href="https://github.com/jzero-io/jzero/graphs/contributors">
     <img src="https://contrib.rocks/image?repo=jzero-io/jzero" />
