@@ -16,7 +16,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/zeromicro/go-zero v1.7.0
 	github.com/zeromicro/go-zero/tools/goctl v1.7.0
-	golang.org/x/mod v0.17.0
+	golang.org/x/mod v0.20.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240723171418-e6d459c13d2a
 	google.golang.org/protobuf v1.34.2
 )
