@@ -90,7 +90,7 @@ var newCmd = &cobra.Command{
 			}
 		}
 
-		if !pathx.FileExists(config.C.Gen.Home) {
+		if !pathx.FileExists(config.C.New.Home) {
 			home, _ := os.UserHomeDir()
 			config.C.New.Home = filepath.Join(home, ".jzero", Version)
 		}
