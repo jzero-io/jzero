@@ -57,10 +57,6 @@ Project Practice please see: https://jzero.jaronnie.com/project
 
 please see: https://jzero.jaronnie.com/roadmap
 
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
-
 ## Contributors
 
 [CONTRIBUTING](CONTRIBUTING.md)
@@ -76,6 +72,10 @@ please see: https://jzero.jaronnie.com/roadmap
 This project is supported by JetBrains Open Source development License.
 
 [![Jetbrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/?from=jzero)
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
 
 ## Contact me
 
