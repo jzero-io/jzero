@@ -38,3 +38,30 @@ docker run --rm -v ${PWD}:/app jaronnie/jzero:latest gen swagger
 ip:port/swagger
 
 ![](https://oss.jaronnie.com/image-20240731134511973.png)
+
+## 高级教程
+
+### 1. 如何自定义字段
+
+please see: [swagger 自定义字段](../faq/swagger.md)
+
+### 2. 基于 proto 文件自定义 header
+
+```protobuf
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        version: "v1";
+    };
+    security_definitions: {
+        security: {
+            key: "ApiKeyAuth",
+            value: {
+                description: "JWT token for authorization ( Bearer token )"
+                type: TYPE_API_KEY,
+                name: "Authorization",
+                in: IN_HEADER
+            },
+        }
+    }
+};
+```
