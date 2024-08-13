@@ -9,7 +9,17 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+
+	"github.com/jzero-io/jzero/config"
+	"github.com/rinchsan/gosimports"
+
+	"github.com/jhump/protoreflect/desc"
+	"github.com/jhump/protoreflect/desc/protoparse"
+	jzeroapi "github.com/jzero-io/desc/proto/jzero/api"
+
+	"google.golang.org/protobuf/proto"
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/stringx"
@@ -45,6 +55,11 @@ type JzeroRpc struct {
 	Style              string
 	RemoveSuffix       bool
 	ChangeReplaceTypes bool
+}
+
+type JzeroProtoApiMiddleware struct {
+	Name   string
+	Routes []string
 }
 
 func (jr *JzeroRpc) Gen() error {
@@ -157,6 +172,9 @@ func (jr *JzeroRpc) Gen() error {
 
 	if pathx.FileExists(protoDirPath) {
 		if err = jr.genServer(serverImports, pbImports, registerServers); err != nil {
+			return err
+		}
+		if err = jr.genApiMiddlewares(protoFilenames); err != nil {
 			return err
 		}
 	}
@@ -492,4 +510,188 @@ func (jr *JzeroRpc) changeReplaceLogicGoTypes(file LogicFile) error {
 	}
 
 	return nil
+}
+
+func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
+	// first: parse all proto, find option
+	fmt.Printf("%s to generate internal/middleware/middleware_gen.go\n", color.WithColor("Start", color.FgGreen))
+
+	var fds []*desc.FileDescriptor
+
+	// parse proto
+	var protoParser protoparse.Parser
+
+	protoParser.InferImportPaths = false
+
+	var files []string
+	for _, protoFilename := range protoFilenames {
+		rel, err := filepath.Rel(filepath.Join("desc", "proto"), protoFilename)
+		if err != nil {
+			return err
+		}
+		files = append(files, rel)
+	}
+
+	protoParser.ImportPaths = []string{filepath.Join("desc", "proto")}
+	protoParser.IncludeSourceCodeInfo = true
+	fds, err = protoParser.ParseFiles(files...)
+	if err != nil {
+		return err
+	}
+
+	var httpMiddlewares []JzeroProtoApiMiddleware
+	var zrpcMiddlewares []JzeroProtoApiMiddleware
+
+	httpMapMiddlewares := make(map[string][]string)
+	zrpcMapMiddlewares := make(map[string][]string)
+
+	for _, fd := range fds {
+		descriptorProto := fd.AsFileDescriptorProto()
+
+		var methodUrls []string
+		var fullMethods []string
+
+		for _, service := range descriptorProto.GetService() {
+			for _, method := range service.GetMethod() {
+				methodUrls = append(methodUrls, getRpcMethodUrl(method))
+				fullMethods = append(fullMethods, fmt.Sprintf("/%s.%s/%s", fd.GetPackage(), service.GetName(), method.GetName()))
+
+				httpExt := proto.GetExtension(method.GetOptions(), jzeroapi.E_Http)
+				switch rule := httpExt.(type) {
+				case *jzeroapi.HttpRule:
+					if rule != nil {
+						httpMapMiddlewares[rule.Middleware] = append(httpMapMiddlewares[rule.Middleware], getRpcMethodUrl(method))
+					}
+				}
+				zrpcExt := proto.GetExtension(method.GetOptions(), jzeroapi.E_Zrpc)
+				switch rule := zrpcExt.(type) {
+				case *jzeroapi.ZrpcRule:
+					if rule != nil {
+						zrpcMapMiddlewares[rule.Middleware] = append(zrpcMapMiddlewares[rule.Middleware], fmt.Sprintf("/%s.%s/%s", fd.GetPackage(), service.GetName(), method.GetName()))
+					}
+				}
+			}
+			httpGroupExt := proto.GetExtension(service.GetOptions(), jzeroapi.E_HttpGroup)
+			switch rule := httpGroupExt.(type) {
+			case *jzeroapi.HttpRule:
+				if rule != nil {
+					httpMapMiddlewares[rule.Middleware] = append(httpMapMiddlewares[rule.Middleware], methodUrls...)
+				}
+			}
+
+			zrpcGroupExt := proto.GetExtension(service.GetOptions(), jzeroapi.E_ZrpcGroup)
+			switch rule := zrpcGroupExt.(type) {
+			case *jzeroapi.ZrpcRule:
+				if rule != nil {
+					zrpcMapMiddlewares[rule.Middleware] = append(zrpcMapMiddlewares[rule.Middleware], fullMethods...)
+				}
+			}
+		}
+	}
+
+	// sort and unique and transfer to httpMiddlewares and zrpcMiddlewares
+	httpMiddlewares = processMiddlewares(httpMapMiddlewares)
+	zrpcMiddlewares = processMiddlewares(zrpcMapMiddlewares)
+
+	for _, v := range httpMiddlewares {
+		template, err := templatex.ParseTemplate(map[string]interface{}{
+			"Name": v.Name,
+		}, embeded.ReadTemplateFile(filepath.Join("plugins", "api", "middleware_http.go.tpl")))
+		if err != nil {
+			return err
+		}
+
+		process, err := gosimports.Process("", template, &gosimports.Options{
+			Comments:   true,
+			FormatOnly: true,
+		})
+		if err != nil {
+			return err
+		}
+		namingFormat, _ := format.FileNamingFormat(config.C.Gen.Style, v.Name+"Middleware")
+		if !pathx.FileExists(filepath.Join("internal", "middleware", namingFormat+".go")) {
+			err = os.WriteFile(filepath.Join("internal", "middleware", namingFormat+".go"), process, 0o644)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	for _, v := range zrpcMiddlewares {
+		template, err := templatex.ParseTemplate(map[string]interface{}{
+			"Name": v.Name,
+		}, embeded.ReadTemplateFile(filepath.Join("plugins", "api", "middleware_zrpc.go.tpl")))
+		if err != nil {
+			return err
+		}
+
+		process, err := gosimports.Process("", template, &gosimports.Options{
+			Comments:   true,
+			FormatOnly: true,
+		})
+		if err != nil {
+			return err
+		}
+		namingFormat, _ := format.FileNamingFormat(config.C.Gen.Style, v.Name+"Middleware")
+		if !pathx.FileExists(filepath.Join("internal", "middleware", namingFormat+".go")) {
+			err = os.WriteFile(filepath.Join("internal", "middleware", namingFormat+".go"), process, 0o644)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	template, err := templatex.ParseTemplate(map[string]interface{}{
+		"HttpMiddlewares": httpMiddlewares,
+		"ZrpcMiddlewares": zrpcMiddlewares,
+	}, embeded.ReadTemplateFile(filepath.Join("plugins", "api", "middleware_gen.go.tpl")))
+	if err != nil {
+		return err
+	}
+
+	process, err := gosimports.Process("", template, &gosimports.Options{
+		Comments:   true,
+		FormatOnly: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filepath.Join("internal", "middleware", "middleware_gen.go"), process, 0o644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func processMiddlewares(middlewareMap map[string][]string) []JzeroProtoApiMiddleware {
+	var result []JzeroProtoApiMiddleware
+
+	for name, routes := range middlewareMap {
+		uniqueRoutes := uniqueAndSort(routes)
+		result = append(result, JzeroProtoApiMiddleware{Name: name, Routes: uniqueRoutes})
+	}
+
+	// Sort the middleware list by name if needed
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Name < result[j].Name
+	})
+
+	return result
+}
+
+func uniqueAndSort(input []string) []string {
+	uniqueMap := make(map[string]struct{})
+	for _, item := range input {
+		uniqueMap[item] = struct{}{}
+	}
+
+	uniqueList := make([]string, 0, len(uniqueMap))
+	for item := range uniqueMap {
+		uniqueList = append(uniqueList, item)
+	}
+
+	sort.Strings(uniqueList)
+	return uniqueList
 }

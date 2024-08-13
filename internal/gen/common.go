@@ -6,6 +6,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"google.golang.org/genproto/googleapis/api/annotations"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/descriptorpb"
+
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 )
@@ -117,6 +121,26 @@ func GetApiServiceName(apiDirName string) string {
 		}
 		if apiSpec.Service.Name != "" {
 			return apiSpec.Service.Name
+		}
+	}
+	return ""
+}
+
+func getRpcMethodUrl(method *descriptorpb.MethodDescriptorProto) string {
+	ext := proto.GetExtension(method.GetOptions(), annotations.E_Http)
+	switch rule := ext.(type) {
+	case *annotations.HttpRule:
+		switch httpRule := rule.GetPattern().(type) {
+		case *annotations.HttpRule_Get:
+			return "GET:" + httpRule.Get
+		case *annotations.HttpRule_Post:
+			return "POST:" + httpRule.Post
+		case *annotations.HttpRule_Put:
+			return "PUT:" + httpRule.Put
+		case *annotations.HttpRule_Delete:
+			return "DELETE:" + httpRule.Delete
+		case *annotations.HttpRule_Patch:
+			return "PATCH:" + httpRule.Patch
 		}
 	}
 	return ""
