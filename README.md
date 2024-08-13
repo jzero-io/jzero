@@ -13,7 +13,7 @@
 
 ## Introduction
 
-Used to create project from templates and generate Server/Client code by proto and api file based on [go-zero](https://go-zero.dev) framework.
+Used to create project from templates and generate Server/Client/Model code by proto、api、sql file based on [go-zero](https://go-zero.dev) framework.
 
 Support development templates for different scenarios:
 * api
