@@ -14,6 +14,9 @@ var C Config
 type Config struct {
 	Syntax string `mapstructure:"syntax"`
 
+	/*
+		===============================command flags start========================================
+	*/
 	// global flags
 	Debug bool `mapstructure:"debug"`
 
@@ -27,6 +30,9 @@ type Config struct {
 	Template TemplateConfig `mapstructure:"template"`
 	// upgrade command
 	Upgrade UpgradeConfig `mapstructure:"upgrade"`
+	/*
+		==============================command flags end=========================================
+	*/
 }
 
 type NewConfig struct {
@@ -42,6 +48,8 @@ type NewConfig struct {
 }
 
 type GenConfig struct {
+	Hooks HooksConfig `mapstructure:"hooks"`
+
 	// global flags
 	Home  string `mapstructure:"home"`
 	Style string `mapstructure:"style"`
@@ -134,6 +142,11 @@ type TemplateBuildConfig struct {
 
 type UpgradeConfig struct {
 	Channel string `mapstructure:"channel"`
+}
+
+type HooksConfig struct {
+	Before []string `mapstructure:"before"`
+	After  []string `mapstructure:"after"`
 }
 
 func (gc *GenSwaggerConfig) Wd() string {

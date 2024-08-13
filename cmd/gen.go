@@ -11,6 +11,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/pkg"
+	"github.com/zeromicro/go-zero/core/color"
+
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
@@ -28,6 +31,17 @@ import (
 var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: `Used to generate server/client code`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Printf("%s hooks \n", color.WithColor("Before", color.FgGreen))
+		for _, v := range config.C.Gen.Hooks.Before {
+			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			err := pkg.Run(v, config.C.Gen.Wd())
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// check go-zero api template
 		home, _ := os.UserHomeDir()
@@ -42,6 +56,17 @@ var genCmd = &cobra.Command{
 		}
 		embeded.Home = config.C.Gen.Home
 		return gen.Gen(config.C.Gen)
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Printf("\n%s hooks \n", color.WithColor("After", color.FgGreen))
+		for _, v := range config.C.Gen.Hooks.After {
+			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			err := pkg.Run(v, config.C.Gen.Wd())
+			if err != nil {
+				return err
+			}
+		}
+		return nil
 	},
 	SilenceUsage: true,
 }
