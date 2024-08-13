@@ -38,3 +38,23 @@ go mod tidy
 ```shell
 go run main.go server
 ```
+
+## 高级教程
+
+基于[配置文件](./command.md#基于配置文件使用-jzero)生成服务端代码, 支持设置 before 和 after hooks
+
+```yaml
+syntax: v1
+
+gen:
+  hooks:
+    before:
+      - go run tools/migrate/main.go
+    after:
+      - jzero gen swagger
+
+  # 从数据库连接生成 model 代码
+  model-mysql-datasource: true
+  model-mysql-datasource-url: "root:123456@tcp(127.0.0.1:3306)/test"
+  model-mysql-ignore-columns: []
+```
