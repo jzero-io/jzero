@@ -203,9 +203,6 @@ message SayHelloRequest {
 
 ### middleware 的分组管理
 
-:::tip
-:::
-
 :::tip 确保存在 desc/proto/jzero/api 文件夹
 
 如果不存在, 请下载到本地 https://github.com/jzero-io/desc/tree/main/proto/jzero/api
