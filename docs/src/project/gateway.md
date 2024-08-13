@@ -152,3 +152,7 @@ func (l *SayHello) SayHello(in *hellopb.SayHelloRequest) (*hellopb.SayHelloRespo
 	}, nil
 }
 ```
+
+### 5.2 middleware 分组控制
+
+please see: [middleware 分组控制](../guide/develop/proto.md#middleware-的分组管理)

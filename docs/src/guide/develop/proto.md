@@ -198,3 +198,62 @@ message SayHelloRequest {
   }];
 }
 ```
+
+## proto 扩展
+
+### middleware 的分组管理
+
+:::tip
+:::
+
+:::tip 确保存在 desc/proto/jzero/api 文件夹
+
+如果不存在, 请下载到本地 https://github.com/jzero-io/desc/tree/main/proto/jzero/api
+:::
+
+添加 middleware
+
+```protobuf
+import "jzero/api/http.proto";
+import "jzero/api/zrpc.proto";
+
+service User {
+    option (jzero.api.http_group) = {
+        middleware: "auth",
+    };
+
+    rpc CreateUser(CreateUserRequest) returns(CreateUserResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/user/create",
+            body: "*"
+        };
+        option (jzero.api.zrpc) = {
+            middleware: "withValue1",
+        };
+    };
+
+    rpc ListUser(ListUserRequest) returns(ListUserResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/user/{username}/list",
+        };
+    };
+}
+```
+
+详细解释:
+* option (jzero.api.http_group) 即将该 service 下的所有 method 都新增 http 中间件
+* option (google.api.http) 只针对某个 method 新增 http 中间件
+* option (jzero.api.zrpc_group) 即将该 service 下的所有 method 都新增 zrpc 中间件
+* option (google.api.zrpc) 只针对某个 method 新增 zrpc 中间件
+
+执行 `jzero gen` 后将会生成一下文件, 以 auth 为例:
+* internal/middleware/authmiddleware.go
+* internal/middleware/middleware_gen.go
+
+修改一下 cmd/server 代码, 将生成的文件注册到 server 中:
+
+```go
+zrpc := server.RegisterZrpc(svcCtx.Config, svcCtx)
+gw := gateway.MustNewServer(svcCtx.Config.Gateway.GatewayConf, middleware.WithHeaderProcessor())
+middleware.RegisterGen(zrpc, gw)
+```
