@@ -593,6 +593,10 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 	httpMiddlewares = processMiddlewares(httpMapMiddlewares)
 	zrpcMiddlewares = processMiddlewares(zrpcMapMiddlewares)
 
+	if len(httpMiddlewares) == 0 && len(zrpcMiddlewares) == 0 {
+		return nil
+	}
+
 	for _, v := range httpMiddlewares {
 		template, err := templatex.ParseTemplate(map[string]interface{}{
 			"Name": v.Name,
