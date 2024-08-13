@@ -11,6 +11,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jhump/protoreflect/desc"
+	"github.com/jhump/protoreflect/desc/protoparse"
+	jzeroapi "github.com/jzero-io/desc/proto/jzero/api"
+
+	"google.golang.org/protobuf/proto"
+
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/jzero-io/jzero/pkg/templatex"
@@ -157,6 +163,9 @@ func (jr *JzeroRpc) Gen() error {
 
 	if pathx.FileExists(protoDirPath) {
 		if err = jr.genServer(serverImports, pbImports, registerServers); err != nil {
+			return err
+		}
+		if err = jr.genApiMiddlewares(protoFilenames); err != nil {
 			return err
 		}
 	}
@@ -488,6 +497,75 @@ func (jr *JzeroRpc) changeReplaceLogicGoTypes(file LogicFile) error {
 
 		if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
+	// first: parse all proto, find option
+	fmt.Printf("%s to generate internal/middleware/middleware_gen.go\n", color.WithColor("Start", color.FgGreen))
+
+	var fds []*desc.FileDescriptor
+
+	// parse proto
+	var protoParser protoparse.Parser
+
+	protoParser.InferImportPaths = false
+
+	var files []string
+	for _, protoFilename := range protoFilenames {
+		rel, err := filepath.Rel(filepath.Join("desc", "proto"), protoFilename)
+		if err != nil {
+			return err
+		}
+		files = append(files, rel)
+	}
+
+	protoParser.ImportPaths = []string{filepath.Join("desc", "proto")}
+	protoParser.IncludeSourceCodeInfo = true
+	fds, err = protoParser.ParseFiles(files...)
+	if err != nil {
+		return err
+	}
+
+	for _, fd := range fds {
+		descriptorProto := fd.AsFileDescriptorProto()
+		for _, service := range descriptorProto.GetService() {
+			httpGroupExt := proto.GetExtension(service.GetOptions(), jzeroapi.E_HttpGroup)
+			switch rule := httpGroupExt.(type) {
+			case *jzeroapi.HttpRule:
+				if rule != nil {
+					fmt.Println(rule.Middleware)
+				}
+			}
+
+			zrpcGroupExt := proto.GetExtension(service.GetOptions(), jzeroapi.E_ZrpcGroup)
+			switch rule := zrpcGroupExt.(type) {
+			case *jzeroapi.ZrpcRule:
+				if rule != nil {
+					fmt.Println(rule.Middleware)
+				}
+			}
+
+			for _, method := range service.GetMethod() {
+				httpExt := proto.GetExtension(method.GetOptions(), jzeroapi.E_Http)
+				switch rule := httpExt.(type) {
+				case *jzeroapi.HttpRule:
+					if rule != nil {
+						fmt.Println(rule.Middleware)
+					}
+				}
+
+				zrpcExt := proto.GetExtension(method.GetOptions(), jzeroapi.E_Zrpc)
+				switch rule := zrpcExt.(type) {
+				case *jzeroapi.ZrpcRule:
+					if rule != nil {
+						fmt.Println(rule.Middleware)
+					}
+				}
+			}
 		}
 	}
 
