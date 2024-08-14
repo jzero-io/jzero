@@ -1,6 +1,6 @@
 # jzero
 
-**解放你的双手有更多的时间去玩游戏**
+**Free your hands and have more time to play games**
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?label=Sponsor-WePay)](https://oss.jaronnie.com/2021723027876_.pic.jpg)
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?label=Sponsor-AliPay)](https://oss.jaronnie.com/2031723027877_.pic.jpg)
@@ -12,59 +12,63 @@
 <img align="center" width="150px" src="https://oss.jaronnie.com/jzero.jpg">
 </p>
 
-中文 | [ENGLISH](README-EN.md)
+[中文](README.md) | ENGLISH
 
-## 介绍
+## Introduction
 
-通过模板创建项目，并基于 proto/api/sql 文件生成 Server/Client/Model 代码。
+Create a project through a template and generate Server/Client/Model code based on proto/api/sql files.
 
-具备以下特点:
-* 基于 [go-zero](https://go-zero.dev) 框架但不局限于 go-zero 框架, 理论上可以基于模板特性接入任意框架
-* 优化 go-zero 框架已有痛点, 并扩展新的特性, 完全兼容 go-zero 框架
-* 基于配置文件, 通过极简指令生成代码
-* 维护常用开发模板, 一键生成符合企业级代码规范的项目
+It has the following features:
 
-更多详情请参阅：https://jzero.jaronnie.com
+* Based on the [go-zero](https://go-zero.dev) framework but not limited to the go-zero framework. In theory, it can access any framework based on template features
 
-## 下载
+* Optimize the existing pain points of the go-zero framework and expand new features, fully compatible with the go-zero framework
+
+* Generate code through minimalist instructions based on configuration files
+
+* Maintain commonly used development templates and generate projects that meet enterprise-level code specifications with one click
+
+For more details please see: https://jzero.jaronnie.com
+
+## Install
 
 ```shell
 go install github.com/jzero-io/jzero@latest
-# 检查工具并下载
+# check tools
 jzero check
 ```
 
-## 快速开始
+## Quick start
 
 ```shell
-# 新建项目
+# new project
 jzero new your_project
-# 生成服务端代码
+# generate server code
 cd your_project
 jzero gen
-# 下载依赖
+# download dependencies
 go mod tidy
-# 生成 swagger json
+# generate swagger json
 jzero gen swagger
-# 生成 http 客户端 sdk
+# generate http sdk
 jzero gen sdk
-# 生成 zrpc 客户端 sdk
+# generate zrpcclient
 jzero gen zrpcclient
-# 运行服务端
+# run server
 go run main.go server
 ```
 
-更多示例代码请参阅: https://github.com/jzero-io/examples
+For more examples code please see: https://github.com/jzero-io/examples
 
-项目实战请参阅: https://jzero.jaronnie.com/project
+Project Practice please see: https://jzero.jaronnie.com/project
 
-## 路线图
+## Roadmap
 
-请参阅: https://jzero.jaronnie.com/roadmap
+please see: https://jzero.jaronnie.com/roadmap
 
-## 贡献者
+## Contributors
 
-[贡献](CONTRIBUTING.md)
+[CONTRIBUTING](CONTRIBUTING.md)
 
 <div>
   <a href="https://github.com/jzero-io/jzero/graphs/contributors">
@@ -72,9 +76,9 @@ go run main.go server
   </a>
 </div>
 
-## 致谢
+## Acknowledgements
 
-该项目由 JetBrains 开源开发许可证支持。
+This project is supported by JetBrains Open Source development License.
 
 [![Jetbrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/?from=jzero)
 
@@ -82,7 +86,7 @@ go run main.go server
 
 [![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
 
-## 联系我
+## Contact me
 
 <p align="center">
 <img align="left" width="250px" height="250px" src="https://oss.jaronnie.com/weixin2.jpg">
