@@ -560,14 +560,20 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 				switch rule := httpExt.(type) {
 				case *jzeroapi.HttpRule:
 					if rule != nil {
-						httpMapMiddlewares[rule.Middleware] = append(httpMapMiddlewares[rule.Middleware], getRpcMethodUrl(method))
+						split := strings.Split(rule.Middleware, ",")
+						for _, m := range split {
+							httpMapMiddlewares[m] = append(httpMapMiddlewares[rule.Middleware], getRpcMethodUrl(method))
+						}
 					}
 				}
 				zrpcExt := proto.GetExtension(method.GetOptions(), jzeroapi.E_Zrpc)
 				switch rule := zrpcExt.(type) {
 				case *jzeroapi.ZrpcRule:
 					if rule != nil {
-						zrpcMapMiddlewares[rule.Middleware] = append(zrpcMapMiddlewares[rule.Middleware], fmt.Sprintf("/%s.%s/%s", fd.GetPackage(), service.GetName(), method.GetName()))
+						split := strings.Split(rule.Middleware, ",")
+						for _, m := range split {
+							zrpcMapMiddlewares[m] = append(zrpcMapMiddlewares[rule.Middleware], fmt.Sprintf("/%s.%s/%s", fd.GetPackage(), service.GetName(), method.GetName()))
+						}
 					}
 				}
 			}
@@ -575,7 +581,10 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 			switch rule := httpGroupExt.(type) {
 			case *jzeroapi.HttpRule:
 				if rule != nil {
-					httpMapMiddlewares[rule.Middleware] = append(httpMapMiddlewares[rule.Middleware], methodUrls...)
+					split := strings.Split(rule.Middleware, ",")
+					for _, m := range split {
+						httpMapMiddlewares[m] = append(httpMapMiddlewares[rule.Middleware], methodUrls...)
+					}
 				}
 			}
 
@@ -583,7 +592,10 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 			switch rule := zrpcGroupExt.(type) {
 			case *jzeroapi.ZrpcRule:
 				if rule != nil {
-					zrpcMapMiddlewares[rule.Middleware] = append(zrpcMapMiddlewares[rule.Middleware], fullMethods...)
+					split := strings.Split(rule.Middleware, ",")
+					for _, m := range split {
+						zrpcMapMiddlewares[m] = append(zrpcMapMiddlewares[rule.Middleware], fullMethods...)
+					}
 				}
 			}
 		}
