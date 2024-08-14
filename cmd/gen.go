@@ -177,6 +177,7 @@ var genDocsCmd = &cobra.Command{
 		}
 		return gendocs.Gen(config.C.Gen)
 	},
+	Aliases: []string{"doc"},
 }
 
 func init() {
