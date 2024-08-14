@@ -32,13 +32,18 @@ var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: `Used to generate server/client code`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Printf("%s hooks \n", color.WithColor("Before", color.FgGreen))
+		if len(config.C.Gen.Hooks.Before) > 0 {
+			fmt.Printf("%s hooks \n", color.WithColor("Start Before", color.FgGreen))
+		}
 		for _, v := range config.C.Gen.Hooks.Before {
 			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
 			err := pkg.Run(v, config.C.Gen.Wd())
 			if err != nil {
 				return err
 			}
+		}
+		if len(config.C.Gen.Hooks.Before) > 0 {
+			fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
 		}
 		return nil
 	},
@@ -58,13 +63,18 @@ var genCmd = &cobra.Command{
 		return gen.Gen(config.C.Gen)
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Printf("\n%s hooks \n", color.WithColor("After", color.FgGreen))
+		if len(config.C.Gen.Hooks.After) > 0 {
+			fmt.Printf("%s hooks \n", color.WithColor("Start After", color.FgGreen))
+		}
 		for _, v := range config.C.Gen.Hooks.After {
 			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
 			err := pkg.Run(v, config.C.Gen.Wd())
 			if err != nil {
 				return err
 			}
+		}
+		if len(config.C.Gen.Hooks.After) > 0 {
+			fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
 		}
 		return nil
 	},
