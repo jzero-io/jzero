@@ -36,7 +36,7 @@ func (rw *responseWriter) Body() []byte {
 	return rw.body.Bytes()
 }
 
-func ResponseHandler(next http.HandlerFunc) http.HandlerFunc {
+func ResponseMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logCtx := logx.ContextWithFields(r.Context(), logx.Field("path", r.URL.Path))
 

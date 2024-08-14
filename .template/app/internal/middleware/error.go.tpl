@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func ErrorHandler(err error) (int, any) {
+func ErrorMiddleware(err error) (int, any) {
 	code := http.StatusInternalServerError
 	message := err.Error()
 

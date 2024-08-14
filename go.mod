@@ -7,7 +7,9 @@ require (
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.21.0
 	github.com/hashicorp/go-version v1.7.0
+	github.com/iancoleman/orderedmap v0.3.0
 	github.com/jhump/protoreflect v1.16.0
+	github.com/jzero-io/desc v0.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/rinchsan/gosimports v0.3.8
 	github.com/spf13/cast v1.7.0
@@ -51,11 +53,9 @@ require (
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
-	github.com/iancoleman/orderedmap v0.3.0 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
-	github.com/jzero-io/desc v0.0.1 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

@@ -6,11 +6,9 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func RegisterZrpc(z *zrpc.RpcServer) {
-	z.AddUnaryInterceptors(ServerValidationUnaryInterceptor)
-}
+func Register(z *zrpc.RpcServer, gw *gateway.Server) {
+	z.AddUnaryInterceptors(ValidatorMiddleware)
 
-func RegisterGateway(g *gateway.Server) {
-    httpx.SetErrorHandler(ErrorHandler)
-    g.Use(ResponseHandler)
+	httpx.SetErrorHandler(ErrorMiddleware)
+    gw.Use(ResponseMiddleware)
 }
