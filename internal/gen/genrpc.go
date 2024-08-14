@@ -560,9 +560,14 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 				switch rule := httpExt.(type) {
 				case *jzeroapi.HttpRule:
 					if rule != nil {
-						split := strings.Split(rule.Middleware, ",")
+						split := strings.Split(strings.ReplaceAll(rule.Middleware, " ", ""), ",")
 						for _, m := range split {
-							httpMapMiddlewares[m] = append(httpMapMiddlewares[rule.Middleware], getRpcMethodUrl(method))
+							if urls, ok := httpMapMiddlewares[m]; ok {
+								urls = append(urls, getRpcMethodUrl(method))
+								httpMapMiddlewares[m] = urls
+							} else {
+								httpMapMiddlewares[m] = []string{getRpcMethodUrl(method)}
+							}
 						}
 					}
 				}
@@ -570,9 +575,14 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 				switch rule := zrpcExt.(type) {
 				case *jzeroapi.ZrpcRule:
 					if rule != nil {
-						split := strings.Split(rule.Middleware, ",")
+						split := strings.Split(strings.ReplaceAll(rule.Middleware, " ", ""), ",")
 						for _, m := range split {
-							zrpcMapMiddlewares[m] = append(zrpcMapMiddlewares[rule.Middleware], fmt.Sprintf("/%s.%s/%s", fd.GetPackage(), service.GetName(), method.GetName()))
+							if urls, ok := httpMapMiddlewares[m]; ok {
+								urls = append(urls, fmt.Sprintf("/%s.%s/%s", fd.GetPackage(), service.GetName(), method.GetName()))
+								zrpcMapMiddlewares[m] = urls
+							} else {
+								zrpcMapMiddlewares[m] = []string{fmt.Sprintf("/%s.%s/%s", fd.GetPackage(), service.GetName(), method.GetName())}
+							}
 						}
 					}
 				}
@@ -581,9 +591,14 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 			switch rule := httpGroupExt.(type) {
 			case *jzeroapi.HttpRule:
 				if rule != nil {
-					split := strings.Split(rule.Middleware, ",")
+					split := strings.Split(strings.ReplaceAll(rule.Middleware, " ", ""), ",")
 					for _, m := range split {
-						httpMapMiddlewares[m] = append(httpMapMiddlewares[rule.Middleware], methodUrls...)
+						if urls, ok := httpMapMiddlewares[m]; ok {
+							urls = append(urls, methodUrls...)
+							httpMapMiddlewares[m] = urls
+						} else {
+							httpMapMiddlewares[m] = methodUrls
+						}
 					}
 				}
 			}
@@ -592,9 +607,14 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 			switch rule := zrpcGroupExt.(type) {
 			case *jzeroapi.ZrpcRule:
 				if rule != nil {
-					split := strings.Split(rule.Middleware, ",")
+					split := strings.Split(strings.ReplaceAll(rule.Middleware, " ", ""), ",")
 					for _, m := range split {
-						zrpcMapMiddlewares[m] = append(zrpcMapMiddlewares[rule.Middleware], fullMethods...)
+						if fms, ok := zrpcMapMiddlewares[m]; ok {
+							fms = append(fms, fullMethods...)
+							httpMapMiddlewares[m] = fms
+						} else {
+							httpMapMiddlewares[m] = fullMethods
+						}
 					}
 				}
 			}
