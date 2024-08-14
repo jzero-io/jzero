@@ -66,6 +66,7 @@ type GenConfig struct {
 	Sdk        GenSdkConfig        `mapstructure:"sdk"`
 	Swagger    GenSwaggerConfig    `mapstructure:"swagger"`
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`
+	Docs       GenDocsConfig
 }
 
 type GenSdkConfig struct {
@@ -90,6 +91,13 @@ type GenZrpcclientConfig struct {
 	Output    string `mapstructure:"output"`
 	GoModule  string `mapstructure:"goModule"`
 	GoPackage string `mapstructure:"goPackage"`
+}
+
+type GenDocsConfig struct {
+	Output   string `mapstructure:"output"`
+	Format   string `mapstructure:"format"`
+	ApiDir   string `mapstructure:"api-dir"`
+	ProtoDir string `mapstructure:"proto-dir"`
 }
 
 type IvmConfig struct {

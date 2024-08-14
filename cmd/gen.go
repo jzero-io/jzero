@@ -169,11 +169,13 @@ var genDocsCmd = &cobra.Command{
 	Use:   "docs",
 	Short: "jzero gen docs",
 	Long:  `jzero gen docs`,
-	PreRun: func(cmd *cobra.Command, args []string) {
-		console.Warning("[warning] generate docs is still working...")
-	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return gendocs.Gen()
+		if config.C.Gen.Docs.Format != "markdown" {
+			if config.C.Gen.Docs.Output == filepath.Join("desc", "docs", "markdown") {
+				config.C.Gen.Docs.Output = filepath.Join("desc", "docs", config.C.Gen.Docs.Format)
+			}
+		}
+		return gendocs.Gen(config.C.Gen)
 	},
 }
 
@@ -223,6 +225,11 @@ func init() {
 
 	{
 		genCmd.AddCommand(genDocsCmd)
+
+		genDocsCmd.Flags().StringP("output", "o", filepath.Join("desc", "docs", "markdown"), "set docs output dir")
+		genDocsCmd.Flags().StringP("format", "", "markdown", "set output format")
+		genDocsCmd.Flags().StringP("api-dir", "", filepath.Join("desc", "api"), "set input api dir")
+		genDocsCmd.Flags().StringP("proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
 	}
 
 	{

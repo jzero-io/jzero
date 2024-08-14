@@ -10,7 +10,6 @@ import (
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
-	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
@@ -53,12 +52,6 @@ func Gen(gc config.GenConfig) error {
 		}
 
 		for _, path := range protoFilepath {
-			protoParser := rpcparser.NewDefaultProtoParser()
-			_, err = protoParser.Parse(path, true)
-			if err != nil {
-				return err
-			}
-
 			command := fmt.Sprintf("protoc -I%s %s --openapiv2_out=%s",
 				gc.Swagger.ProtoDir,
 				path,

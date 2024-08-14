@@ -97,6 +97,18 @@ var checkCmd = &cobra.Command{
 			log.Warning("[jzero-env] warning: env check failed, protoc-gen-validate is not installed")
 		}
 
+		// protoc-gen-doc
+		log.Info("\n[jzero-env]: looking up protoc-gen-doc")
+		_, err = env.LookPath("protoc-gen-doc")
+		if err != nil {
+			_ = golang.Install("github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@latest")
+		}
+		if _, err = env.LookPath("protoc-gen-doc"); err == nil {
+			log.Success(`[jzero-env]: "protoc-gen-doc" is installed`)
+		} else {
+			log.Warning("[jzero-env] warning: env check failed, protoc-gen-doc is not installed")
+		}
+
 		log.Success("\n[jzero-env]: congratulations! your jzero environment is ready!")
 	},
 }
