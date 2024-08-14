@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package jzero.api;
+
+option go_package = "github.com/jzero-io/desc/proto/jzero/api";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MethodOptions {
+  HttpRule http = 10000;
+}
+
+extend google.protobuf.ServiceOptions {
+  HttpRule http_group = 10001;
+}
+
+message HttpRule {
+  string middleware = 1;
+}
