@@ -39,9 +39,9 @@ var newCmd = &cobra.Command{
 			config.C.New.Module = args[0]
 		}
 
-		if !pathx.FileExists(embeded.Home) {
+		if !pathx.FileExists(config.C.New.Home) {
 			home, _ := os.UserHomeDir()
-			embeded.Home = filepath.Join(home, ".jzero", Version)
+			config.C.New.Home = filepath.Join(home, ".jzero", Version)
 		}
 
 		if config.C.New.Remote != "" && config.C.New.Branch != "" {
