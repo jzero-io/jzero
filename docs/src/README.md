@@ -36,7 +36,7 @@ jzero 具备以下特点:
     * 默认支持通过 proto 新增拦截器和 http 中间件, 可以设定某个 method, 也可以设定整个 service
 * 数据库场景
   * 将原生 sql 替换成 sqlbuilder, 从而可以更好的支持不同的数据库类型
-  * 扩展新的抽象方法提升开发效率
+  * 扩展新的抽象方法提升开发效率, 不再是简单的增删改查, 逐步扩展, 拥有类似 orm 的能力
 * 客户端场景:
   * 通过 api/proto 文件自动生成 swagger json, 并内置 swagger ui 
   * 通过 api/proto 文件自动生成 http client

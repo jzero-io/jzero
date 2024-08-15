@@ -2,7 +2,7 @@
 title: 模版
 icon: vscode-icons:folder-type-template
 star: true
-order: 5.2
+order: 5.3
 category: 开发
 tag:
   - Guide

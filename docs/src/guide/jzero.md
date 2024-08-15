@@ -12,6 +12,7 @@ order: 2.1
   * gen sdk: 生成 http 客户端 sdk
   * gen zrpcclient: 生成 zrpc 客户端 sdk
   * gen swagger: 生成 swagger.json
+  * gen doc: 生成 markdown 等文档
 * ivm: 接口版本管理
   * ivm init: 初始化新版本代码
   * ivm add: 新增可描述文件

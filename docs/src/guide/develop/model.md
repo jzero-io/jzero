@@ -1,5 +1,5 @@
 ---
-title: model 数据库
+title: model 数据库教程
 icon: icon-park-twotone:database-code
 star: true
 order: 5

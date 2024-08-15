@@ -1,5 +1,5 @@
 ---
-title: 新增 command
+title: 新增 command 教程
 icon: clarity:command-line
 star: true
 order: 0.1
