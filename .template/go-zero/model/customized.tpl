@@ -1,4 +1,4 @@
-func (m *custom{{.upperStartCamelObject}}Model) Find(ctx context.Context, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
+func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Context, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
 	condition.Apply(sb, conds...)
 	sql, args := sb.Build()
@@ -11,7 +11,7 @@ func (m *custom{{.upperStartCamelObject}}Model) Find(ctx context.Context, conds 
 	return resp, nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) Page(ctx context.Context, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, int64 ,error) {
+func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Context, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, int64 ,error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
 	countsb := sqlbuilder.Select("count(*)").From(m.table)
 
