@@ -13,6 +13,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/config"
+	"github.com/zeromicro/go-zero/core/logx"
+
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/mr"
@@ -36,6 +41,23 @@ type JzeroSql struct {
 
 func (js *JzeroSql) Gen() error {
 	dir := "."
+	var goctlHome string
+
+	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero")) {
+		tempDir, err := os.MkdirTemp(os.TempDir(), "")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tempDir)
+		err = embeded.WriteTemplateDir(filepath.Join("go-zero"), tempDir)
+		if err != nil {
+			return err
+		}
+		goctlHome = tempDir
+	} else {
+		goctlHome = filepath.Join(config.C.Gen.Home, "go-zero")
+	}
+	logx.Debugf("goctl_home = %s", goctlHome)
 
 	if js.ModelMysqlDatasource {
 		fmt.Printf("%s to generate model code from url %s.\n", color.WithColor("Start", color.FgGreen), js.ModelMysqlDatasourceUrl)
@@ -55,7 +77,7 @@ func (js *JzeroSql) Gen() error {
 				js.ModelMysqlDatasourceUrl,
 				table,
 				filepath.Join(dir, "internal", "model", strings.ToLower(table)),
-				filepath.Join(embeded.Home, "go-zero"),
+				goctlHome,
 				js.Style,
 				strings.Join(js.ModelIgnoreColumns, ","),
 				js.ModelMysqlCache,
@@ -99,7 +121,7 @@ func (js *JzeroSql) Gen() error {
 					command := fmt.Sprintf("goctl model mysql ddl --src %s --dir %s --home %s --style %s -i '%s' --cache=%t",
 						filepath.Join(dir, "desc", "sql", f.Name()),
 						modelDir,
-						filepath.Join(embeded.Home, "go-zero"),
+						goctlHome,
 						js.Style,
 						strings.Join(js.ModelIgnoreColumns, ","),
 						js.ModelMysqlCache,

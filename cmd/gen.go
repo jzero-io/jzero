@@ -48,13 +48,6 @@ var genCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// check go-zero api template
-		home, _ := os.UserHomeDir()
-		if !pathx.FileExists(filepath.Join(home, ".jzero", Version, "go-zero")) {
-			err := embeded.WriteTemplateDir(filepath.Join("go-zero"), filepath.Join(home, ".jzero", Version, "go-zero"))
-			cobra.CheckErr(err)
-		}
-
 		if !pathx.FileExists(config.C.Gen.Home) {
 			home, _ := os.UserHomeDir()
 			config.C.Gen.Home = filepath.Join(home, ".jzero", Version)
@@ -128,7 +121,9 @@ var genSdkCmd = &cobra.Command{
 		}
 
 		mod, err := mod.GetGoMod(config.C.Gen.Wd())
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		if config.C.Gen.Sdk.Output == "" {
 			config.C.Gen.Sdk.Output = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), config.C.Gen.Sdk.Language)
@@ -156,7 +151,9 @@ var genSdkCmd = &cobra.Command{
 		}
 
 		homeDir, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 		if embeded.Home == "" {
 			embeded.Home = filepath.Join(homeDir, ".jzero", Version)
 		}
