@@ -4,7 +4,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 	err := m.QueryRowIndexCtx(ctx, &resp, {{.cacheKeyVariable}}, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
 		sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
         // patch
-		sb.Where(sb.EQ(strings.Split(strings.TrimSpace("{{.originalField}}"), "=")[0], {{.lowerStartCamelField}}))
+		sb.Where(sb.EQ(strings.Split(strings.ReplaceAll("{{.originalField}}", " ", ""), "=")[0], {{.lowerStartCamelField}}))
 		sb.Limit(1)
         sql, args := sb.Build()
 		if err := conn.QueryRowCtx(ctx, &resp, sql, args...); err != nil {
@@ -22,8 +22,10 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 	}
 }{{else}}var resp {{.upperStartCamelObject}}
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-    sb.Where(sb.EQ("{{.originalField}}", {{.lowerStartCamelField}}))
+	// patch
+	sb.Where(sb.EQ(strings.Split(strings.ReplaceAll("{{.originalField}}", " ", ""), "=")[0], {{.lowerStartCamelField}}))
     sb.Limit(1)
+
     sql, args := sb.Build()
     err := m.conn.QueryRowCtx(ctx, &resp, sql, args...)
 
