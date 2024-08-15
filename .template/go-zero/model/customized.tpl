@@ -11,6 +11,20 @@ func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Cont
 	return resp, nil
 }
 
+func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.Context, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
+	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
+	condition.Apply(sb, conds...)
+	sb.Limit(1)
+	sql, args := sb.Build()
+
+	var resp {{.upperStartCamelObject}}
+	err := m.conn.QueryRowCtx(ctx, &resp, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Context, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, int64 ,error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
 	countsb := sqlbuilder.Select("count(*)").From(m.table)
