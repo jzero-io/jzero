@@ -1,3 +1,14 @@
+func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, datas []*{{.upperStartCamelObject}}) error {
+    sb := sqlbuilder.InsertInto(m.table)
+    sb.Cols({{.lowerStartCamelObject}}RowsExpectAutoSet)
+    for _, data := range datas {
+        sb.Values({{.expressionValues}})
+    }
+    sql, args := sb.Build()
+    _, err:= m.conn.ExecCtx(ctx, sql, args...)
+    return err
+}
+
 func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Context, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
 	condition.Apply(sb, conds...)
