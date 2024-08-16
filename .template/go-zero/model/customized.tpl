@@ -82,3 +82,14 @@ func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx cont
 	}
 	return nil
 }
+
+func (m *custom{{.upperStartCamelObject}}Model) BulkDelete(ctx context.Context, conds ...condition.Condition) error {
+    if len(conds) == 0 {
+		return nil
+	}
+	sb := sqlbuilder.DeleteFrom(m.table)
+	condition.ApplyDelete(sb, conds...)
+	sql, args := sb.Build()
+	_, err := m.conn.ExecCtx(ctx, sql, args...)
+	return err
+}
