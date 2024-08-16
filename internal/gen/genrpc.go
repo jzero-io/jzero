@@ -514,8 +514,6 @@ func (jr *JzeroRpc) changeReplaceLogicGoTypes(file LogicFile) error {
 }
 
 func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
-	fmt.Printf("%s to generate internal/middleware/middleware_gen.go\n", color.WithColor("Start", color.FgGreen))
-
 	var fds []*desc.FileDescriptor
 
 	// parse proto
@@ -628,6 +626,8 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 	if len(httpMiddlewares) == 0 && len(zrpcMiddlewares) == 0 {
 		return nil
 	}
+
+	fmt.Printf("%s to generate internal/middleware/middleware_gen.go\n", color.WithColor("Start", color.FgGreen))
 
 	for _, v := range httpMiddlewares {
 		template, err := templatex.ParseTemplate(map[string]interface{}{
