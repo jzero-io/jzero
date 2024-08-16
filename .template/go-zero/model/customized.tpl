@@ -11,7 +11,7 @@ func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, 
 
 func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Context, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
-	condition.Apply(sb, conds...)
+	condition.ApplySelect(sb, conds...)
 	sql, args := sb.Build()
 
 	var resp []*{{.upperStartCamelObject}}
@@ -24,7 +24,7 @@ func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Cont
 
 func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.Context, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
-	condition.Apply(sb, conds...)
+	condition.ApplySelect(sb, conds...)
 	sb.Limit(1)
 	sql, args := sb.Build()
 
@@ -40,8 +40,8 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
 	countsb := sqlbuilder.Select("count(*)").From(m.table)
 
-	condition.Apply(sb, conds...)
-	condition.Apply(countsb, conds...)
+	condition.ApplySelect(sb, conds...)
+	condition.ApplySelect(countsb, conds...)
 
 	var resp []*{{.upperStartCamelObject}}
 
@@ -51,7 +51,6 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 		return nil, 0, err
 	}
 
-	// get total
     var total int64
     sql, args = countsb.Build()
     err = m.conn.QueryRowCtx(ctx, &total, sql, args...)
@@ -60,4 +59,26 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
     }
 
 	return resp, total, nil
+}
+
+func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx context.Context, field map[string]any, conds ...condition.Condition) error {
+    if field == nil {
+        return nil
+    }
+
+	sb := sqlbuilder.Update(m.table)
+	condition.ApplyUpdate(sb, conds...)
+
+	var assigns []string
+    for key, value := range field {
+        assigns = append(assigns, sb.Assign(key, value))
+    }
+    sb.Set(assigns...)
+
+	sql, args := sb.Build()
+	_, err := m.conn.ExecCtx(ctx, sql, args...)
+	if err != nil {
+		return err
+	}
+	return nil
 }
