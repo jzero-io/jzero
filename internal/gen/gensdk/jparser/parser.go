@@ -70,15 +70,12 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 						Body:         rule.Body,
 						Type:         "proto",
 						Package:      strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./"),
-						// param *{{.Request.Package | base}}.{{.Request.Name}}
-						FullName: fmt.Sprintf("param *%s.%s", filepath.Base(strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./")), stringx.FirstUpper(method.GetInputType().GetName())),
+						FullName:     fmt.Sprintf("param *%s.%s", filepath.Base(strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./")), stringx.FirstUpper(method.GetInputType().GetName())),
 					}
 					httpInterface.Response = &vars.Response{
 						Package: strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./"),
 					}
 					httpInterface.Response.FullName = BuildProtoResponseFullName(httpInterface.Response.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
-					httpInterface.Response.FakeFullName = BuildProtoFakeFullName(httpInterface.Response.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
-					httpInterface.Response.FakeReturnName = BuildProtoFakeReturnName(service.GetName(), stringx.FirstUpper(method.GetOutputType().GetName()))
 				}
 				httpInterface.MethodName = method.GetName()
 				httpInterface.Scope = vars.Scope(config.Scope)
@@ -102,9 +99,13 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 			for _, route := range group.Routes {
 				path, _ := url.JoinPath(group.Annotation.Properties["prefix"], route.Path)
 
+				resource := vars.Resource(stringx.ToCamel(group.Annotation.Properties["group"]))
+				if resource == "" {
+					resource = "api"
+				}
 				httpInterface := vars.HTTPInterface{
 					Scope:      vars.Scope(config.Scope),
-					Resource:   vars.Resource(stringx.ToCamel(group.Annotation.Properties["group"])),
+					Resource:   resource,
 					Method:     strings.ToUpper(route.Method),
 					URL:        path,
 					MethodName: strings.TrimSuffix(route.Handler, "Handler"),
@@ -128,10 +129,8 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 
 				if route.ResponseType != nil {
 					httpInterface.Response = &vars.Response{
-						FakeReturnName: BuildApiFakeReturnName(group.GetAnnotation("group"), httpInterface.MethodName, route.ResponseType),
-						FakeFullName:   BuildApiFakeFullName(route.ResponseType),
-						FullName:       BuildApiResponseFullName(route.ResponseType),
-						Package:        "types",
+						FullName: BuildApiResponseFullName(route.ResponseType),
+						Package:  "types",
 					}
 				} else {
 					httpInterface.IsStreamServer = true
