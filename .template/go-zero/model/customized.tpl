@@ -83,7 +83,7 @@ func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx cont
 	return nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) BulkDelete(ctx context.Context, conds ...condition.Condition) error {
+func (m *custom{{.upperStartCamelObject}}Model) BulkDeleteByCondition(ctx context.Context, conds ...condition.Condition) error {
     if len(conds) == 0 {
 		return nil
 	}
