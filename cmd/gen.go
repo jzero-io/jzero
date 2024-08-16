@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/pflag"
+
 	"github.com/jzero-io/jzero/pkg"
 	"github.com/zeromicro/go-zero/core/color"
 
@@ -205,7 +207,15 @@ func init() {
 
 		genSdkCmd.Flags().StringP("language", "l", "go", "set language")
 		genSdkCmd.Flags().StringP("output", "o", "", "set output dir")
-		genSdkCmd.Flags().StringP("goModule", "", "", "set module name")
+		genSdkCmd.Flags().StringP("goModule", "", "", "set go module name")
+		// 兼容 module
+		genSdkCmd.Flags().StringP("module", "", "", "set go module name")
+		genSdkCmd.Flags().SetNormalizeFunc(func(f *pflag.FlagSet, name string) pflag.NormalizedName {
+			if name == "module" {
+				name = "goModule"
+			}
+			return pflag.NormalizedName(name)
+		})
 		genSdkCmd.Flags().StringP("goPackage", "", "", "set package name")
 		genSdkCmd.Flags().StringP("api-dir", "", filepath.Join("desc", "api"), "set input api dir")
 		genSdkCmd.Flags().StringP("proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
@@ -236,6 +246,14 @@ func init() {
 		genZRpcClientCmd.Flags().StringP("output", "o", "zrpcclient-go", "generate rpcclient code")
 		genZRpcClientCmd.Flags().StringP("scope", "", "", "set scope name")
 		genZRpcClientCmd.Flags().StringP("goModule", "", "", "set go module name")
+		// 兼容 module
+		genZRpcClientCmd.Flags().StringP("module", "", "", "set go module name")
+		genZRpcClientCmd.Flags().SetNormalizeFunc(func(f *pflag.FlagSet, name string) pflag.NormalizedName {
+			if name == "module" {
+				name = "goModule"
+			}
+			return pflag.NormalizedName(name)
+		})
 		genZRpcClientCmd.Flags().StringP("goPackage", "", "", "set package name")
 	}
 }
