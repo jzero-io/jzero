@@ -41,7 +41,35 @@ go run main.go server
 
 ## 高级教程
 
-基于[配置文件](./command.md#基于配置文件使用-jzero)生成服务端代码, 支持设置 before 和 after hooks
+### 生成数据库代码
+
+:::tip 支持基于 sql 文件和数据库 dsn 连接生成代码, 默认使用 sql 文件生成
+
+[model 模板地址](https://github.com/jzero-io/sqlbuilder-zero) 
+
+[go-zero model 文档](https://go-zero.dev/docs/tutorials/cli/model#goctl-model-mysql-%E6%8C%87%E4%BB%A4)
+:::
+
+jzero 默认使用 go-zero sqlx 和 sqlbuilder-go 完成对数据库的 crud 操作.
+
+jzero 数据库规范:
+
+* sql 文件放在 desc/sql
+* 生成的 model 放在 internal/model
+
+#### 基于 sql 文件生成代码
+
+将 sql 文件放入 `desc/sql` 文件夹下即可, 执行 `jzero gen`
+
+#### 基于数据库 dsn 连接生成代码
+
+```shell
+jzero gen --model-mysql-datasource --model-mysql-datasource-url="root:123456@tcp(127.0.0.1:3306)/test"
+```
+
+### 基于配置文件生成代码
+
+基于[配置文件](./jzero.md#基于配置文件使用-jzero)生成服务端代码, 支持设置 before 和 after hooks
 
 ```yaml
 syntax: v1
