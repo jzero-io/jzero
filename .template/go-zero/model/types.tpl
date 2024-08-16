@@ -8,7 +8,7 @@ type (
         FindOneByCondition(ctx context.Context, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error)
         PageByCondition(ctx context.Context, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, int64 ,error)
         UpdateFieldsByCondition(ctx context.Context, field map[string]any, conds ...condition.Condition) error
-        BulkDeleteByCondition(ctx context.Context, conds ...condition.Condition) error
+        DeleteByCondition(ctx context.Context, conds ...condition.Condition) error
 	}
 
 	default{{.upperStartCamelObject}}Model struct {
