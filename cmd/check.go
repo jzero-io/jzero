@@ -44,7 +44,7 @@ var checkCmd = &cobra.Command{
 		log.Info("\n[jzero-env]: looking up protoc-gen-go-grpc")
 		_, err = env.LookPath("protoc-gen-go-grpc")
 		if err != nil {
-			_ = golang.Install("google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.4.0")
+			_ = golang.Install("google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest")
 		}
 		if _, err = env.LookPath("protoc-gen-go-grpc"); err == nil {
 			log.Success(`[jzero-env]: "protoc-gen-go-grpc" is installed`)
