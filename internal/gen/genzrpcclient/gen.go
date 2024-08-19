@@ -189,6 +189,9 @@ func Generate(gc config.GenConfig, genModule bool) error {
 			return err
 		}
 		data["Module"] = gc.Zrpcclient.GoModule
+		if gc.Zrpcclient.GoVersion != "" {
+			data["GoVersion"] = gc.Zrpcclient.GoVersion
+		}
 		template, err = templatex.ParseTemplate(data, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl"))))
 		if err != nil {
 			return err

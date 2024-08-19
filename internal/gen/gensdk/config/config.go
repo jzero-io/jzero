@@ -4,6 +4,7 @@ type Config struct {
 	Language     string
 	Scope        string
 	GenModule    bool
+	GoVersion    string
 	GoPackage    string
 	GoModule     string
 	Output       string

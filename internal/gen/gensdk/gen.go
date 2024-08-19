@@ -21,6 +21,7 @@ func GenSdk(gc config.GenConfig, genModule bool) error {
 		Language:     gc.Sdk.Language,
 		Scope:        gc.Sdk.Scope,
 		GenModule:    genModule,
+		GoVersion:    gc.Sdk.GoVersion,
 		GoModule:     gc.Sdk.GoModule,
 		GoPackage:    gc.Sdk.GoPackage,
 		Output:       gc.Sdk.Output,

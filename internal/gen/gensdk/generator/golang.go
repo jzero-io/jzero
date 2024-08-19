@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/internal/new"
 	"github.com/rinchsan/gosimports"
-
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
@@ -169,26 +169,23 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 }
 
 func (g *Golang) genGoMod() (*GeneratedFile, error) {
-	tmpDir, err := os.MkdirTemp(os.TempDir(), "")
+	data, err := new.NewTemplateData()
 	if err != nil {
 		return nil, err
 	}
-	defer os.RemoveAll(tmpDir)
-
-	resp, err := execx.Run(fmt.Sprintf("go mod init %s", g.config.GoModule), tmpDir)
-	if err != nil {
-		return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
+	if g.config.GoVersion != "" {
+		data["GoVersion"] = g.config.GoVersion
 	}
+	data["Module"] = g.config.GoModule
 
-	goModBytes, err := os.ReadFile(filepath.Join(tmpDir, "go.mod"))
+	template, err := templatex.ParseTemplate(data, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "client-go", "go.mod.tpl"))))
 	if err != nil {
 		return nil, err
 	}
 
 	return &GeneratedFile{
-		Skip:    true,
 		Path:    "go.mod",
-		Content: *bytes.NewBuffer(goModBytes),
+		Content: *bytes.NewBuffer(template),
 	}, nil
 }
 

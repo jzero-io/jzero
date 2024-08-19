@@ -76,6 +76,7 @@ type GenSdkConfig struct {
 	WrapResponse bool   `mapstructure:"wrap-response"`
 	Output       string `mapstructure:"output"`
 	Language     string `mapstructure:"language"`
+	GoVersion    string `mapstructure:"goVersion"`
 	GoModule     string `mapstructure:"goModule"`
 	GoPackage    string `mapstructure:"goPackage"`
 }
@@ -89,6 +90,7 @@ type GenSwaggerConfig struct {
 type GenZrpcclientConfig struct {
 	Scope     string `mapstructure:"scope"`
 	Output    string `mapstructure:"output"`
+	GoVersion string `mapstructure:"goVersion"`
 	GoModule  string `mapstructure:"goModule"`
 	GoPackage string `mapstructure:"goPackage"`
 }
