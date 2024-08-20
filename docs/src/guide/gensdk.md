@@ -25,7 +25,7 @@ go mod tidy
 @tab Docker
 ```bash
 cd your_project
-docker run --rm -v ${PWD}:/app jaronnie/jzero:latest gen sdk
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen sdk
 
 cd your_project-go
 go mod tidy

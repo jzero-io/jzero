@@ -48,9 +48,9 @@ jzero check
 
 @tab Docker
 ```shell
-docker pull jaronnie/jzero:latest
+docker pull ghcr.io/jzero-io/jzero:latest
 # 如果无法 pull
-docker pull registry.cn-hangzhou.aliyuncs.com/jaronnie/jzero:latest
-docker tag registry.cn-hangzhou.aliyuncs.com/jaronnie/jzero:latest jaronnie/jzero:latest
+docker pull registry.cn-hangzhou.aliyuncs.com/ghcr.io/jzero-io/jzero:latest
+docker tag registry.cn-hangzhou.aliyuncs.com/ghcr.io/jzero-io/jzero:latest ghcr.io/jzero-io/jzero:latest
 ```
 :::

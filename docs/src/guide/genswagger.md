@@ -29,7 +29,7 @@ jzero gen swagger
 @tab Docker
 ```bash
 cd your_project
-docker run --rm -v ${PWD}:/app jaronnie/jzero:latest gen swagger
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 ```
 :::
 

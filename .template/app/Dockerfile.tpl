@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM jaronnie/jzero:latest as builder
+FROM --platform=$BUILDPLATFORM ghcr.io/jzero-io/jzero:latest as builder
 
 ARG TARGETARCH
 ARG LDFLAGS
