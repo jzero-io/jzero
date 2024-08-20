@@ -3,6 +3,10 @@ FROM --platform=$TARGETPLATFORM golang:alpine
 ENV CGO_ENABLED 0
 ENV GOPROXY https://goproxy.io,direct
 
+LABEL MAINTAINER = jaronnie
+LABEL EMAIL = jaron@jaronnie.com
+LABEL org.opencontainers.image.source = "https://github.com/jzero-io/jzero/"
+
 WORKDIR /app
 
 COPY dist/jzero_linux_amd64_v1/jzero /dist/jzero_linux_amd64_v1/jzero
