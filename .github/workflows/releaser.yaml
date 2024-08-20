@@ -85,3 +85,19 @@ jobs:
           platforms: linux/amd64, linux/arm64
           push: true
           tags: ghcr.io/jzero-io/jzero:latest,ghcr.io/jzero-io/jzero:${{ steps.get_version.outputs.VERSION }}
+
+      - name: Log in to github package
+        uses: docker/login-action@v3
+        with:
+          registry: docker.pkg.github.com
+          username: jzero-io
+          password: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Docker build and push
+        uses: docker/build-push-action@v6
+        with:
+          registry: docker.pkg.github.com
+          context: .
+          platforms: linux/amd64, linux/arm64
+          push: true
+          tags: docker.pkg.github.com/jzero-io/jzero:latest,docker.pkg.github.com/jzero-io/jzero:${{ steps.get_version.outputs.VERSION }}
