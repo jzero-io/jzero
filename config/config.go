@@ -54,8 +54,10 @@ type GenConfig struct {
 	Home  string `mapstructure:"home"`
 	Style string `mapstructure:"style"`
 
-	ChangeReplaceTypes        bool     `mapstructure:"change-replace-types"`
-	RemoveSuffix              bool     `mapstructure:"remove-suffix"`
+	ChangeReplaceTypes bool `mapstructure:"change-replace-types"`
+	RemoveSuffix       bool `mapstructure:"remove-suffix"`
+
+	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`
 	ModelMysqlIgnoreColumns   []string `mapstructure:"model-mysql-ignore-columns"`
 	ModelMysqlDatasource      bool     `mapstructure:"model-mysql-datasource"`
 	ModelMysqlDatasourceUrl   string   `mapstructure:"model-mysql-datasource-url"`

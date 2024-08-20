@@ -54,6 +54,7 @@ func Gen(gcf config.GenConfig) error {
 	jzeroSql := JzeroSql{
 		Wd:                        gcf.Wd(),
 		Style:                     gcf.Style,
+		ModelStrict:               gcf.ModelMysqlStrict,
 		ModelIgnoreColumns:        gcf.ModelMysqlIgnoreColumns,
 		ModelMysqlDatasource:      gcf.ModelMysqlDatasource,
 		ModelMysqlDatasourceUrl:   gcf.ModelMysqlDatasourceUrl,

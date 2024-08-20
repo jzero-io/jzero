@@ -29,8 +29,10 @@ import (
 )
 
 type JzeroSql struct {
-	Wd                        string
-	Style                     string
+	Wd    string
+	Style string
+
+	ModelStrict               bool
 	ModelIgnoreColumns        []string
 	ModelMysqlDatasource      bool
 	ModelMysqlDatasourceUrl   string
@@ -73,7 +75,7 @@ func (js *JzeroSql) Gen() error {
 			}
 		}, func(table string) {
 			fmt.Printf("%s table %s\n", color.WithColor("Using", color.FgGreen), table)
-			command := fmt.Sprintf("goctl model mysql datasource --url '%s' --table %s --dir %s --home %s --style %s -i '%s' --cache=%t",
+			command := fmt.Sprintf("goctl model mysql datasource --url '%s' --table %s --dir %s --home %s --style %s -i '%s' --cache=%t --strict=%t",
 				js.ModelMysqlDatasourceUrl,
 				table,
 				filepath.Join(dir, "internal", "model", strings.ToLower(table)),
@@ -81,6 +83,7 @@ func (js *JzeroSql) Gen() error {
 				js.Style,
 				strings.Join(js.ModelIgnoreColumns, ","),
 				js.ModelMysqlCache,
+				js.ModelStrict,
 			)
 			_, err := execx.Run(command, js.Wd)
 			if err != nil {
@@ -118,13 +121,14 @@ func (js *JzeroSql) Gen() error {
 					}
 
 					modelDir := filepath.Join(dir, "internal", "model", strings.ToLower(f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))]))
-					command := fmt.Sprintf("goctl model mysql ddl --src %s --dir %s --home %s --style %s -i '%s' --cache=%t",
+					command := fmt.Sprintf("goctl model mysql ddl --src %s --dir %s --home %s --style %s -i '%s' --cache=%t --strict=%t",
 						filepath.Join(dir, "desc", "sql", f.Name()),
 						modelDir,
 						goctlHome,
 						js.Style,
 						strings.Join(js.ModelIgnoreColumns, ","),
 						js.ModelMysqlCache,
+						js.ModelStrict,
 					)
 					_, err = execx.Run(command, js.Wd)
 					if err != nil {
