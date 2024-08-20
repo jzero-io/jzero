@@ -32,6 +32,12 @@ go install github.com/jzero-io/jzero@latest
 jzero check
 ```
 
+### docker
+
+```shell
+docker pull ghcr.io/jzero-io/jzero:latest
+```
+
 ## 快速开始
 
 ```shell
@@ -48,6 +54,24 @@ jzero gen swagger
 jzero gen sdk
 # 生成 zrpc 客户端 sdk
 jzero gen zrpcclient
+# 运行服务端
+go run main.go server
+```
+
+### docker
+
+```shell
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project
+cd your_project
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
+# 下载依赖
+go mod tidy
+# 生成 swagger json
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
+# 生成 http 客户端 sdk
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen sdk
+# 生成 zrpc 客户端 sdk
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen zrpcclient
 # 运行服务端
 go run main.go server
 ```

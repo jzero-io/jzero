@@ -53,10 +53,10 @@ jzero 具备以下特点:
 
 ```bash
 # 一键创建项目
-docker run --rm -v ${PWD}/your_project:/app/your_project ghcr.io/jzero-io/jzero:latest new your_project
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_projectct
 cd your_project 
 # 一键生成代码
-docker run --rm -v ${PWD}:/app/your_project ghcr.io/jzero-io/jzero:latest gen -w your_project
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
 # 下载依赖
 go mod tidy
 # 启动项目

@@ -67,9 +67,9 @@ jzero new your_project --branch api-goctl
 @tab Docker
 
 ```bash
-docker run --rm -v ${PWD}/your_project:/app/your_project ghcr.io/jzero-io/jzero:latest new your_project --branch api
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --branch api
 # 如果需要与原生 goctl 保持同样的目录结构请使用
-docker run --rm -v ${PWD}/your_project:/app/your_project ghcr.io/jzero-io/jzero:latest new your_project --branch api-goctl
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --branch api-goctl
 ```
 :::
 
@@ -92,9 +92,9 @@ jzero new your_project --branch rpc-goctl
 @tab Docker
 
 ```bash
-docker run --rm -v ${PWD}/your_project:/app/your_project ghcr.io/jzero-io/jzero:latest new your_project --branch rpc
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --branch rpc --output /app/your_project
 # 如果需要与原生 goctl 保持同样的目录结构请使用
-docker run --rm -v ${PWD}/your_project:/app/your_project ghcr.io/jzero-io/jzero:latest new your_project --branch rpc-goctl
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --branch rpc-goctl
 ```
 :::
 
@@ -115,7 +115,7 @@ jzero new your_project --branch gateway
 @tab Docker
 
 ```bash
-docker run --rm -v ${PWD}/your_project:/app/your_project ghcr.io/jzero-io/jzero:latest new your_project --branch gateway
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --branch gateway
 ```
 :::
 
@@ -138,7 +138,7 @@ jzero new your_project
 @tab Docker
 
 ```bash
-docker run --rm -v ${PWD}/your_project:/app/your_project ghcr.io/jzero-io/jzero:latest new your_project
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project
 ```
 :::
 
@@ -159,7 +159,7 @@ jzero new your_project --branch cli
 @tab Docker
 
 ```bash
-docker run --rm -v ${PWD}/your_project:/app/your_project ghcr.io/jzero-io/jzero:latest new your_project --branch cli
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --branch cli
 ```
 :::
 
