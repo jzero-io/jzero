@@ -45,13 +45,13 @@ func (js *JzeroSql) Gen() error {
 	dir := "."
 	var goctlHome string
 
-	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero")) {
+	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "model")) {
 		tempDir, err := os.MkdirTemp(os.TempDir(), "")
 		if err != nil {
 			return err
 		}
 		defer os.RemoveAll(tempDir)
-		err = embeded.WriteTemplateDir(filepath.Join("go-zero"), tempDir)
+		err = embeded.WriteTemplateDir(filepath.Join("go-zero", "model"), filepath.Join(tempDir, "model"))
 		if err != nil {
 			return err
 		}
