@@ -54,7 +54,7 @@ jzero 具备以下特点:
 
 ```bash
 # 一键创建项目
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_projectct
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project
 cd your_project 
 # 一键生成代码
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
