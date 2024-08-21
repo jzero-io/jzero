@@ -21,6 +21,7 @@ order: 2.1
 * template: 模板功能
   * template init: 将模板下载到本地磁盘
   * template build: 将当前项目编译成 jzero 可使用的模板
+* upgrade: 更新 jzero
 
 ### 获取更多信息
 

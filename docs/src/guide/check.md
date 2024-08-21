@@ -6,9 +6,6 @@ order: 2
 
 由于 jzero 基于 go 语言以及 go-zero 框架, 需要先安装 golang, goctl 工具
 
-::: tip  如果觉得需要安装的工具太多可以采取使用 Docker 的方式, 工具全部集成到容器中
-:::
-
 ## 安装 golang
 
 :::tip 推荐采用 go 1.21 版本以及以上
@@ -41,6 +38,9 @@ jzero version
 ```shell
 jzero check
 ```
+
+::: tip  如果觉得需要安装的工具太多可以采取使用 Docker 的方式, 工具全部集成到容器中
+:::
 
 ## Docker
 
