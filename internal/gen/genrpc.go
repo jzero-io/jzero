@@ -609,9 +609,9 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 					for _, m := range split {
 						if fms, ok := zrpcMapMiddlewares.Get(m); ok {
 							fms = append(fms.([]string), fullMethods...)
-							httpMapMiddlewares.Set(m, fms)
+							zrpcMapMiddlewares.Set(m, fms)
 						} else {
-							httpMapMiddlewares.Set(m, fullMethods)
+							zrpcMapMiddlewares.Set(m, fullMethods)
 						}
 					}
 				}

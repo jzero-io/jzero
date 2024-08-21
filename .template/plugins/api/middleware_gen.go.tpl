@@ -13,6 +13,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+var (
+	_ = fmt.Sprintf("middleware_gen.go")
+)
+
 func RegisterGen(zrpc *zrpc.RpcServer, gw *gateway.Server) {
 	gw.Use(func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -25,15 +29,14 @@ func RegisterGen(zrpc *zrpc.RpcServer, gw *gateway.Server) {
 		}
 	})
 
-	zrpc.AddUnaryInterceptors(func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
-        {{range $v := .ZrpcMiddlewares}}
+    {{range $v := .ZrpcMiddlewares}}
+        zrpc.AddUnaryInterceptors(func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
             if matchRoute("{{$v.Name}}", info.FullMethod) {
-                {{$v.Name | FirstUpper | ToCamel}}Middleware(ctx, req, info, handler)
+                return {{$v.Name | FirstUpper | ToCamel}}Middleware(ctx, req, info, handler)
             }
-        {{end}}
-
-        return handler(ctx, req)
-    })
+            return handler(ctx, req)
+        })
+    {{end}}
 }
 
 // Define and compile routes
