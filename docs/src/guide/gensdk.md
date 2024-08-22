@@ -4,17 +4,44 @@ icon: carbon:sdk
 order: 5
 ---
 
+## 自动生成 http sdk 参数
+
+```shell
+$ jzero gen sdk -h                   
+Generate sdk client by api file and proto file
+
+Usage:
+  jzero gen sdk [flags]
+
+Flags:
+      --api-dir string     set input api dir (default "desc/api")
+      --goModule string    set go module name
+      --goPackage string   set package name
+      --goVersion string   set go version, only effect when having goModule flag
+  -h, --help               help for sdk
+  -l, --language string    set language (default "go")
+  -o, --output string      set output dir
+      --proto-dir string   set input proto dir (default "desc/proto")
+      --scope string       set scope name
+      --wrap-response      warp response: code, data, message (default true)
+
+Global Flags:
+  -f, --config string   set config file (default ".jzero.yaml")
+      --debug           debug mode
+      --home string     set template home (default "/Users/jaronnie/Desktop/jaronnie/github/jzero-io/jzero/.template")
+      --style string    The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md] (default "gozero")
+```
+
 ## 自动生成 go http sdk
 
 * kubernetes client-go style
-* 根据 api group 和 proto service 进行业务分组
+* 根据 api 文件中的 group name 和 proto 文件中的 service name 进行业务分组
 * 链式调用, 调用逻辑清晰
 * 可自定义接口进行扩展
 
 ::: code-tabs#shell
 
 @tab jzero
-
 ```bash
 cd your_project
 jzero gen sdk
@@ -30,6 +57,29 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen sdk
 cd your_project-go
 go mod tidy
 ```
+
+@tab GitHub Action
+```yaml
+name: jzero-action-test
+
+on:
+  push:
+    branches:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: jzero-io/jzero-action@v1
+        with:
+          args: gen sdk
+          version: latest
+```
 :::
 
 ### 使用实例
@@ -39,11 +89,9 @@ package main
 
 import (
 	"context"
-	"fmt"
-	
 	"github.com/jzero-io/restc"
-	"your_project-go"
-	"your_project-go/model/your_project/types"
+	your_project_go "your_project/your_project-go"
+	"your_project/your_project-go/model/your_project/pb/hellopb"
 )
 
 func main() {

@@ -211,7 +211,7 @@ func init() {
 		genSdkCmd.Flags().StringP("goPackage", "", "", "set package name")
 		genSdkCmd.Flags().StringP("api-dir", "", filepath.Join("desc", "api"), "set input api dir")
 		genSdkCmd.Flags().StringP("proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
-		genSdkCmd.Flags().BoolP("wrap-response", "", true, "warp response: code, data, message")
+		genSdkCmd.Flags().BoolP("wrap-response", "", true, "wrap response: code, data, message")
 		genSdkCmd.Flags().StringP("scope", "", "", "set scope name")
 	}
 
