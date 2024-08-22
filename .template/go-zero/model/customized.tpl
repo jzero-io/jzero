@@ -41,7 +41,14 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 	countsb := sqlbuilder.Select("count(*)").From(m.table)
 
 	condition.ApplySelect(sb, conds...)
-	condition.ApplySelect(countsb, conds...)
+
+	var countConds []condition.Condition
+    for _, cond := range conds {
+    	if cond.Operator != condition.Limit && cond.Operator != condition.Offset {
+    		countConds = append(countConds, cond)
+    	}
+    }
+    condition.ApplySelect(countsb, countConds...)
 
 	var resp []*{{.upperStartCamelObject}}
 
