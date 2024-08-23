@@ -1,8 +1,9 @@
 // @ts-ignore
 import { hopeTheme } from "vuepress-theme-hope";
-import navbar from "./navbar.js";
+import { enNavbar, zhNavbar } from "./navbar/index.js";
 import sidebar from "./sidebar.js";
 
+// @ts-ignore
 export default hopeTheme({
   hostname: "https://jzero.jaronnie.com",
 
@@ -21,23 +22,33 @@ export default hopeTheme({
 
   docsDir: "docs/src",
 
-  // 导航栏
-  navbar,
+  locales: {
+    "/": {
+      // 导航栏
+      navbar: zhNavbar,
 
-  // 侧边栏
-  sidebar,
+      // 侧边栏
+      sidebar,
 
-  // 页脚
-  footer: "",
-  displayFooter: true,
+      // 页脚
+      footer: "",
+      displayFooter: true,
 
-  // 多语言配置
-  metaLocales: {
-    editLink: "在 GitHub 上编辑此页",
+      // Page meta
+      metaLocales: {
+        editLink: "在 GitHub 上编辑此页",
+      },
+    },
+    "/en/": {
+      // 导航栏
+      navbar: enNavbar,
+
+      // Page meta
+      metaLocales: {
+        editLink: "Edit this page on GitHub",
+      },
+    },
   },
-
-  // 如果想要实时查看任何改变，启用它。注: 这对更新性能有很大负面影响
-  // hotReload: true,
 
   // 在这里配置主题提供的插件
   plugins: {

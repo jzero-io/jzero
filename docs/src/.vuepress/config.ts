@@ -5,9 +5,18 @@ import theme from "./theme.js";
 export default defineUserConfig({
   base: "/",
 
-  lang: "zh-CN",
-  title: "Jzero Framework",
-  description: "Jzero docs",
+  locales: {
+    "/": {
+      lang: "zh-CN",
+      title: "Jzero Framework",
+      description: "Jzero docs",
+    },
+    "/en/": {
+      lang: "en-US",
+      title: "Jzero Framework",
+      description: "Jzero docs",
+    },
+  },
 
   theme,
 

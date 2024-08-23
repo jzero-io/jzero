@@ -2,21 +2,21 @@
 import { navbar } from "vuepress-theme-hope";
 
 // @ts-ignore
-export default navbar([
+export const enNavbar = navbar([
   "/",
   {
     link: "https://github.com/jzero-io/templates",
-    text: "模板仓库",
+    text: "template repo",
     icon: "octicon:repo-16"
   },
   {
     link: "https://github.com/jzero-io/jzero-contrib",
-    text: "扩展",
+    text: "extensions",
     icon: "material-symbols:send-time-extension"
   },
   {
     link: "https://github.com/jzero-io/examples",
-    text: "代码示例",
+    text: "code example",
     icon: "vscode-icons:file-type-go"
   },
 ]);
