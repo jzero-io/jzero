@@ -1,7 +1,7 @@
 ---
 home: false
 icon: fluent:home-heart-20-filled
-title: 首页
+title: Home
 ---
 
 <div style="text-align: center;">

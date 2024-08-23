@@ -27,7 +27,7 @@ It has the following features:
 
 * Maintain commonly used development templates and generate projects that meet enterprise-level code specifications with one click
 
-For more details please see: https://jzero.jaronnie.com
+For more details please see: https://jzero.jaronnie.com/en. The English documentation is incomplete and is still being supplemented
 
 ## Install
 
