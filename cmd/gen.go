@@ -240,5 +240,7 @@ func init() {
 		genZRpcClientCmd.Flags().StringP("goModule", "", "", "set go module name")
 		genZRpcClientCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")
 		genZRpcClientCmd.Flags().StringP("goPackage", "", "", "set package name")
+		genZRpcClientCmd.Flags().StringP("client-out", "", "", "set client custom path")
+		genZRpcClientCmd.Flags().StringP("pb-out", "", "", "set pb custom path")
 	}
 }

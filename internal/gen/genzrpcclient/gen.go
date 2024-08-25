@@ -25,11 +25,28 @@ type DirContext struct {
 	OptionGoPackage string
 	Scope           string
 	Output          string
+	ClientOut       string //client目录
+	PbOut           string //pb 目录
+
+}
+
+func (d DirContext) GetPbOut() string {
+	if d.PbOut != "" {
+		return d.PbOut
+	}
+	return fmt.Sprintf("%s/model/%s/%s", d.ImportBase, d.Scope, strings.TrimPrefix(d.OptionGoPackage, "./"))
+}
+
+func (d DirContext) GetClientOut() string {
+	if d.ClientOut != "" {
+		return d.ClientOut
+	}
+	return filepath.Join(d.Output, "typed", d.Scope)
 }
 
 func (d DirContext) GetCall() generator.Dir {
 	return generator.Dir{
-		Filename: filepath.Join(d.Output, "typed", d.Scope),
+		Filename: d.GetClientOut(),
 		GetChildPackage: func(childPath string) (string, error) {
 			return strings.ToLower(childPath), nil
 		},
@@ -62,14 +79,14 @@ func (d DirContext) GetSvc() generator.Dir {
 
 func (d DirContext) GetPb() generator.Dir {
 	return generator.Dir{
-		Package: filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, d.Scope, strings.TrimPrefix(d.OptionGoPackage, "./"))),
+		Package: filepath.ToSlash(d.GetPbOut()),
 	}
 }
 
 func (d DirContext) GetProtoGo() generator.Dir {
 	return generator.Dir{
 		Filename: d.OptionGoPackage,
-		Package:  filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, d.Scope, strings.TrimPrefix(d.OptionGoPackage, "./"))),
+		Package:  filepath.ToSlash(d.GetPbOut()),
 	}
 }
 
@@ -114,6 +131,8 @@ func Generate(gc config.GenConfig, genModule bool) error {
 			OptionGoPackage: parse.GoPackage,
 			Scope:           gc.Zrpcclient.Scope,
 			Output:          gc.Zrpcclient.Output,
+			ClientOut:       gc.Zrpcclient.ClientOut,
+			PbOut:           gc.Zrpcclient.PbOut,
 		}
 		for _, service := range parse.Service {
 			services = append(services, service.Name)
@@ -121,11 +140,16 @@ func Generate(gc config.GenConfig, genModule bool) error {
 		}
 
 		// gen pb model
-		err = os.MkdirAll(filepath.Join(gc.Zrpcclient.Output, "model", gc.Zrpcclient.Scope), 0o755)
+
+		//err = os.MkdirAll(filepath.Join(gc.Zrpcclient.Output, "model", gc.Zrpcclient.Scope), 0o755)
+		//if err != nil {
+		//	return err
+		//}
+		err = os.MkdirAll(dirContext.GetPbOut(), 0o755)
 		if err != nil {
 			return err
 		}
-		resp, err := execx.Run(fmt.Sprintf("protoc -I%s --go_out=%s --go-grpc_out=%s %s", baseProtoDir, filepath.Join(gc.Zrpcclient.Output, "model", gc.Zrpcclient.Scope), filepath.Join(gc.Zrpcclient.Output, "model", gc.Zrpcclient.Scope), fp), wd)
+		resp, err := execx.Run(fmt.Sprintf("protoc -I%s --go_out=%s --go-grpc_out=%s %s", baseProtoDir, dirContext.GetPbOut(), dirContext.GetPbOut(), fp), wd)
 		if err != nil {
 			return errors.Errorf("err: [%v], resp: [%s]", err, resp)
 		}
@@ -142,11 +166,16 @@ func Generate(gc config.GenConfig, genModule bool) error {
 	}
 
 	// gen clientset and options
+	clientOut := filepath.Join(gc.Zrpcclient.Output, "typed", gc.Zrpcclient.Scope, fmt.Sprintf("%s_client.go", gc.Zrpcclient.Scope))
+	if gc.Zrpcclient.ClientOut != "" {
+		clientOut = gc.Zrpcclient.ClientOut
+	}
 	template, err := templatex.ParseTemplate(map[string]interface{}{
 		"Module":  gc.Zrpcclient.GoModule,
 		"Package": gc.Zrpcclient.GoPackage,
 		"Scopes":  []string{gc.Zrpcclient.Scope},
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "clientset.go.tpl"))))
+
 	if err != nil {
 		return err
 	}
@@ -177,7 +206,8 @@ func Generate(gc config.GenConfig, genModule bool) error {
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(filepath.Join(gc.Zrpcclient.Output, "typed", gc.Zrpcclient.Scope, fmt.Sprintf("%s_client.go", gc.Zrpcclient.Scope)), template, 0o644)
+
+	err = os.WriteFile(clientOut, template, 0o644)
 	if err != nil {
 		return err
 	}

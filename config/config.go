@@ -95,6 +95,8 @@ type GenZrpcclientConfig struct {
 	GoVersion string `mapstructure:"goVersion"`
 	GoModule  string `mapstructure:"goModule"`
 	GoPackage string `mapstructure:"goPackage"`
+	ClientOut string `mapstructure:"client-out"`
+	PbOut     string `mapstructure:"pb-out"`
 }
 
 type GenDocsConfig struct {
