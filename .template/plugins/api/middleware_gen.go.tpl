@@ -15,6 +15,8 @@ import (
 
 var (
 	_ = fmt.Sprintf("middleware_gen.go")
+	_ = context.Background()
+    _ = grpc.SupportPackageIsVersion7
 )
 
 func RegisterGen(zrpc *zrpc.RpcServer, gw *gateway.Server) {

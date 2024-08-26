@@ -40,6 +40,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVarP(&CfgFile, "config", "f", ".jzero.yaml", "set config file")
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "debug mode")
+	rootCmd.PersistentFlags().IntP("debug-sleep-time", "", 3, "debug sleep time")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -60,7 +61,7 @@ func initConfig() {
 		logx.MustSetup(logx.LogConf{Encoding: "plain"})
 		logx.SetLevel(logx.DebugLevel)
 		logx.Debugf("using jzero frame debug mode, please wait time.Sleep(time.Second * 15)")
-		time.Sleep(time.Second * 15)
+		time.Sleep(time.Duration(config.C.DebugSleepTime) * time.Second)
 	} else {
 		logx.Disable()
 	}

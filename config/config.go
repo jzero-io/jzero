@@ -18,7 +18,8 @@ type Config struct {
 		===============================command flags start========================================
 	*/
 	// global flags
-	Debug bool `mapstructure:"debug"`
+	Debug          bool `mapstructure:"debug"`
+	DebugSleepTime int  `mapstructure:"debug-sleep-time"`
 
 	// new command
 	New NewConfig `mapstructure:"new"`

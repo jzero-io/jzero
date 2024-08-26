@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/core/logx"
+
 	"github.com/iancoleman/orderedmap"
 
 	"github.com/jzero-io/jzero/config"
@@ -98,23 +100,27 @@ func (jr *JzeroRpc) Gen() error {
 		fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), v)
 		zrpcOut := "."
 
-		command := fmt.Sprintf("goctl rpc protoc %s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s ",
+		command := fmt.Sprintf("goctl rpc protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s ",
 			v,
 			protoDirPath,
+			filepath.Join(protoDirPath, "third_party"),
 			filepath.Join("internal"),
 			filepath.Join("internal"),
 			zrpcOut,
 			filepath.Join(embeded.Home, "go-zero"),
 			jr.Style)
 
+		logx.Debug(command)
+
 		_, err = execx.Run(command, jr.Wd)
 		if err != nil {
 			return err
 		}
 
-		command = fmt.Sprintf("protoc %s -I%s --validate_out=%s",
+		command = fmt.Sprintf("protoc %s -I%s -I%s --validate_out=%s",
 			v,
 			protoDirPath,
+			filepath.Join(protoDirPath, "third_party"),
 			"lang=go:internal",
 		)
 		_, err = execx.Run(command, jr.Wd)
@@ -149,8 +155,9 @@ func (jr *JzeroRpc) Gen() error {
 			if !pathx.FileExists(generateProtoDescriptorPath(v)) {
 				_ = os.MkdirAll(filepath.Dir(generateProtoDescriptorPath(v)), 0o755)
 			}
-			protocCommand := fmt.Sprintf("protoc --include_imports -I%s --descriptor_set_out=%s %s",
+			protocCommand := fmt.Sprintf("protoc --include_imports -I%s -I%s --descriptor_set_out=%s %s",
 				protoDirPath,
+				filepath.Join(protoDirPath, "third_party"),
 				generateProtoDescriptorPath(v),
 				v,
 			)
@@ -530,7 +537,7 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 		files = append(files, rel)
 	}
 
-	protoParser.ImportPaths = []string{filepath.Join("desc", "proto")}
+	protoParser.ImportPaths = []string{filepath.Join("desc", "proto"), filepath.Join("desc", "proto", "third_party")}
 	protoParser.IncludeSourceCodeInfo = true
 	fds, err = protoParser.ParseFiles(files...)
 	if err != nil {

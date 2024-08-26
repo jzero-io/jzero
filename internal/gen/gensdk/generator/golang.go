@@ -86,7 +86,7 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	// parse proto
 	var protoParser protoparse.Parser
 	if len(protoFiles) > 0 {
-		protoParser.ImportPaths = []string{g.config.ProtoDir}
+		protoParser.ImportPaths = []string{g.config.ProtoDir, filepath.Join(g.config.ProtoDir, "third_party")}
 		var protoRelFiles []string
 		for _, v := range protoFiles {
 			rel, err := filepath.Rel(g.config.ProtoDir, v)
@@ -313,7 +313,7 @@ func (g *Golang) genPbTypesModel(protoFiles []string) ([]*GeneratedFile, error) 
 	defer os.RemoveAll(tmpDir)
 
 	for _, pf := range protoFiles {
-		resp, err := execx.Run(fmt.Sprintf("protoc -I%s --go_out=%s %s", g.config.ProtoDir, tmpDir, pf), g.wd)
+		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s --go_out=%s %s", g.config.ProtoDir, filepath.Join(g.config.ProtoDir, "third_party"), tmpDir, pf), g.wd)
 		if err != nil {
 			return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
 		}

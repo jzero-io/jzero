@@ -125,7 +125,7 @@ func Generate(gc config.GenConfig, genModule bool) error {
 		if err != nil {
 			return err
 		}
-		resp, err := execx.Run(fmt.Sprintf("protoc -I%s --go_out=%s --go-grpc_out=%s %s", baseProtoDir, filepath.Join(gc.Zrpcclient.Output, "model", gc.Zrpcclient.Scope), filepath.Join(gc.Zrpcclient.Output, "model", gc.Zrpcclient.Scope), fp), wd)
+		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s --go_out=%s --go-grpc_out=%s %s", baseProtoDir, filepath.Join(baseProtoDir, "third_party"), filepath.Join(gc.Zrpcclient.Output, "model", gc.Zrpcclient.Scope), filepath.Join(gc.Zrpcclient.Output, "model", gc.Zrpcclient.Scope), fp), wd)
 		if err != nil {
 			return errors.Errorf("err: [%v], resp: [%s]", err, resp)
 		}

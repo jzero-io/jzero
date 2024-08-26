@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/pkg/errors"
@@ -71,23 +73,27 @@ func Gen(gcf config.GenConfig) error {
 }
 
 func RemoveExtraFiles(wd string, style string) {
-	if err := os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd, style))); err != nil {
-		logx.Debugf("remove api frame main go file error: %s", err.Error())
-	}
-	if err := os.Remove(filepath.Join(wd, "etc", getApiFrameEtcFilename(wd, style))); err != nil {
-		logx.Debugf("remove api etc file error: %s", err.Error())
+	if pathx.FileExists(filepath.Join("desc", "api")) {
+		if err := os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd, style))); err != nil {
+			logx.Debugf("remove api frame main go file error: %s", err.Error())
+		}
+		if err := os.Remove(filepath.Join(wd, "etc", getApiFrameEtcFilename(wd, style))); err != nil {
+			logx.Debugf("remove api etc file error: %s", err.Error())
+		}
 	}
 
-	protoFilenames, err := GetProtoFilepath(filepath.Join("desc", "proto"))
-	if err == nil {
-		for _, v := range protoFilenames {
-			v = filepath.Base(v)
-			fileBase := v[0 : len(v)-len(path.Ext(v))]
-			if err = os.Remove(filepath.Join(wd, getProtoFrameMainGoFilename(fileBase, style))); err != nil {
-				logx.Debugf("remove proto frame main go file error: %s", err.Error())
-			}
-			if err = os.Remove(filepath.Join(wd, "etc", getProtoFrameEtcFilename(fileBase, style))); err != nil {
-				logx.Debugf("remove proto etc file error: %s", err.Error())
+	if pathx.FileExists(filepath.Join("desc", "proto")) {
+		protoFilenames, err := GetProtoFilepath(filepath.Join("desc", "proto"))
+		if err == nil {
+			for _, v := range protoFilenames {
+				v = filepath.Base(v)
+				fileBase := v[0 : len(v)-len(path.Ext(v))]
+				if err = os.Remove(filepath.Join(wd, getProtoFrameMainGoFilename(fileBase, style))); err != nil {
+					logx.Debugf("remove proto frame main go file error: %s", err.Error())
+				}
+				if err = os.Remove(filepath.Join(wd, "etc", getProtoFrameEtcFilename(fileBase, style))); err != nil {
+					logx.Debugf("remove proto etc file error: %s", err.Error())
+				}
 			}
 		}
 	}

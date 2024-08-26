@@ -58,8 +58,9 @@ func Gen(gc config.GenConfig) error {
 			return err
 		}
 
-		command := fmt.Sprintf("protoc -I%s --doc_out=%s --doc_opt=%s,index.%s %s",
+		command := fmt.Sprintf("protoc -I%s -I%s --doc_out=%s --doc_opt=%s,index.%s %s",
 			gc.Docs.ProtoDir,
+			filepath.Join(gc.Docs.ProtoDir, "third_party"),
 			gc.Docs.Output,
 			gc.Docs.Format,
 			getExt(gc.Docs.Format),

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/jzero-io/jzero/config"
@@ -52,8 +53,9 @@ func Gen(gc config.GenConfig) error {
 		}
 
 		for _, path := range protoFilepath {
-			command := fmt.Sprintf("protoc -I%s %s --openapiv2_out=%s",
+			command := fmt.Sprintf("protoc -I%s -I%s %s --openapiv2_out=%s",
 				gc.Swagger.ProtoDir,
+				filepath.Join(gc.Swagger.ProtoDir, "third_party"),
 				path,
 				gc.Swagger.Output,
 			)
