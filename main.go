@@ -15,7 +15,7 @@ var (
 
 // ldflags
 var (
-	version = "0.23.8"
+	version = "0.24.0"
 	commit  string
 	date    string
 )
