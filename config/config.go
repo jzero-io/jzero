@@ -52,8 +52,9 @@ type GenConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
 	// global flags
-	Home  string `mapstructure:"home"`
-	Style string `mapstructure:"style"`
+	Home   string `mapstructure:"home"`
+	Style  string `mapstructure:"style"`
+	Branch string `mapstructure:"branch"`
 
 	ChangeReplaceTypes bool `mapstructure:"change-replace-types"`
 	RemoveSuffix       bool `mapstructure:"remove-suffix"`

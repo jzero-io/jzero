@@ -48,9 +48,12 @@ var genCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		home, _ := os.UserHomeDir()
 		if !pathx.FileExists(config.C.Gen.Home) {
-			home, _ := os.UserHomeDir()
 			config.C.Gen.Home = filepath.Join(home, ".jzero", Version)
+		}
+		if config.C.Gen.Branch != "" {
+			config.C.Gen.Home = filepath.Join(home, ".jzero", "templates", config.C.Gen.Branch)
 		}
 		embeded.Home = config.C.Gen.Home
 		return gen.Gen(config.C.Gen)
@@ -191,6 +194,7 @@ func init() {
 		// gen command persistentFlags
 		genCmd.PersistentFlags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 		genCmd.PersistentFlags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
+		genCmd.PersistentFlags().StringP("branch", "", "", "set branch")
 
 		genCmd.Flags().BoolP("model-mysql-strict", "", false, "goctl model mysql strict mode, see [https://go-zero.dev/docs/tutorials/cli/model]")
 		genCmd.Flags().StringSliceP("model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
