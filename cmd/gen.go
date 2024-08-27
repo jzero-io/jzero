@@ -81,6 +81,22 @@ var genCmd = &cobra.Command{
 var genZRpcClientCmd = &cobra.Command{
 	Use:   "zrpcclient",
 	Short: `Gen zrpc client code by proto`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if len(config.C.Gen.Zrpcclient.Hooks.Before) > 0 {
+			fmt.Printf("%s hooks \n", color.WithColor("Start Before", color.FgGreen))
+		}
+		for _, v := range config.C.Gen.Zrpcclient.Hooks.Before {
+			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			err := pkg.Run(v, config.C.Gen.Wd())
+			if err != nil {
+				return err
+			}
+		}
+		if len(config.C.Gen.Zrpcclient.Hooks.Before) > 0 {
+			fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
+		}
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wd, err := os.Getwd()
 		cobra.CheckErr(err)
@@ -103,6 +119,22 @@ var genZRpcClientCmd = &cobra.Command{
 		}
 		return genzrpcclient.Generate(config.C.Gen, genModule)
 	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		if len(config.C.Gen.Zrpcclient.Hooks.After) > 0 {
+			fmt.Printf("%s hooks \n", color.WithColor("Start After", color.FgGreen))
+		}
+		for _, v := range config.C.Gen.Zrpcclient.Hooks.After {
+			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			err := pkg.Run(v, config.C.Gen.Wd())
+			if err != nil {
+				return err
+			}
+		}
+		if len(config.C.Gen.Zrpcclient.Hooks.After) > 0 {
+			fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
+		}
+		return nil
+	},
 }
 
 // genSwaggerCmd represents the genSwagger command
@@ -118,6 +150,22 @@ var genSwaggerCmd = &cobra.Command{
 var genSdkCmd = &cobra.Command{
 	Use:   "sdk",
 	Short: `Generate sdk client by api file and proto file`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if len(config.C.Gen.Sdk.Hooks.Before) > 0 {
+			fmt.Printf("%s hooks \n", color.WithColor("Start Before", color.FgGreen))
+		}
+		for _, v := range config.C.Gen.Sdk.Hooks.Before {
+			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			err := pkg.Run(v, config.C.Gen.Wd())
+			if err != nil {
+				return err
+			}
+		}
+		if len(config.C.Gen.Sdk.Hooks.Before) > 0 {
+			fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
+		}
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if config.C.Gen.Sdk.Language == "ts" {
 			console.Warning("[warning] ts client is still working...")
@@ -161,6 +209,22 @@ var genSdkCmd = &cobra.Command{
 			embeded.Home = filepath.Join(homeDir, ".jzero", Version)
 		}
 		return gensdk.GenSdk(config.C.Gen, genModule)
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		if len(config.C.Gen.Sdk.Hooks.After) > 0 {
+			fmt.Printf("%s hooks \n", color.WithColor("Start After", color.FgGreen))
+		}
+		for _, v := range config.C.Gen.Sdk.Hooks.After {
+			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			err := pkg.Run(v, config.C.Gen.Wd())
+			if err != nil {
+				return err
+			}
+		}
+		if len(config.C.Gen.Sdk.Hooks.After) > 0 {
+			fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
+		}
+		return nil
 	},
 }
 

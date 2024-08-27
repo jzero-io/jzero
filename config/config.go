@@ -74,6 +74,8 @@ type GenConfig struct {
 }
 
 type GenSdkConfig struct {
+	Hooks HooksConfig `mapstructure:"hooks"`
+
 	Scope        string `mapstructure:"scope"`
 	ApiDir       string `mapstructure:"api-dir"`
 	ProtoDir     string `mapstructure:"proto-dir"`
@@ -92,6 +94,8 @@ type GenSwaggerConfig struct {
 }
 
 type GenZrpcclientConfig struct {
+	Hooks HooksConfig `mapstructure:"hooks"`
+
 	Scope     string `mapstructure:"scope"`
 	Output    string `mapstructure:"output"`
 	GoVersion string `mapstructure:"goVersion"`
