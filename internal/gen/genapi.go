@@ -480,17 +480,17 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 
 	var methodFunc string
 
-	var requestType string
-	var responseType string
+	var requestType spec.Type
+	var responseType spec.Type
 
 	for _, group := range apiSpec.Service.Groups {
 		for _, route := range group.Routes {
 			if route.Handler == file.Handler && group.GetAnnotation("group") == file.Group {
 				if route.RequestType != nil {
-					requestType = util.Title(route.RequestType.Name())
+					requestType = route.RequestType
 				}
 				if route.ResponseType != nil {
-					responseType = util.Title(route.ResponseType.Name())
+					responseType = route.ResponseType
 				}
 				methodFunc = route.Handler
 				methodFunc = util.Title(strings.TrimSuffix(methodFunc, "Handler"))
@@ -502,29 +502,54 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 	ast.Inspect(f, func(node ast.Node) bool {
 		if fn, ok := node.(*ast.FuncDecl); ok && fn.Recv != nil {
 			if fn.Name.Name == methodFunc {
-				if fn.Type != nil && fn.Type.Params != nil {
-					for _, param := range fn.Type.Params.List {
-						if starExpr, ok := param.Type.(*ast.StarExpr); ok {
-							if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
-								if selectorExpr.Sel.Name != requestType {
-									selectorExpr.Sel.Name = requestType
-									needModify = true
-								}
-							}
+				needModify = true
+
+				// 设置函数的入参
+				if requestType != nil {
+					switch requestType.(type) {
+					case spec.DefineStruct:
+						fn.Type.Params.List = []*ast.Field{
+							{
+								Names: []*ast.Ident{ast.NewIdent("req")},
+								Type:  &ast.StarExpr{X: ast.NewIdent("types." + requestType.Name())},
+							},
 						}
 					}
+				} else {
+					fn.Type.Params.List = nil
 				}
 
-				if fn.Type != nil && fn.Type.Results != nil {
-					for _, result := range fn.Type.Results.List {
-						if starExpr, ok := result.Type.(*ast.StarExpr); ok {
-							if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
-								if selectorExpr.Sel.Name != responseType {
-									selectorExpr.Sel.Name = responseType
-									needModify = true
-								}
-							}
+				// 设置参数的出参
+				if responseType != nil {
+					switch responseType.(type) {
+					case spec.PrimitiveType:
+						fn.Type.Results.List = []*ast.Field{
+							{
+								Names: []*ast.Ident{ast.NewIdent("resp")},
+								Type:  ast.NewIdent(responseType.Name()),
+							},
+							{
+								Names: []*ast.Ident{ast.NewIdent("err")},
+								Type:  ast.NewIdent("error"),
+							},
 						}
+					case spec.DefineStruct:
+						fn.Type.Results.List = []*ast.Field{
+							{
+								Names: []*ast.Ident{ast.NewIdent("resp")},
+								Type:  &ast.StarExpr{X: ast.NewIdent("types." + responseType.Name())},
+							},
+							{
+								Names: []*ast.Ident{ast.NewIdent("err")},
+								Type:  ast.NewIdent("error"),
+							},
+						}
+					}
+				} else {
+					fn.Type.Results.List = []*ast.Field{
+						{
+							Type: ast.NewIdent("error"),
+						},
 					}
 				}
 			}
