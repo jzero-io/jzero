@@ -133,15 +133,15 @@ func (ja *JzeroApi) Gen() error {
 
 	if ja.RemoveSuffix && apiSpec != nil {
 		for _, file := range allHandlerFiles {
-			if err := ja.rewriteHandlerGo(file.Path); err != nil {
+			if err := ja.removeHandlerSuffix(file.Path); err != nil {
 				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
-			if err := ja.rewriteRoutesGo(file.Group, file.Handler); err != nil {
+			if err := ja.removeRouteSuffix(file.Group, file.Handler); err != nil {
 				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
 		}
 		for _, file := range allLogicFiles {
-			if err := ja.rewriteLogicGo(file.Path); err != nil {
+			if err := ja.removeLogicSuffix(file.Path); err != nil {
 				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
 		}
@@ -150,12 +150,6 @@ func (ja *JzeroApi) Gen() error {
 	if ja.ChangeReplaceTypes {
 		for _, file := range allLogicFiles {
 			if err := ja.changeLogicTypes(file, apiSpec); err != nil {
-				console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
-				continue
-			}
-		}
-		for _, file := range allHandlerFiles {
-			if err := ja.changeReplaceHandlerGoTypes(file, apiSpec); err != nil {
 				console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
 				continue
 			}
@@ -281,7 +275,7 @@ func (ja *JzeroApi) separateTypesGoByGoctlTypesPlugin(mainApiFilePath string) er
 	return nil
 }
 
-func (ja *JzeroApi) rewriteHandlerGo(fp string) error {
+func (ja *JzeroApi) removeHandlerSuffix(fp string) error {
 	// Get the new file name of the file (without the 7 characters(Handler) before the ".go" extension)
 	newFilePath := fp[:len(fp)-10]
 	// patch
@@ -343,7 +337,7 @@ func (ja *JzeroApi) rewriteHandlerGo(fp string) error {
 	return os.Rename(fp, newFilePath)
 }
 
-func (ja *JzeroApi) rewriteRoutesGo(group string, handler string) error {
+func (ja *JzeroApi) removeRouteSuffix(group string, handler string) error {
 	fp := filepath.Join(ja.Wd, "internal", "handler", "routes.go")
 	fset := token.NewFileSet()
 	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
@@ -380,7 +374,7 @@ func (ja *JzeroApi) rewriteRoutesGo(group string, handler string) error {
 	return nil
 }
 
-func (ja *JzeroApi) rewriteLogicGo(fp string) error {
+func (ja *JzeroApi) removeLogicSuffix(fp string) error {
 	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
 	newFilePath := fp[:len(fp)-8]
 	// patch
@@ -548,88 +542,6 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 		if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (ja *JzeroApi) changeReplaceHandlerGoTypes(file HandlerFile, apiSpec *spec.ApiSpec) error {
-	fp := file.Path // handler file path
-	if ja.RemoveSuffix {
-		fp = file.Path[:len(file.Path)-10]
-		// patch
-		fp = strings.TrimSuffix(fp, "_")
-		fp = strings.TrimSuffix(fp, "-")
-		fp += ".go"
-	}
-
-	var requestType string
-
-	for _, group := range apiSpec.Service.Groups {
-		for _, route := range group.Routes {
-			if route.Handler == file.Handler && group.GetAnnotation("group") == file.Group {
-				if route.RequestType != nil {
-					requestType = util.Title(route.RequestType.Name())
-				}
-			}
-		}
-	}
-
-	fset := token.NewFileSet()
-
-	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
-	if err != nil {
-		return err
-	}
-
-	funcName := util.Title(file.Handler)
-	if ja.RemoveSuffix {
-		funcName = strings.TrimSuffix(funcName, "Handler")
-	}
-
-	ast.Inspect(f, func(n ast.Node) bool {
-		if fn, ok := n.(*ast.FuncDecl); ok {
-			if fn.Name.Name == funcName {
-				// find var req types.XXRequest
-				for _, body := range fn.Body.List {
-					if returnStmt, ok := body.(*ast.ReturnStmt); ok {
-						for _, v := range returnStmt.Results {
-							if funcLit, ok := v.(*ast.FuncLit); ok {
-								for _, list := range funcLit.Body.List {
-									if declStmt, ok := list.(*ast.DeclStmt); ok {
-										if decl, ok := declStmt.Decl.(*ast.GenDecl); ok {
-											for _, declSpec := range decl.Specs {
-												if valueSpec, ok := declSpec.(*ast.ValueSpec); ok {
-													if selectorExpr, ok := valueSpec.Type.(*ast.SelectorExpr); ok {
-														if ident, ok := selectorExpr.X.(*ast.Ident); ok {
-															if ident.Name == "types" {
-																selectorExpr.Sel.Name = requestType
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return true
-	})
-
-	// Write the modified AST back to the file
-	buf := bytes.NewBuffer(nil)
-	if err := goformat.Node(buf, fset, f); err != nil {
-		return err
-	}
-
-	if err := os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
-		return err
 	}
 
 	return nil
