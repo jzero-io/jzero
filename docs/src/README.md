@@ -27,6 +27,8 @@ jzero 具备以下特点:
     * 支持 types 文件分组(原生 goctl 将所有 api 文件生成的 types 放到单文件 types.go 中, 导致该文件爆炸)
     * 编写多个 api 文件, 无需显示的编写一个 main.api 文件, 框架自动处理好
     * 默认集成 `https://github.com/go-playground/validator` 校验框架
+    * 支持重新生成 handler 文件, 并支持不同场景(有输入输出, 有输入没输出, 没输入有输出, 没输入没输出), 无需再手动维护 handler 代码, 提升开发过程中的体验
+    * 支持自动修改 logic 文件函数的入参和出参, 当 api 文件修改后, 自动适配修改, 提升开发过程中的体验
 * rpc 场景
     * 支持多个 proto, 自动注册, 无需手动编写
     * 默认支持 proto message 的字段校验, 且支持自定义错误信息
