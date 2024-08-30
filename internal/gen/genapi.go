@@ -11,6 +11,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/config"
+	"github.com/zeromicro/go-zero/core/logx"
+
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/color"
@@ -59,6 +62,24 @@ func (ja *JzeroApi) Gen() error {
 		return nil
 	}
 
+	var goctlHome string
+
+	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "api")) {
+		tempDir, err := os.MkdirTemp(os.TempDir(), "")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tempDir)
+		err = embeded.WriteTemplateDir(filepath.Join("go-zero", "api"), filepath.Join(tempDir, "api"))
+		if err != nil {
+			return err
+		}
+		goctlHome = tempDir
+	} else {
+		goctlHome = filepath.Join(config.C.Gen.Home, "go-zero")
+	}
+	logx.Debugf("goctl_home = %s", goctlHome)
+
 	if pathx.FileExists(apiDirName) {
 		// format api dir
 		command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
@@ -93,7 +114,11 @@ func (ja *JzeroApi) Gen() error {
 			return err
 		}
 
-		err = ja.generateApiCode(mainApiFilePath)
+		if config.C.Gen.RegenApiHandler {
+			_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler"))
+		}
+
+		err = ja.generateApiCode(mainApiFilePath, goctlHome)
 		if err != nil {
 			return err
 		}
@@ -124,7 +149,7 @@ func (ja *JzeroApi) Gen() error {
 
 	if ja.ChangeReplaceTypes {
 		for _, file := range allLogicFiles {
-			if err := ja.changeReplaceLogicGoTypes(file, apiSpec); err != nil {
+			if err := ja.changeLogicTypes(file, apiSpec); err != nil {
 				console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
 				continue
 			}
@@ -233,14 +258,14 @@ func findApiFiles(dir string) ([]string, error) {
 	return apiFiles, nil
 }
 
-func (ja *JzeroApi) generateApiCode(mainApiFilePath string) error {
+func (ja *JzeroApi) generateApiCode(mainApiFilePath string, goctlHome string) error {
 	if mainApiFilePath == "" {
 		return errors.New("empty mainApiFilePath")
 	}
 
 	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
 	dir := "."
-	command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s ", mainApiFilePath, dir, filepath.Join(embeded.Home, "go-zero"), ja.Style)
+	command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", mainApiFilePath, dir, goctlHome, ja.Style)
 	if _, err := execx.Run(command, ja.Wd); err != nil {
 		return err
 	}
@@ -440,7 +465,8 @@ func (ja *JzeroApi) rewriteLogicGo(fp string) error {
 	return os.Rename(fp, newFilePath)
 }
 
-func (ja *JzeroApi) changeReplaceLogicGoTypes(file LogicFile, apiSpec *spec.ApiSpec) error {
+// changeLogicTypes todo: 优化
+func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) error {
 	fp := file.Path // logic file path
 	if ja.RemoveSuffix {
 		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)

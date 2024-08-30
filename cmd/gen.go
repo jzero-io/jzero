@@ -252,7 +252,7 @@ func init() {
 
 		// used for jzero
 		genCmd.Flags().BoolP("remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
-		genCmd.Flags().BoolP("change-replace-types", "", true, "if api file or proto change, e.g. Request or Response type, change handler and logic file content types but not file")
+		genCmd.Flags().BoolP("rewrite-logic-types", "", true, "if api file or proto change, e.g. Request or Response type, change logic file content types but not file")
 
 		// used for goctl
 		// gen command persistentFlags

@@ -34,7 +34,7 @@ func Gen(gcf config.GenConfig) error {
 		Module:             moduleStruct.Path,
 		Style:              gcf.Style,
 		RemoveSuffix:       gcf.RemoveSuffix,
-		ChangeReplaceTypes: gcf.ChangeReplaceTypes,
+		ChangeReplaceTypes: gcf.ChangeLogicTypes,
 	}
 	err = jzeroRpc.Gen()
 	if err != nil {
@@ -46,7 +46,7 @@ func Gen(gcf config.GenConfig) error {
 		Module:             moduleStruct.Path,
 		Style:              gcf.Style,
 		RemoveSuffix:       gcf.RemoveSuffix,
-		ChangeReplaceTypes: gcf.ChangeReplaceTypes,
+		ChangeReplaceTypes: gcf.ChangeLogicTypes,
 	}
 	err = jzeroApi.Gen()
 	if err != nil {

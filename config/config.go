@@ -56,8 +56,9 @@ type GenConfig struct {
 	Style  string `mapstructure:"style"`
 	Branch string `mapstructure:"branch"`
 
-	ChangeReplaceTypes bool `mapstructure:"change-replace-types"`
-	RemoveSuffix       bool `mapstructure:"remove-suffix"`
+	ChangeLogicTypes bool `mapstructure:"change-logic-types"`
+	RemoveSuffix     bool `mapstructure:"remove-suffix"`
+	RegenApiHandler  bool `mapstructure:"regen-api-handler"`
 
 	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`
 	ModelMysqlIgnoreColumns   []string `mapstructure:"model-mysql-ignore-columns"`
