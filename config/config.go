@@ -120,9 +120,9 @@ type IvmConfig struct {
 }
 
 type IvmInitConfig struct {
-	Style              string `mapstructure:"style"`
-	RemoveSuffix       bool   `mapstructure:"remove-suffix"`
-	ChangeReplaceTypes bool   `mapstructure:"change-replace-types"`
+	Style            string `mapstructure:"style"`
+	RemoveSuffix     bool   `mapstructure:"remove-suffix"`
+	ChangeLogicTypes bool   `mapstructure:"change-logic-types"`
 }
 
 type IvmAddConfig struct {

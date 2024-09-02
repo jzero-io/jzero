@@ -30,11 +30,11 @@ func Gen(gcf config.GenConfig) error {
 	}()
 
 	jzeroRpc := JzeroRpc{
-		Wd:                 gcf.Wd(),
-		Module:             moduleStruct.Path,
-		Style:              gcf.Style,
-		RemoveSuffix:       gcf.RemoveSuffix,
-		ChangeReplaceTypes: gcf.ChangeLogicTypes,
+		Wd:               gcf.Wd(),
+		Module:           moduleStruct.Path,
+		Style:            gcf.Style,
+		RemoveSuffix:     gcf.RemoveSuffix,
+		ChangeLogicTypes: gcf.ChangeLogicTypes,
 	}
 	err = jzeroRpc.Gen()
 	if err != nil {
@@ -47,6 +47,7 @@ func Gen(gcf config.GenConfig) error {
 		Style:              gcf.Style,
 		RemoveSuffix:       gcf.RemoveSuffix,
 		ChangeReplaceTypes: gcf.ChangeLogicTypes,
+		RegenApiHandler:    gcf.RegenApiHandler,
 	}
 	err = jzeroApi.Gen()
 	if err != nil {

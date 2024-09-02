@@ -60,7 +60,7 @@ func initConfig() {
 	if config.C.Debug {
 		logx.MustSetup(logx.LogConf{Encoding: "plain"})
 		logx.SetLevel(logx.DebugLevel)
-		logx.Debugf("using jzero frame debug mode, please wait time.Sleep(time.Second * 15)")
+		logx.Debugf("using jzero frame debug mode, please wait time.Sleep(time.Second * %d)", config.C.DebugSleepTime)
 		time.Sleep(time.Duration(config.C.DebugSleepTime) * time.Second)
 	} else {
 		logx.Disable()

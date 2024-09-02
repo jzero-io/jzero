@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+
 	"github.com/zeromicro/go-zero/core/logx"
 
 	"github.com/iancoleman/orderedmap"
@@ -53,11 +55,11 @@ type ServerFile struct {
 }
 
 type JzeroRpc struct {
-	Wd                 string
-	Module             string
-	Style              string
-	RemoveSuffix       bool
-	ChangeReplaceTypes bool
+	Wd               string
+	Module           string
+	Style            string
+	RemoveSuffix     bool
+	ChangeLogicTypes bool
 }
 
 type JzeroProtoApiMiddleware struct {
@@ -131,20 +133,23 @@ func (jr *JzeroRpc) Gen() error {
 
 		if jr.RemoveSuffix {
 			for _, file := range allServerFiles {
-				if err := jr.rewriteServerGo(file.Path); err != nil {
+				if err := jr.removeServerSuffix(file.Path); err != nil {
+					console.Warning("[warning]: remove server suffix %s meet error %v", file.Path, err)
 					continue
 				}
 			}
 			for _, file := range allLogicFiles {
-				if err := jr.rewriteLogicGo(file.Path); err != nil {
+				if err := jr.removeLogicSuffix(file.Path); err != nil {
+					console.Warning("[warning]: remove logic suffix %s meet error %v", file.Path, err)
 					continue
 				}
 			}
 		}
 
-		if jr.ChangeReplaceTypes {
+		if jr.ChangeLogicTypes {
 			for _, file := range allLogicFiles {
-				if err := jr.changeReplaceLogicGoTypes(file); err != nil {
+				if err := jr.changeLogicTypes(file); err != nil {
+					console.Warning("[warning]: change logic types %s meet error %v", file.Path, err)
 					continue
 				}
 			}
@@ -261,6 +266,7 @@ func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, er
 
 			f := LogicFile{
 				Path:             fp,
+				Package:          protoSpec.PbPackage,
 				Handler:          rpc.Name,
 				Group:            service.Name,
 				ClientStream:     rpc.StreamsRequest,
@@ -275,7 +281,7 @@ func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, er
 	return logicFiles, nil
 }
 
-func (jr *JzeroRpc) rewriteLogicGo(fp string) error {
+func (jr *JzeroRpc) removeLogicSuffix(fp string) error {
 	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
 	newFilePath := fp[:len(fp)-8]
 	// patch
@@ -285,6 +291,7 @@ func (jr *JzeroRpc) rewriteLogicGo(fp string) error {
 
 	if pathx.FileExists(newFilePath) {
 		_ = os.Remove(fp)
+		return nil
 	}
 
 	fset := token.NewFileSet()
@@ -359,7 +366,7 @@ func (jr *JzeroRpc) rewriteLogicGo(fp string) error {
 	return os.Rename(fp, newFilePath)
 }
 
-func (jr *JzeroRpc) rewriteServerGo(fp string) error {
+func (jr *JzeroRpc) removeServerSuffix(fp string) error {
 	fset := token.NewFileSet()
 
 	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
@@ -453,7 +460,7 @@ func (jr *JzeroRpc) rewriteServerGo(fp string) error {
 	return nil
 }
 
-func (jr *JzeroRpc) changeReplaceLogicGoTypes(file LogicFile) error {
+func (jr *JzeroRpc) changeLogicTypes(file LogicFile) error {
 	fp := file.Path // logic file path
 	if jr.RemoveSuffix {
 		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
@@ -471,33 +478,59 @@ func (jr *JzeroRpc) changeReplaceLogicGoTypes(file LogicFile) error {
 		return err
 	}
 
-	var needModify bool
 	ast.Inspect(f, func(node ast.Node) bool {
 		if fn, ok := node.(*ast.FuncDecl); ok && fn.Recv != nil {
-			if fn.Name.Name == file.Handler {
-				if fn.Type != nil && fn.Type.Params != nil {
-					for _, param := range fn.Type.Params.List {
-						if starExpr, ok := param.Type.(*ast.StarExpr); ok {
-							if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
-								if selectorExpr.Sel.Name != file.RequestTypeName {
-									selectorExpr.Sel.Name = file.RequestTypeName
-									needModify = true
-								}
-							}
-						}
+			if fn.Name.Name == util.Title(file.Handler) {
+				// custom request and response
+				if !file.ClientStream && !file.ServerStream {
+					fn.Type.Params.List = []*ast.Field{
+						{
+							Names: []*ast.Ident{ast.NewIdent("in")},
+							Type:  &ast.StarExpr{X: ast.NewIdent(fmt.Sprintf("%s.%s", file.Package, util.Title(file.RequestTypeName)))},
+						},
+					}
+					fn.Type.Results.List = []*ast.Field{
+						{
+							Type: &ast.StarExpr{X: ast.NewIdent(fmt.Sprintf("%s.%s", file.Package, util.Title(file.ResponseTypeName)))},
+						},
+						{
+							Type: ast.NewIdent("error"),
+						},
 					}
 				}
 
-				if fn.Type != nil && fn.Type.Results != nil {
-					for _, result := range fn.Type.Results.List {
-						if starExpr, ok := result.Type.(*ast.StarExpr); ok {
-							if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
-								if selectorExpr.Sel.Name != file.ResponseTypeName {
-									selectorExpr.Sel.Name = file.ResponseTypeName
-									needModify = true
-								}
-							}
-						}
+				// server stream
+				if !file.ClientStream && file.ServerStream {
+					fn.Type.Params.List = []*ast.Field{
+						{
+							Names: []*ast.Ident{ast.NewIdent("in")},
+							Type:  &ast.StarExpr{X: ast.NewIdent(fmt.Sprintf("%s.%s", file.Package, util.Title(file.RequestTypeName)))},
+						},
+						{
+							Names: []*ast.Ident{ast.NewIdent("stream")},
+							Type:  ast.NewIdent(fmt.Sprintf("%s.%s_%sServer", file.Package, util.Title(file.Group), util.Title(file.Handler))),
+						},
+					}
+					fn.Type.Results.List = []*ast.Field{
+						{
+							Type: ast.NewIdent("error"),
+						},
+					}
+				}
+
+				// client stream
+				if file.ClientStream {
+					fn.Type.Params.List = []*ast.Field{
+						{
+							Names: []*ast.Ident{ast.NewIdent("stream")},
+							Type:  ast.NewIdent(fmt.Sprintf("%s.%s_%sServer", file.Package, util.Title(file.Group), util.Title(file.Handler))),
+						},
+					}
+
+					fn.Type.Results.List = []*ast.Field{
+						{
+							Type: ast.NewIdent("error"),
+						},
 					}
 				}
 			}
@@ -505,16 +538,14 @@ func (jr *JzeroRpc) changeReplaceLogicGoTypes(file LogicFile) error {
 		return true
 	})
 
-	if needModify {
-		// Write the modified AST back to the file
-		buf := bytes.NewBuffer(nil)
-		if err := goformat.Node(buf, fset, f); err != nil {
-			return err
-		}
+	// Write the modified AST back to the file
+	buf := bytes.NewBuffer(nil)
+	if err := goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
 
-		if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
-			return err
-		}
+	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+		return err
 	}
 
 	return nil

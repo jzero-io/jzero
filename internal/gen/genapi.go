@@ -11,6 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/pkg/astx"
+
+	"github.com/samber/lo"
+
 	"github.com/jzero-io/jzero/config"
 	"github.com/zeromicro/go-zero/core/logx"
 
@@ -32,6 +36,7 @@ type JzeroApi struct {
 	Style              string
 	RemoveSuffix       bool
 	ChangeReplaceTypes bool
+	RegenApiHandler    bool
 }
 
 type HandlerFile struct {
@@ -41,7 +46,10 @@ type HandlerFile struct {
 }
 
 type LogicFile struct {
-	Group   string
+	Package string
+	// service
+	Group string
+	// rpc name
 	Handler string
 	Path    string
 
@@ -114,7 +122,7 @@ func (ja *JzeroApi) Gen() error {
 			return err
 		}
 
-		if config.C.Gen.RegenApiHandler {
+		if ja.RegenApiHandler {
 			_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler"))
 		}
 
@@ -422,6 +430,7 @@ func (ja *JzeroApi) removeLogicSuffix(fp string) error {
 		return true
 	})
 
+	// change handler type struct
 	ast.Inspect(f, func(node ast.Node) bool {
 		if fn, ok := node.(*ast.GenDecl); ok && fn.Tok == token.TYPE {
 			for _, s := range fn.Specs {
@@ -459,7 +468,7 @@ func (ja *JzeroApi) removeLogicSuffix(fp string) error {
 	return os.Rename(fp, newFilePath)
 }
 
-// changeLogicTypes todo: 优化
+// changeLogicTypes just change logic file logic function params and resp, but not body and others code
 func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) error {
 	fp := file.Path // logic file path
 	if ja.RemoveSuffix {
@@ -478,10 +487,10 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 		return err
 	}
 
-	var methodFunc string
-
-	var requestType spec.Type
-	var responseType spec.Type
+	var (
+		methodFunc                string
+		requestType, responseType spec.Type
+	)
 
 	for _, group := range apiSpec.Service.Groups {
 		for _, route := range group.Routes {
@@ -492,19 +501,15 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 				if route.ResponseType != nil {
 					responseType = route.ResponseType
 				}
-				methodFunc = route.Handler
-				methodFunc = util.Title(strings.TrimSuffix(methodFunc, "Handler"))
+				// todo: do not guess remove-suffix=false
+				methodFunc = util.Title(strings.TrimSuffix(route.Handler, "Handler"))
 			}
 		}
 	}
 
-	var needModify bool
 	ast.Inspect(f, func(node ast.Node) bool {
 		if fn, ok := node.(*ast.FuncDecl); ok && fn.Recv != nil {
 			if fn.Name.Name == methodFunc {
-				needModify = true
-
-				// 设置函数的入参
 				if requestType != nil {
 					switch requestType.(type) {
 					case spec.DefineStruct:
@@ -519,7 +524,6 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 					fn.Type.Params.List = nil
 				}
 
-				// 设置参数的出参
 				if responseType != nil {
 					switch responseType.(type) {
 					case spec.PrimitiveType:
@@ -557,16 +561,138 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 		return true
 	})
 
-	if needModify {
-		// Write the modified AST back to the file
-		buf := bytes.NewBuffer(nil)
-		if err := goformat.Node(buf, fset, f); err != nil {
-			return err
-		}
+	// change handler type struct
+	var needImportNetHttp bool
+	if ja.RegenApiHandler {
+		ast.Inspect(f, func(node ast.Node) bool {
+			if genDecl, ok := node.(*ast.GenDecl); ok && genDecl.Tok == token.TYPE {
+				for _, ss := range genDecl.Specs {
+					if typeSpec, ok := ss.(*ast.TypeSpec); ok {
+						var (
+							structType *ast.StructType
+							ok         bool
+							names      []string
+						)
+						if structType, ok = typeSpec.Type.(*ast.StructType); ok {
+							for _, field := range structType.Fields.List {
+								for _, name := range field.Names {
+									names = append(names, name.Name)
+								}
+							}
+						}
+						if structType != nil && requestType == nil && !lo.Contains(names, "r") {
+							newField := &ast.Field{
+								Names: []*ast.Ident{ast.NewIdent("r")},
+								Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
+							}
+							structType.Fields.List = append(structType.Fields.List, newField)
+							needImportNetHttp = true
+						}
+						if structType != nil && responseType == nil && !lo.Contains(names, "w") {
+							newField := &ast.Field{
+								Names: []*ast.Ident{ast.NewIdent("w")},
+								Type:  ast.NewIdent("http.ResponseWriter"),
+							}
+							structType.Fields.List = append(structType.Fields.List, newField)
+							needImportNetHttp = true
+						}
+					}
+				}
+			}
+			return true
+		})
 
-		if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
-			return err
+		// change New type struct params
+		ast.Inspect(f, func(n ast.Node) bool {
+			if fn, ok := n.(*ast.FuncDecl); ok && fn.Name.Name == fmt.Sprintf("New%s", methodFunc) {
+				var paramNames []string
+				for _, param := range fn.Type.Params.List {
+					for _, name := range param.Names {
+						paramNames = append(paramNames, name.Name)
+					}
+				}
+				if requestType == nil && !lo.Contains(paramNames, "r") {
+					fn.Type.Params.List = append(fn.Type.Params.List, &ast.Field{
+						Names: []*ast.Ident{ast.NewIdent("r")},
+						Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
+					})
+					needImportNetHttp = true
+				}
+
+				if responseType == nil && !lo.Contains(paramNames, "w") {
+					fn.Type.Params.List = append(fn.Type.Params.List, &ast.Field{
+						Names: []*ast.Ident{ast.NewIdent("w")},
+						Type:  ast.NewIdent("http.ResponseWriter"),
+					})
+					needImportNetHttp = true
+				}
+
+				for _, body := range fn.Body.List {
+					if returnStmt, ok := body.(*ast.ReturnStmt); ok {
+						for _, result := range returnStmt.Results {
+							if unaryExpr, ok := result.(*ast.UnaryExpr); ok {
+								if compositeLit, ok := unaryExpr.X.(*ast.CompositeLit); ok {
+									if _, ok = compositeLit.Type.(*ast.Ident); ok {
+										hasR := false
+										hasW := false
+
+										for _, elt := range compositeLit.Elts {
+											if kv, ok := elt.(*ast.KeyValueExpr); ok {
+												if key, ok := kv.Key.(*ast.Ident); ok {
+													if key.Name == "r" {
+														hasR = true
+													}
+													if key.Name == "w" {
+														hasW = true
+													}
+												}
+											}
+										}
+
+										if requestType == nil && !hasR {
+											// Add new field
+											newField := &ast.KeyValueExpr{
+												Key:   ast.NewIdent("r"),
+												Value: ast.NewIdent("r"), // or any default value you want
+											}
+											compositeLit.Elts = append(compositeLit.Elts, newField)
+										}
+
+										if responseType == nil && !hasW {
+											// Add new field
+											newField := &ast.KeyValueExpr{
+												Key:   ast.NewIdent("w"),
+												Value: ast.NewIdent("w"), // or any default value you want
+											}
+											compositeLit.Elts = append(compositeLit.Elts, newField)
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return true
+		})
+
+		// check `net/http` import
+		if needImportNetHttp {
+			addedImports := make(map[string]bool)
+			if !astx.HasImport(f, `"net/http"`) {
+				astx.AddImport(f, `"net/http"`, addedImports)
+			}
 		}
+	}
+
+	// Write the modified AST back to the file
+	buf := bytes.NewBuffer(nil)
+	if err := goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
+
+	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+		return err
 	}
 
 	return nil

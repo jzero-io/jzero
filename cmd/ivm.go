@@ -79,7 +79,7 @@ func init() {
 
 		ivmInitCmd.Flags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 		ivmInitCmd.Flags().BoolP("remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
-		ivmInitCmd.Flags().BoolP("change-replace-types", "", true, "if api file or proto change, e.g. Request or Response type, change handler and logic file content types but not file")
+		ivmInitCmd.Flags().BoolP("change-logic-types", "", true, "if api file or proto change, e.g. Request or Response type, change handler and logic file content types but not file")
 	}
 
 	{

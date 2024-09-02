@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/pkg/astx"
+
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/pkg/templatex"
@@ -186,20 +188,20 @@ func (ivm *IvmInit) astAddImport(f *ast.File, oldService string, clientStream, s
 	// Track added imports to avoid duplicates
 	addedImports := make(map[string]bool)
 
-	if !hasImport(f, `"google.golang.org/protobuf/proto"`) {
-		addImport(f, `"google.golang.org/protobuf/proto"`, addedImports)
+	if !astx.HasImport(f, `"google.golang.org/protobuf/proto"`) {
+		astx.AddImport(f, `"google.golang.org/protobuf/proto"`, addedImports)
 	}
 
-	if !hasImport(f, fmt.Sprintf(`"%s/internal/logic/%s"`, ivm.jzeroRpc.Module, strings.ToLower(oldService))) {
-		addImport(f, fmt.Sprintf(`"%s/internal/logic/%s"`, ivm.jzeroRpc.Module, strings.ToLower(oldService)), addedImports)
+	if !astx.HasImport(f, fmt.Sprintf(`"%s/internal/logic/%s"`, ivm.jzeroRpc.Module, strings.ToLower(oldService))) {
+		astx.AddImport(f, fmt.Sprintf(`"%s/internal/logic/%s"`, ivm.jzeroRpc.Module, strings.ToLower(oldService)), addedImports)
 	}
 
-	if !hasImport(f, fmt.Sprintf(`"%s/internal/pb/%spb"`, ivm.jzeroRpc.Module, strings.ToLower(oldService))) {
-		addImport(f, fmt.Sprintf(`"%s/internal/pb/%spb"`, ivm.jzeroRpc.Module, strings.ToLower(oldService)), addedImports)
+	if !astx.HasImport(f, fmt.Sprintf(`"%s/internal/pb/%spb"`, ivm.jzeroRpc.Module, strings.ToLower(oldService))) {
+		astx.AddImport(f, fmt.Sprintf(`"%s/internal/pb/%spb"`, ivm.jzeroRpc.Module, strings.ToLower(oldService)), addedImports)
 	}
 	if clientStream || serverStream {
-		if !hasImport(f, `"io"`) {
-			addImport(f, `"io"`, addedImports)
+		if !astx.HasImport(f, `"io"`) {
+			astx.AddImport(f, `"io"`, addedImports)
 		}
 	}
 	return nil
@@ -255,42 +257,4 @@ func (ivm *IvmInit) astInspect(f *ast.File, oldLogicFile gen.LogicFile, newLogic
 	}
 
 	return nil
-}
-
-// hasImport checks if the given import path is already declared in the file.
-func hasImport(f *ast.File, path string) bool {
-	for _, decl := range f.Decls {
-		genDecl, ok := decl.(*ast.GenDecl)
-		if !ok || genDecl.Tok != token.IMPORT {
-			continue
-		}
-		for _, spec := range genDecl.Specs {
-			importSpec, ok := spec.(*ast.ImportSpec)
-			if !ok {
-				continue
-			}
-			if importSpec.Path.Value == path {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// addImport adds the import declaration to the file if it's not already marked as added.
-func addImport(f *ast.File, path string, addedImports map[string]bool) {
-	if !addedImports[path] {
-		addedImports[path] = true
-		f.Decls = append([]ast.Decl{&ast.GenDecl{
-			Tok: token.IMPORT,
-			Specs: []ast.Spec{
-				&ast.ImportSpec{
-					Path: &ast.BasicLit{
-						Kind:  token.STRING,
-						Value: path,
-					},
-				},
-			},
-		}}, f.Decls...)
-	}
 }
