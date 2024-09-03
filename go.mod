@@ -17,8 +17,8 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
-	github.com/zeromicro/go-zero v1.7.1
-	github.com/zeromicro/go-zero/tools/goctl v1.7.1
+	github.com/zeromicro/go-zero v1.7.2
+	github.com/zeromicro/go-zero/tools/goctl v1.7.2
 	golang.org/x/mod v0.20.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240814211410-ddb44dafa142
 	google.golang.org/protobuf v1.34.2
