@@ -11,9 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/pkg"
-	"github.com/zeromicro/go-zero/core/color"
-
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
@@ -21,8 +18,10 @@ import (
 	"github.com/jzero-io/jzero/internal/gen/gensdk"
 	"github.com/jzero-io/jzero/internal/gen/genswagger"
 	"github.com/jzero-io/jzero/internal/gen/genzrpcclient"
+	"github.com/jzero-io/jzero/pkg"
 	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/spf13/cobra"
+	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
@@ -36,7 +35,7 @@ var genCmd = &cobra.Command{
 			fmt.Printf("%s hooks \n", color.WithColor("Start Before", color.FgGreen))
 		}
 		for _, v := range config.C.Gen.Hooks.Before {
-			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			fmt.Printf("%s command %s\n", color.WithColor("Run", color.FgGreen), v)
 			err := pkg.Run(v, config.C.Gen.Wd())
 			if err != nil {
 				return err
@@ -63,7 +62,7 @@ var genCmd = &cobra.Command{
 			fmt.Printf("%s hooks \n", color.WithColor("Start After", color.FgGreen))
 		}
 		for _, v := range config.C.Gen.Hooks.After {
-			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			fmt.Printf("%s command %s\n", color.WithColor("Run", color.FgGreen), v)
 			err := pkg.Run(v, config.C.Gen.Wd())
 			if err != nil {
 				return err
@@ -86,7 +85,7 @@ var genZRpcClientCmd = &cobra.Command{
 			fmt.Printf("%s hooks \n", color.WithColor("Start Before", color.FgGreen))
 		}
 		for _, v := range config.C.Gen.Zrpcclient.Hooks.Before {
-			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			fmt.Printf("%s command %s\n", color.WithColor("Run", color.FgGreen), v)
 			err := pkg.Run(v, config.C.Gen.Wd())
 			if err != nil {
 				return err
@@ -124,7 +123,7 @@ var genZRpcClientCmd = &cobra.Command{
 			fmt.Printf("%s hooks \n", color.WithColor("Start After", color.FgGreen))
 		}
 		for _, v := range config.C.Gen.Zrpcclient.Hooks.After {
-			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			fmt.Printf("%s command %s\n", color.WithColor("Run", color.FgGreen), v)
 			err := pkg.Run(v, config.C.Gen.Wd())
 			if err != nil {
 				return err
@@ -155,7 +154,7 @@ var genSdkCmd = &cobra.Command{
 			fmt.Printf("%s hooks \n", color.WithColor("Start Before", color.FgGreen))
 		}
 		for _, v := range config.C.Gen.Sdk.Hooks.Before {
-			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			fmt.Printf("%s command %s\n", color.WithColor("Run", color.FgGreen), v)
 			err := pkg.Run(v, config.C.Gen.Wd())
 			if err != nil {
 				return err
@@ -215,7 +214,7 @@ var genSdkCmd = &cobra.Command{
 			fmt.Printf("%s hooks \n", color.WithColor("Start After", color.FgGreen))
 		}
 		for _, v := range config.C.Gen.Sdk.Hooks.After {
-			fmt.Printf("%s to run command %s\n", color.WithColor("Start", color.FgGreen), v)
+			fmt.Printf("%s command %s\n", color.WithColor("Run", color.FgGreen), v)
 			err := pkg.Run(v, config.C.Gen.Wd())
 			if err != nil {
 				return err

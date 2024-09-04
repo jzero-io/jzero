@@ -11,30 +11,24 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
-
-	"github.com/zeromicro/go-zero/core/logx"
-
 	"github.com/iancoleman/orderedmap"
-
-	"github.com/jzero-io/jzero/config"
-	"github.com/rinchsan/gosimports"
-
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	jzeroapi "github.com/jzero-io/desc/proto/jzero/api"
-
-	"google.golang.org/protobuf/proto"
-
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/jzero-io/jzero/pkg/templatex"
+	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/core/color"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"google.golang.org/protobuf/proto"
 )
 
 type (
@@ -80,6 +74,10 @@ func (jr *JzeroRpc) Gen() error {
 	var allServerFiles []ServerFile
 	var allLogicFiles []LogicFile
 
+	if len(protoFilenames) > 0 {
+		fmt.Printf("%s to generate proto code. \n", color.WithColor("Start", color.FgGreen))
+	}
+
 	for _, v := range protoFilenames {
 		// parse proto
 		protoParser := rpcparser.NewDefaultProtoParser()
@@ -99,7 +97,7 @@ func (jr *JzeroRpc) Gen() error {
 			return err
 		}
 
-		fmt.Printf("%s to generate proto code. \n%s proto file %s\n", color.WithColor("Start", color.FgGreen), color.WithColor("Using", color.FgGreen), v)
+		fmt.Printf("%s proto file %s\n", color.WithColor("Using", color.FgGreen), v)
 		zrpcOut := "."
 
 		command := fmt.Sprintf("goctl rpc protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s ",
@@ -129,7 +127,6 @@ func (jr *JzeroRpc) Gen() error {
 		if err != nil {
 			return err
 		}
-		fmt.Println(color.WithColor("Done", color.FgGreen))
 
 		if jr.RemoveSuffix {
 			for _, file := range allServerFiles {
@@ -181,6 +178,9 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 		pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(parse.GoPackage, "./")))
+	}
+	if len(protoFilenames) > 0 {
+		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
 
 	if pathx.FileExists(protoDirPath) {
