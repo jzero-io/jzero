@@ -37,6 +37,7 @@ type JzeroApi struct {
 	RemoveSuffix       bool
 	ChangeReplaceTypes bool
 	RegenApiHandler    bool
+	RegenApiTypes      bool
 }
 
 type HandlerFile struct {
@@ -124,6 +125,10 @@ func (ja *JzeroApi) Gen() error {
 
 		if ja.RegenApiHandler {
 			_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler"))
+		}
+
+		if ja.RegenApiTypes {
+			_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types"))
 		}
 
 		err = ja.generateApiCode(mainApiFilePath, goctlHome)
