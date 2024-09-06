@@ -8,7 +8,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0
 	github.com/hashicorp/go-version v1.7.0
 	github.com/iancoleman/orderedmap v0.3.0
-	github.com/jhump/protoreflect v1.16.0
+	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v0.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/rinchsan/gosimports v0.3.8
@@ -33,7 +33,7 @@ require (
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
 	github.com/antlr/antlr4/runtime/Go/antlr v0.0.0-20210521184019-c5ad59b459ec // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bufbuild/protocompile v0.10.0 // indirect
+	github.com/bufbuild/protocompile v0.14.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
