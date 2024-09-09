@@ -35,6 +35,7 @@ func Gen(gcf config.GenConfig) error {
 		Style:            gcf.Style,
 		RemoveSuffix:     gcf.RemoveSuffix,
 		ChangeLogicTypes: gcf.ChangeLogicTypes,
+		RpcStylePatch:    gcf.RpcStylePatch,
 	}
 	err = jzeroRpc.Gen()
 	if err != nil {

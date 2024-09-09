@@ -254,6 +254,8 @@ func init() {
 		genCmd.Flags().BoolP("change-logic-types", "", true, "if api file or proto change, e.g. Request or Response type, change logic file content types but not file")
 		genCmd.Flags().BoolP("regen-api-handler", "", false, "")
 		genCmd.Flags().BoolP("regen-api-types", "", true, "")
+		// fix rpc style
+		genCmd.Flags().BoolP("rpc-style-patch", "", false, "")
 
 		// used for goctl
 		// gen command persistentFlags

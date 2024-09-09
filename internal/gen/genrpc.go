@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/pkg/astx"
+
 	"github.com/iancoleman/orderedmap"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
@@ -45,7 +47,8 @@ func (l RegisterLines) String() string {
 }
 
 type ServerFile struct {
-	Path string
+	Path    string
+	Service string
 }
 
 type JzeroRpc struct {
@@ -54,6 +57,7 @@ type JzeroRpc struct {
 	Style            string
 	RemoveSuffix     bool
 	ChangeLogicTypes bool
+	RpcStylePatch    bool
 }
 
 type JzeroProtoApiMiddleware struct {
@@ -97,6 +101,17 @@ func (jr *JzeroRpc) Gen() error {
 			return err
 		}
 
+		if jr.RpcStylePatch {
+			for _, s := range parse.Service {
+				// rename logic dir and server dir
+				dirName, _ := format.FileNamingFormat("gozero", s.Name)
+				fixDirName, _ := format.FileNamingFormat(jr.Style, s.Name)
+
+				_ = os.Rename(filepath.Join("internal", "logic", strings.ToLower(fixDirName)), filepath.Join("internal", "logic", dirName))
+				_ = os.Rename(filepath.Join("internal", "server", strings.ToLower(fixDirName)), filepath.Join("internal", "server", dirName))
+			}
+		}
+
 		fmt.Printf("%s proto file %s\n", color.WithColor("Using", color.FgGreen), v)
 		zrpcOut := "."
 
@@ -115,6 +130,17 @@ func (jr *JzeroRpc) Gen() error {
 		_, err = execx.Run(command, jr.Wd)
 		if err != nil {
 			return err
+		}
+
+		if jr.RpcStylePatch {
+			for _, s := range parse.Service {
+				// rename logic dir and server dir
+				dirName, _ := format.FileNamingFormat("gozero", s.Name)
+				fixDirName, _ := format.FileNamingFormat(jr.Style, s.Name)
+
+				_ = os.Rename(filepath.Join("internal", "logic", strings.ToLower(dirName)), filepath.Join("internal", "logic", fixDirName))
+				_ = os.Rename(filepath.Join("internal", "server", strings.ToLower(dirName)), filepath.Join("internal", "server", fixDirName))
+			}
 		}
 
 		command = fmt.Sprintf("protoc %s -I%s -I%s --validate_out=%s",
@@ -170,7 +196,13 @@ func (jr *JzeroRpc) Gen() error {
 		}
 
 		for _, s := range parse.Service {
-			serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, strings.ToLower(s.Name), jr.Module, strings.ToLower(s.Name)))
+			if jr.RpcStylePatch {
+				serverDir, _ := format.FileNamingFormat(jr.Style, s.Name)
+				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, strings.ToLower(s.Name), jr.Module, strings.ToLower(serverDir)))
+			} else {
+				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, strings.ToLower(s.Name), jr.Module, strings.ToLower(s.Name)))
+			}
+
 			if jr.RemoveSuffix {
 				registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%s(ctx))", filepath.Base(parse.GoPackage), stringx.FirstUpper(s.Name), strings.ToLower(s.Name), stringx.FirstUpper(s.Name)))
 			} else {
@@ -187,9 +219,53 @@ func (jr *JzeroRpc) Gen() error {
 		if err = jr.genServer(serverImports, pbImports, registerServers); err != nil {
 			return err
 		}
+		if jr.RpcStylePatch {
+			for _, file := range allServerFiles {
+				err = jr.changeServerImportLogicPath(file)
+				if err != nil {
+					return err
+				}
+			}
+		}
 		if err = jr.genApiMiddlewares(protoFilenames); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (jr *JzeroRpc) changeServerImportLogicPath(file ServerFile) error {
+	fp := file.Path
+	if jr.RemoveSuffix {
+		// Get the new file name of the file (without the 5 characters(Server or server) before the ".go" extension)
+		fp = fp[:len(fp)-9]
+		// patch
+		fp = strings.TrimSuffix(fp, "_")
+		fp = strings.TrimSuffix(fp, "-")
+		fp = fp + ".go"
+	}
+
+	fset := token.NewFileSet()
+
+	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+	// 删掉某个 import, 新增某个 import
+	astx.DeleteImport(f, fmt.Sprintf(`"%s/internal/logic/%s"`, jr.Module, strings.ToLower(file.Service)))
+
+	maps := make(map[string]bool)
+	logicImportDir, _ := format.FileNamingFormat(jr.Style, file.Service)
+	astx.AddImport(f, fmt.Sprintf(`"%s/internal/logic/%s"`, jr.Module, strings.ToLower(logicImportDir)), maps)
+
+	// Write the modified AST back to the file
+	buf := bytes.NewBuffer(nil)
+	if err := goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
+
+	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+		return err
 	}
 	return nil
 }
@@ -243,9 +319,14 @@ func (jr *JzeroRpc) GetAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, 
 			return nil, err
 		}
 		fp := filepath.Join(jr.Wd, "internal", "server", strings.ToLower(service.Name), namingFormat+".go")
+		if jr.RpcStylePatch {
+			serverDir, _ := format.FileNamingFormat(jr.Style, service.Name)
+			fp = filepath.Join(jr.Wd, "internal", "server", strings.ToLower(serverDir), namingFormat+".go")
+		}
 
 		f := ServerFile{
-			Path: fp,
+			Path:    fp,
+			Service: service.Name,
 		}
 
 		serverFiles = append(serverFiles, f)
@@ -263,6 +344,10 @@ func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, er
 			}
 
 			fp := filepath.Join(jr.Wd, "internal", "logic", strings.ToLower(service.Name), namingFormat+".go")
+			if jr.RpcStylePatch {
+				logicDir, _ := format.FileNamingFormat(jr.Style, service.Name)
+				fp = filepath.Join(jr.Wd, "internal", "logic", strings.ToLower(logicDir), namingFormat+".go")
+			}
 
 			f := LogicFile{
 				Path:             fp,
