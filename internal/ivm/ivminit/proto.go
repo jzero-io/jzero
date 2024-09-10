@@ -142,7 +142,7 @@ func (ivm *IvmInit) writeNewProto(protoFilepath string, fd *desc.FileDescriptor,
 	return os.WriteFile(newProtoFilepath, []byte(ivm.todoFixMessageTypeInRpcMethod(protoStr, oldProtoPackage)), 0o644)
 }
 
-func (ivm *IvmInit) todoFixMessageTypeInRpcMethod(protoString string, oldProtoPackage string) string {
+func (ivm *IvmInit) todoFixMessageTypeInRpcMethod(protoString, oldProtoPackage string) string {
 	lines := strings.Split(protoString, "\n")
 	for i, line := range lines {
 		// Check if the line contains the searchString.

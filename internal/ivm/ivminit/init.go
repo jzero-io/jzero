@@ -7,12 +7,13 @@ import (
 
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
-	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/internal/gen"
-	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/pkg/mod"
 )
 
 type IvmInit struct {

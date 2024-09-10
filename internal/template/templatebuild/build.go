@@ -11,9 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/config"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/mod/modfile"
+
+	"github.com/jzero-io/jzero/config"
 )
 
 func checkWrite(path string, bytes []byte) error {

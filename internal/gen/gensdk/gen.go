@@ -4,10 +4,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
 	"github.com/jzero-io/jzero/config"
 	gensdkconfig "github.com/jzero-io/jzero/internal/gen/gensdk/config"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/generator"
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 func GenSdk(gc config.GenConfig, genModule bool) error {

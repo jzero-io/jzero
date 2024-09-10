@@ -6,11 +6,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
-
 	"github.com/jhump/protoreflect/desc"
-	"github.com/jzero-io/jzero/pkg/stringx"
 	"google.golang.org/protobuf/reflect/protoreflect"
+
+	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
+	"github.com/jzero-io/jzero/pkg/stringx"
 )
 
 var toCamelCaseRe = regexp.MustCompile(`(^[A-Za-z])|(_|\.)([A-Za-z])`)

@@ -11,16 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/pkg/astx"
-
-	"github.com/samber/lo"
-
-	"github.com/jzero-io/jzero/config"
-	"github.com/zeromicro/go-zero/core/logx"
-
-	"github.com/jzero-io/jzero/embeded"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/color"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -28,6 +22,10 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/astx"
 )
 
 type JzeroApi struct {
@@ -265,7 +263,7 @@ func findApiFiles(dir string) ([]string, error) {
 	return apiFiles, nil
 }
 
-func (ja *JzeroApi) generateApiCode(mainApiFilePath string, goctlHome string) error {
+func (ja *JzeroApi) generateApiCode(mainApiFilePath, goctlHome string) error {
 	if mainApiFilePath == "" {
 		return errors.New("empty mainApiFilePath")
 	}
@@ -350,7 +348,7 @@ func (ja *JzeroApi) removeHandlerSuffix(fp string) error {
 	return os.Rename(fp, newFilePath)
 }
 
-func (ja *JzeroApi) removeRouteSuffix(group string, handler string) error {
+func (ja *JzeroApi) removeRouteSuffix(group, handler string) error {
 	fp := filepath.Join(ja.Wd, "internal", "handler", "routes.go")
 	fset := token.NewFileSet()
 	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)

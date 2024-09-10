@@ -10,7 +10,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/vars"
 )
 
-func Run(arg string, dir string) error {
+func Run(arg, dir string) error {
 	goos := runtime.GOOS
 	var cmd *exec.Cmd
 	switch goos {

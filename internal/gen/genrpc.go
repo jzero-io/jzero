@@ -11,16 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/pkg/astx"
-
 	"github.com/iancoleman/orderedmap"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	jzeroapi "github.com/jzero-io/desc/proto/jzero/api"
-	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/pkg/stringx"
-	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,6 +25,12 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/astx"
+	"github.com/jzero-io/jzero/pkg/stringx"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 type (
@@ -279,7 +279,7 @@ func generateProtoDescriptorPath(protoPath string) string {
 	return filepath.Join("desc", "pb", strings.TrimSuffix(rel, ".proto")+".pb")
 }
 
-func (jr *JzeroRpc) genServer(serverImports ImportLines, pbImports ImportLines, registerServers RegisterLines) error {
+func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServers RegisterLines) error {
 	fmt.Printf("%s to generate internal/server/server.go\n", color.WithColor("Start", color.FgGreen))
 	serverFile, err := templatex.ParseTemplate(map[string]interface{}{
 		"Module":          jr.Module,

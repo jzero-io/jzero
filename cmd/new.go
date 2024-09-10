@@ -14,13 +14,14 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/internal/new"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/internal/new"
 )
 
 // newCmd represents the new command

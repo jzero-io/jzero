@@ -7,25 +7,23 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/internal/new"
-	"github.com/rinchsan/gosimports"
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-
-	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
-	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser"
-	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
-
 	"github.com/jhump/protoreflect/desc"
-	"github.com/jzero-io/jzero/internal/gen"
-	"github.com/pkg/errors"
-
 	"github.com/jhump/protoreflect/desc/protoparse"
-	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/pkg/templatex"
+	"github.com/pkg/errors"
+	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	apiparser "github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser"
+	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
+	"github.com/jzero-io/jzero/internal/new"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 func init() {
@@ -245,7 +243,7 @@ func (g *Golang) genScopeClients(scope string, resources []string) ([]*Generated
 	return scopeClientFiles, nil
 }
 
-func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scope string, resource string) ([]*GeneratedFile, error) {
+func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scope, resource string) ([]*GeneratedFile, error) {
 	var scopeResourceFiles []*GeneratedFile
 
 	// resource_expansion.go

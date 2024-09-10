@@ -9,10 +9,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/template/templatebuild"
 	"github.com/jzero-io/jzero/internal/template/templateinit"
-	"github.com/spf13/cobra"
 )
 
 // templateCmd represents the template command

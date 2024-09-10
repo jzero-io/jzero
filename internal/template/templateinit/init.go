@@ -9,9 +9,10 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/zeromicro/go-zero/core/color"
+
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/zeromicro/go-zero/core/color"
 )
 
 func Init(cc config.TemplateConfig) error {

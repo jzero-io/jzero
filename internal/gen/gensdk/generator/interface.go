@@ -3,9 +3,9 @@ package generator
 import (
 	"bytes"
 
-	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
-
 	"github.com/pkg/errors"
+
+	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
 )
 
 type GeneratedFile struct {

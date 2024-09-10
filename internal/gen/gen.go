@@ -7,14 +7,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-
-	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/pkg/mod"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/pkg/mod"
 )
 
 func Gen(gcf config.GenConfig) error {
@@ -75,7 +75,7 @@ func Gen(gcf config.GenConfig) error {
 	return nil
 }
 
-func RemoveExtraFiles(wd string, style string) {
+func RemoveExtraFiles(wd, style string) {
 	if pathx.FileExists(filepath.Join("desc", "api")) {
 		if err := os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd, style))); err != nil {
 			logx.Debugf("remove api frame main go file error: %s", err.Error())
@@ -103,7 +103,7 @@ func RemoveExtraFiles(wd string, style string) {
 }
 
 // getApiFrameMainGoFilename: goctl/api/gogen/genmain.go
-func getApiFrameMainGoFilename(wd string, style string) string {
+func getApiFrameMainGoFilename(wd, style string) string {
 	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
 	serviceName = strings.ToLower(serviceName)
 	filename, err := format.FileNamingFormat(style, serviceName)
@@ -118,7 +118,7 @@ func getApiFrameMainGoFilename(wd string, style string) string {
 }
 
 // getApiFrameEtcFilename: goctl/api/gogen/genetc.go
-func getApiFrameEtcFilename(wd string, style string) string {
+func getApiFrameEtcFilename(wd, style string) string {
 	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
 	filename, err := format.FileNamingFormat(style, serviceName)
 	if err != nil {
@@ -128,7 +128,7 @@ func getApiFrameEtcFilename(wd string, style string) string {
 }
 
 // getProtoFrameMainGoFilename: goctl/rpc/generator/genmain.go
-func getProtoFrameMainGoFilename(source string, style string) string {
+func getProtoFrameMainGoFilename(source, style string) string {
 	filename, err := format.FileNamingFormat(style, source)
 	if err != nil {
 		return ""
@@ -137,7 +137,7 @@ func getProtoFrameMainGoFilename(source string, style string) string {
 }
 
 // getProtoFrameEtcFilename: goctl/rpc/generator/genetc.go
-func getProtoFrameEtcFilename(source string, style string) string {
+func getProtoFrameEtcFilename(source, style string) string {
 	filename, err := format.FileNamingFormat(style, source)
 	if err != nil {
 		return ""

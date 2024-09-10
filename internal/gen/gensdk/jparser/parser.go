@@ -7,16 +7,16 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jhump/protoreflect/desc"
+	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
+	"google.golang.org/genproto/googleapis/api/annotations"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser/api"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser/gateway"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
-
-	"github.com/jhump/protoreflect/desc"
 	"github.com/jzero-io/jzero/pkg/stringx"
-	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
-	"google.golang.org/genproto/googleapis/api/annotations"
-	"google.golang.org/protobuf/proto"
 )
 
 func Parse(config *config.Config, fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) (vars.ScopeResourceHTTPInterfaceMap, error) {
@@ -151,11 +151,11 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 	return httpInterfaces, nil
 }
 
-func BuildProtoResponseFullName(goPackage string, responseTypeName string) string {
+func BuildProtoResponseFullName(goPackage, responseTypeName string) string {
 	return fmt.Sprintf("*%s.%s", filepath.Base(goPackage), responseTypeName)
 }
 
-func BuildProtoFakeFullName(goPackage string, responseTypeName string) string {
+func BuildProtoFakeFullName(goPackage, responseTypeName string) string {
 	return fmt.Sprintf("&%s.%s", filepath.Base(goPackage), responseTypeName)
 }
 
@@ -173,11 +173,11 @@ func BuildApiResponseFullName(t spec.Type) string {
 	}
 }
 
-func BuildProtoFakeReturnName(serviceName string, responseTypeName string) string {
+func BuildProtoFakeReturnName(serviceName, responseTypeName string) string {
 	return fmt.Sprintf("FakeReturn%s%s", stringx.FirstUpper(serviceName), stringx.FirstUpper(responseTypeName))
 }
 
-func BuildApiFakeReturnName(group string, method string, t spec.Type) string {
+func BuildApiFakeReturnName(group, method string, t spec.Type) string {
 	return fmt.Sprintf("FakeReturn%s%s%s", stringx.FirstUpper(stringx.ToCamel(group)), stringx.FirstUpper(method), stringx.FirstUpper(t.Name()))
 }
 

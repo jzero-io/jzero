@@ -8,12 +8,13 @@ package cmd
 import (
 	"strings"
 
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/ivm/ivmaddapi"
 	"github.com/jzero-io/jzero/internal/ivm/ivmaddproto"
 	"github.com/jzero-io/jzero/internal/ivm/ivminit"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 )
 
 // ivmCmd represents the interface version manage command

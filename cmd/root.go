@@ -10,11 +10,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/jzero-io/jzero/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/config"
 )
 
 var CfgFile string

@@ -11,6 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/cobra"
+	"github.com/zeromicro/go-zero/core/color"
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
@@ -20,10 +25,6 @@ import (
 	"github.com/jzero-io/jzero/internal/gen/genzrpcclient"
 	"github.com/jzero-io/jzero/pkg"
 	"github.com/jzero-io/jzero/pkg/mod"
-	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/core/color"
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 // genCmd represents the gen command

@@ -6,13 +6,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 type TemplateData struct {

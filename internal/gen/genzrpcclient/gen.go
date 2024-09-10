@@ -6,17 +6,18 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/internal/gen"
-	"github.com/jzero-io/jzero/internal/new"
-	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/pkg/errors"
 	conf "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/generator"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
+
+	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/internal/new"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 type DirContext struct {

@@ -6,9 +6,10 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
-	"github.com/jzero-io/jzero/config"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
+
+	"github.com/jzero-io/jzero/config"
 )
 
 var upgradeCmd = &cobra.Command{

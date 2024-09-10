@@ -11,16 +11,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/pkg/astx"
+	"github.com/rinchsan/gosimports"
+	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/pkg/astx"
 	"github.com/jzero-io/jzero/pkg/templatex"
-	"github.com/rinchsan/gosimports"
-	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 )
 
-func (ivm *IvmInit) updateProtoLogic(fp string, oldFp string) error {
+func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 	protoParser := rpcparser.NewDefaultProtoParser()
 	parse, err := protoParser.Parse(fp, true)
 	if err != nil {
@@ -244,7 +244,7 @@ func (ivm *IvmInit) astAddLogic(f *ast.File, oldService, logicMethodName string,
 	return nil
 }
 
-func (ivm *IvmInit) astInspect(f *ast.File, oldLogicFile gen.LogicFile, newLogicFile gen.LogicFile) error {
+func (ivm *IvmInit) astInspect(f *ast.File, oldLogicFile, newLogicFile gen.LogicFile) error {
 	logicMethodName := newLogicFile.Handler
 	oldService := oldLogicFile.Group
 

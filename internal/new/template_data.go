@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
+
 	"github.com/jzero-io/jzero/pkg/mod"
 )
 

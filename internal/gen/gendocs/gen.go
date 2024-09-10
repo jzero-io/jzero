@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/config"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/internal/gen/gendocs/markdown"
 	gendocsparser "github.com/jzero-io/jzero/internal/gen/gendocs/parser"
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 )
 
 func Gen(gc config.GenConfig) error {

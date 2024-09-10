@@ -6,11 +6,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/templatex"
-	"github.com/pkg/errors"
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
 
 type Method struct {
