@@ -73,7 +73,7 @@ type GenConfig struct {
 	Sdk        GenSdkConfig        `mapstructure:"sdk"`
 	Swagger    GenSwaggerConfig    `mapstructure:"swagger"`
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`
-	Docs       GenDocsConfig
+	Docs       GenDocsConfig       `mapstructure:"docs"`
 }
 
 type GenSdkConfig struct {

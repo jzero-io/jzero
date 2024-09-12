@@ -62,8 +62,8 @@ func Gen(gc config.GenConfig) error {
 			gc.Docs.ProtoDir,
 			filepath.Join(gc.Docs.ProtoDir, "third_party"),
 			gc.Docs.Output,
+			getFormat(gc.Docs.Format),
 			gc.Docs.Format,
-			getExt(gc.Docs.Format),
 			strings.Join(protoFilepath, " "),
 		)
 		_, err = execx.Run(command, gc.Swagger.Wd())
@@ -75,10 +75,10 @@ func Gen(gc config.GenConfig) error {
 	return nil
 }
 
-func getExt(format string) string {
+func getFormat(format string) string {
 	switch format {
-	case "markdown":
-		return "md"
+	case "md":
+		return "markdown"
 	}
 	return format
 }
