@@ -25,10 +25,11 @@ func AddProto(ic config.IvmConfig) error {
 		split := strings.Split(v, ":")
 		var method Method
 		if len(split) == 2 {
-			method.Name = split[0]
-			method.Verb = split[1]
+			method.Name = split[1]
+			method.Verb = split[0]
 		} else if len(split) == 1 {
 			method.Name = split[0]
+			method.Verb = "get"
 		} else {
 			continue
 		}

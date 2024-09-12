@@ -1,8 +1,8 @@
 syntax = "v1"
 
-{{range $v := .Handlers | uniq}}type {{$v | FirstUpper}}{{ $.GroupCamel }}Request {}
+{{range $v := .Handlers | uniq}}type {{$v.Name | FirstUpper}}{{ $.GroupCamel }}Request {}
 
-type {{$v | FirstUpper}}{{ $.GroupCamel }}Response {}
+type {{$v.Name | FirstUpper}}{{ $.GroupCamel }}Response {}
 
 {{end}}
 
@@ -11,8 +11,8 @@ type {{$v | FirstUpper}}{{ $.GroupCamel }}Response {}
     group:  {{ .Group }}
 )
 service {{ .Service }} {
-    {{range $v := .Handlers | uniq}}@handler {{$v}}Handler
-    post /{{ $.Group }}/{{$v | FirstLower}} ({{$v | FirstUpper}}{{ $.GroupCamel }}Request) returns ({{$v | FirstUpper}}{{ $.GroupCamel }}Response)
+    {{range $v := .Handlers | uniq}}@handler {{$v.Name}}Handler
+    {{$v.Verb}} /{{ $.Group }}/{{$v.Name | FirstLower}} ({{$v.Name | FirstUpper}}{{ $.GroupCamel }}Request) returns ({{$v.Name | FirstUpper}}{{ $.GroupCamel }}Response)
 
     {{end}}
 }

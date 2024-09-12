@@ -94,7 +94,7 @@ func init() {
 		_ = ivmAddProtoCmd.MarkFlagRequired("name")
 
 		ivmAddProtoCmd.Flags().StringSliceP("services", "", nil, "set proto services")
-		ivmAddProtoCmd.Flags().StringSliceP("methods", "m", []string{"SayHello:get"}, "set proto methods")
+		ivmAddProtoCmd.Flags().StringSliceP("methods", "m", []string{"get:SayHello"}, "set proto methods")
 	}
 
 	{
@@ -103,6 +103,6 @@ func init() {
 		_ = ivmAddApiCmd.MarkFlagRequired("name")
 
 		ivmAddApiCmd.Flags().StringP("group", "", "", "set api file group")
-		ivmAddApiCmd.Flags().StringSliceP("handler", "", []string{"List", "Get", "Edit", "List", "Delete"}, "set api file handlers")
+		ivmAddApiCmd.Flags().StringSliceP("handlers", "", []string{"get:List", "get:Get", "post:Edit", "get:Delete"}, "set api file handlers")
 	}
 }

@@ -3,6 +3,7 @@ package ivmaddapi
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
@@ -11,13 +12,34 @@ import (
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
+type Handler struct {
+	Name string
+	Verb string
+}
+
 func AddApi(ic config.IvmConfig) error {
 	baseApiDir := filepath.Join("desc", "api")
 
 	service := gen.GetApiServiceName(filepath.Join("desc", "api"))
 
+	var handlers []Handler
+	for _, v := range ic.Add.Api.Handlers {
+		split := strings.Split(v, ":")
+		var method Handler
+		if len(split) == 2 {
+			method.Name = split[1]
+			method.Verb = split[0]
+		} else if len(split) == 1 {
+			method.Name = split[0]
+			method.Verb = "get"
+		} else {
+			continue
+		}
+		handlers = append(handlers, method)
+	}
+
 	template, err := templatex.ParseTemplate(map[string]interface{}{
-		"Handlers":   ic.Add.Api.Handlers,
+		"Handlers":   handlers,
 		"Service":    service,
 		"Group":      ic.Add.Api.Group,
 		"GroupCamel": stringx.FirstUpper(stringx.ToCamel(ic.Add.Api.Group)),

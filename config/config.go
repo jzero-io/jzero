@@ -133,15 +133,15 @@ type IvmAddConfig struct {
 }
 
 type IvmAddApiConfig struct {
-	Name     string
-	Group    string
-	Handlers []string
+	Name     string   `mapstructure:"name"`
+	Group    string   `mapstructure:"group"`
+	Handlers []string `mapstructure:"handlers"`
 }
 
 type IvmAddProtoConfig struct {
-	Methods  []string
-	Name     string
-	Services []string
+	Methods  []string `mapstructure:"methods"`
+	Name     string   `mapstructure:"name"`
+	Services []string `mapstructure:"services"`
 }
 
 type TemplateConfig struct {
