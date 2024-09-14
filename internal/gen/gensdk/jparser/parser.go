@@ -155,10 +155,6 @@ func BuildProtoResponseFullName(goPackage, responseTypeName string) string {
 	return fmt.Sprintf("*%s.%s", filepath.Base(goPackage), responseTypeName)
 }
 
-func BuildProtoFakeFullName(goPackage, responseTypeName string) string {
-	return fmt.Sprintf("&%s.%s", filepath.Base(goPackage), responseTypeName)
-}
-
 func BuildApiResponseFullName(t spec.Type) string {
 	switch v := t.(type) {
 	case spec.PrimitiveType:
@@ -170,28 +166,6 @@ func BuildApiResponseFullName(t spec.Type) string {
 		return fmt.Sprintf("[]*types.%s", strings.TrimPrefix(t.Name(), "[]"))
 	default:
 		return fmt.Sprintf("*types.%s", stringx.FirstUpper(strings.TrimPrefix(t.Name(), "*")))
-	}
-}
-
-func BuildProtoFakeReturnName(serviceName, responseTypeName string) string {
-	return fmt.Sprintf("FakeReturn%s%s", stringx.FirstUpper(serviceName), stringx.FirstUpper(responseTypeName))
-}
-
-func BuildApiFakeReturnName(group, method string, t spec.Type) string {
-	return fmt.Sprintf("FakeReturn%s%s%s", stringx.FirstUpper(stringx.ToCamel(group)), stringx.FirstUpper(method), stringx.FirstUpper(t.Name()))
-}
-
-func BuildApiFakeFullName(t spec.Type) string {
-	switch v := t.(type) {
-	case spec.PrimitiveType:
-		return "*" + t.Name()
-	case spec.ArrayType:
-		if value, ok := v.Value.(spec.PrimitiveType); ok {
-			return value.RawName
-		}
-		return fmt.Sprintf("[]*types.%s", strings.TrimPrefix(t.Name(), "[]"))
-	default:
-		return fmt.Sprintf("&types.%s", stringx.FirstUpper(strings.TrimPrefix(t.Name(), "*")))
 	}
 }
 
