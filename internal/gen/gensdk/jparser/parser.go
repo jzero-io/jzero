@@ -50,10 +50,19 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 					case *annotations.HttpRule_Post:
 						httpInterface.Method = http.MethodPost
 						httpInterface.URL = httpRule.Post
+					case *annotations.HttpRule_Put:
+						httpInterface.Method = http.MethodPut
+						httpInterface.URL = httpRule.Put
+					case *annotations.HttpRule_Delete:
+						httpInterface.Method = http.MethodDelete
+						httpInterface.URL = httpRule.Delete
+					case *annotations.HttpRule_Patch:
+						httpInterface.Method = http.MethodPatch
+						httpInterface.URL = httpRule.Patch
 					}
 
 					var requestBodyName string
-					if (httpInterface.Method == http.MethodPost) && rule.Body != "*" {
+					if (httpInterface.Method == http.MethodPost || httpInterface.Method == http.MethodPut || httpInterface.Method == http.MethodPatch) && rule.Body != "*" {
 						for _, v := range method.GetInputType().GetFields() {
 							if rule.Body == v.GetName() {
 								requestBodyName = v.GetName()
@@ -119,7 +128,7 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 						Type:         "api",
 						FullName:     fmt.Sprintf("param %s.%s", "types", stringx.FirstUpper(route.RequestType.Name())),
 					}
-					if strings.ToUpper(route.Method) == http.MethodPost {
+					if strings.ToUpper(route.Method) == http.MethodPost || strings.ToUpper(route.Method) == http.MethodPut || strings.ToUpper(route.Method) == http.MethodPatch {
 						httpInterface.Request.Body = "*"
 					}
 				} else {

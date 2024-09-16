@@ -44,18 +44,6 @@ func CreateQueryParams(route *spec.Route) []*vars.QueryParam {
 		return nil
 	}
 
-	//members := route.RequestType.(spec.DefineStruct).GetTagMembers("form")
-	//params := make([]*vars.QueryParam, 0)
-	//for _, member := range members {
-	//	name, _ := member.GetPropertyName()
-	//	param := &vars.QueryParam{
-	//		GoName: stringx.FirstUpper(member.Name),
-	//		Name:   name,
-	//	}
-	//	params = append(params, param)
-	//}
-	//return params
-
 	return extractQueryParams(route.RequestType.(spec.DefineStruct))
 }
 

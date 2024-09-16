@@ -52,7 +52,7 @@ func new{{.Resource | FirstUpper | ToCamel}}Client(c *{{.Scope | FirstUpper | To
 		Params({{if eq $v.Request.Body "*"}}{{else}}{{range $q := $v.QueryParams}}
 			restc.QueryParam{Name: "{{$q.Name}}", Value: param.{{$q.GoName}}},{{end}}{{end}}
 		).
-		{{ if eq $v.Method "GET" }}{{else}}Body({{if eq $v.Request.Body ""}}nil{{else if eq $v.Request.Body "*"}}param{{else if ne $v.Method "GET"}}param.{{$v.Request.RealBodyName}}{{else}}nil{{end}}).{{end}}
+		{{ if or (eq $v.Method "GET") (eq $v.Method "DELETE") }}{{else}}Body({{if eq $v.Request.Body ""}}nil{{else if eq $v.Request.Body "*"}}param{{else if or (ne $v.Method "GET") (ne $v.Method "DELETE")}}param.{{$v.Request.RealBodyName}}{{else}}nil{{end}}).{{end}}
 		Do(ctx).
 		Into(&resp, {{$.IsWrapHTTPResponse}})
 
