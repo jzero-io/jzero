@@ -169,6 +169,15 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 
+		if jr.RpcStylePatch {
+			for _, file := range allServerFiles {
+				err = jr.changeServerImportLogicPath(file)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
 		if jr.ChangeLogicTypes {
 			for _, file := range allLogicFiles {
 				if err := jr.changeLogicTypes(file); err != nil {
@@ -218,14 +227,6 @@ func (jr *JzeroRpc) Gen() error {
 	if pathx.FileExists(protoDirPath) {
 		if err = jr.genServer(serverImports, pbImports, registerServers); err != nil {
 			return err
-		}
-		if jr.RpcStylePatch {
-			for _, file := range allServerFiles {
-				err = jr.changeServerImportLogicPath(file)
-				if err != nil {
-					return err
-				}
-			}
 		}
 		if err = jr.genApiMiddlewares(protoFilenames); err != nil {
 			return err
