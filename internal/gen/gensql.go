@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"go/ast"
 	goformat "go/format"
 	goparser "go/parser"
 	"go/token"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -74,20 +76,11 @@ func (js *JzeroSql) Gen() error {
 			}
 		}, func(table string) {
 			fmt.Printf("%s table %s\n", color.WithColor("Using", color.FgGreen), table)
-			command := fmt.Sprintf("goctl model mysql datasource --url '%s' --table %s --dir %s --home %s --style %s -i '%s' --cache=%t --strict=%t",
-				js.ModelMysqlDatasourceUrl,
-				table,
-				filepath.Join(dir, "internal", "model", strings.ToLower(table)),
-				goctlHome,
-				js.Style,
-				strings.Join(js.ModelIgnoreColumns, ","),
-				js.ModelMysqlCache,
-				js.ModelStrict,
-			)
-			logx.Debugf("command: %s", command)
-			_, err := execx.Run(command, js.Wd)
+
+			cmd := exec.Command("goctl", "model", "mysql", "datasource", "--url", js.ModelMysqlDatasourceUrl, "--table", table, "--dir", filepath.Join(dir, "internal", "model", strings.ToLower(table)), "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelStrict))
+			resp, err := cmd.CombinedOutput()
 			if err != nil {
-				console.Warning("[warning]: %s", err.Error())
+				console.Warning(errors.Wrap(err, strings.TrimRight(string(resp), "\r\n")).Error())
 				return
 			}
 
