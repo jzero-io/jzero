@@ -84,6 +84,7 @@ func (js *JzeroSql) Gen() error {
 				js.ModelMysqlCache,
 				js.ModelStrict,
 			)
+			logx.Debugf("command: %s", command)
 			_, err := execx.Run(command, js.Wd)
 			if err != nil {
 				console.Warning("[warning]: %s", err.Error())
