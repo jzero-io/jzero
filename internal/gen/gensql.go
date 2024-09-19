@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"go/ast"
 	goformat "go/format"
 	goparser "go/parser"
@@ -80,7 +79,7 @@ func (js *JzeroSql) Gen() error {
 			cmd := exec.Command("goctl", "model", "mysql", "datasource", "--url", js.ModelMysqlDatasourceUrl, "--table", table, "--dir", filepath.Join(dir, "internal", "model", strings.ToLower(table)), "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelStrict))
 			resp, err := cmd.CombinedOutput()
 			if err != nil {
-				console.Warning(errors.Wrap(err, strings.TrimRight(string(resp), "\r\n")).Error())
+				console.Warning("[warning]: %s:%s", err.Error(), resp)
 				return
 			}
 
