@@ -19,7 +19,6 @@ import (
 	"github.com/zeromicro/go-zero/core/mr"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/parser"
-	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -113,18 +112,10 @@ func (js *JzeroSql) Gen() error {
 					}
 
 					modelDir := filepath.Join(dir, "internal", "model", strings.ToLower(f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))]))
-					command := fmt.Sprintf("goctl model mysql ddl --src %s --dir %s --home %s --style %s -i '%s' --cache=%t --strict=%t",
-						filepath.Join(dir, "desc", "sql", f.Name()),
-						modelDir,
-						goctlHome,
-						js.Style,
-						strings.Join(js.ModelIgnoreColumns, ","),
-						js.ModelMysqlCache,
-						js.ModelStrict,
-					)
-					_, err = execx.Run(command, js.Wd)
+					cmd := exec.Command("goctl", "model", "mysql", "ddl", "--src", filepath.Join(dir, "desc", "sql", f.Name()), "--dir", modelDir, "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelStrict))
+					resp, err := cmd.CombinedOutput()
 					if err != nil {
-						console.Warning("[warning]: %s", err.Error())
+						console.Warning("[warning]: %s:%s", err.Error(), resp)
 						continue
 					}
 					if js.ModelMysqlCachePrefix != "" && js.ModelMysqlCache {
