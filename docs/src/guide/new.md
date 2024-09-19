@@ -62,6 +62,8 @@ Global Flags:
 jzero new your_project --branch api
 # 如果需要与原生 goctl 保持同样的目录结构请使用
 jzero new your_project --branch api-goctl
+# 如果需要将应用部署在 vercel 上
+jzero new your_project --branch api-vercel
 ```
 
 @tab Docker
