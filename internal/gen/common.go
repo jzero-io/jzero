@@ -81,7 +81,7 @@ func GetMainApiFilePath(apiDirName string) (string, bool, error) {
 	}
 
 	if mainApiFilePath == "" {
-		apiFilePath, err := getRouteApiFilePath(apiDirName)
+		apiFilePath, err := getApiFileRelPath(apiDirName)
 		if err != nil {
 			return "", false, err
 		}
@@ -110,7 +110,7 @@ func GetMainApiFilePath(apiDirName string) (string, bool, error) {
 }
 
 func GetApiServiceName(apiDirName string) string {
-	fs, err := getRouteApiFilePath(apiDirName)
+	fs, err := getApiFileRelPath(apiDirName)
 	if err != nil {
 		return ""
 	}

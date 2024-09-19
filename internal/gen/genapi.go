@@ -216,7 +216,7 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 	return logicFiles, nil
 }
 
-func getRouteApiFilePath(apiDirName string) ([]string, error) {
+func getApiFileRelPath(apiDirName string) ([]string, error) {
 	var apiFiles []string
 
 	allApiFiles, err := findApiFiles(apiDirName)
@@ -224,17 +224,11 @@ func getRouteApiFilePath(apiDirName string) ([]string, error) {
 		return nil, err
 	}
 	for _, file := range allApiFiles {
-		apiSpec, err := parser.Parse(file, nil)
+		rel, err := filepath.Rel(apiDirName, file)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to parse api file %s", file)
+			return nil, err
 		}
-		if len(apiSpec.Service.Routes()) > 0 {
-			rel, err := filepath.Rel(apiDirName, file)
-			if err != nil {
-				return nil, err
-			}
-			apiFiles = append(apiFiles, filepath.ToSlash(rel))
-		}
+		apiFiles = append(apiFiles, filepath.ToSlash(rel))
 	}
 
 	return apiFiles, nil
@@ -271,6 +265,7 @@ func (ja *JzeroApi) generateApiCode(mainApiFilePath, goctlHome string) error {
 	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
 	dir := "."
 	command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", mainApiFilePath, dir, goctlHome, ja.Style)
+	logx.Debugf("command: %s", command)
 	if _, err := execx.Run(command, ja.Wd); err != nil {
 		return err
 	}
