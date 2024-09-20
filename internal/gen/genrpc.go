@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"golang.org/x/tools/go/ast/astutil"
+
 	"github.com/iancoleman/orderedmap"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
@@ -28,7 +30,6 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/pkg/astx"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
@@ -171,7 +172,7 @@ func (jr *JzeroRpc) Gen() error {
 
 		if jr.RpcStylePatch {
 			for _, file := range allServerFiles {
-				err = jr.changeServerImportLogicPath(file)
+				err = jr.rpcStylePatch(file)
 				if err != nil {
 					return err
 				}
@@ -235,7 +236,7 @@ func (jr *JzeroRpc) Gen() error {
 	return nil
 }
 
-func (jr *JzeroRpc) changeServerImportLogicPath(file ServerFile) error {
+func (jr *JzeroRpc) rpcStylePatch(file ServerFile) error {
 	fp := file.Path
 	if jr.RemoveSuffix {
 		// Get the new file name of the file (without the 5 characters(Server or server) before the ".go" extension)
@@ -252,12 +253,11 @@ func (jr *JzeroRpc) changeServerImportLogicPath(file ServerFile) error {
 	if err != nil {
 		return err
 	}
-	// 删掉某个 import, 新增某个 import
-	astx.DeleteImport(f, fmt.Sprintf(`"%s/internal/logic/%s"`, jr.Module, strings.ToLower(file.Service)))
 
-	maps := make(map[string]bool)
+	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/logic/%s", jr.Module, strings.ToLower(file.Service)))
+
 	logicImportDir, _ := format.FileNamingFormat(jr.Style, file.Service)
-	astx.AddImport(f, fmt.Sprintf(`"%s/internal/logic/%s"`, jr.Module, strings.ToLower(logicImportDir)), maps)
+	astutil.AddImport(fset, f, fmt.Sprintf("%s/internal/logic/%s", jr.Module, strings.ToLower(logicImportDir)))
 
 	// Write the modified AST back to the file
 	buf := bytes.NewBuffer(nil)

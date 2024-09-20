@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"golang.org/x/tools/go/ast/astutil"
+
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/color"
@@ -25,7 +27,6 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/pkg/astx"
 )
 
 type JzeroApi struct {
@@ -676,10 +677,7 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 
 		// check `net/http` import
 		if needImportNetHttp {
-			addedImports := make(map[string]bool)
-			if !astx.HasImport(f, `"net/http"`) {
-				astx.AddImport(f, `"net/http"`, addedImports)
-			}
+			astutil.AddImport(fset, f, "net/http")
 		}
 	}
 

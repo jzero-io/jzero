@@ -36,7 +36,7 @@ func Init(ic config.IvmConfig) error {
 	ivmInit.newVersion = ic.Version
 
 	protoDir := filepath.Join("desc", "proto", ivmInit.oldVersion)
-	protoBaseDir := filepath.Join("desc", "proto")
+	protoBaseDir := filepath.Join("desc", "proto", "third_party")
 	ivmInit.protoBaseDir = protoBaseDir
 	ivmInit.oldProtoDir = protoDir
 	ivmInit.newProtoDir = filepath.Join("desc", "proto", ic.Version)

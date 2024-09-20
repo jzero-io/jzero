@@ -11,12 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"golang.org/x/tools/go/ast/astutil"
+
 	"github.com/rinchsan/gosimports"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
-	"github.com/jzero-io/jzero/pkg/astx"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -60,7 +61,7 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 			return err
 		}
 
-		err = ivm.astInspect(f, oldFiles[i], file)
+		err = ivm.astInspect(fset, f, oldFiles[i], file)
 		if err != nil {
 			return err
 		}
@@ -183,32 +184,19 @@ func (ivm *IvmInit) astRemoveDefaultFirstLineComments(f *ast.File) error {
 	return nil
 }
 
-func (ivm *IvmInit) astAddImport(f *ast.File, oldService string, clientStream, serverStream bool) error {
+func (ivm *IvmInit) astAddImport(fset *token.FileSet, f *ast.File, oldService string, clientStream, serverStream bool) error {
 	// 添加 import
-	// Track added imports to avoid duplicates
-	addedImports := make(map[string]bool)
-
-	if !astx.HasImport(f, `"google.golang.org/protobuf/proto"`) {
-		astx.AddImport(f, `"google.golang.org/protobuf/proto"`, addedImports)
-	}
-
-	if !astx.HasImport(f, fmt.Sprintf(`"%s/internal/logic/%s"`, ivm.jzeroRpc.Module, strings.ToLower(oldService))) {
-		astx.AddImport(f, fmt.Sprintf(`"%s/internal/logic/%s"`, ivm.jzeroRpc.Module, strings.ToLower(oldService)), addedImports)
-	}
-
-	if !astx.HasImport(f, fmt.Sprintf(`"%s/internal/pb/%spb"`, ivm.jzeroRpc.Module, strings.ToLower(oldService))) {
-		astx.AddImport(f, fmt.Sprintf(`"%s/internal/pb/%spb"`, ivm.jzeroRpc.Module, strings.ToLower(oldService)), addedImports)
-	}
+	astutil.AddImport(fset, f, "google.golang.org/protobuf/proto")
+	astutil.AddImport(fset, f, fmt.Sprintf("%s/internal/logic/%s", ivm.jzeroRpc.Module, strings.ToLower(oldService)))
+	astutil.AddImport(fset, f, fmt.Sprintf("%s/internal/pb/%spb", ivm.jzeroRpc.Module, strings.ToLower(oldService)))
 	if clientStream || serverStream {
-		if !astx.HasImport(f, `"io"`) {
-			astx.AddImport(f, `"io"`, addedImports)
-		}
+		astutil.AddImport(fset, f, "io")
 	}
 	return nil
 }
 
-func (ivm *IvmInit) astAddLogic(f *ast.File, oldService, logicMethodName string, clientStream, serverStream bool) error {
-	if err := ivm.astAddImport(f, oldService, clientStream, serverStream); err != nil {
+func (ivm *IvmInit) astAddLogic(fset *token.FileSet, f *ast.File, oldService, logicMethodName string, clientStream, serverStream bool) error {
+	if err := ivm.astAddImport(fset, f, oldService, clientStream, serverStream); err != nil {
 		return err
 	}
 
@@ -244,7 +232,7 @@ func (ivm *IvmInit) astAddLogic(f *ast.File, oldService, logicMethodName string,
 	return nil
 }
 
-func (ivm *IvmInit) astInspect(f *ast.File, oldLogicFile, newLogicFile gen.LogicFile) error {
+func (ivm *IvmInit) astInspect(fset *token.FileSet, f *ast.File, oldLogicFile, newLogicFile gen.LogicFile) error {
 	logicMethodName := newLogicFile.Handler
 	oldService := oldLogicFile.Group
 
@@ -252,7 +240,7 @@ func (ivm *IvmInit) astInspect(f *ast.File, oldLogicFile, newLogicFile gen.Logic
 		return err
 	}
 
-	if err := ivm.astAddLogic(f, oldService, logicMethodName, newLogicFile.ClientStream, newLogicFile.ServerStream); err != nil {
+	if err := ivm.astAddLogic(fset, f, oldService, logicMethodName, newLogicFile.ClientStream, newLogicFile.ServerStream); err != nil {
 		return err
 	}
 
