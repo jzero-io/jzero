@@ -172,7 +172,13 @@ func (jr *JzeroRpc) Gen() error {
 
 		if jr.RpcStylePatch {
 			for _, file := range allServerFiles {
-				err = jr.rpcStylePatch(file)
+				err = jr.rpcStylePatchServer(file)
+				if err != nil {
+					return err
+				}
+			}
+			for _, file := range allLogicFiles {
+				err = jr.rpcStylePatchLogic(file)
 				if err != nil {
 					return err
 				}
@@ -236,7 +242,7 @@ func (jr *JzeroRpc) Gen() error {
 	return nil
 }
 
-func (jr *JzeroRpc) rpcStylePatch(file ServerFile) error {
+func (jr *JzeroRpc) rpcStylePatchServer(file ServerFile) error {
 	fp := file.Path
 	if jr.RemoveSuffix {
 		// Get the new file name of the file (without the 5 characters(Server or server) before the ".go" extension)
@@ -257,7 +263,40 @@ func (jr *JzeroRpc) rpcStylePatch(file ServerFile) error {
 	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/logic/%s", jr.Module, strings.ToLower(file.Service)))
 
 	logicImportDir, _ := format.FileNamingFormat(jr.Style, file.Service)
-	astutil.AddImport(fset, f, fmt.Sprintf("%s/internal/logic/%s", jr.Module, strings.ToLower(logicImportDir)))
+	importLogicName, _ := format.FileNamingFormat("gozero", file.Service)
+	astutil.AddNamedImport(fset, f, importLogicName+"logic", fmt.Sprintf("%s/internal/logic/%s", jr.Module, strings.ToLower(logicImportDir)))
+
+	// Write the modified AST back to the file
+	buf := bytes.NewBuffer(nil)
+	if err := goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
+
+	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (jr *JzeroRpc) rpcStylePatchLogic(file LogicFile) error {
+	fp := file.Path
+	if jr.RemoveSuffix {
+		fp = fp[:len(fp)-8]
+		// patch
+		fp = strings.TrimSuffix(fp, "_")
+		fp = strings.TrimSuffix(fp, "-")
+		fp = fp + ".go"
+	}
+
+	fset := token.NewFileSet()
+
+	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+
+	packageName, _ := format.FileNamingFormat(jr.Style, file.Group)
+	f.Name = ast.NewIdent(strings.ToLower(packageName))
 
 	// Write the modified AST back to the file
 	buf := bytes.NewBuffer(nil)
