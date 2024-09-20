@@ -91,7 +91,7 @@ go run main.go server
 
 ## 贡献者
 
-[贡献](CONTRIBUTING.md)
+[贡献](https://jzero.jaronnie.com/guide/contribute)
 
 <div>
   <a href="https://github.com/jzero-io/jzero/graphs/contributors">
