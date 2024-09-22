@@ -14,7 +14,7 @@
 
 ![Static Badge](https://img.shields.io/badge/Latest_New_Feature-blue?style=for-the-badge)
 
-* 将 jzero 应用部署在 [Vercel](https://vercel.com), [模板仓库分支](https://github.com/jzero-io/templates/tree/api-vercel)
+* 将 jzero 应用部署在 [Vercel](https://vercel.com), [模板仓库分支](https://github.com/jzero-io/templates/tree/api-vercel), [代码示例](https://github.com/jaronnie/go-serverless-vercel)
 
 中文 | [ENGLISH](README-EN.md)
 
