@@ -586,7 +586,17 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 							}
 							structType.Fields.List = append(structType.Fields.List, newField)
 							needImportNetHttp = true
+						} else if structType != nil && requestType != nil && lo.Contains(names, "r") {
+							for i, v := range structType.Fields.List {
+								if len(v.Names) > 0 {
+									if v.Names[0].Name == "r" {
+										// 删除这个元素
+										structType.Fields.List = append(structType.Fields.List[:i], structType.Fields.List[i+1:]...)
+									}
+								}
+							}
 						}
+
 						if structType != nil && responseType == nil && !lo.Contains(names, "w") {
 							newField := &ast.Field{
 								Names: []*ast.Ident{ast.NewIdent("w")},
@@ -594,6 +604,17 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 							}
 							structType.Fields.List = append(structType.Fields.List, newField)
 							needImportNetHttp = true
+						} else if structType != nil && responseType != nil && !lo.Contains(names, "w") {
+							if lo.Contains(names, "w") {
+								for i, v := range structType.Fields.List {
+									if len(v.Names) > 0 {
+										if v.Names[0].Name == "w" {
+											// 删除这个元素
+											structType.Fields.List = append(structType.Fields.List[:i], structType.Fields.List[i+1:]...)
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -616,6 +637,14 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 						Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
 					})
 					needImportNetHttp = true
+				} else if requestType != nil && lo.Contains(paramNames, "r") {
+					for i, v := range fn.Type.Params.List {
+						if len(v.Names) > 0 {
+							if v.Names[0].Name == "r" {
+								fn.Type.Params.List = append(fn.Type.Params.List[:i], fn.Type.Params.List[i+1:]...)
+							}
+						}
+					}
 				}
 
 				if responseType == nil && !lo.Contains(paramNames, "w") {
@@ -624,6 +653,14 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 						Type:  ast.NewIdent("http.ResponseWriter"),
 					})
 					needImportNetHttp = true
+				} else if responseType != nil && lo.Contains(paramNames, "w") {
+					for i, v := range fn.Type.Params.List {
+						if len(v.Names) > 0 {
+							if v.Names[0].Name == "w" {
+								fn.Type.Params.List = append(fn.Type.Params.List[:i], fn.Type.Params.List[i+1:]...)
+							}
+						}
+					}
 				}
 
 				for _, body := range fn.Body.List {
@@ -655,6 +692,17 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 												Value: ast.NewIdent("r"), // or any default value you want
 											}
 											compositeLit.Elts = append(compositeLit.Elts, newField)
+										} else if requestType != nil && hasR {
+											for i, v := range compositeLit.Elts {
+												if kv, ok := v.(*ast.KeyValueExpr); ok {
+													if key, ok := kv.Key.(*ast.Ident); ok {
+														if key.Name == "r" {
+															// 删除这个元素
+															compositeLit.Elts = append(compositeLit.Elts[:i], compositeLit.Elts[i+1:]...)
+														}
+													}
+												}
+											}
 										}
 
 										if responseType == nil && !hasW {
@@ -664,6 +712,17 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 												Value: ast.NewIdent("w"), // or any default value you want
 											}
 											compositeLit.Elts = append(compositeLit.Elts, newField)
+										} else if responseType != nil && hasW {
+											for i, v := range compositeLit.Elts {
+												if kv, ok := v.(*ast.KeyValueExpr); ok {
+													if key, ok := kv.Key.(*ast.Ident); ok {
+														if key.Name == "w" {
+															// 删除这个元素
+															compositeLit.Elts = append(compositeLit.Elts[:i], compositeLit.Elts[i+1:]...)
+														}
+													}
+												}
+											}
 										}
 									}
 								}
@@ -678,6 +737,8 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 		// check `net/http` import
 		if needImportNetHttp {
 			astutil.AddImport(fset, f, "net/http")
+		} else {
+			astutil.DeleteImport(fset, f, "net/http")
 		}
 	}
 
