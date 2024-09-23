@@ -561,7 +561,6 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 	})
 
 	// change handler type struct
-	var needImportNetHttp bool
 	if ja.RegenApiHandler {
 		ast.Inspect(f, func(node ast.Node) bool {
 			if genDecl, ok := node.(*ast.GenDecl); ok && genDecl.Tok == token.TYPE {
@@ -585,7 +584,6 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 								Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
 							}
 							structType.Fields.List = append(structType.Fields.List, newField)
-							needImportNetHttp = true
 						} else if structType != nil && requestType != nil && lo.Contains(names, "r") {
 							for i, v := range structType.Fields.List {
 								if len(v.Names) > 0 {
@@ -603,7 +601,6 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 								Type:  ast.NewIdent("http.ResponseWriter"),
 							}
 							structType.Fields.List = append(structType.Fields.List, newField)
-							needImportNetHttp = true
 						} else if structType != nil && responseType != nil && !lo.Contains(names, "w") {
 							if lo.Contains(names, "w") {
 								for i, v := range structType.Fields.List {
@@ -636,7 +633,6 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 						Names: []*ast.Ident{ast.NewIdent("r")},
 						Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
 					})
-					needImportNetHttp = true
 				} else if requestType != nil && lo.Contains(paramNames, "r") {
 					for i, v := range fn.Type.Params.List {
 						if len(v.Names) > 0 {
@@ -652,7 +648,6 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 						Names: []*ast.Ident{ast.NewIdent("w")},
 						Type:  ast.NewIdent("http.ResponseWriter"),
 					})
-					needImportNetHttp = true
 				} else if responseType != nil && lo.Contains(paramNames, "w") {
 					for i, v := range fn.Type.Params.List {
 						if len(v.Names) > 0 {
@@ -735,9 +730,9 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 		})
 
 		// check `net/http` import
-		if needImportNetHttp {
+		if requestType == nil || responseType == nil {
 			astutil.AddImport(fset, f, "net/http")
-		} else {
+		} else if requestType != nil && responseType != nil {
 			astutil.DeleteImport(fset, f, "net/http")
 		}
 	}
