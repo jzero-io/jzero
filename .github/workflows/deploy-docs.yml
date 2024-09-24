@@ -26,6 +26,10 @@ jobs:
           cache: npm
           cache-dependency-path: docs/pnpm-lock.yaml
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.3'
+
       - name: Build Docs
         env:
           NODE_OPTIONS: --max_old_space_size=8192
