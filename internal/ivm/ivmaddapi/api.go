@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/api/format"
+
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
@@ -47,5 +49,12 @@ func AddApi(ic config.IvmConfig) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(baseApiDir, ic.Add.Api.Name+".api"), template, 0o644)
+
+	err = os.WriteFile(filepath.Join(baseApiDir, ic.Add.Api.Name+".api"), template, 0o644)
+	if err != nil {
+		return err
+	}
+
+	// format
+	return format.ApiFormatByPath(filepath.Join(baseApiDir, ic.Add.Api.Name+".api"), false)
 }
