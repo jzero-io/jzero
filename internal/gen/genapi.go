@@ -135,7 +135,11 @@ func (ja *JzeroApi) Gen() error {
 			return err
 		}
 		// goctl-types. make types.go separate by group
-		err = ja.separateTypesGoByGoctlTypesPlugin(mainApiFilePath)
+		apiFiles, err := findApiFiles(filepath.Join("desc", "api"))
+		if err != nil {
+			return err
+		}
+		err = ja.separateTypesGo(mainApiFilePath, apiFiles)
 		if err != nil {
 			return err
 		}
@@ -273,11 +277,20 @@ func (ja *JzeroApi) generateApiCode(mainApiFilePath, goctlHome string) error {
 	return nil
 }
 
-func (ja *JzeroApi) separateTypesGoByGoctlTypesPlugin(mainApiFilePath string) error {
+func (ja *JzeroApi) separateTypesGo(mainApiFilePath string, apiFiles []string) error {
 	dir := "."
 	command := fmt.Sprintf("goctl api plugin -plugin goctl-types=\"gen\" -api %s --dir %s --style %s\n", mainApiFilePath, dir, ja.Style)
 	if _, err := execx.Run(command, ja.Wd); err != nil {
 		return err
+	}
+	for _, apiFile := range apiFiles {
+		parse, err := parser.Parse(apiFile, "")
+		if err != nil {
+			return err
+		}
+		if goPackage, ok := parse.Info.Properties["go_package"]; ok {
+			fmt.Println(goPackage)
+		}
 	}
 	return nil
 }
