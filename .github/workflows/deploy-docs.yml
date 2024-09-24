@@ -43,6 +43,7 @@ jobs:
 
       - name: Upload to jaronnie/jzero-docs-deploy-pages
         run: |
+          go install github.com/jaronnie/grum@latest
           GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum clone https://github.com/jaronnie/jzero-docs-deploy-pages
           cd jzero-docs-deploy-pages
           mv ../docs/src/.vuepress/dist/* ./
