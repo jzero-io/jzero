@@ -40,3 +40,12 @@ jobs:
         with:
           branch: gh-pages
           folder: docs/src/.vuepress/dist
+
+      - name: Upload to jaronnie/jzero-docs-deploy-pages
+        run: |
+          GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum clone https://github.com/jaronnie/jzero-docs-deploy-pages
+          cd jzero-docs-deploy-pages
+          mv ../docs/src/.vuepress/dist/* ./
+          git add .
+          git diff-index --quiet HEAD || git commit -m "chore(docs): update docs"
+          git push -f
