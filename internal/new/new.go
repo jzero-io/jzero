@@ -117,6 +117,11 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 			stylePath = filepath.Join(filepath.Dir(rel), formatFilename+filepath.Ext(filename))
 		}
 
+		// specify
+		if filename == "go.mod" && jn.nc.SubModule {
+			continue
+		}
+
 		gsf = append(gsf, &GeneratedFile{
 			Path:    filepath.Join(jn.nc.Output, stylePath),
 			Content: *bytes.NewBuffer(fileBytes),

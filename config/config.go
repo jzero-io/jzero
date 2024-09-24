@@ -39,6 +39,7 @@ type Config struct {
 type NewConfig struct {
 	Home         string   `mapstructure:"home"`
 	Module       string   `mapstructure:"module"`
+	SubModule    bool     `mapstructure:"submodule"`
 	Output       string   `mapstructure:"output"`
 	Remote       string   `mapstructure:"remote"`
 	Cache        bool     `mapstructure:"cache"`

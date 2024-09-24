@@ -20,9 +20,15 @@ import (
 func Gen(gcf config.GenConfig) error {
 	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), gcf.Wd())
 
+	var module string
 	moduleStruct, err := mod.GetGoMod(gcf.Wd())
 	if err != nil {
 		return errors.Wrapf(err, "get go module struct error")
+	}
+	module = moduleStruct.Path
+
+	if !pathx.FileExists("go.mod") {
+		module = filepath.ToSlash(filepath.Join(module, filepath.Base(gcf.Wd())))
 	}
 
 	defer func() {
@@ -31,7 +37,7 @@ func Gen(gcf config.GenConfig) error {
 
 	jzeroRpc := JzeroRpc{
 		Wd:               gcf.Wd(),
-		Module:           moduleStruct.Path,
+		Module:           module,
 		Style:            gcf.Style,
 		RemoveSuffix:     gcf.RemoveSuffix,
 		ChangeLogicTypes: gcf.ChangeLogicTypes,

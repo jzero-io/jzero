@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/jzero-io/jzero/pkg/mod"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/pkg/errors"
@@ -38,6 +40,15 @@ var newCmd = &cobra.Command{
 		}
 		if config.C.New.Module == "" {
 			config.C.New.Module = args[0]
+		}
+		// 在 go mod 项目的一个子模块
+		if config.C.New.SubModule {
+			wd, _ := os.Getwd()
+			goMod, err := mod.GetGoMod(wd)
+			if err != nil {
+				cobra.CheckErr(err)
+			}
+			config.C.New.Module = filepath.ToSlash(filepath.Join(goMod.Path, config.C.New.Module))
 		}
 
 		if !pathx.FileExists(config.C.New.Home) {
@@ -115,4 +126,5 @@ func init() {
 	newCmd.Flags().BoolP("with-template", "", false, "with template files in your project")
 	newCmd.Flags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 	newCmd.Flags().StringSliceP("features", "", []string{}, "select features")
+	newCmd.Flags().BoolP("submodule", "", false, "is project's submodule")
 }
