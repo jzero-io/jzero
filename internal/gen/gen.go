@@ -50,12 +50,13 @@ func Gen(gcf config.GenConfig) error {
 
 	jzeroApi := JzeroApi{
 		Wd:                 gcf.Wd(),
-		Module:             moduleStruct.Path,
+		Module:             module,
 		Style:              gcf.Style,
 		RemoveSuffix:       gcf.RemoveSuffix,
 		ChangeReplaceTypes: gcf.ChangeLogicTypes,
 		RegenApiHandler:    gcf.RegenApiHandler,
 		RegenApiTypes:      gcf.RegenApiTypes,
+		SplitApiTypesDir:   gcf.SplitApiTypesDir,
 	}
 	err = jzeroApi.Gen()
 	if err != nil {

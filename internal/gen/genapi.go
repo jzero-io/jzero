@@ -3,6 +3,8 @@ package gen
 import (
 	"bytes"
 	"fmt"
+	"github.com/jzero-io/jzero/pkg/templatex"
+	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	"go/ast"
 	goformat "go/format"
 	goparser "go/parser"
@@ -37,6 +39,7 @@ type JzeroApi struct {
 	ChangeReplaceTypes bool
 	RegenApiHandler    bool
 	RegenApiTypes      bool
+	SplitApiTypesDir   bool
 }
 
 type HandlerFile struct {
@@ -70,8 +73,8 @@ func (ja *JzeroApi) Gen() error {
 		return nil
 	}
 
+	// 处理模板
 	var goctlHome string
-
 	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "api")) {
 		tempDir, err := os.MkdirTemp(os.TempDir(), "")
 		if err != nil {
@@ -88,6 +91,7 @@ func (ja *JzeroApi) Gen() error {
 	}
 	logx.Debugf("goctl_home = %s", goctlHome)
 
+	var mainApiFilePath string
 	if pathx.FileExists(apiDirName) {
 		// format api dir
 		command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
@@ -97,6 +101,7 @@ func (ja *JzeroApi) Gen() error {
 		}
 
 		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
+		// 获取 main api
 		mainApiFilePath, isDelete, err := GetMainApiFilePath(apiDirName)
 		if err != nil {
 			return err
@@ -122,24 +127,11 @@ func (ja *JzeroApi) Gen() error {
 			return err
 		}
 
-		if ja.RegenApiHandler {
-			_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler"))
-		}
-
-		if ja.RegenApiTypes {
-			_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types"))
-		}
-
-		err = ja.generateApiCode(mainApiFilePath, goctlHome)
-		if err != nil {
-			return err
-		}
-		// goctl-types. make types.go separate by group
 		apiFiles, err := findApiFiles(filepath.Join("desc", "api"))
 		if err != nil {
 			return err
 		}
-		err = ja.separateTypesGo(mainApiFilePath, apiFiles)
+		err = ja.generateApiCode(mainApiFilePath, apiFiles, goctlHome)
 		if err != nil {
 			return err
 		}
@@ -147,6 +139,7 @@ func (ja *JzeroApi) Gen() error {
 		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
 
+	// 处理多余后缀
 	if ja.RemoveSuffix && apiSpec != nil {
 		for _, file := range allHandlerFiles {
 			if err := ja.removeHandlerSuffix(file.Path); err != nil {
@@ -163,6 +156,7 @@ func (ja *JzeroApi) Gen() error {
 		}
 	}
 
+	// 自动替换 logic 层的 request 和 response name
 	if ja.ChangeReplaceTypes {
 		for _, file := range allLogicFiles {
 			if err := ja.changeLogicTypes(file, apiSpec); err != nil {
@@ -170,6 +164,12 @@ func (ja *JzeroApi) Gen() error {
 				continue
 			}
 		}
+	}
+
+	// 将 types.go 分 group 或者分 dir
+	err := ja.separateTypesGo(mainApiFilePath, allLogicFiles, allHandlerFiles)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -221,75 +221,100 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 	return logicFiles, nil
 }
 
-func getApiFileRelPath(apiDirName string) ([]string, error) {
-	var apiFiles []string
-
-	allApiFiles, err := findApiFiles(apiDirName)
-	if err != nil {
-		return nil, err
-	}
-	for _, file := range allApiFiles {
-		rel, err := filepath.Rel(apiDirName, file)
-		if err != nil {
-			return nil, err
-		}
-		apiFiles = append(apiFiles, filepath.ToSlash(rel))
-	}
-
-	return apiFiles, nil
-}
-
-func findApiFiles(dir string) ([]string, error) {
-	var apiFiles []string
-
-	files, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			subFiles, err := findApiFiles(filepath.Join(dir, file.Name()))
-			if err != nil {
-				return nil, err
-			}
-			apiFiles = append(apiFiles, subFiles...)
-		} else if filepath.Ext(file.Name()) == ".api" {
-			apiFiles = append(apiFiles, filepath.Join(dir, file.Name()))
-		}
-	}
-
-	return apiFiles, nil
-}
-
-func (ja *JzeroApi) generateApiCode(mainApiFilePath, goctlHome string) error {
+func (ja *JzeroApi) generateApiCode(mainApiFilePath string, apiFiles []string, goctlHome string) error {
 	if mainApiFilePath == "" {
 		return errors.New("empty mainApiFilePath")
 	}
 
-	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
-	dir := "."
-	command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", mainApiFilePath, dir, goctlHome, ja.Style)
-	logx.Debugf("command: %s", command)
-	if _, err := execx.Run(command, ja.Wd); err != nil {
-		return err
+	if ja.RegenApiHandler {
+		_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler"))
 	}
+
+	if ja.RegenApiTypes {
+		_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types"))
+	}
+
+	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
+
+	dir := "."
+	if !ja.SplitApiTypesDir {
+		command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", mainApiFilePath, dir, goctlHome, ja.Style)
+		logx.Debugf("command: %s", command)
+		if _, err := execx.Run(command, ja.Wd); err != nil {
+			return err
+		}
+		return nil
+	}
+	for _, v := range apiFiles {
+		command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, ja.Style)
+		logx.Debugf("command: %s", command)
+		if _, err := execx.Run(command, ja.Wd); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func (ja *JzeroApi) separateTypesGo(mainApiFilePath string, apiFiles []string) error {
-	dir := "."
-	command := fmt.Sprintf("goctl api plugin -plugin goctl-types=\"gen\" -api %s --dir %s --style %s\n", mainApiFilePath, dir, ja.Style)
-	if _, err := execx.Run(command, ja.Wd); err != nil {
+func (ja *JzeroApi) separateTypesGo(mainApiFilePath string, allLogicFiles []LogicFile, allHandlerFiles []HandlerFile) error {
+	if !ja.SplitApiTypesDir {
+		dir := "."
+		command := fmt.Sprintf("goctl api plugin -plugin goctl-types=\"gen\" -api %s --dir %s --style %s\n", mainApiFilePath, dir, ja.Style)
+		if _, err := execx.Run(command, ja.Wd); err != nil {
+			return err
+		}
+		return nil
+	}
+	// split types go dir
+	routeApiFiles, err := findRouteApiFiles(filepath.Join("desc", "api"))
+	if err != nil {
 		return err
 	}
-	for _, apiFile := range apiFiles {
+	_ = os.Remove(filepath.Join("internal", "types", "types.go"))
+	for _, apiFile := range routeApiFiles {
 		parse, err := parser.Parse(apiFile, "")
 		if err != nil {
 			return err
 		}
-		if goPackage, ok := parse.Info.Properties["go_package"]; ok {
-			fmt.Println(goPackage)
+		for _, g := range parse.Service.Groups {
+			typesGoString, err := gogen.BuildTypes(parse.Types)
+			if err != nil {
+				return err
+			}
+			typesGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+				"Types":   typesGoString,
+				"Package": g.GetAnnotation("group"),
+			}, []byte(`// Code generated by jzero. DO NOT EDIT.
+package {{.Package}}
+
+import (
+    "time"
+)
+
+var (
+    _ = time.Now()
+)
+
+{{.Types}}`))
+			if err != nil {
+				return err
+			}
+
+			_ = os.MkdirAll(filepath.Join("internal", "types", g.GetAnnotation("group")), 0o755)
+			if err = os.WriteFile(filepath.Join("internal", "types", g.GetAnnotation("group"), "types.go"), typesGoBytes, 0o644); err != nil {
+				return err
+			}
+		}
+	}
+
+	for _, v := range allLogicFiles {
+		if err = ja.updateLogicImportedTypesPath(v); err != nil {
+			return err
+		}
+	}
+	for _, v := range allHandlerFiles {
+		if err = ja.updateHandlerImportedTypesPath(v); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -760,5 +785,70 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 		return err
 	}
 
+	return nil
+}
+
+func (ja *JzeroApi) updateHandlerImportedTypesPath(file HandlerFile) error {
+	fp := file.Path // handler file path
+	if ja.RemoveSuffix {
+		fp = file.Path[:len(file.Path)-10]
+		// patch
+		fp = strings.TrimSuffix(fp, "_")
+		fp = strings.TrimSuffix(fp, "-")
+		fp += ".go"
+	}
+
+	fset := token.NewFileSet()
+
+	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+
+	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
+	astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Group))
+
+	// Write the modified AST back to the file
+	buf := bytes.NewBuffer(nil)
+	if err := goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
+
+	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ja *JzeroApi) updateLogicImportedTypesPath(file LogicFile) error {
+	fp := file.Path // logic file path
+	if ja.RemoveSuffix {
+		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
+		fp = file.Path[:len(file.Path)-8]
+		// patch
+		fp = strings.TrimSuffix(fp, "_")
+		fp = strings.TrimSuffix(fp, "-")
+		fp += ".go"
+	}
+
+	fset := token.NewFileSet()
+
+	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+
+	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
+	astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Group))
+
+	// Write the modified AST back to the file
+	buf := bytes.NewBuffer(nil)
+	if err := goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
+
+	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+		return err
+	}
 	return nil
 }

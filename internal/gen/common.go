@@ -145,3 +145,73 @@ func getRpcMethodUrl(method *descriptorpb.MethodDescriptorProto) string {
 	}
 	return ""
 }
+
+func getApiFileRelPath(apiDirName string) ([]string, error) {
+	var apiFiles []string
+
+	allApiFiles, err := findApiFiles(apiDirName)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range allApiFiles {
+		rel, err := filepath.Rel(apiDirName, file)
+		if err != nil {
+			return nil, err
+		}
+		apiFiles = append(apiFiles, filepath.ToSlash(rel))
+	}
+
+	return apiFiles, nil
+}
+
+func findApiFiles(dir string) ([]string, error) {
+	var apiFiles []string
+
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			subFiles, err := findApiFiles(filepath.Join(dir, file.Name()))
+			if err != nil {
+				return nil, err
+			}
+			apiFiles = append(apiFiles, subFiles...)
+		} else if filepath.Ext(file.Name()) == ".api" {
+			apiFiles = append(apiFiles, filepath.Join(dir, file.Name()))
+		}
+	}
+
+	return apiFiles, nil
+}
+
+func findRouteApiFiles(dir string) ([]string, error) {
+	var apiFiles []string
+
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			subFiles, err := findRouteApiFiles(filepath.Join(dir, file.Name()))
+			if err != nil {
+				return nil, err
+			}
+			apiFiles = append(apiFiles, subFiles...)
+		} else if filepath.Ext(file.Name()) == ".api" {
+			parse, err := parser.Parse(filepath.Join(dir, file.Name()), "")
+			if err != nil {
+				return nil, err
+			}
+			if len(parse.Service.Routes()) > 0 {
+				apiFiles = append(apiFiles, filepath.Join(dir, file.Name()))
+			}
+		}
+	}
+
+	return apiFiles, nil
+}
