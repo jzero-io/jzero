@@ -351,7 +351,18 @@ var (
 			}
 		}
 	} else {
-		typesGoString, err := gogen.BuildTypes(allTypes)
+		// 去除重复
+		var realAllTypes []spec.Type
+		exist := make(map[string]struct{})
+		for _, v := range allTypes {
+			if _, ok := exist[v.Name()]; ok {
+				continue
+			}
+			realAllTypes = append(realAllTypes, v)
+			exist[v.Name()] = struct{}{}
+		}
+
+		typesGoString, err := gogen.BuildTypes(realAllTypes)
 		if err != nil {
 			return err
 		}
