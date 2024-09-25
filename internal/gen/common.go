@@ -6,12 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
+	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
-
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
-	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 )
 
 func getProtoDir(protoDirPath string) ([]os.DirEntry, error) {
@@ -187,7 +186,7 @@ func findApiFiles(dir string) ([]string, error) {
 	return apiFiles, nil
 }
 
-func findRouteApiFiles(dir string) ([]string, error) {
+func FindRouteApiFiles(dir string) ([]string, error) {
 	var apiFiles []string
 
 	files, err := os.ReadDir(dir)
@@ -197,7 +196,7 @@ func findRouteApiFiles(dir string) ([]string, error) {
 
 	for _, file := range files {
 		if file.IsDir() {
-			subFiles, err := findRouteApiFiles(filepath.Join(dir, file.Name()))
+			subFiles, err := FindRouteApiFiles(filepath.Join(dir, file.Name()))
 			if err != nil {
 				return nil, err
 			}

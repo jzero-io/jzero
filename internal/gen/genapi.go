@@ -3,8 +3,6 @@ package gen
 import (
 	"bytes"
 	"fmt"
-	"github.com/jzero-io/jzero/pkg/templatex"
-	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	"go/ast"
 	goformat "go/format"
 	goparser "go/parser"
@@ -13,12 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/tools/go/ast/astutil"
-
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -26,9 +23,11 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 type JzeroApi struct {
@@ -43,6 +42,7 @@ type JzeroApi struct {
 }
 
 type HandlerFile struct {
+	Package string
 	Group   string
 	Handler string
 	Path    string
@@ -91,66 +91,56 @@ func (ja *JzeroApi) Gen() error {
 	}
 	logx.Debugf("goctl_home = %s", goctlHome)
 
-	var mainApiFilePath string
-	if pathx.FileExists(apiDirName) {
-		// format api dir
-		command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
-		_, err := execx.Run(command, ja.Wd)
+	// format api dir
+	command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
+	_, err := execx.Run(command, ja.Wd)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
+
+	apiFiles, err := FindRouteApiFiles(apiDirName)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range apiFiles {
+		apiSpec, err = parser.Parse(v, nil)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
-		// 获取 main api
-		mainApiFilePath, isDelete, err := GetMainApiFilePath(apiDirName)
+		logicFiles, err := ja.getAllLogicFiles(apiSpec)
 		if err != nil {
 			return err
 		}
-		defer func() {
-			if isDelete {
-				_ = os.Remove(mainApiFilePath)
-			}
-		}()
+		allLogicFiles = append(allLogicFiles, logicFiles...)
 
-		apiSpec, err = parser.Parse(mainApiFilePath, nil)
+		handlerFiles, err := ja.getAllHandlerFiles(apiSpec)
 		if err != nil {
 			return err
 		}
+		allHandlerFiles = append(allHandlerFiles, handlerFiles...)
 
-		allLogicFiles, err = ja.getAllLogicFiles(apiSpec)
+		err = ja.generateApiCode(v, apiFiles, goctlHome)
 		if err != nil {
 			return err
 		}
-
-		allHandlerFiles, err = ja.getAllHandlerFiles(apiSpec)
-		if err != nil {
-			return err
-		}
-
-		apiFiles, err := findApiFiles(filepath.Join("desc", "api"))
-		if err != nil {
-			return err
-		}
-		err = ja.generateApiCode(mainApiFilePath, apiFiles, goctlHome)
-		if err != nil {
-			return err
-		}
-
-		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
 
 	// 处理多余后缀
-	if ja.RemoveSuffix && apiSpec != nil {
+	if ja.RemoveSuffix {
 		for _, file := range allHandlerFiles {
-			if err := ja.removeHandlerSuffix(file.Path); err != nil {
+			if err = ja.removeHandlerSuffix(file.Path); err != nil {
 				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
-			if err := ja.removeRouteSuffix(file.Group, file.Handler); err != nil {
+			if err = ja.removeRouteSuffix(file.Group, file.Handler); err != nil {
 				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
 		}
 		for _, file := range allLogicFiles {
-			if err := ja.removeLogicSuffix(file.Path); err != nil {
+			if err = ja.removeLogicSuffix(file.Path); err != nil {
 				return errors.Wrapf(err, "rewrite %s", file.Path)
 			}
 		}
@@ -167,11 +157,14 @@ func (ja *JzeroApi) Gen() error {
 	}
 
 	// 将 types.go 分 group 或者分 dir
-	err := ja.separateTypesGo(mainApiFilePath, allLogicFiles, allHandlerFiles)
-	if err != nil {
-		return err
+	if ja.SplitApiTypesDir {
+		err = ja.separateTypesGo(allLogicFiles, allHandlerFiles)
+		if err != nil {
+			return err
+		}
 	}
 
+	fmt.Println(color.WithColor("Done", color.FgGreen))
 	return nil
 }
 
@@ -186,13 +179,15 @@ func (ja *JzeroApi) getAllHandlerFiles(apiSpec *spec.ApiSpec) ([]HandlerFile, er
 			}
 			fp := filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group"), namingFormat+".go")
 
-			f := HandlerFile{
+			hf := HandlerFile{
 				Path:    fp,
 				Group:   group.GetAnnotation("group"),
 				Handler: route.Handler,
 			}
-
-			handlerFiles = append(handlerFiles, f)
+			if goPackage, ok := apiSpec.Info.Properties["go_package"]; ok {
+				hf.Package = goPackage
+			}
+			handlerFiles = append(handlerFiles, hf)
 		}
 	}
 	return handlerFiles, nil
@@ -209,23 +204,23 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 
 			fp := filepath.Join(ja.Wd, "internal", "logic", group.GetAnnotation("group"), namingFormat+".go")
 
-			f := LogicFile{
+			hf := LogicFile{
+				Package: apiSpec.Info.Properties["go_package"],
 				Path:    fp,
 				Group:   group.GetAnnotation("group"),
 				Handler: route.Handler,
 			}
+			if goPackage, ok := apiSpec.Info.Properties["go_package"]; ok {
+				hf.Package = goPackage
+			}
 
-			logicFiles = append(logicFiles, f)
+			logicFiles = append(logicFiles, hf)
 		}
 	}
 	return logicFiles, nil
 }
 
-func (ja *JzeroApi) generateApiCode(mainApiFilePath string, apiFiles []string, goctlHome string) error {
-	if mainApiFilePath == "" {
-		return errors.New("empty mainApiFilePath")
-	}
-
+func (ja *JzeroApi) generateApiCode(apiFilepath string, apiFiles []string, goctlHome string) error {
 	if ja.RegenApiHandler {
 		_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler"))
 	}
@@ -234,11 +229,11 @@ func (ja *JzeroApi) generateApiCode(mainApiFilePath string, apiFiles []string, g
 		_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types"))
 	}
 
-	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), mainApiFilePath)
+	fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), apiFilepath)
 
 	dir := "."
 	if !ja.SplitApiTypesDir {
-		command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", mainApiFilePath, dir, goctlHome, ja.Style)
+		command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", apiFilepath, dir, goctlHome, ja.Style)
 		logx.Debugf("command: %s", command)
 		if _, err := execx.Run(command, ja.Wd); err != nil {
 			return err
@@ -256,17 +251,9 @@ func (ja *JzeroApi) generateApiCode(mainApiFilePath string, apiFiles []string, g
 	return nil
 }
 
-func (ja *JzeroApi) separateTypesGo(mainApiFilePath string, allLogicFiles []LogicFile, allHandlerFiles []HandlerFile) error {
-	if !ja.SplitApiTypesDir {
-		dir := "."
-		command := fmt.Sprintf("goctl api plugin -plugin goctl-types=\"gen\" -api %s --dir %s --style %s\n", mainApiFilePath, dir, ja.Style)
-		if _, err := execx.Run(command, ja.Wd); err != nil {
-			return err
-		}
-		return nil
-	}
+func (ja *JzeroApi) separateTypesGo(allLogicFiles []LogicFile, allHandlerFiles []HandlerFile) error {
 	// split types go dir
-	routeApiFiles, err := findRouteApiFiles(filepath.Join("desc", "api"))
+	routeApiFiles, err := FindRouteApiFiles(filepath.Join("desc", "api"))
 	if err != nil {
 		return err
 	}
@@ -276,15 +263,19 @@ func (ja *JzeroApi) separateTypesGo(mainApiFilePath string, allLogicFiles []Logi
 		if err != nil {
 			return err
 		}
-		for _, g := range parse.Service.Groups {
-			typesGoString, err := gogen.BuildTypes(parse.Types)
-			if err != nil {
-				return err
-			}
-			typesGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
-				"Types":   typesGoString,
-				"Package": g.GetAnnotation("group"),
-			}, []byte(`// Code generated by jzero. DO NOT EDIT.
+		typesGoString, err := gogen.BuildTypes(parse.Types)
+		if err != nil {
+			return err
+		}
+
+		goPackage, ok := parse.Info.Properties["go_package"]
+		if !ok {
+			return errors.New("do not has go_package option")
+		}
+		typesGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+			"Types":   typesGoString,
+			"Package": goPackage,
+		}, []byte(`// Code generated by jzero. DO NOT EDIT.
 package {{.Package}}
 
 import (
@@ -296,14 +287,13 @@ var (
 )
 
 {{.Types}}`))
-			if err != nil {
-				return err
-			}
+		if err != nil {
+			return err
+		}
 
-			_ = os.MkdirAll(filepath.Join("internal", "types", g.GetAnnotation("group")), 0o755)
-			if err = os.WriteFile(filepath.Join("internal", "types", g.GetAnnotation("group"), "types.go"), typesGoBytes, 0o644); err != nil {
-				return err
-			}
+		_ = os.MkdirAll(filepath.Join("internal", "types", goPackage), 0o755)
+		if err = os.WriteFile(filepath.Join("internal", "types", goPackage, "types.go"), typesGoBytes, 0o644); err != nil {
+			return err
 		}
 	}
 
@@ -538,7 +528,6 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 				if route.ResponseType != nil {
 					responseType = route.ResponseType
 				}
-				// todo: do not guess remove-suffix=false
 				methodFunc = util.Title(strings.TrimSuffix(route.Handler, "Handler"))
 			}
 		}
