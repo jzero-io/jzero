@@ -11,13 +11,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/internal/gen"
+
 	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/rinchsan/gosimports"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
