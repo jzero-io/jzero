@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"google.golang.org/genproto/googleapis/api/annotations"
@@ -204,7 +206,7 @@ func FindRouteApiFiles(dir string) ([]string, error) {
 		} else if filepath.Ext(file.Name()) == ".api" {
 			parse, err := parser.Parse(filepath.Join(dir, file.Name()), "")
 			if err != nil {
-				return nil, err
+				return nil, errors.Wrapf(err, "parse api: %s meet error", filepath.Join(dir, file.Name()))
 			}
 			if len(parse.Service.Routes()) > 0 {
 				apiFiles = append(apiFiles, filepath.Join(dir, file.Name()))

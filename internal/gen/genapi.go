@@ -59,7 +59,9 @@ type LogicFile struct {
 	Path    string
 
 	RequestTypeName  string
+	RequestType      spec.Type
 	ResponseTypeName string
+	ResponseType     spec.Type
 	ClientStream     bool
 	ServerStream     bool
 }
@@ -67,7 +69,6 @@ type LogicFile struct {
 func (ja *JzeroApi) Gen() error {
 	apiDirName := filepath.Join("desc", "api")
 
-	var apiSpec *spec.ApiSpec
 	var allHandlerFiles []HandlerFile
 	var allLogicFiles []LogicFile
 
@@ -108,7 +109,7 @@ func (ja *JzeroApi) Gen() error {
 	}
 
 	for _, v := range apiFiles {
-		apiSpec, err = parser.Parse(v, nil)
+		apiSpec, err := parser.Parse(v, nil)
 		if err != nil {
 			return err
 		}
@@ -151,7 +152,7 @@ func (ja *JzeroApi) Gen() error {
 	// 自动替换 logic 层的 request 和 response name
 	if ja.ChangeReplaceTypes {
 		for _, file := range allLogicFiles {
-			if err := ja.changeLogicTypes(file, apiSpec); err != nil {
+			if err := ja.changeLogicTypes(file); err != nil {
 				console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
 				continue
 			}
@@ -205,10 +206,11 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 			fp := filepath.Join(ja.Wd, "internal", "logic", group.GetAnnotation("group"), namingFormat+".go")
 
 			hf := LogicFile{
-				Package: apiSpec.Info.Properties["go_package"],
-				Path:    fp,
-				Group:   group.GetAnnotation("group"),
-				Handler: route.Handler,
+				Path:         fp,
+				Group:        group.GetAnnotation("group"),
+				Handler:      route.Handler,
+				RequestType:  route.RequestType,
+				ResponseType: route.ResponseType,
 			}
 			if goPackage, ok := apiSpec.Info.Properties["go_package"]; ok {
 				hf.Package = goPackage
@@ -289,7 +291,7 @@ func (ja *JzeroApi) getRoutesGoBody() string {
 
 func (ja *JzeroApi) separateTypesGo(allLogicFiles []LogicFile, allHandlerFiles []HandlerFile) error {
 	// split types go dir
-	routeApiFiles, err := FindRouteApiFiles(filepath.Join("desc", "api"))
+	apiFiles, err := findApiFiles(filepath.Join("desc", "api"))
 	if err != nil {
 		return err
 	}
@@ -298,7 +300,7 @@ func (ja *JzeroApi) separateTypesGo(allLogicFiles []LogicFile, allHandlerFiles [
 
 	var allTypes []spec.Type
 
-	for _, apiFile := range routeApiFiles {
+	for _, apiFile := range apiFiles {
 		parse, err := parser.Parse(apiFile, "")
 		if err != nil {
 			return err
@@ -581,7 +583,7 @@ func (ja *JzeroApi) removeLogicSuffix(fp string) error {
 }
 
 // changeLogicTypes just change logic file logic function params and resp, but not body and others code
-func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) error {
+func (ja *JzeroApi) changeLogicTypes(file LogicFile) error {
 	fp := file.Path // logic file path
 	if ja.RemoveSuffix {
 		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
@@ -604,19 +606,9 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 		requestType, responseType spec.Type
 	)
 
-	for _, group := range apiSpec.Service.Groups {
-		for _, route := range group.Routes {
-			if route.Handler == file.Handler && group.GetAnnotation("group") == file.Group {
-				if route.RequestType != nil {
-					requestType = route.RequestType
-				}
-				if route.ResponseType != nil {
-					responseType = route.ResponseType
-				}
-				methodFunc = util.Title(strings.TrimSuffix(route.Handler, "Handler"))
-			}
-		}
-	}
+	requestType = file.RequestType
+	responseType = file.ResponseType
+	methodFunc = util.Title(strings.TrimSuffix(file.Handler, "Handler"))
 
 	ast.Inspect(f, func(node ast.Node) bool {
 		if fn, ok := node.(*ast.FuncDecl); ok && fn.Recv != nil {
@@ -713,14 +705,12 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile, apiSpec *spec.ApiSpec) erro
 								Type:  ast.NewIdent("http.ResponseWriter"),
 							}
 							structType.Fields.List = append(structType.Fields.List, newField)
-						} else if structType != nil && responseType != nil && !lo.Contains(names, "w") {
-							if lo.Contains(names, "w") {
-								for i, v := range structType.Fields.List {
-									if len(v.Names) > 0 {
-										if v.Names[0].Name == "w" {
-											// 删除这个元素
-											structType.Fields.List = append(structType.Fields.List[:i], structType.Fields.List[i+1:]...)
-										}
+						} else if structType != nil && responseType != nil && lo.Contains(names, "w") {
+							for i, v := range structType.Fields.List {
+								if len(v.Names) > 0 {
+									if v.Names[0].Name == "w" {
+										// 删除这个元素
+										structType.Fields.List = append(structType.Fields.List[:i], structType.Fields.List[i+1:]...)
 									}
 								}
 							}
@@ -879,8 +869,10 @@ func (ja *JzeroApi) updateHandlerImportedTypesPath(file HandlerFile) error {
 		return err
 	}
 
-	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
-	astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Group))
+	if astutil.UsesImport(f, fmt.Sprintf("%s/internal/types", ja.Module)) {
+		astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
+		astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
+	}
 
 	// Write the modified AST back to the file
 	buf := bytes.NewBuffer(nil)
@@ -912,8 +904,10 @@ func (ja *JzeroApi) updateLogicImportedTypesPath(file LogicFile) error {
 		return err
 	}
 
-	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
-	astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Group))
+	if astutil.UsesImport(f, fmt.Sprintf("%s/internal/types", ja.Module)) {
+		astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
+		astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
+	}
 
 	// Write the modified AST back to the file
 	buf := bytes.NewBuffer(nil)
