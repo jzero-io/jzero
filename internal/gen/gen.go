@@ -55,8 +55,8 @@ func Gen(gcf config.GenConfig) error {
 		RemoveSuffix:       gcf.RemoveSuffix,
 		ChangeReplaceTypes: gcf.ChangeLogicTypes,
 		RegenApiHandler:    gcf.RegenApiHandler,
-		RegenApiTypes:      gcf.RegenApiTypes,
 		SplitApiTypesDir:   gcf.SplitApiTypesDir,
+		ApiGitDiff:         gcf.ApiGitDiff,
 	}
 	err = jzeroApi.Gen()
 	if err != nil {

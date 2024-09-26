@@ -61,7 +61,7 @@ type GenConfig struct {
 	ChangeLogicTypes bool   `mapstructure:"change-logic-types"`
 	RemoveSuffix     bool   `mapstructure:"remove-suffix"`
 	RegenApiHandler  bool   `mapstructure:"regen-api-handler"`
-	RegenApiTypes    bool   `mapstructure:"regen-api-types"`
+	ApiGitDiff       string `mapstructure:"api-git-diff"`
 	RpcStylePatch    bool   `mapstructure:"rpc-style-patch"`
 	ModelGitDiff     string `mapstructure:"model-git-diff"`
 
