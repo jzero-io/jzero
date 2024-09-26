@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
@@ -79,7 +81,7 @@ func checkWrite(path string, bytes []byte) error {
 	if filepath.Ext(path) == ".go" {
 		bytesFormat, err = gosimports.Process("", bytes, &gosimports.Options{FormatOnly: true, Comments: true})
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "format %s", path)
 		}
 	}
 
@@ -105,7 +107,7 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 		}
 		fileBytes, err := templatex.ParseTemplate(jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "parse template: %s", filepath.Join(dirname, file.Name()))
 		}
 
 		stylePath := filepath.Join(filepath.Dir(rel), filename)

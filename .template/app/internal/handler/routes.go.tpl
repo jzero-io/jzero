@@ -15,5 +15,5 @@ var (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
-        {{.Routes}}
+        {{if .Routes}}{{.Routes}}{{end}}
 }
