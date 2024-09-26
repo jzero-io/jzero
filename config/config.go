@@ -58,11 +58,12 @@ type GenConfig struct {
 	Branch           string `mapstructure:"branch"`
 	SplitApiTypesDir bool   `mapstructure:"split-api-types-dir"`
 
-	ChangeLogicTypes bool `mapstructure:"change-logic-types"`
-	RemoveSuffix     bool `mapstructure:"remove-suffix"`
-	RegenApiHandler  bool `mapstructure:"regen-api-handler"`
-	RegenApiTypes    bool `mapstructure:"regen-api-types"`
-	RpcStylePatch    bool `mapstructure:"rpc-style-patch"`
+	ChangeLogicTypes bool   `mapstructure:"change-logic-types"`
+	RemoveSuffix     bool   `mapstructure:"remove-suffix"`
+	RegenApiHandler  bool   `mapstructure:"regen-api-handler"`
+	RegenApiTypes    bool   `mapstructure:"regen-api-types"`
+	RpcStylePatch    bool   `mapstructure:"rpc-style-patch"`
+	ModelGitDiff     string `mapstructure:"model-git-diff"`
 
 	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`
 	ModelMysqlIgnoreColumns   []string `mapstructure:"model-mysql-ignore-columns"`

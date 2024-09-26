@@ -38,6 +38,7 @@ type JzeroSql struct {
 	ModelMysqlDatasourceTable []string
 	ModelMysqlCache           bool
 	ModelMysqlCachePrefix     string
+	ModelGitDiff              string
 }
 
 func (js *JzeroSql) Gen() error {
@@ -66,6 +67,18 @@ func (js *JzeroSql) Gen() error {
 		tables, err := getMysqlAllTables(js.ModelMysqlDatasourceUrl)
 		if err != nil {
 			return err
+		}
+		if js.ModelGitDiff != "" {
+			var changesTables []string
+			cmd := exec.Command("git", "diff", "--name-only", "HEAD", "--", js.ModelGitDiff)
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				return err
+			}
+			for _, v := range strings.Split(string(output), "\n") {
+				changesTables = append(changesTables, getTableName(v)...)
+			}
+			tables = changesTables
 		}
 
 		mr.ForEach(func(source chan<- string) {
@@ -187,4 +200,39 @@ func getMysqlAllTables(url string) ([]string, error) {
 		return nil, err
 	}
 	return tables, nil
+}
+
+func getTableName(fp string) []string {
+	var tables []string
+	if filepath.Ext(fp) == ".go" {
+		fset := token.NewFileSet()
+
+		f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
+		if err != nil {
+			return nil
+		}
+
+		// 遍历 AST 节点
+		for _, decl := range f.Decls {
+			// 查找函数声明
+			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+				// 检查是否是 TableName 方法
+				if funcDecl.Name.Name == "TableName" {
+					// 查找 return 语句
+					for _, stmt := range funcDecl.Body.List {
+						if retStmt, ok := stmt.(*ast.ReturnStmt); ok {
+							// 获取 return 的基本字面值
+							if len(retStmt.Results) > 0 {
+								if basicLit, ok := retStmt.Results[0].(*ast.BasicLit); ok {
+									tables = append(tables, strings.ReplaceAll(basicLit.Value, `"`, ""))
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return tables
 }

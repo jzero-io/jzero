@@ -73,6 +73,7 @@ func Gen(gcf config.GenConfig) error {
 		ModelMysqlDatasourceTable: gcf.ModelMysqlDatasourceTable,
 		ModelMysqlCache:           gcf.ModelMysqlCache,
 		ModelMysqlCachePrefix:     gcf.ModelMysqlCachePrefix,
+		ModelGitDiff:              gcf.ModelGitDiff,
 	}
 	err = jzeroSql.Gen()
 	if err != nil {
