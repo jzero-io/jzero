@@ -94,14 +94,14 @@ func (ja *JzeroApi) Gen() error {
 	}
 	logx.Debugf("goctl_home = %s", goctlHome)
 
+	fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
+
 	// format api dir
 	command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
 	_, err := execx.Run(command, ja.Wd)
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
 
 	apiFiles, err := FindRouteApiFiles(apiDirName)
 	if err != nil {
