@@ -52,17 +52,6 @@ var checkCmd = &cobra.Command{
 			log.Fatalln("[jzero-env] env check failed, protoc-gen-go-grpc is not installed")
 		}
 
-		log.Info("\n[jzero-env]: looking up goctl-types")
-		_, err = env.LookPath("goctl-types")
-		if err != nil {
-			_ = golang.Install("github.com/jzero-io/goctl-types@latest")
-		}
-		if _, err = env.LookPath("goctl-types"); err == nil {
-			log.Success(`[jzero-env]: "goctl-types" is installed`)
-		} else {
-			log.Fatalln("[jzero-env] env check failed, goctl-types is not installed")
-		}
-
 		log.Info("\n[jzero-env]: looking up goctl-swagger")
 		_, err = env.LookPath("goctl-swagger")
 		if err != nil {
