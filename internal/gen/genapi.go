@@ -336,7 +336,11 @@ var (
 			}
 
 			_ = os.MkdirAll(filepath.Join("internal", "types", goPackage), 0o755)
-			if err = os.WriteFile(filepath.Join("internal", "types", goPackage, "types.go"), typesGoBytes, 0o644); err != nil {
+			source, err := goformat.Source(typesGoBytes)
+			if err != nil {
+				return err
+			}
+			if err = os.WriteFile(filepath.Join("internal", "types", goPackage, "types.go"), source, 0o644); err != nil {
 				return err
 			}
 		}
