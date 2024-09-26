@@ -61,6 +61,7 @@ type GenConfig struct {
 	RemoveSuffix     bool `mapstructure:"remove-suffix"`
 	RegenApiHandler  bool `mapstructure:"regen-api-handler"`
 	RegenApiTypes    bool `mapstructure:"regen-api-types"`
+	SplitApiTypesDir bool `mapstructure:"split-api-types-dir"`
 	RpcStylePatch    bool `mapstructure:"rpc-style-patch"`
 
 	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`

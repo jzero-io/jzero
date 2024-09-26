@@ -11,7 +11,7 @@ import (
 
 // ParseTemplate template
 func ParseTemplate(data interface{}, tplT []byte) ([]byte, error) {
-	t, err := template.New("production").Funcs(sprig.TxtFuncMap()).Funcs(RegisterTxtFuncMap()).Parse(string(tplT))
+	t, err := template.New("production").Funcs(sprig.TxtFuncMap()).Funcs(RegisterTxtFuncMap()).Option().Parse(string(tplT))
 	if err != nil {
 		return nil, err
 	}

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
@@ -18,31 +19,35 @@ import (
 func Gen(gc config.GenConfig) error {
 	if pathx.FileExists(gc.Swagger.ApiDir) {
 		_ = os.MkdirAll(gc.Swagger.Output, 0o755)
-		mainApiFile, isDelete, err := gen.GetMainApiFilePath(gc.Swagger.ApiDir)
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if isDelete {
-				_ = os.Remove(mainApiFile)
-			}
-		}()
 
 		if !pathx.FileExists(gc.Swagger.Output) {
 			_ = os.MkdirAll(gc.Swagger.Output, 0o755)
 		}
 
 		// gen swagger by desc/api
-		if mainApiFile != "" {
-			apiFile := fmt.Sprintf("%s.swagger.json", gen.GetApiServiceName(gc.Swagger.ApiDir))
-			cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", mainApiFile, "-dir", gc.Swagger.Output)
-			resp, err := cmd.CombinedOutput()
+		files, err := gen.FindRouteApiFiles(gc.Swagger.ApiDir)
+		if err != nil {
+			return err
+		}
+		for _, v := range files {
+			parse, err := parser.Parse(v)
 			if err != nil {
-				return errors.Wrap(err, strings.TrimRight(string(resp), "\r\n"))
+				return err
 			}
-			if strings.TrimRight(string(resp), "\r\n") != "" {
-				fmt.Println(strings.TrimRight(string(resp), "\r\n"))
+			if goPackage, ok := parse.Info.Properties["go_package"]; ok {
+				apiFile := fmt.Sprintf("%s.swagger.json", strings.ReplaceAll(goPackage, "/", "-"))
+				cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", v, "-dir", gc.Swagger.Output)
+				resp, err := cmd.CombinedOutput()
+				if err != nil {
+					return errors.Wrap(err, strings.TrimRight(string(resp), "\r\n"))
+				}
+				if strings.TrimRight(string(resp), "\r\n") != "" {
+					fmt.Println(strings.TrimRight(string(resp), "\r\n"))
+				}
+			} else {
+				return errors.New("暂不支持")
 			}
+
 		}
 	}
 
