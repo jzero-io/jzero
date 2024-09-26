@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
-
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/gen"
@@ -31,24 +31,34 @@ func Gen(gc config.GenConfig) error {
 		if err != nil {
 			return err
 		}
+
+		var eg errgroup.Group
+		eg.SetLimit(len(files))
 		for _, v := range files {
-			parse, err := parser.Parse(v)
-			if err != nil {
-				return err
-			}
-			if goPackage, ok := parse.Info.Properties["go_package"]; ok {
-				apiFile := fmt.Sprintf("%s.swagger.json", strings.ReplaceAll(goPackage, "/", "-"))
-				cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", v, "-dir", gc.Swagger.Output)
-				resp, err := cmd.CombinedOutput()
+			cv := v
+			eg.Go(func() error {
+				parse, err := parser.Parse(cv)
 				if err != nil {
-					return errors.Wrap(err, strings.TrimRight(string(resp), "\r\n"))
+					return err
 				}
-				if strings.TrimRight(string(resp), "\r\n") != "" {
-					fmt.Println(strings.TrimRight(string(resp), "\r\n"))
+				if goPackage, ok := parse.Info.Properties["go_package"]; ok {
+					apiFile := fmt.Sprintf("%s.swagger.json", strings.ReplaceAll(goPackage, "/", "-"))
+					cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", cv, "-dir", gc.Swagger.Output)
+					resp, err := cmd.CombinedOutput()
+					if err != nil {
+						return errors.Wrap(err, strings.TrimRight(string(resp), "\r\n"))
+					}
+					if strings.TrimRight(string(resp), "\r\n") != "" {
+						fmt.Println(strings.TrimRight(string(resp), "\r\n"))
+					}
+				} else {
+					console.Warning("[warning]: 暂不支持非 package api")
 				}
-			} else {
-				console.Warning("[warning]: 暂不支持非 package api")
-			}
+				return nil
+			})
+		}
+		if err = eg.Wait(); err != nil {
+			return err
 		}
 	}
 
