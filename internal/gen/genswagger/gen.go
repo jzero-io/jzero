@@ -2,6 +2,7 @@ package genswagger
 
 import (
 	"fmt"
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -45,9 +46,8 @@ func Gen(gc config.GenConfig) error {
 					fmt.Println(strings.TrimRight(string(resp), "\r\n"))
 				}
 			} else {
-				return errors.New("暂不支持")
+				console.Warning("[warning]: 暂不支持非 package api")
 			}
-
 		}
 	}
 

@@ -1,5 +1,9 @@
 syntax = "v1"
 
+info (
+	go_package: "version"
+)
+
 type GetVersionRequest {}
 
 type GetVersionResponse {
