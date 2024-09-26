@@ -251,7 +251,6 @@ func init() {
 		genCmd.Flags().BoolP("change-logic-types", "", true, "if api file or proto change, e.g. Request or Response type, change logic file content types but not file")
 		genCmd.Flags().BoolP("regen-api-handler", "", false, "")
 		genCmd.Flags().BoolP("regen-api-types", "", true, "")
-		genCmd.Flags().BoolP("split-api-types-dir", "", false, "")
 		// fix rpc style
 		genCmd.Flags().BoolP("rpc-style-patch", "", false, "")
 
@@ -260,6 +259,7 @@ func init() {
 		genCmd.PersistentFlags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 		genCmd.PersistentFlags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
 		genCmd.PersistentFlags().StringP("branch", "", "", "set branch")
+		genCmd.PersistentFlags().BoolP("split-api-types-dir", "", false, "")
 
 		genCmd.Flags().BoolP("model-mysql-strict", "", false, "goctl model mysql strict mode, see [https://go-zero.dev/docs/tutorials/cli/model]")
 		genCmd.Flags().StringSliceP("model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")

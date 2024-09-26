@@ -40,11 +40,15 @@ func AddApi(ic config.IvmConfig) error {
 		handlers = append(handlers, method)
 	}
 
+	groupCamel := stringx.FirstUpper(stringx.ToCamel(ic.Add.Api.Group))
+	if ic.SplitApiTypesDir {
+		groupCamel = ""
+	}
 	template, err := templatex.ParseTemplate(map[string]interface{}{
 		"Handlers":   handlers,
 		"Service":    service,
 		"Group":      ic.Add.Api.Group,
-		"GroupCamel": stringx.FirstUpper(stringx.ToCamel(ic.Add.Api.Group)),
+		"GroupCamel": groupCamel,
 	}, embeded.ReadTemplateFile(filepath.Join("ivm", "add", "template.api.tpl")))
 	if err != nil {
 		return err

@@ -53,15 +53,15 @@ type GenConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
 	// global flags
-	Home   string `mapstructure:"home"`
-	Style  string `mapstructure:"style"`
-	Branch string `mapstructure:"branch"`
+	Home             string `mapstructure:"home"`
+	Style            string `mapstructure:"style"`
+	Branch           string `mapstructure:"branch"`
+	SplitApiTypesDir bool   `mapstructure:"split-api-types-dir"`
 
 	ChangeLogicTypes bool `mapstructure:"change-logic-types"`
 	RemoveSuffix     bool `mapstructure:"remove-suffix"`
 	RegenApiHandler  bool `mapstructure:"regen-api-handler"`
 	RegenApiTypes    bool `mapstructure:"regen-api-types"`
-	SplitApiTypesDir bool `mapstructure:"split-api-types-dir"`
 	RpcStylePatch    bool `mapstructure:"rpc-style-patch"`
 
 	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`
@@ -117,7 +117,8 @@ type GenDocsConfig struct {
 
 type IvmConfig struct {
 	// global flags
-	Version string `mapstructure:"version"`
+	Version          string `mapstructure:"version"`
+	SplitApiTypesDir bool   `mapstructure:"split-api-types-dir"`
 
 	Init IvmInitConfig `mapstructure:"init"`
 	Add  IvmAddConfig  `mapstructure:"add"`
