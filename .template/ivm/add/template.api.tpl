@@ -1,8 +1,14 @@
 syntax = "v1"
 
-{{range $v := .Handlers | uniq}}type {{$v.Name | FirstUpper}}{{ $.GroupCamel }}Request {}
+{{ if .SplitApiTypesDir }}
+info (
+    go_package: "{{ .Group }}"
+)
+{{end}}
 
-type {{$v.Name | FirstUpper}}{{ $.GroupCamel }}Response {}
+{{range $v := .Handlers | uniq}}type {{$v.Name | FirstUpper}}{{ if $.SplitApiTypesDir }}{{else}}{{ $.GroupCamel }}{{end}}Request {}
+
+type {{$v.Name | FirstUpper}}{{ if $.SplitApiTypesDir }}{{else}}{{ $.GroupCamel }}{{end}}Response {}
 
 {{end}}
 
@@ -12,7 +18,7 @@ type {{$v.Name | FirstUpper}}{{ $.GroupCamel }}Response {}
 )
 service {{ .Service }} {
     {{range $v := .Handlers | uniq}}@handler {{$v.Name}}Handler
-    {{$v.Verb}} /{{ $.Group }}/{{$v.Name | FirstLower}} ({{$v.Name | FirstUpper}}{{ $.GroupCamel }}Request) returns ({{$v.Name | FirstUpper}}{{ $.GroupCamel }}Response)
+    {{$v.Verb}} /{{ $.Group }}/{{$v.Name | FirstLower}} ({{$v.Name | FirstUpper}}{{ if $.SplitApiTypesDir }}{{else}}{{ $.GroupCamel }}{{end}}Request) returns ({{$v.Name | FirstUpper}}{{ if $.SplitApiTypesDir }}{{else}}{{ $.GroupCamel }}{{end}}Response)
 
     {{end}}
 }
