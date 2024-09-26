@@ -2,11 +2,12 @@ package genswagger
 
 import (
 	"fmt"
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
