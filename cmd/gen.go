@@ -250,6 +250,7 @@ func init() {
 		genCmd.Flags().BoolP("remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
 		genCmd.Flags().BoolP("change-logic-types", "", true, "if api file or proto change, e.g. Request or Response type, change logic file content types but not file")
 		genCmd.Flags().BoolP("regen-api-handler", "", false, "")
+		genCmd.Flags().BoolP("regen-api-types", "", false, "")
 
 		// fix rpc style
 		genCmd.Flags().BoolP("rpc-style-patch", "", false, "")

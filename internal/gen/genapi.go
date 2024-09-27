@@ -13,6 +13,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/jzero-io/jzero/pkg/gitdiff"
+
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 
@@ -46,6 +48,7 @@ type JzeroApi struct {
 	RemoveSuffix       bool
 	ChangeReplaceTypes bool
 	RegenApiHandler    bool
+	RegenApiTypes      bool
 	ApiGitDiff         string
 	SplitApiTypesDir   bool
 }
@@ -230,6 +233,45 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 }
 
 func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string, allHandlerFiles []HandlerFile) error {
+	if ja.RegenApiHandler {
+		if ja.ApiGitDiff != "" {
+			files, err := gitdiff.GetChangedFiles(ja.ApiGitDiff)
+			if err == nil {
+				for _, file := range files {
+					if filepath.Ext(file) == ".api" {
+						parse, err := parser.Parse(file, nil)
+						if err == nil {
+							for _, group := range parse.Service.Groups {
+								_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group")))
+							}
+						}
+					}
+				}
+			}
+		} else {
+			_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler"))
+		}
+	}
+	if ja.RegenApiTypes {
+		if ja.ApiGitDiff != "" {
+			files, err := gitdiff.GetChangedFiles(ja.ApiGitDiff)
+			if err == nil {
+				for _, file := range files {
+					if filepath.Ext(file) == ".api" {
+						parse, err := parser.Parse(file, nil)
+						if err == nil {
+							for _, group := range parse.Service.Groups {
+								_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types", group.GetAnnotation("group")))
+							}
+						}
+					}
+				}
+			}
+		} else {
+			_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types"))
+		}
+	}
+
 	var handlerImports ImportLines
 
 	var allRoutesGoBody string
@@ -295,6 +337,7 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string, allHand
 	if err != nil {
 		return err
 	}
+	_ = os.Remove(filepath.Join("internal", "handler", "routes.go"))
 	return os.WriteFile(filepath.Join("internal", "handler", "routes.go"), template, 0o644)
 }
 
