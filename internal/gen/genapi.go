@@ -11,13 +11,20 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
+	"github.com/spf13/cast"
+	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
+
+	"golang.org/x/sync/errgroup"
+
+	jgogen "github.com/jzero-io/jzero/pkg/gogen"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
+	zeroconfig "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
@@ -39,7 +46,7 @@ type JzeroApi struct {
 	RemoveSuffix       bool
 	ChangeReplaceTypes bool
 	RegenApiHandler    bool
-	RegenApiTypes      bool
+	ApiGitDiff         string
 	SplitApiTypesDir   bool
 }
 
@@ -223,26 +230,52 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 }
 
 func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string, allHandlerFiles []HandlerFile) error {
-	if ja.RegenApiHandler {
-		_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler"))
-	}
-
-	if ja.RegenApiTypes {
-		_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types"))
-	}
-
 	var handlerImports ImportLines
 
 	var allRoutesGoBody string
+	var allRoutesGoBodyMap sync.Map
+
+	var eg errgroup.Group
+	eg.SetLimit(len(apiFiles))
 	for _, v := range apiFiles {
-		dir := "."
-		fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), v)
-		command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, ja.Style)
-		logx.Debugf("command: %s", command)
-		if _, err := execx.Run(command, ja.Wd); err != nil {
-			return err
+		cv := v
+		eg.Go(func() error {
+			routesGoBody, err := ja.getRoutesGoBody(cv)
+			if err != nil {
+				return err
+			}
+			allRoutesGoBodyMap.Store(cv, routesGoBody)
+			return nil
+		})
+	}
+
+	if err := eg.Wait(); err != nil {
+		return err
+	}
+
+	for _, v := range apiFiles {
+		if s, ok := allRoutesGoBodyMap.Load(v); ok {
+			allRoutesGoBody += cast.ToString(s) + "\n"
 		}
-		allRoutesGoBody += ja.getRoutesGoBody() + "\n"
+	}
+
+	var apieg errgroup.Group
+	apieg.SetLimit(len(apiFiles))
+	for _, v := range apiFiles {
+		cv := v
+		apieg.Go(func() error {
+			dir := "."
+			fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), cv)
+			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", cv, dir, goctlHome, ja.Style)
+			logx.Debugf("command: %s", command)
+			if _, err := execx.Run(command, ja.Wd); err != nil {
+				return err
+			}
+			return nil
+		})
+	}
+	if err := apieg.Wait(); err != nil {
+		return err
 	}
 
 	exist := make(map[string]struct{})
@@ -265,12 +298,20 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string, allHand
 	return os.WriteFile(filepath.Join("internal", "handler", "routes.go"), template, 0o644)
 }
 
-func (ja *JzeroApi) getRoutesGoBody() string {
-	fset := token.NewFileSet()
-
-	f, err := goparser.ParseFile(fset, filepath.Join("internal", "handler", "routes.go"), nil, goparser.ParseComments)
+func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {
+	parse, err := parser.Parse(fp, nil)
 	if err != nil {
-		return ""
+		return "", err
+	}
+	routesGoBody, err := jgogen.GenRoutesString(ja.Module, &zeroconfig.Config{NamingFormat: ja.Style}, parse)
+	if err != nil {
+		return "", err
+	}
+
+	fset := token.NewFileSet()
+	f, err := goparser.ParseFile(fset, "", strings.NewReader(routesGoBody), goparser.ParseComments)
+	if err != nil {
+		return "", err
 	}
 	// 遍历 AST 节点
 	for _, decl := range f.Decls {
@@ -280,13 +321,13 @@ func (ja *JzeroApi) getRoutesGoBody() string {
 				// 提取函数体
 				var buf bytes.Buffer
 				if err = printer.Fprint(&buf, fset, funcDecl.Body); err != nil {
-					return ""
+					return "", err
 				}
-				return buf.String()
+				return buf.String(), nil
 			}
 		}
 	}
-	return ""
+	return "", errors.New("no RegisterHandlers function")
 }
 
 func (ja *JzeroApi) separateTypesGo(allLogicFiles []LogicFile, allHandlerFiles []HandlerFile) error {

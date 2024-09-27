@@ -250,11 +250,12 @@ func init() {
 		genCmd.Flags().BoolP("remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
 		genCmd.Flags().BoolP("change-logic-types", "", true, "if api file or proto change, e.g. Request or Response type, change logic file content types but not file")
 		genCmd.Flags().BoolP("regen-api-handler", "", false, "")
-		genCmd.Flags().BoolP("regen-api-types", "", true, "")
+
 		// fix rpc style
 		genCmd.Flags().BoolP("rpc-style-patch", "", false, "")
-		// model git-diff
-		genCmd.Flags().StringP("model-git-diff", "", filepath.Join("desc", "sql"), "set git diff path, if changes then generate model code")
+		// git-diff
+		genCmd.Flags().StringP("api-git-diff", "", filepath.Join("desc", "api"), "set api git diff path, if changes then generate model code")
+		genCmd.Flags().StringP("model-git-diff", "", filepath.Join("desc", "sql"), "set model git diff path, if changes then generate model code")
 
 		// used for goctl
 		// gen command persistentFlags

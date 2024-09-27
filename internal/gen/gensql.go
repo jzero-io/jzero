@@ -14,6 +14,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/pkg/gitdiff"
+
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/mr"
@@ -70,12 +72,19 @@ func (js *JzeroSql) Gen() error {
 		}
 		if js.ModelGitDiff != "" {
 			var changesTables []string
-			cmd := exec.Command("git", "diff", "--name-only", "HEAD", "--", js.ModelGitDiff)
-			output, err := cmd.CombinedOutput()
+			var files []string
+			addedFiles, err := gitdiff.GetAddedFiles(js.ModelGitDiff)
 			if err != nil {
 				return err
 			}
-			for _, v := range strings.Split(string(output), "\n") {
+			files = append(files, addedFiles...)
+			changedFiles, err := gitdiff.GetChangedFiles(js.ModelGitDiff)
+			if err != nil {
+				return err
+			}
+			files = append(files, changedFiles...)
+
+			for _, v := range files {
 				changesTables = append(changesTables, getTableName(v)...)
 			}
 			tables = changesTables
