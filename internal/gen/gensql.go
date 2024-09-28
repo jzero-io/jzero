@@ -40,7 +40,8 @@ type JzeroSql struct {
 	ModelMysqlDatasourceTable []string
 	ModelMysqlCache           bool
 	ModelMysqlCachePrefix     string
-	ModelGitDiff              string
+	ModelGitDiff              bool
+	ModelGitDiffPath          string
 }
 
 func (js *JzeroSql) Gen() error {
@@ -70,15 +71,15 @@ func (js *JzeroSql) Gen() error {
 		if err != nil {
 			return err
 		}
-		if js.ModelGitDiff != "" {
+		if js.ModelGitDiff {
 			var changesTables []string
 			var files []string
-			addedFiles, err := gitdiff.GetAddedFiles(js.ModelGitDiff)
+			addedFiles, err := gitdiff.GetAddedFiles(js.ModelGitDiffPath)
 			if err != nil {
 				return err
 			}
 			files = append(files, addedFiles...)
-			changedFiles, err := gitdiff.GetChangedFiles(js.ModelGitDiff)
+			changedFiles, err := gitdiff.GetChangedFiles(js.ModelGitDiffPath)
 			if err != nil {
 				return err
 			}

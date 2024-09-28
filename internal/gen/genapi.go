@@ -48,7 +48,8 @@ type JzeroApi struct {
 	RemoveSuffix       bool
 	ChangeReplaceTypes bool
 	RegenApiHandler    bool
-	ApiGitDiff         string
+	ApiGitDiff         bool
+	ApiGitDiffPath     string
 	SplitApiTypesDir   bool
 }
 
@@ -232,8 +233,8 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 }
 
 func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string) error {
-	if ja.ApiGitDiff != "" {
-		files, err := gitdiff.GetChangedFiles(ja.ApiGitDiff)
+	if ja.ApiGitDiff {
+		files, err := gitdiff.GetChangedFiles(ja.ApiGitDiffPath)
 		if err == nil {
 			for _, file := range files {
 				if filepath.Ext(file) == ".api" {
@@ -251,7 +252,7 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string) error {
 				}
 			}
 		}
-		files, err = gitdiff.GetDeletedFiles(ja.ApiGitDiff)
+		files, err = gitdiff.GetDeletedFiles(ja.ApiGitDiffPath)
 		if err == nil {
 			for _, file := range files {
 				if filepath.Ext(file) == ".api" {
@@ -327,8 +328,10 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string) error {
 			if _, ok := exist[g.GetAnnotation("group")]; ok {
 				continue
 			}
-			handlerImports = append(handlerImports, fmt.Sprintf(`%s "%s/internal/handler/%s"`, strings.ToLower(strings.ReplaceAll(g.GetAnnotation("group"), "/", "")), ja.Module, g.GetAnnotation("group")))
 			exist[g.GetAnnotation("group")] = struct{}{}
+			if g.GetAnnotation("group") != "" {
+				handlerImports = append(handlerImports, fmt.Sprintf(`%s "%s/internal/handler/%s"`, strings.ToLower(strings.ReplaceAll(g.GetAnnotation("group"), "/", "")), ja.Module, g.GetAnnotation("group")))
+			}
 		}
 	}
 

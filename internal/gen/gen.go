@@ -57,6 +57,7 @@ func Gen(c config.Config) error {
 		RegenApiHandler:    c.Gen.RegenApiHandler,
 		SplitApiTypesDir:   c.Gen.SplitApiTypesDir,
 		ApiGitDiff:         c.Gen.ApiGitDiff,
+		ApiGitDiffPath:     c.Gen.ApiGitDiffPath,
 	}
 	err = jzeroApi.Gen()
 	if err != nil {
@@ -74,6 +75,7 @@ func Gen(c config.Config) error {
 		ModelMysqlCache:           c.Gen.ModelMysqlCache,
 		ModelMysqlCachePrefix:     c.Gen.ModelMysqlCachePrefix,
 		ModelGitDiff:              c.Gen.ModelGitDiff,
+		ModelGitDiffPath:          c.Gen.ModelGitDiffPath,
 	}
 	err = jzeroSql.Gen()
 	if err != nil {
