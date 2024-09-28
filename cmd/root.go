@@ -10,6 +10,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -56,6 +58,14 @@ func initConfig() {
 
 	if err := traverseCommands("", rootCmd); err != nil {
 		panic(err)
+	}
+
+	// patch jzero version
+	if config.C.Version != "" {
+		fmt.Printf("use jzero version: %s\n", config.C.Version)
+		if err := golang.Install(fmt.Sprintf("github.com/jzero-io/jzero@%s", config.C.Version)); err != nil {
+			cobra.CheckErr(err)
+		}
 	}
 
 	if config.C.Debug {

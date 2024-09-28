@@ -12,7 +12,8 @@ import (
 var C Config
 
 type Config struct {
-	Syntax string `mapstructure:"syntax"`
+	Syntax  string `mapstructure:"syntax"`
+	Version string `mapstructure:"version"`
 
 	/*
 		===============================command flags start========================================
