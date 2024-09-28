@@ -51,6 +51,9 @@ type JzeroApi struct {
 	ApiGitDiff         bool
 	ApiGitDiffPath     string
 	SplitApiTypesDir   bool
+
+	ApiFiles   []string
+	ApiSpecMap map[string]*spec.ApiSpec
 }
 
 type HandlerFile struct {
@@ -86,24 +89,6 @@ func (ja *JzeroApi) Gen() error {
 		return nil
 	}
 
-	// 处理模板
-	var goctlHome string
-	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "api")) {
-		tempDir, err := os.MkdirTemp(os.TempDir(), "")
-		if err != nil {
-			return err
-		}
-		defer os.RemoveAll(tempDir)
-		err = embeded.WriteTemplateDir(filepath.Join("go-zero", "api"), filepath.Join(tempDir, "api"))
-		if err != nil {
-			return err
-		}
-		goctlHome = tempDir
-	} else {
-		goctlHome = filepath.Join(config.C.Gen.Home, "go-zero")
-	}
-	logx.Debugf("goctl_home = %s", goctlHome)
-
 	fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
 
 	// format api dir
@@ -113,16 +98,20 @@ func (ja *JzeroApi) Gen() error {
 		return err
 	}
 
-	apiFiles, err := FindRouteApiFiles(apiDirName)
+	apiFiles, err := findApiFiles(apiDirName)
 	if err != nil {
 		return err
 	}
+
+	ja.ApiFiles = apiFiles
+	ja.ApiSpecMap = make(map[string]*spec.ApiSpec, len(apiFiles))
 
 	for _, v := range apiFiles {
 		apiSpec, err := parser.Parse(v, nil)
 		if err != nil {
 			return err
 		}
+		ja.ApiSpecMap[v] = apiSpec
 
 		logicFiles, err := ja.getAllLogicFiles(apiSpec)
 		if err != nil {
@@ -137,7 +126,7 @@ func (ja *JzeroApi) Gen() error {
 		allHandlerFiles = append(allHandlerFiles, handlerFiles...)
 	}
 
-	err = ja.generateApiCode(apiFiles, goctlHome)
+	err = ja.generateApiCode()
 	if err != nil {
 		return err
 	}
@@ -232,14 +221,34 @@ func (ja *JzeroApi) getAllLogicFiles(apiSpec *spec.ApiSpec) ([]LogicFile, error)
 	return logicFiles, nil
 }
 
-func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string) error {
+func (ja *JzeroApi) generateApiCode() error {
+	// 处理模板
+	var goctlHome string
+	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "api")) {
+		tempDir, err := os.MkdirTemp(os.TempDir(), "")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tempDir)
+		err = embeded.WriteTemplateDir(filepath.Join("go-zero", "api"), filepath.Join(tempDir, "api"))
+		if err != nil {
+			return err
+		}
+		goctlHome = tempDir
+	} else {
+		goctlHome = filepath.Join(config.C.Gen.Home, "go-zero")
+	}
+	logx.Debugf("goctl_home = %s", goctlHome)
+
+	var genCodeApiFiles []string
 	if ja.ApiGitDiff {
 		files, err := gitdiff.GetChangedFiles(ja.ApiGitDiffPath)
 		if err == nil {
+			// 增加变动的文件
+			genCodeApiFiles = append(genCodeApiFiles, files...)
 			for _, file := range files {
 				if filepath.Ext(file) == ".api" {
-					parse, err := parser.Parse(file, nil)
-					if err == nil {
+					if parse, ok := ja.ApiSpecMap[file]; ok {
 						for _, group := range parse.Service.Groups {
 							if ja.RegenApiHandler {
 								_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group")))
@@ -252,24 +261,33 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string) error {
 				}
 			}
 		}
-		files, err = gitdiff.GetDeletedFiles(ja.ApiGitDiffPath)
+		// 获取新增的 api 文件
+		files, err = gitdiff.GetAddedFiles(ja.ApiGitDiffPath)
 		if err == nil {
-			for _, file := range files {
-				if filepath.Ext(file) == ".api" {
-					parse, err := parser.Parse(file, nil)
-					if err == nil {
-						for _, group := range parse.Service.Groups {
-							if ja.RegenApiHandler {
-								_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group")))
-							}
-							if ja.SplitApiTypesDir {
-								_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types", group.GetAnnotation("group")))
-							}
-						}
-					}
-				}
-			}
+			genCodeApiFiles = append(genCodeApiFiles, files...)
 		}
+		//files, err = gitdiff.GetDeletedFiles(ja.ApiGitDiffPath)
+		//if err == nil {
+		//	for _, file := range files {
+		//		if filepath.Ext(file) == ".api" {
+		//			if content, err := gitdiff.GetDeletedFileContent(file); err == nil {
+		//				if parse, err := parser.Parse("", content); err == nil {
+		//					for _, group := range parse.Service.Groups {
+		//						if ja.RegenApiHandler {
+		//							_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group")))
+		//						}
+		//						if ja.SplitApiTypesDir {
+		//							_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types", group.GetAnnotation("group")))
+		//						}
+		//					}
+		//				}
+		//			}
+		//		}
+		//	}
+		//}
+	} else {
+		// 否则就是全量的 api 文件
+		genCodeApiFiles = ja.ApiFiles
 	}
 
 	var handlerImports ImportLines
@@ -277,15 +295,17 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string) error {
 	var allRoutesGoBodyMap sync.Map
 
 	var eg errgroup.Group
-	eg.SetLimit(len(apiFiles))
-	for _, v := range apiFiles {
+	eg.SetLimit(len(ja.ApiFiles))
+	for _, v := range ja.ApiFiles {
 		cv := v
 		eg.Go(func() error {
 			routesGoBody, err := ja.getRoutesGoBody(cv)
 			if err != nil {
 				return err
 			}
-			allRoutesGoBodyMap.Store(cv, routesGoBody)
+			if routesGoBody != "" {
+				allRoutesGoBodyMap.Store(cv, routesGoBody)
+			}
 			return nil
 		})
 	}
@@ -294,37 +314,37 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string) error {
 		return err
 	}
 
-	for _, v := range apiFiles {
+	for _, v := range ja.ApiFiles {
 		if s, ok := allRoutesGoBodyMap.Load(v); ok {
 			allRoutesGoBody += cast.ToString(s) + "\n"
 		}
 	}
 
-	eg.SetLimit(len(apiFiles))
-	for _, v := range apiFiles {
+	eg.SetLimit(len(genCodeApiFiles))
+	for _, v := range genCodeApiFiles {
 		cv := v
-		eg.Go(func() error {
-			dir := "."
-			fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), cv)
-			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", cv, dir, goctlHome, ja.Style)
-			logx.Debugf("command: %s", command)
-			if _, err := execx.Run(command, ja.Wd); err != nil {
-				return err
-			}
-			return nil
-		})
+		if len(ja.ApiSpecMap[cv].Service.Routes()) > 0 {
+			eg.Go(func() error {
+				dir := "."
+				fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), cv)
+				// todo: 偶发的文件多线程写的 bug
+				_ = os.Remove(filepath.Join("internal", "types", "types.go"))
+				command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", cv, dir, goctlHome, ja.Style)
+				logx.Debugf("command: %s", command)
+				if _, err := execx.Run(command, ja.Wd); err != nil {
+					return errors.Wrapf(err, "api file: %s", cv)
+				}
+				return nil
+			})
+		}
 	}
 	if err := eg.Wait(); err != nil {
 		return err
 	}
 
 	exist := make(map[string]struct{})
-	for _, v := range apiFiles {
-		parse, err := parser.Parse(v, nil)
-		if err != nil {
-			return err
-		}
-		for _, g := range parse.Service.Groups {
+	for _, v := range ja.ApiFiles {
+		for _, g := range ja.ApiSpecMap[v].Service.Groups {
 			if _, ok := exist[g.GetAnnotation("group")]; ok {
 				continue
 			}
@@ -347,61 +367,49 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, goctlHome string) error {
 }
 
 func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {
-	parse, err := parser.Parse(fp, nil)
-	if err != nil {
-		return "", err
-	}
-	routesGoBody, err := jgogen.GenRoutesString(ja.Module, &zeroconfig.Config{NamingFormat: ja.Style}, parse)
-	if err != nil {
-		return "", err
-	}
+	if len(ja.ApiSpecMap[fp].Service.Routes()) > 0 {
+		routesGoBody, err := jgogen.GenRoutesString(ja.Module, &zeroconfig.Config{NamingFormat: ja.Style}, ja.ApiSpecMap[fp])
+		if err != nil {
+			return "", err
+		}
 
-	fset := token.NewFileSet()
-	f, err := goparser.ParseFile(fset, "", strings.NewReader(routesGoBody), goparser.ParseComments)
-	if err != nil {
-		return "", err
-	}
-	// 遍历 AST 节点
-	for _, decl := range f.Decls {
-		// 查找函数声明
-		if funcDecl, ok := decl.(*ast.FuncDecl); ok {
-			if funcDecl.Name.Name == "RegisterHandlers" {
-				// 提取函数体
-				var buf bytes.Buffer
-				if err = printer.Fprint(&buf, fset, funcDecl.Body); err != nil {
-					return "", err
+		fset := token.NewFileSet()
+		f, err := goparser.ParseFile(fset, "", strings.NewReader(routesGoBody), goparser.ParseComments)
+		if err != nil {
+			return "", err
+		}
+		// 遍历 AST 节点
+		for _, decl := range f.Decls {
+			// 查找函数声明
+			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+				if funcDecl.Name.Name == "RegisterHandlers" {
+					// 提取函数体
+					var buf bytes.Buffer
+					if err = printer.Fprint(&buf, fset, funcDecl.Body); err != nil {
+						return "", err
+					}
+					return buf.String(), nil
 				}
-				return buf.String(), nil
 			}
 		}
 	}
-	return "", errors.New("no RegisterHandlers function")
+	return "", nil
 }
 
 func (ja *JzeroApi) separateTypesGo(allLogicFiles []LogicFile, allHandlerFiles []HandlerFile) error {
-	// split types go dir
-	apiFiles, err := findApiFiles(filepath.Join("desc", "api"))
-	if err != nil {
-		return err
-	}
-
 	_ = os.Remove(filepath.Join("internal", "types", "types.go"))
 
 	var allTypes []spec.Type
 
-	for _, apiFile := range apiFiles {
-		parse, err := parser.Parse(apiFile, "")
-		if err != nil {
-			return err
-		}
-		allTypes = append(allTypes, parse.Types...)
+	for _, apiFile := range ja.ApiFiles {
+		allTypes = append(allTypes, ja.ApiSpecMap[apiFile].Types...)
 
 		if ja.SplitApiTypesDir {
-			typesGoString, err := gogen.BuildTypes(parse.Types)
+			typesGoString, err := gogen.BuildTypes(ja.ApiSpecMap[apiFile].Types)
 			if err != nil {
 				return err
 			}
-			goPackage, ok := parse.Info.Properties["go_package"]
+			goPackage, ok := ja.ApiSpecMap[apiFile].Info.Properties["go_package"]
 			if !ok {
 				return errors.New("do not has go_package option")
 			}
@@ -437,12 +445,12 @@ var (
 
 	if ja.SplitApiTypesDir {
 		for _, v := range allLogicFiles {
-			if err = ja.updateLogicImportedTypesPath(v); err != nil {
+			if err := ja.updateLogicImportedTypesPath(v); err != nil {
 				return err
 			}
 		}
 		for _, v := range allHandlerFiles {
-			if err = ja.updateHandlerImportedTypesPath(v); err != nil {
+			if err := ja.updateHandlerImportedTypesPath(v); err != nil {
 				return err
 			}
 		}

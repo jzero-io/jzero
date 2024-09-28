@@ -31,7 +31,11 @@ func GetAddedFiles(path string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	files = append(files, strings.Split(string(output), "\n")...)
+	for _, v := range strings.Split(string(output), "\n") {
+		if v != "" {
+			files = append(files, v)
+		}
+	}
 	return files, nil
 }
 
@@ -42,6 +46,10 @@ func diffFilter(path, flag string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	files = append(files, strings.Split(string(output), "\n")...)
+	for _, v := range strings.Split(string(output), "\n") {
+		if v != "" {
+			files = append(files, v)
+		}
+	}
 	return files, nil
 }
