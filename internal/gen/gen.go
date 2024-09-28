@@ -17,31 +17,31 @@ import (
 	"github.com/jzero-io/jzero/pkg/mod"
 )
 
-func Gen(gcf config.GenConfig) error {
-	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), gcf.Wd())
+func Gen(c config.Config) error {
+	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), c.Wd())
 
 	var module string
-	moduleStruct, err := mod.GetGoMod(gcf.Wd())
+	moduleStruct, err := mod.GetGoMod(c.Wd())
 	if err != nil {
 		return errors.Wrapf(err, "get go module struct error")
 	}
 	module = moduleStruct.Path
 
 	if !pathx.FileExists("go.mod") {
-		module = filepath.ToSlash(filepath.Join(module, filepath.Base(gcf.Wd())))
+		module = filepath.ToSlash(filepath.Join(module, filepath.Base(c.Wd())))
 	}
 
 	defer func() {
-		RemoveExtraFiles(gcf.Wd(), gcf.Style)
+		RemoveExtraFiles(c.Wd(), c.Gen.Style)
 	}()
 
 	jzeroRpc := JzeroRpc{
-		Wd:               gcf.Wd(),
+		Wd:               c.Wd(),
 		Module:           module,
-		Style:            gcf.Style,
-		RemoveSuffix:     gcf.RemoveSuffix,
-		ChangeLogicTypes: gcf.ChangeLogicTypes,
-		RpcStylePatch:    gcf.RpcStylePatch,
+		Style:            c.Gen.Style,
+		RemoveSuffix:     c.Gen.RemoveSuffix,
+		ChangeLogicTypes: c.Gen.ChangeLogicTypes,
+		RpcStylePatch:    c.Gen.RpcStylePatch,
 	}
 	err = jzeroRpc.Gen()
 	if err != nil {
@@ -49,14 +49,14 @@ func Gen(gcf config.GenConfig) error {
 	}
 
 	jzeroApi := JzeroApi{
-		Wd:                 gcf.Wd(),
+		Wd:                 c.Wd(),
 		Module:             module,
-		Style:              gcf.Style,
-		RemoveSuffix:       gcf.RemoveSuffix,
-		ChangeReplaceTypes: gcf.ChangeLogicTypes,
-		RegenApiHandler:    gcf.RegenApiHandler,
-		SplitApiTypesDir:   gcf.SplitApiTypesDir,
-		ApiGitDiff:         gcf.ApiGitDiff,
+		Style:              c.Gen.Style,
+		RemoveSuffix:       c.Gen.RemoveSuffix,
+		ChangeReplaceTypes: c.Gen.ChangeLogicTypes,
+		RegenApiHandler:    c.Gen.RegenApiHandler,
+		SplitApiTypesDir:   c.Gen.SplitApiTypesDir,
+		ApiGitDiff:         c.Gen.ApiGitDiff,
 	}
 	err = jzeroApi.Gen()
 	if err != nil {
@@ -64,16 +64,16 @@ func Gen(gcf config.GenConfig) error {
 	}
 
 	jzeroSql := JzeroSql{
-		Wd:                        gcf.Wd(),
-		Style:                     gcf.Style,
-		ModelStrict:               gcf.ModelMysqlStrict,
-		ModelIgnoreColumns:        gcf.ModelMysqlIgnoreColumns,
-		ModelMysqlDatasource:      gcf.ModelMysqlDatasource,
-		ModelMysqlDatasourceUrl:   gcf.ModelMysqlDatasourceUrl,
-		ModelMysqlDatasourceTable: gcf.ModelMysqlDatasourceTable,
-		ModelMysqlCache:           gcf.ModelMysqlCache,
-		ModelMysqlCachePrefix:     gcf.ModelMysqlCachePrefix,
-		ModelGitDiff:              gcf.ModelGitDiff,
+		Wd:                        c.Wd(),
+		Style:                     c.Gen.Style,
+		ModelStrict:               c.Gen.ModelMysqlStrict,
+		ModelIgnoreColumns:        c.Gen.ModelMysqlIgnoreColumns,
+		ModelMysqlDatasource:      c.Gen.ModelMysqlDatasource,
+		ModelMysqlDatasourceUrl:   c.Gen.ModelMysqlDatasourceUrl,
+		ModelMysqlDatasourceTable: c.Gen.ModelMysqlDatasourceTable,
+		ModelMysqlCache:           c.Gen.ModelMysqlCache,
+		ModelMysqlCachePrefix:     c.Gen.ModelMysqlCachePrefix,
+		ModelGitDiff:              c.Gen.ModelGitDiff,
 	}
 	err = jzeroSql.Gen()
 	if err != nil {

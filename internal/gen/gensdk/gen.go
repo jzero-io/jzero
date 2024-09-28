@@ -11,27 +11,27 @@ import (
 	"github.com/jzero-io/jzero/internal/gen/gensdk/generator"
 )
 
-func GenSdk(gc config.GenConfig, genModule bool) error {
-	if !pathx.FileExists(gc.Sdk.Output) {
-		if err := os.MkdirAll(gc.Sdk.Output, 0o755); err != nil {
+func GenSdk(c config.Config, genModule bool) error {
+	if !pathx.FileExists(c.Gen.Sdk.Output) {
+		if err := os.MkdirAll(c.Gen.Sdk.Output, 0o755); err != nil {
 			return err
 		}
 	}
 
-	c := gensdkconfig.Config{
-		Language:     gc.Sdk.Language,
-		Scope:        gc.Sdk.Scope,
+	gc := gensdkconfig.Config{
+		Language:     c.Gen.Sdk.Language,
+		Scope:        c.Gen.Sdk.Scope,
 		GenModule:    genModule,
-		GoVersion:    gc.Sdk.GoVersion,
-		GoModule:     gc.Sdk.GoModule,
-		GoPackage:    gc.Sdk.GoPackage,
-		Output:       gc.Sdk.Output,
-		ApiDir:       gc.Sdk.ApiDir,
-		ProtoDir:     gc.Sdk.ProtoDir,
-		WrapResponse: gc.Sdk.WrapResponse,
+		GoVersion:    c.Gen.Sdk.GoVersion,
+		GoModule:     c.Gen.Sdk.GoModule,
+		GoPackage:    c.Gen.Sdk.GoPackage,
+		Output:       c.Gen.Sdk.Output,
+		ApiDir:       c.Gen.Sdk.ApiDir,
+		ProtoDir:     c.Gen.Sdk.ProtoDir,
+		WrapResponse: c.Gen.Sdk.WrapResponse,
 	}
 
-	gen, err := generator.New(c)
+	gen, err := generator.New(gc)
 	if err != nil {
 		return err
 	}
@@ -42,15 +42,15 @@ func GenSdk(gc config.GenConfig, genModule bool) error {
 	}
 
 	for _, v := range files {
-		if !pathx.FileExists(filepath.Dir(filepath.Join(gc.Sdk.Output, v.Path))) {
-			if err = os.MkdirAll(filepath.Dir(filepath.Join(gc.Sdk.Output, v.Path)), 0o755); err != nil {
+		if !pathx.FileExists(filepath.Dir(filepath.Join(c.Gen.Sdk.Output, v.Path))) {
+			if err = os.MkdirAll(filepath.Dir(filepath.Join(c.Gen.Sdk.Output, v.Path)), 0o755); err != nil {
 				return err
 			}
 		}
-		if pathx.FileExists(filepath.Join(gc.Sdk.Output, v.Path)) && v.Skip {
+		if pathx.FileExists(filepath.Join(c.Gen.Sdk.Output, v.Path)) && v.Skip {
 			continue
 		}
-		if err = os.WriteFile(filepath.Join(gc.Sdk.Output, v.Path), v.Content.Bytes(), 0o644); err != nil {
+		if err = os.WriteFile(filepath.Join(c.Gen.Sdk.Output, v.Path), v.Content.Bytes(), 0o644); err != nil {
 			return err
 		}
 	}

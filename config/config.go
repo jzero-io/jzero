@@ -174,12 +174,7 @@ type HooksConfig struct {
 	After  []string `mapstructure:"after"`
 }
 
-func (gc *GenSwaggerConfig) Wd() string {
-	wd, _ := os.Getwd()
-	return wd
-}
-
-func (gc *GenConfig) Wd() string {
+func (c *Config) Wd() string {
 	wd, _ := os.Getwd()
 	return wd
 }

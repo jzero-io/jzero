@@ -19,9 +19,9 @@ type Method struct {
 	Verb string
 }
 
-func AddProto(ic config.IvmConfig) error {
+func AddProto(c config.Config) error {
 	var methods []Method
-	for _, v := range ic.Add.Proto.Methods {
+	for _, v := range c.Ivm.Add.Proto.Methods {
 		split := strings.Split(v, ":")
 		var method Method
 		if len(split) == 2 {
@@ -39,21 +39,21 @@ func AddProto(ic config.IvmConfig) error {
 	var version string
 	var versionSuffix string
 
-	if ic.Version == "v1" {
+	if c.Ivm.Version == "v1" {
 		version = ""
 		versionSuffix = ""
 	} else {
-		version = ic.Version
-		versionSuffix = "_" + ic.Version
+		version = c.Ivm.Version
+		versionSuffix = "_" + c.Ivm.Version
 	}
 
 	template, err := templatex.ParseTemplate(map[string]interface{}{
-		"Package":    ic.Add.Proto.Name,
+		"Package":    c.Ivm.Add.Proto.Name,
 		"Methods":    methods,
-		"Services":   ic.Add.Proto.Services,
+		"Services":   c.Ivm.Add.Proto.Services,
 		"Version":    version,
-		"UrlVersion": ic.Version,
-		"ProtoPath":  filepath.Join(ic.Version, fmt.Sprintf("%s%s.proto", ic.Add.Proto.Name, versionSuffix)),
+		"UrlVersion": c.Ivm.Version,
+		"ProtoPath":  filepath.Join(c.Ivm.Version, fmt.Sprintf("%s%s.proto", c.Ivm.Add.Proto.Name, versionSuffix)),
 	}, embeded.ReadTemplateFile(filepath.Join("ivm", "add", "template.proto.tpl")))
 	if err != nil {
 		return err
@@ -63,7 +63,7 @@ func AddProto(ic config.IvmConfig) error {
 	// Create a new printer
 	// printer := &protoprint.Printer{}
 
-	output := filepath.Join("desc", "proto", ic.Version, fmt.Sprintf("%s%s.proto", ic.Add.Proto.Name, versionSuffix))
+	output := filepath.Join("desc", "proto", c.Ivm.Version, fmt.Sprintf("%s%s.proto", c.Ivm.Add.Proto.Name, versionSuffix))
 
 	if pathx.FileExists(output) {
 		return errors.New("proto file already exists")

@@ -49,7 +49,7 @@ var ivmAddProtoCmd = &cobra.Command{
 		if len(config.C.Ivm.Add.Proto.Services) == 0 {
 			config.C.Ivm.Add.Proto.Services = []string{config.C.Ivm.Add.Proto.Name}
 		}
-		return ivmaddproto.AddProto(config.C.Ivm)
+		return ivmaddproto.AddProto(config.C)
 	},
 	SilenceUsage: true,
 }
@@ -64,7 +64,7 @@ var ivmAddApiCmd = &cobra.Command{
 		if config.C.Ivm.Add.Api.Group == "" {
 			config.C.Ivm.Add.Api.Group = config.C.Ivm.Add.Api.Name
 		}
-		return ivmaddapi.AddApi(config.C.Ivm)
+		return ivmaddapi.AddApi(config.C)
 	},
 	SilenceUsage: true,
 }

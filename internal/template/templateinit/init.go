@@ -15,18 +15,18 @@ import (
 	"github.com/jzero-io/jzero/embeded"
 )
 
-func Init(cc config.TemplateConfig) error {
-	if cc.Init.Remote != "" && cc.Init.Branch != "" {
-		_ = os.MkdirAll(cc.Init.Output, 0o755)
-		fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), cc.Init.Output, cc.Init.Branch)
+func Init(c config.Config) error {
+	if c.Template.Init.Remote != "" && c.Template.Init.Branch != "" {
+		_ = os.MkdirAll(c.Template.Init.Output, 0o755)
+		fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), c.Template.Init.Output, c.Template.Init.Branch)
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
-		_, err := git.PlainCloneContext(ctx, filepath.Join(cc.Init.Output), false, &git.CloneOptions{
+		_, err := git.PlainCloneContext(ctx, filepath.Join(c.Template.Init.Output), false, &git.CloneOptions{
 			SingleBranch:  true,
-			URL:           cc.Init.Remote,
+			URL:           c.Template.Init.Remote,
 			Depth:         0,
-			ReferenceName: plumbing.ReferenceName("refs/heads/" + cc.Init.Branch),
+			ReferenceName: plumbing.ReferenceName("refs/heads/" + c.Template.Init.Branch),
 		})
 		if err != nil {
 			return err
@@ -36,6 +36,6 @@ func Init(cc config.TemplateConfig) error {
 		return nil
 	}
 
-	err := embeded.WriteTemplateDir("", cc.Init.Output)
+	err := embeded.WriteTemplateDir("", c.Template.Init.Output)
 	return err
 }

@@ -13,23 +13,23 @@ import (
 	"github.com/jzero-io/jzero/internal/gen"
 )
 
-func Gen(gc config.GenConfig) error {
-	if pathx.FileExists(gc.Docs.ProtoDir) {
-		_ = os.MkdirAll(gc.Docs.Output, 0o755)
-		protoFilepath, err := gen.GetProtoFilepath(gc.Swagger.ProtoDir)
+func Gen(c config.Config) error {
+	if pathx.FileExists(c.Gen.Docs.ProtoDir) {
+		_ = os.MkdirAll(c.Gen.Docs.Output, 0o755)
+		protoFilepath, err := gen.GetProtoFilepath(c.Gen.Swagger.ProtoDir)
 		if err != nil {
 			return err
 		}
 
 		command := fmt.Sprintf("protoc -I%s -I%s --doc_out=%s --doc_opt=%s,index.%s %s",
-			gc.Docs.ProtoDir,
-			filepath.Join(gc.Docs.ProtoDir, "third_party"),
-			gc.Docs.Output,
-			getFormat(gc.Docs.Format),
-			gc.Docs.Format,
+			c.Gen.Docs.ProtoDir,
+			filepath.Join(c.Gen.Docs.ProtoDir, "third_party"),
+			c.Gen.Docs.Output,
+			getFormat(c.Gen.Docs.Format),
+			c.Gen.Docs.Format,
 			strings.Join(protoFilepath, " "),
 		)
-		_, err = execx.Run(command, gc.Swagger.Wd())
+		_, err = execx.Run(command, c.Wd())
 		if err != nil {
 			return err
 		}

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
@@ -34,19 +33,19 @@ type GeneratedFile struct {
 	Skip    bool
 }
 
-func NewProject(nc config.NewConfig, appName string) error {
-	err := os.MkdirAll(nc.Output, 0o755)
+func NewProject(c config.Config, appName string) error {
+	err := os.MkdirAll(c.New.Output, 0o755)
 	cobra.CheckErr(err)
 
 	templateData, err := NewTemplateData()
 	cobra.CheckErr(err)
-	templateData["Features"] = nc.Features
-	templateData["Module"] = nc.Module
+	templateData["Features"] = c.New.Features
+	templateData["Module"] = c.New.Module
 	templateData["APP"] = appName
 
 	jn := JzeroNew{
 		TemplateData: templateData,
-		nc:           nc,
+		nc:           c.New,
 	}
 
 	gfs, err := jn.New(filepath.Join("app"))
