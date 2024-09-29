@@ -28,7 +28,10 @@ func Gen(c config.Config) error {
 	module = moduleStruct.Path
 
 	if !pathx.FileExists("go.mod") {
-		module = filepath.ToSlash(filepath.Join(module, filepath.Base(c.Wd())))
+		module, err = mod.GetParentPackage(c.Wd())
+		if err != nil {
+			return errors.Wrapf(err, "get parent package error")
+		}
 	}
 
 	defer func() {

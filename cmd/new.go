@@ -44,11 +44,10 @@ var newCmd = &cobra.Command{
 		// 在 go mod 项目的一个子模块
 		if config.C.New.SubModule {
 			wd, _ := os.Getwd()
-			goMod, err := mod.GetGoMod(wd)
-			if err != nil {
-				cobra.CheckErr(err)
-			}
-			config.C.New.Module = filepath.ToSlash(filepath.Join(goMod.Path, config.C.New.Module))
+			var err error
+			parentPackage, err := mod.GetParentPackage(wd)
+			config.C.New.Module = filepath.ToSlash(filepath.Join(parentPackage, config.C.New.Output))
+			cobra.CheckErr(err)
 		}
 
 		if !pathx.FileExists(config.C.New.Home) {

@@ -12,6 +12,16 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 )
 
+// GetParentPackage if is submodule project, root package is based on go.mod and add its dir
+func GetParentPackage(workDir string) (string, error) {
+	mod, err := GetGoMod(workDir)
+	if err != nil {
+		return "", err
+	}
+	trim := strings.TrimPrefix(workDir, mod.Dir)
+	return filepath.ToSlash(filepath.Join(mod.Path, trim)), nil
+}
+
 func GetGoVersion() (string, error) {
 	resp, err := execx.Run("go env GOVERSION", "")
 	if err != nil {
@@ -60,5 +70,6 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 // which is the result of the command go list
 type ModuleStruct struct {
 	Path      string
+	Dir       string
 	GoVersion string
 }
