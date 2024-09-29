@@ -261,7 +261,15 @@ func (ja *JzeroApi) generateApiCode() error {
 		if parse, ok := ja.GenCodeApiSpecMap[file]; ok {
 			for _, group := range parse.Service.Groups {
 				if ja.RegenApiHandler {
-					_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group")))
+					dirFile, err := os.ReadDir(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group")))
+					if err != nil {
+						return err
+					}
+					for _, v := range dirFile {
+						if !v.IsDir() {
+							_ = os.Remove(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group"), v.Name()))
+						}
+					}
 				}
 				if ja.SplitApiTypesDir {
 					_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types", group.GetAnnotation("group")))
