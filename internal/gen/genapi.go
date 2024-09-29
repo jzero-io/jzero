@@ -152,6 +152,7 @@ func (ja *JzeroApi) Gen() error {
 	} else {
 		// 否则就是全量的 api 文件
 		genCodeApiFiles = ja.ApiFiles
+		ja.GenCodeApiSpecMap = ja.ApiSpecMap
 	}
 	ja.GenCodeApiFiles = genCodeApiFiles
 
