@@ -6,10 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/mod/modfile"
-
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	"golang.org/x/mod/modfile"
 )
 
 // GetParentPackage if is submodule project, root package is based on go.mod and add its dir

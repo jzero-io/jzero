@@ -8,6 +8,26 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 )
 
+type LogicFile struct {
+	Package string
+
+	// service
+	Group string
+
+	// rpc name
+	Handler string
+
+	Path        string
+	ApiFilepath string
+
+	RequestTypeName  string
+	RequestType      spec.Type
+	ResponseTypeName string
+	ResponseType     spec.Type
+	ClientStream     bool
+	ServerStream     bool
+}
+
 func (ja *JzeroApi) getAllLogicFiles(apiFilepath string, apiSpec *spec.ApiSpec) ([]LogicFile, error) {
 	var logicFiles []LogicFile
 	for _, group := range apiSpec.Service.Groups {

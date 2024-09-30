@@ -90,7 +90,6 @@ func build(tc config.TemplateConfig, dirname string, mod *modfile.File) error {
 				return err
 			}
 		}
-
 	}
 	return nil
 }

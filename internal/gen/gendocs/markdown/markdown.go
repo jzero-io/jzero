@@ -39,11 +39,11 @@ func (m *Markdown) Generate() error {
 }
 
 //
-//func (m *Markdown) generateGroup() []byte {
+// func (m *Markdown) generateGroup() []byte {
 //	return nil
-//}
+// }
 
-//func (m *Markdown) generateRequestTypeTable() []byte {
+// func (m *Markdown) generateRequestTypeTable() []byte {
 //	for _, docsSpec := range m.docsSpecs {
 //		for _, route := range docsSpec.GroupSpec.Routes {
 //			buf := bytes.NewBuffer(nil)
@@ -59,4 +59,4 @@ func (m *Markdown) Generate() error {
 //		}
 //	}
 //	return nil
-//}
+// }

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"google.golang.org/genproto/googleapis/api/annotations"
@@ -16,7 +15,8 @@ import (
 )
 
 type (
-	ImportLines   []string
+	ImportLines []string
+
 	RegisterLines []string
 )
 

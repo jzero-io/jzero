@@ -8,11 +8,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/pkg/desc"
-	"github.com/jzero-io/jzero/pkg/gitdiff"
-	"github.com/jzero-io/jzero/pkg/templatex"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/color"
@@ -23,6 +18,12 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/desc"
+	"github.com/jzero-io/jzero/pkg/gitdiff"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 type JzeroApi struct {
@@ -40,31 +41,6 @@ type JzeroApi struct {
 	GenCodeApiFiles   []string
 	ApiSpecMap        map[string]*spec.ApiSpec
 	GenCodeApiSpecMap map[string]*spec.ApiSpec
-}
-
-type HandlerFile struct {
-	Package     string
-	Group       string
-	Handler     string
-	Path        string
-	ApiFilepath string
-}
-
-type LogicFile struct {
-	Package string
-	// service
-	Group string
-	// rpc name
-	Handler     string
-	Path        string
-	ApiFilepath string
-
-	RequestTypeName  string
-	RequestType      spec.Type
-	ResponseTypeName string
-	ResponseType     spec.Type
-	ClientStream     bool
-	ServerStream     bool
 }
 
 func (ja *JzeroApi) Gen() error {

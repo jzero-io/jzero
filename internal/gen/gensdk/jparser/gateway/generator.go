@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"sort"
@@ -17,13 +18,13 @@ var toCamelCaseRe = regexp.MustCompile(`(^[A-Za-z])|(_|\.)([A-Za-z])`)
 
 func toCamelCase(str string) string {
 	return toCamelCaseRe.ReplaceAllStringFunc(str, func(s string) string {
-		return strings.ToUpper(strings.Replace(s, "_", "", -1))
+		return strings.ToUpper(strings.ReplaceAll(s, "_", ""))
 	})
 }
 
 func PathParam(pattern string) ([]*vars.PathParam, error) {
 	if !strings.HasPrefix(pattern, "/") {
-		return nil, fmt.Errorf("no leading /")
+		return nil, errors.New("no leading /")
 	}
 	tokens, _ := tokenize(pattern[1:])
 

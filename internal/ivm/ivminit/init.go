@@ -5,10 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
-
-	"github.com/jzero-io/jzero/internal/gen/genrpc"
-
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/pkg/errors"
@@ -16,6 +12,8 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/internal/gen/genrpc"
+	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/mod"
 )
 
@@ -51,7 +49,6 @@ func Init(ic config.IvmConfig) error {
 		if err != nil {
 			return err
 		}
-
 	}
 
 	var fds []*desc.FileDescriptor
@@ -81,7 +78,6 @@ func Init(ic config.IvmConfig) error {
 				}
 			}
 		}
-
 	}
 
 	wd, err := os.Getwd()

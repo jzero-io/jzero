@@ -8,9 +8,10 @@ import (
 	"go/token"
 	"strings"
 
-	jgogen "github.com/jzero-io/jzero/pkg/gogen"
 	zeroconfig "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
+
+	jgogen "github.com/jzero-io/jzero/pkg/gogen"
 )
 
 func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {

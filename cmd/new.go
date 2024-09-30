@@ -12,8 +12,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/jzero-io/jzero/pkg/mod"
-
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/pkg/errors"
@@ -24,6 +22,7 @@ import (
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/new"
+	"github.com/jzero-io/jzero/pkg/mod"
 )
 
 // newCmd represents the new command

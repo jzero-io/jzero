@@ -47,7 +47,7 @@ func AddProto(c config.Config) error {
 		versionSuffix = "_" + c.Ivm.Version
 	}
 
-	template, err := templatex.ParseTemplate(map[string]interface{}{
+	template, err := templatex.ParseTemplate(map[string]any{
 		"Package":    c.Ivm.Add.Proto.Name,
 		"Methods":    methods,
 		"Services":   c.Ivm.Add.Proto.Services,

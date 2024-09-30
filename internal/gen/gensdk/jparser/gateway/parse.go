@@ -3,6 +3,7 @@
 package gateway
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -250,11 +251,11 @@ func expectPChars(t string) error {
 
 		// unreserved
 		switch {
-		case 'A' <= r && r <= 'Z':
+		case r >= 'A' && r <= 'Z':
 			continue
-		case 'a' <= r && r <= 'z':
+		case r >= 'a' && r <= 'z':
 			continue
-		case '0' <= r && r <= '9':
+		case r >= '0' && r <= '9':
 			continue
 		}
 		switch r {
@@ -280,18 +281,18 @@ func expectPChars(t string) error {
 // expectIdent determines if "ident" is a valid identifier in .proto schema ([[:alpha:]_][[:alphanum:]_]*).
 func expectIdent(ident string) error {
 	if ident == "" {
-		return fmt.Errorf("empty identifier")
+		return errors.New("empty identifier")
 	}
 	for pos, r := range ident {
 		switch {
-		case '0' <= r && r <= '9':
+		case r >= '0' && r <= '9':
 			if pos == 0 {
 				return fmt.Errorf("identifier starting with digit: %s", ident)
 			}
 			continue
-		case 'A' <= r && r <= 'Z':
+		case r >= 'A' && r <= 'Z':
 			continue
-		case 'a' <= r && r <= 'z':
+		case r >= 'a' && r <= 'z':
 			continue
 		case r == '_':
 			continue
@@ -304,11 +305,11 @@ func expectIdent(ident string) error {
 
 func isHexDigit(r rune) bool {
 	switch {
-	case '0' <= r && r <= '9':
+	case r >= '0' && r <= '9':
 		return true
-	case 'A' <= r && r <= 'F':
+	case r >= 'A' && r <= 'F':
 		return true
-	case 'a' <= r && r <= 'f':
+	case r >= 'a' && r <= 'f':
 		return true
 	}
 	return false

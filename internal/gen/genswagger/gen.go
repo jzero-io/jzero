@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/pkg/desc"
-
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -17,6 +15,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/pkg/desc"
 )
 
 func Gen(c config.Config) error {

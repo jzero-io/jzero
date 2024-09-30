@@ -79,6 +79,7 @@ type (
 		jwtTrans         string
 		maxBytes         string
 	}
+
 	route struct {
 		method  string
 		path    string

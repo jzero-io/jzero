@@ -19,19 +19,25 @@ type Config struct {
 		===============================command flags start========================================
 	*/
 	// global flags
-	Debug          bool `mapstructure:"debug"`
-	DebugSleepTime int  `mapstructure:"debug-sleep-time"`
+	Debug bool `mapstructure:"debug"`
+
+	DebugSleepTime int `mapstructure:"debug-sleep-time"`
 
 	// new command
 	New NewConfig `mapstructure:"new"`
+
 	// gen command
 	Gen GenConfig `mapstructure:"gen"`
+
 	// ivm command
 	Ivm IvmConfig `mapstructure:"ivm"`
+
 	// template command
 	Template TemplateConfig `mapstructure:"template"`
+
 	// upgrade command
 	Upgrade UpgradeConfig `mapstructure:"upgrade"`
+
 	/*
 		==============================command flags end=========================================
 	*/
@@ -54,7 +60,8 @@ type GenConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
 	// global flags
-	Home             string `mapstructure:"home"`
+	Home string `mapstructure:"home"`
+
 	Style            string `mapstructure:"style"`
 	Branch           string `mapstructure:"branch"`
 	SplitApiTypesDir bool   `mapstructure:"split-api-types-dir"`
@@ -121,8 +128,9 @@ type GenDocsConfig struct {
 
 type IvmConfig struct {
 	// global flags
-	Version          string `mapstructure:"version"`
-	SplitApiTypesDir bool   `mapstructure:"split-api-types-dir"`
+	Version string `mapstructure:"version"`
+
+	SplitApiTypesDir bool `mapstructure:"split-api-types-dir"`
 
 	Init IvmInitConfig `mapstructure:"init"`
 	Add  IvmAddConfig  `mapstructure:"add"`

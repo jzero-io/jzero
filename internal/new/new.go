@@ -23,7 +23,7 @@ type TemplateData struct {
 }
 
 type JzeroNew struct {
-	TemplateData map[string]interface{}
+	TemplateData map[string]any
 	nc           config.NewConfig
 }
 

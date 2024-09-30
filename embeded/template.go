@@ -8,6 +8,7 @@ import (
 
 var (
 	Template embed.FS
+
 	// Home template home
 	Home string
 )

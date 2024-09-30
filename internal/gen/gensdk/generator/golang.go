@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
-
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/pkg/errors"
@@ -24,6 +22,7 @@ import (
 	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
 	"github.com/jzero-io/jzero/internal/new"
+	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -77,7 +76,6 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 		if err != nil {
 			return nil, err
 		}
-
 	}
 
 	var fds []*desc.FileDescriptor
@@ -191,7 +189,7 @@ func (g *Golang) genGoMod() (*GeneratedFile, error) {
 func (g *Golang) genClientSets(scopes []string) ([]*GeneratedFile, error) {
 	var clientSetFiles []*GeneratedFile
 
-	clientGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+	clientGoBytes, err := templatex.ParseTemplate(map[string]any{
 		"Package": g.config.GoPackage,
 		"Module":  g.config.GoModule,
 		"Scopes":  scopes,
@@ -210,7 +208,7 @@ func (g *Golang) genClientSets(scopes []string) ([]*GeneratedFile, error) {
 func (g *Golang) genDirectClients() ([]*GeneratedFile, error) {
 	var directClientFiles []*GeneratedFile
 
-	directClientGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+	directClientGoBytes, err := templatex.ParseTemplate(map[string]any{
 		"Module": g.config.GoModule,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-go", "typed", "direct_client.go.tpl")))
 	if err != nil {
@@ -227,7 +225,7 @@ func (g *Golang) genDirectClients() ([]*GeneratedFile, error) {
 func (g *Golang) genScopeClients(scope string, resources []string) ([]*GeneratedFile, error) {
 	var scopeClientFiles []*GeneratedFile
 
-	scopeClientGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+	scopeClientGoBytes, err := templatex.ParseTemplate(map[string]any{
 		"Scope":     scope,
 		"Module":    g.config.GoModule,
 		"Resources": resources,
@@ -248,7 +246,7 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 	var scopeResourceFiles []*GeneratedFile
 
 	// resource_expansion.go
-	resourceExpansionGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+	resourceExpansionGoBytes, err := templatex.ParseTemplate(map[string]any{
 		"Module":   g.config.GoModule,
 		"Scope":    scope,
 		"Resource": resource,
@@ -261,7 +259,7 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 		Content: *bytes.NewBuffer(resourceExpansionGoBytes),
 	})
 
-	resourceGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+	resourceGoBytes, err := templatex.ParseTemplate(map[string]any{
 		"GoModule":           g.config.GoModule,
 		"Scope":              scope,
 		"Resource":           resource,
@@ -292,7 +290,7 @@ func (g *Golang) genApiTypesModel(types []spec.Type) (*GeneratedFile, error) {
 		return nil, err
 	}
 
-	typesGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+	typesGoBytes, err := templatex.ParseTemplate(map[string]any{
 		"Types": typesGoString,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-go", "model", "types", "scope_types.go.tpl")))
 	if err != nil {

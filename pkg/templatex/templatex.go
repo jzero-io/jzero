@@ -10,7 +10,7 @@ import (
 )
 
 // ParseTemplate template
-func ParseTemplate(data interface{}, tplT []byte) ([]byte, error) {
+func ParseTemplate(data any, tplT []byte) ([]byte, error) {
 	t, err := template.New("production").Funcs(sprig.TxtFuncMap()).Funcs(RegisterTxtFuncMap()).Option().Parse(string(tplT))
 	if err != nil {
 		return nil, err
@@ -29,14 +29,14 @@ func RegisterTxtFuncMap() template.FuncMap {
 }
 
 func RegisterFuncMap() template.FuncMap {
-	gfm := make(map[string]interface{}, len(registerFuncMap))
+	gfm := make(map[string]any, len(registerFuncMap))
 	for k, v := range registerFuncMap {
 		gfm[k] = v
 	}
 	return gfm
 }
 
-var registerFuncMap = map[string]interface{}{
+var registerFuncMap = map[string]any{
 	"FirstUpper": stringx.FirstUpper,
 	"FirstLower": stringx.FirstLower,
 	"ToCamel":    stringx.ToCamel,

@@ -7,12 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/pkg/desc"
-
-	"github.com/jzero-io/jzero/internal/gen/genapi"
-	"github.com/jzero-io/jzero/internal/gen/genrpc"
-	"github.com/jzero-io/jzero/internal/gen/gensql"
-
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -20,6 +14,10 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/internal/gen/genapi"
+	"github.com/jzero-io/jzero/internal/gen/genrpc"
+	"github.com/jzero-io/jzero/internal/gen/gensql"
+	"github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/mod"
 )
 

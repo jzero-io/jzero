@@ -11,14 +11,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/internal/gen/genapi"
-
-	"golang.org/x/tools/go/ast/astutil"
-
 	"github.com/rinchsan/gosimports"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
+	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/internal/gen/genapi"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -81,7 +79,7 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 			logicTypeName = file.Handler
 		}
 
-		templateValue := map[string]interface{}{
+		templateValue := map[string]any{
 			"Service":          strings.ToLower(file.Group),
 			"OldService":       strings.ToLower(oldFiles[i].Group),
 			"LogicTypeName":    logicTypeName,
@@ -97,7 +95,7 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 				return err
 			}
 
-			templateFile, err = templatex.ParseTemplate(map[string]interface{}{
+			templateFile, err = templatex.ParseTemplate(map[string]any{
 				"Body": string(templateLogicBody),
 			}, []byte(fileContent))
 			if err != nil {
@@ -114,7 +112,7 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 				return err
 			}
 
-			templateFile, err = templatex.ParseTemplate(map[string]interface{}{
+			templateFile, err = templatex.ParseTemplate(map[string]any{
 				"Body":    string(templateLogicBody),
 				"Adaptor": string(templateLogicAdaptor),
 			}, []byte(fileContent))
@@ -132,7 +130,7 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 				return err
 			}
 
-			templateFile, err = templatex.ParseTemplate(map[string]interface{}{
+			templateFile, err = templatex.ParseTemplate(map[string]any{
 				"Body":    string(templateLogicBody),
 				"Adaptor": string(templateLogicAdaptor),
 			}, []byte(fileContent))
@@ -150,7 +148,7 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 				return err
 			}
 
-			templateFile, err = templatex.ParseTemplate(map[string]interface{}{
+			templateFile, err = templatex.ParseTemplate(map[string]any{
 				"Body":    string(templateLogicBody),
 				"Adaptor": string(templateLogicAdaptor),
 			}, []byte(fileContent))

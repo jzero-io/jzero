@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
-
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	apiparser "github.com/zeromicro/go-zero/tools/goctl/api/parser"
@@ -18,6 +16,7 @@ import (
 	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
+	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -144,7 +143,7 @@ func (t *Typescript) Gen() ([]*GeneratedFile, error) {
 }
 
 func (t *Typescript) genClientSet(scopes []string) (*GeneratedFile, error) {
-	clientBytes, err := templatex.ParseTemplate(map[string]interface{}{
+	clientBytes, err := templatex.ParseTemplate(map[string]any{
 		"APP":    t.config.Scope,
 		"Scopes": scopes,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "index.ts.tpl")))
@@ -158,7 +157,7 @@ func (t *Typescript) genClientSet(scopes []string) (*GeneratedFile, error) {
 }
 
 func (t *Typescript) genPackageJson(scopes []string) (*GeneratedFile, error) {
-	packageJsonBytes, err := templatex.ParseTemplate(map[string]interface{}{
+	packageJsonBytes, err := templatex.ParseTemplate(map[string]any{
 		"APP": t.config.Scope,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "package.json.tpl")))
 	if err != nil {
@@ -171,7 +170,7 @@ func (t *Typescript) genPackageJson(scopes []string) (*GeneratedFile, error) {
 }
 
 func (t *Typescript) genScopeClient(scope string, resources []string) (*GeneratedFile, error) {
-	scopeClientBytes, err := templatex.ParseTemplate(map[string]interface{}{
+	scopeClientBytes, err := templatex.ParseTemplate(map[string]any{
 		"Scope":     scope,
 		"Resources": resources,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "typed", "scope_client.ts.tpl")))
@@ -186,7 +185,7 @@ func (t *Typescript) genScopeClient(scope string, resources []string) (*Generate
 }
 
 func (t *Typescript) genRest() (*GeneratedFile, error) {
-	requestBytes, err := templatex.ParseTemplate(map[string]interface{}{}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "rest", "request.ts.tpl")))
+	requestBytes, err := templatex.ParseTemplate(map[string]any{}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "rest", "request.ts.tpl")))
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +199,7 @@ func (t *Typescript) genRest() (*GeneratedFile, error) {
 func (t *Typescript) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scope, resource string) ([]*GeneratedFile, error) {
 	var scopeResourceFiles []*GeneratedFile
 
-	resourceGoBytes, err := templatex.ParseTemplate(map[string]interface{}{
+	resourceGoBytes, err := templatex.ParseTemplate(map[string]any{
 		"HTTPInterfaces": rhis[vars.Scope(scope)][vars.Resource(resource)],
 		"Resource":       resource,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "typed", "resource.ts.tpl")))

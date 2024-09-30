@@ -23,10 +23,10 @@ var templateCmd = &cobra.Command{
 }
 
 var templateInitCmd = &cobra.Command{
-	Use:   "init",
-	Short: `Save template files on your disk`,
-	PreRun: func(_ *cobra.Command, _ []string) {
-	},
+	Use:    "init",
+	Short:  `Save template files on your disk`,
+	PreRun: func(_ *cobra.Command, _ []string) {},
+
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if config.C.Template.Init.Output == "" {
 			home, _ := os.UserHomeDir()

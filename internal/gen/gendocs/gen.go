@@ -6,12 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/pkg/desc"
-
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/pkg/desc"
 )
 
 func Gen(c config.Config) error {

@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/pkg/desc"
-
 	"github.com/pkg/errors"
 	conf "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -18,6 +16,7 @@ import (
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/new"
+	"github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -144,7 +143,7 @@ func Generate(c config.Config, genModule bool) error {
 	}
 
 	// gen clientset and options
-	template, err := templatex.ParseTemplate(map[string]interface{}{
+	template, err := templatex.ParseTemplate(map[string]any{
 		"Module":  c.Gen.Zrpcclient.GoModule,
 		"Package": c.Gen.Zrpcclient.GoPackage,
 		"Scopes":  []string{c.Gen.Zrpcclient.Scope},
@@ -157,7 +156,7 @@ func Generate(c config.Config, genModule bool) error {
 		return err
 	}
 
-	template, err = templatex.ParseTemplate(map[string]interface{}{
+	template, err = templatex.ParseTemplate(map[string]any{
 		"Module":  c.Gen.Zrpcclient.GoModule,
 		"Package": c.Gen.Zrpcclient.GoPackage,
 		"Scopes":  []string{c.Gen.Zrpcclient.Scope},
@@ -171,7 +170,7 @@ func Generate(c config.Config, genModule bool) error {
 	}
 
 	// generate scope client
-	template, err = templatex.ParseTemplate(map[string]interface{}{
+	template, err = templatex.ParseTemplate(map[string]any{
 		"Module":   c.Gen.Zrpcclient.GoModule,
 		"Scope":    c.Gen.Zrpcclient.Scope,
 		"Services": services,

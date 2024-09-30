@@ -1,9 +1,12 @@
 package vars
 
 type (
-	Scope                         string
-	Resource                      string
-	ResourceHTTPInterfaceMap      = map[Resource][]*HTTPInterface
+	Scope string
+
+	Resource string
+
+	ResourceHTTPInterfaceMap = map[Resource][]*HTTPInterface
+
 	ScopeResourceHTTPInterfaceMap map[Scope]ResourceHTTPInterfaceMap
 )
 
@@ -17,11 +20,13 @@ type HTTPInterface struct {
 	MethodName string
 
 	// body
-	Request  *Request
+	Request *Request
+
 	Response *Response
 
 	// param
-	PathParams  []*PathParam
+	PathParams []*PathParam
+
 	QueryParams []*QueryParam
 
 	// comments

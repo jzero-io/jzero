@@ -5,12 +5,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/pkg/desc"
-
 	"github.com/zeromicro/go-zero/tools/goctl/api/format"
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
@@ -41,7 +40,7 @@ func AddApi(c config.Config) error {
 		handlers = append(handlers, method)
 	}
 
-	template, err := templatex.ParseTemplate(map[string]interface{}{
+	template, err := templatex.ParseTemplate(map[string]any{
 		"Handlers":         handlers,
 		"Service":          service,
 		"Group":            c.Ivm.Add.Api.Group,

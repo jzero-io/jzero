@@ -8,6 +8,14 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 )
 
+type HandlerFile struct {
+	Package     string
+	Group       string
+	Handler     string
+	Path        string
+	ApiFilepath string
+}
+
 func (ja *JzeroApi) getAllHandlerFiles(apiFilepath string, apiSpec *spec.ApiSpec) ([]HandlerFile, error) {
 	var handlerFiles []HandlerFile
 	for _, group := range apiSpec.Service.Groups {
