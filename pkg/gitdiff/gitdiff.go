@@ -49,7 +49,7 @@ func diffFilter(path, flag string) ([]string, error) {
 	}
 	for _, v := range strings.Split(string(output), "\n") {
 		if v != "" {
-			files = append(files, v)
+			files = append(files, filepath.Join(strings.Split(v, "/")...))
 		}
 	}
 	return files, nil
