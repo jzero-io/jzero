@@ -30,7 +30,14 @@ cd jzero
 git checkout -b feat/patch-1
 ```
 
-### 4. push
+### 4. format the code what you changes
+
+```shell
+go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
+gorgeous ./...
+```
+
+### 5. push
 
 ```shell
 git add .
@@ -38,7 +45,7 @@ git commit -m "feat(xx): custom message"
 git push
 ```
 
-### 5. pull request
+### 6. pull request
 
 ## debug jzero
 
