@@ -21,10 +21,11 @@ jobs:
         with:
           go-version: '1.22.3'
 
-      - name: Install Jzero
+      - name: Install Tool
         run: |
           go install
           jzero check
+          go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
 
       - name: Test new project and run
         run: |
@@ -32,6 +33,11 @@ jobs:
           cd quickstart && jzero gen && go mod tidy
           go run main.go version
           cd ..
+          rm -rf quickstart
+
+      - name: format go
+        run: |
+          gorgeous -d ./... 
 
       - uses: actions/checkout@v4
       - name: golangci-lint
