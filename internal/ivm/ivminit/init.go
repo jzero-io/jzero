@@ -5,6 +5,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
+
+	"github.com/jzero-io/jzero/internal/gen/genrpc"
+
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/pkg/errors"
@@ -12,7 +16,6 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/pkg/mod"
 )
 
@@ -23,7 +26,7 @@ type IvmInit struct {
 	oldProtoDir  string
 	newProtoDir  string
 
-	jzeroRpc gen.JzeroRpc
+	jzeroRpc genrpc.JzeroRpc
 }
 
 func Init(ic config.IvmConfig) error {
@@ -44,7 +47,7 @@ func Init(ic config.IvmConfig) error {
 	var protoFiles []string
 
 	if pathx.FileExists(protoDir) {
-		protoFiles, err = gen.GetProtoFilepath(protoDir)
+		protoFiles, err = jzerodesc.GetProtoFilepath(protoDir)
 		if err != nil {
 			return err
 		}
@@ -90,7 +93,7 @@ func Init(ic config.IvmConfig) error {
 		return err
 	}
 
-	jzeroRpc := gen.JzeroRpc{
+	jzeroRpc := genrpc.JzeroRpc{
 		Wd:               wd,
 		Module:           moduleStruct.Path,
 		Style:            ic.Init.Style,
@@ -104,7 +107,7 @@ func Init(ic config.IvmConfig) error {
 	}
 
 	// invoke old version logic
-	newVersionProtoFilepath, err := gen.GetProtoFilepath(ivmInit.newProtoDir)
+	newVersionProtoFilepath, err := jzerodesc.GetProtoFilepath(ivmInit.newProtoDir)
 	if err != nil {
 		return err
 	}

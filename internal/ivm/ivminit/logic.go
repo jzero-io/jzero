@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/internal/gen/genapi"
 
 	"golang.org/x/tools/go/ast/astutil"
 
@@ -233,7 +233,7 @@ func (ivm *IvmInit) astAddLogic(fset *token.FileSet, f *ast.File, oldService, lo
 	return nil
 }
 
-func (ivm *IvmInit) astInspect(fset *token.FileSet, f *ast.File, oldLogicFile, newLogicFile gen.LogicFile) error {
+func (ivm *IvmInit) astInspect(fset *token.FileSet, f *ast.File, oldLogicFile, newLogicFile genapi.LogicFile) error {
 	logicMethodName := newLogicFile.Handler
 	oldService := oldLogicFile.Group
 

@@ -1,4 +1,4 @@
-package gen
+package desc
 
 import (
 	"fmt"
@@ -14,6 +14,19 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
+
+type (
+	ImportLines   []string
+	RegisterLines []string
+)
+
+func (l ImportLines) String() string {
+	return "\n\n\t" + strings.Join(l, "\n\t")
+}
+
+func (l RegisterLines) String() string {
+	return "\n\t\t" + strings.Join(l, "\n\t\t")
+}
 
 func getProtoDir(protoDirPath string) ([]os.DirEntry, error) {
 	protoDir, err := os.ReadDir(protoDirPath)
@@ -127,7 +140,7 @@ func GetApiServiceName(apiDirName string) string {
 	return ""
 }
 
-func getRpcMethodUrl(method *descriptorpb.MethodDescriptorProto) string {
+func GetRpcMethodUrl(method *descriptorpb.MethodDescriptorProto) string {
 	ext := proto.GetExtension(method.GetOptions(), annotations.E_Http)
 	switch rule := ext.(type) {
 	case *annotations.HttpRule:
@@ -150,7 +163,7 @@ func getRpcMethodUrl(method *descriptorpb.MethodDescriptorProto) string {
 func getApiFileRelPath(apiDirName string) ([]string, error) {
 	var apiFiles []string
 
-	allApiFiles, err := findApiFiles(apiDirName)
+	allApiFiles, err := FindApiFiles(apiDirName)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +178,7 @@ func getApiFileRelPath(apiDirName string) ([]string, error) {
 	return apiFiles, nil
 }
 
-func findApiFiles(dir string) ([]string, error) {
+func FindApiFiles(dir string) ([]string, error) {
 	var apiFiles []string
 
 	files, err := os.ReadDir(dir)
@@ -175,7 +188,7 @@ func findApiFiles(dir string) ([]string, error) {
 
 	for _, file := range files {
 		if file.IsDir() {
-			subFiles, err := findApiFiles(filepath.Join(dir, file.Name()))
+			subFiles, err := FindApiFiles(filepath.Join(dir, file.Name()))
 			if err != nil {
 				return nil, err
 			}

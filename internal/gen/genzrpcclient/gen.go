@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/pkg/desc"
+
 	"github.com/pkg/errors"
 	conf "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -15,7 +17,6 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/internal/new"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
@@ -91,7 +92,7 @@ func Generate(c config.Config, genModule bool) error {
 
 	baseProtoDir := filepath.Join("desc", "proto")
 
-	fps, err := gen.GetProtoFilepath(baseProtoDir)
+	fps, err := desc.GetProtoFilepath(baseProtoDir)
 	if err != nil {
 		return err
 	}

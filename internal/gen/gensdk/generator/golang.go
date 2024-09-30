@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
+
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/pkg/errors"
@@ -18,7 +20,6 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
@@ -52,7 +53,7 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	var apiSpecs []*spec.ApiSpec
 
 	if pathx.FileExists(g.config.ApiDir) {
-		mainApiFilePath, isDelete, err := gen.GetMainApiFilePath(g.config.ApiDir)
+		mainApiFilePath, isDelete, err := jzerodesc.GetMainApiFilePath(g.config.ApiDir)
 		if err != nil {
 			return nil, err
 		}
@@ -72,7 +73,7 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	var protoFiles []string
 
 	if pathx.FileExists(g.config.ProtoDir) {
-		protoFiles, err = gen.GetProtoFilepath(g.config.ProtoDir)
+		protoFiles, err = jzerodesc.GetProtoFilepath(g.config.ProtoDir)
 		if err != nil {
 			return nil, err
 		}

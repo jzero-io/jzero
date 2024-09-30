@@ -1,4 +1,4 @@
-package gen
+package gensql
 
 import (
 	"bytes"

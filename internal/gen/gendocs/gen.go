@@ -6,17 +6,18 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/pkg/desc"
+
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/internal/gen"
 )
 
 func Gen(c config.Config) error {
 	if pathx.FileExists(c.Gen.Docs.ProtoDir) {
 		_ = os.MkdirAll(c.Gen.Docs.Output, 0o755)
-		protoFilepath, err := gen.GetProtoFilepath(c.Gen.Swagger.ProtoDir)
+		protoFilepath, err := desc.GetProtoFilepath(c.Gen.Swagger.ProtoDir)
 		if err != nil {
 			return err
 		}

@@ -5,11 +5,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/pkg/desc"
+
 	"github.com/zeromicro/go-zero/tools/goctl/api/format"
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/pkg/stringx"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
@@ -22,7 +23,7 @@ type Handler struct {
 func AddApi(c config.Config) error {
 	baseApiDir := filepath.Join("desc", "api")
 
-	service := gen.GetApiServiceName(filepath.Join("desc", "api"))
+	service := desc.GetApiServiceName(filepath.Join("desc", "api"))
 
 	var handlers []Handler
 	for _, v := range c.Ivm.Add.Api.Handlers {

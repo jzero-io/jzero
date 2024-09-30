@@ -1,4 +1,4 @@
-package gen
+package genrpc
 
 import (
 	"bytes"
@@ -10,6 +10,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
+
+	"github.com/jzero-io/jzero/internal/gen/genapi"
 
 	"golang.org/x/tools/go/ast/astutil"
 
@@ -34,19 +38,6 @@ import (
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
-type (
-	ImportLines   []string
-	RegisterLines []string
-)
-
-func (l ImportLines) String() string {
-	return "\n\n\t" + strings.Join(l, "\n\t")
-}
-
-func (l RegisterLines) String() string {
-	return "\n\t\t" + strings.Join(l, "\n\t\t")
-}
-
 type ServerFile struct {
 	Path    string
 	Service string
@@ -68,16 +59,16 @@ type JzeroProtoApiMiddleware struct {
 
 func (jr *JzeroRpc) Gen() error {
 	protoDirPath := filepath.Join("desc", "proto")
-	protoFilenames, err := GetProtoFilepath(protoDirPath)
+	protoFilenames, err := jzerodesc.GetProtoFilepath(protoDirPath)
 	if err != nil {
 		return err
 	}
 
-	var serverImports ImportLines
-	var pbImports ImportLines
-	var registerServers RegisterLines
+	var serverImports jzerodesc.ImportLines
+	var pbImports jzerodesc.ImportLines
+	var registerServers jzerodesc.RegisterLines
 	var allServerFiles []ServerFile
-	var allLogicFiles []LogicFile
+	var allLogicFiles []genapi.LogicFile
 
 	if len(protoFilenames) > 0 {
 		fmt.Printf("%s to generate proto code. \n", color.WithColor("Start", color.FgGreen))
@@ -278,7 +269,7 @@ func (jr *JzeroRpc) rpcStylePatchServer(file ServerFile) error {
 	return nil
 }
 
-func (jr *JzeroRpc) rpcStylePatchLogic(file LogicFile) error {
+func (jr *JzeroRpc) rpcStylePatchLogic(file genapi.LogicFile) error {
 	fp := file.Path
 	if jr.RemoveSuffix {
 		fp = fp[:len(fp)-8]
@@ -319,7 +310,7 @@ func generateProtoDescriptorPath(protoPath string) string {
 	return filepath.Join("desc", "pb", strings.TrimSuffix(rel, ".proto")+".pb")
 }
 
-func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServers RegisterLines) error {
+func (jr *JzeroRpc) genServer(serverImports, pbImports jzerodesc.ImportLines, registerServers jzerodesc.RegisterLines) error {
 	fmt.Printf("%s to generate internal/server/server.go\n", color.WithColor("Start", color.FgGreen))
 	serverFile, err := templatex.ParseTemplate(map[string]interface{}{
 		"Module":          jr.Module,
@@ -374,8 +365,8 @@ func (jr *JzeroRpc) GetAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, 
 	return serverFiles, nil
 }
 
-func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, error) {
-	var logicFiles []LogicFile
+func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]genapi.LogicFile, error) {
+	var logicFiles []genapi.LogicFile
 	for _, service := range protoSpec.Service {
 		for _, rpc := range service.RPC {
 			namingFormat, err := format.FileNamingFormat(jr.Style, rpc.Name+"Logic")
@@ -389,7 +380,7 @@ func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]LogicFile, er
 				fp = filepath.Join(jr.Wd, "internal", "logic", strings.ToLower(logicDir), namingFormat+".go")
 			}
 
-			f := LogicFile{
+			f := genapi.LogicFile{
 				Path:             fp,
 				Package:          protoSpec.PbPackage,
 				Handler:          rpc.Name,
@@ -585,7 +576,7 @@ func (jr *JzeroRpc) removeServerSuffix(fp string) error {
 	return nil
 }
 
-func (jr *JzeroRpc) changeLogicTypes(file LogicFile) error {
+func (jr *JzeroRpc) changeLogicTypes(file genapi.LogicFile) error {
 	fp := file.Path // logic file path
 	if jr.RemoveSuffix {
 		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
@@ -714,7 +705,7 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 
 		for _, service := range descriptorProto.GetService() {
 			for _, method := range service.GetMethod() {
-				methodUrls = append(methodUrls, getRpcMethodUrl(method))
+				methodUrls = append(methodUrls, jzerodesc.GetRpcMethodUrl(method))
 				fullMethods = append(fullMethods, fmt.Sprintf("/%s.%s/%s", fd.GetPackage(), service.GetName(), method.GetName()))
 
 				httpExt := proto.GetExtension(method.GetOptions(), jzeroapi.E_Http)
@@ -724,10 +715,10 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 						split := strings.Split(strings.ReplaceAll(rule.Middleware, " ", ""), ",")
 						for _, m := range split {
 							if urls, ok := httpMapMiddlewares.Get(m); ok {
-								urls = append(urls.([]string), getRpcMethodUrl(method))
+								urls = append(urls.([]string), jzerodesc.GetRpcMethodUrl(method))
 								httpMapMiddlewares.Set(m, urls)
 							} else {
-								httpMapMiddlewares.Set(m, []string{getRpcMethodUrl(method)})
+								httpMapMiddlewares.Set(m, []string{jzerodesc.GetRpcMethodUrl(method)})
 							}
 						}
 					}

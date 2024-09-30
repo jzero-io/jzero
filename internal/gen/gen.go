@@ -7,6 +7,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/pkg/desc"
+
+	"github.com/jzero-io/jzero/internal/gen/genapi"
+	"github.com/jzero-io/jzero/internal/gen/genrpc"
+	"github.com/jzero-io/jzero/internal/gen/gensql"
+
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -38,7 +44,7 @@ func Gen(c config.Config) error {
 		RemoveExtraFiles(c.Wd(), c.Gen.Style)
 	}()
 
-	jzeroRpc := JzeroRpc{
+	jzeroRpc := genrpc.JzeroRpc{
 		Wd:               c.Wd(),
 		Module:           module,
 		Style:            c.Gen.Style,
@@ -51,7 +57,7 @@ func Gen(c config.Config) error {
 		return err
 	}
 
-	jzeroApi := JzeroApi{
+	jzeroApi := genapi.JzeroApi{
 		Wd:                 c.Wd(),
 		Module:             module,
 		Style:              c.Gen.Style,
@@ -67,7 +73,7 @@ func Gen(c config.Config) error {
 		return err
 	}
 
-	jzeroSql := JzeroSql{
+	jzeroSql := gensql.JzeroSql{
 		Wd:                        c.Wd(),
 		Style:                     c.Gen.Style,
 		ModelStrict:               c.Gen.ModelMysqlStrict,
@@ -99,7 +105,7 @@ func RemoveExtraFiles(wd, style string) {
 	}
 
 	if pathx.FileExists(filepath.Join("desc", "proto")) {
-		protoFilenames, err := GetProtoFilepath(filepath.Join("desc", "proto"))
+		protoFilenames, err := desc.GetProtoFilepath(filepath.Join("desc", "proto"))
 		if err == nil {
 			for _, v := range protoFilenames {
 				v = filepath.Base(v)
@@ -117,7 +123,7 @@ func RemoveExtraFiles(wd, style string) {
 
 // getApiFrameMainGoFilename: goctl/api/gogen/genmain.go
 func getApiFrameMainGoFilename(wd, style string) string {
-	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
+	serviceName := desc.GetApiServiceName(filepath.Join(wd, "desc", "api"))
 	serviceName = strings.ToLower(serviceName)
 	filename, err := format.FileNamingFormat(style, serviceName)
 	if err != nil {
@@ -132,7 +138,7 @@ func getApiFrameMainGoFilename(wd, style string) string {
 
 // getApiFrameEtcFilename: goctl/api/gogen/genetc.go
 func getApiFrameEtcFilename(wd, style string) string {
-	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
+	serviceName := desc.GetApiServiceName(filepath.Join(wd, "desc", "api"))
 	filename, err := format.FileNamingFormat(style, serviceName)
 	if err != nil {
 		return ""

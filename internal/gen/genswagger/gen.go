@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/pkg/desc"
+
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -15,7 +17,6 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/internal/gen"
 )
 
 func Gen(c config.Config) error {
@@ -27,7 +28,7 @@ func Gen(c config.Config) error {
 		}
 
 		// gen swagger by desc/api
-		files, err := gen.FindRouteApiFiles(c.Gen.Swagger.ApiDir)
+		files, err := desc.FindRouteApiFiles(c.Gen.Swagger.ApiDir)
 		if err != nil {
 			return err
 		}
@@ -64,7 +65,7 @@ func Gen(c config.Config) error {
 
 	if pathx.FileExists(c.Gen.Swagger.ProtoDir) {
 		_ = os.MkdirAll(c.Gen.Swagger.Output, 0o755)
-		protoFilepath, err := gen.GetProtoFilepath(c.Gen.Swagger.ProtoDir)
+		protoFilepath, err := desc.GetProtoFilepath(c.Gen.Swagger.ProtoDir)
 		if err != nil {
 			return err
 		}
