@@ -1,4 +1,4 @@
-package gensql
+package genmodel
 
 import (
 	"bytes"
@@ -25,7 +25,7 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/pkg/gitdiff"
+	"github.com/jzero-io/jzero/pkg/gitstatus"
 )
 
 type JzeroSql struct {
@@ -39,7 +39,7 @@ type JzeroSql struct {
 	ModelMysqlDatasourceTable []string
 	ModelMysqlCache           bool
 	ModelMysqlCachePrefix     string
-	ModelGitDiff              bool
+	GitDiff                   bool
 	ModelGitDiffPath          string
 }
 
@@ -70,19 +70,14 @@ func (js *JzeroSql) Gen() error {
 		if err != nil {
 			return err
 		}
-		if js.ModelGitDiff {
+		if js.GitDiff {
 			var changesTables []string
 			var files []string
-			addedFiles, err := gitdiff.GetAddedFiles(js.ModelGitDiffPath)
+			m, _, err := gitstatus.ChangedFiles(js.ModelGitDiffPath, "")
 			if err != nil {
 				return err
 			}
-			files = append(files, addedFiles...)
-			changedFiles, err := gitdiff.GetChangedFiles(js.ModelGitDiffPath)
-			if err != nil {
-				return err
-			}
-			files = append(files, changedFiles...)
+			files = append(files, m...)
 
 			for _, v := range files {
 				changesTables = append(changesTables, getTableName(v)...)

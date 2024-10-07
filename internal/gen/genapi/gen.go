@@ -22,7 +22,7 @@ import (
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/desc"
-	"github.com/jzero-io/jzero/pkg/gitdiff"
+	"github.com/jzero-io/jzero/pkg/gitstatus"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -33,7 +33,7 @@ type JzeroApi struct {
 	RemoveSuffix       bool
 	ChangeReplaceTypes bool
 	RegenApiHandler    bool
-	ApiGitDiff         bool
+	GitDiff            bool
 	ApiGitDiffPath     string
 	SplitApiTypesDir   bool
 
@@ -92,21 +92,13 @@ func (ja *JzeroApi) Gen() error {
 	}
 
 	var genCodeApiFiles []string
-	if ja.ApiGitDiff {
-		files, err := gitdiff.GetChangedFiles(ja.ApiGitDiffPath)
+	if ja.GitDiff {
+		m, _, err := gitstatus.ChangedFiles(ja.ApiGitDiffPath, ".api")
 		if err == nil {
 			// 获取变动的 api 文件
-			genCodeApiFiles = append(genCodeApiFiles, files...)
-			for _, file := range files {
+			genCodeApiFiles = append(genCodeApiFiles, m...)
+			for _, file := range m {
 				ja.GenCodeApiSpecMap[file] = ja.ApiSpecMap[file]
-			}
-		}
-		// 获取新增的 api 文件
-		files, err = gitdiff.GetAddedFiles(ja.ApiGitDiffPath)
-		if err == nil {
-			for _, f := range files {
-				genCodeApiFiles = append(genCodeApiFiles, f)
-				ja.GenCodeApiSpecMap[f] = ja.ApiSpecMap[f]
 			}
 		}
 	} else {

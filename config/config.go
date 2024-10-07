@@ -69,10 +69,9 @@ type GenConfig struct {
 	ChangeLogicTypes bool   `mapstructure:"change-logic-types"`
 	RemoveSuffix     bool   `mapstructure:"remove-suffix"`
 	RegenApiHandler  bool   `mapstructure:"regen-api-handler"`
-	ApiGitDiff       bool   `mapstructure:"api-git-diff"`
+	GitDiff          bool   `mapstructure:"git-diff"`
 	ApiGitDiffPath   string `mapstructure:"api-git-diff-path"`
 	RpcStylePatch    bool   `mapstructure:"rpc-style-patch"`
-	ModelGitDiff     bool   `mapstructure:"model-git-diff"`
 	ModelGitDiffPath string `mapstructure:"model-git-diff-path"`
 
 	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`

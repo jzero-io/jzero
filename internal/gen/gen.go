@@ -13,8 +13,8 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/gen/genapi"
+	"github.com/jzero-io/jzero/internal/gen/genmodel"
 	"github.com/jzero-io/jzero/internal/gen/genrpc"
-	"github.com/jzero-io/jzero/internal/gen/gensql"
 	"github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/mod"
 )
@@ -61,7 +61,7 @@ func Gen(c config.Config) error {
 		ChangeReplaceTypes: c.Gen.ChangeLogicTypes,
 		RegenApiHandler:    c.Gen.RegenApiHandler,
 		SplitApiTypesDir:   c.Gen.SplitApiTypesDir,
-		ApiGitDiff:         c.Gen.ApiGitDiff,
+		GitDiff:            c.Gen.GitDiff,
 		ApiGitDiffPath:     c.Gen.ApiGitDiffPath,
 	}
 	err = jzeroApi.Gen()
@@ -69,7 +69,7 @@ func Gen(c config.Config) error {
 		return err
 	}
 
-	jzeroSql := gensql.JzeroSql{
+	jzeroSql := genmodel.JzeroSql{
 		Wd:                        c.Wd(),
 		Style:                     c.Gen.Style,
 		ModelStrict:               c.Gen.ModelMysqlStrict,
@@ -79,7 +79,7 @@ func Gen(c config.Config) error {
 		ModelMysqlDatasourceTable: c.Gen.ModelMysqlDatasourceTable,
 		ModelMysqlCache:           c.Gen.ModelMysqlCache,
 		ModelMysqlCachePrefix:     c.Gen.ModelMysqlCachePrefix,
-		ModelGitDiff:              c.Gen.ModelGitDiff,
+		GitDiff:                   c.Gen.GitDiff,
 		ModelGitDiffPath:          c.Gen.ModelGitDiffPath,
 	}
 	err = jzeroSql.Gen()

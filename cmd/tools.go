@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jzero-io/jzero/pkg/gitdiff"
+	"github.com/jzero-io/jzero/pkg/gitstatus"
 )
 
 // toolsCmd represents the tools command
@@ -27,18 +27,12 @@ var toolsGitDiffCmd = &cobra.Command{
 			path = args[0]
 		}
 		var diffFiles []string
-		files, err := gitdiff.GetChangedFiles(path)
+		m, _, err := gitstatus.ChangedFiles(path, "")
 		if err != nil {
 			os.Exit(1)
 			return
 		}
-		diffFiles = append(diffFiles, files...)
-		addedFiles, err := gitdiff.GetAddedFiles(path)
-		if err != nil {
-			os.Exit(1)
-			return
-		}
-		diffFiles = append(diffFiles, addedFiles...)
+		diffFiles = append(diffFiles, m...)
 		if len(diffFiles) > 0 {
 			os.Exit(1)
 			return
