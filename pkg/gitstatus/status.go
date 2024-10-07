@@ -17,7 +17,7 @@ func GetDeletedFileContent(path string) (string, error) {
 	return string(output), nil
 }
 
-func ChangedFiles(path string, ext string) ([]string, []string, error) {
+func ChangedFiles(path, ext string) ([]string, []string, error) {
 	var m []string
 	var d []string
 
