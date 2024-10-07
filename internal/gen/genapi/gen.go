@@ -238,8 +238,11 @@ func (ja *JzeroApi) generateApiCode() error {
 			eg.Go(func() error {
 				dir := "."
 				fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), cv)
-				// todo: 偶发的文件多线程写的 bug
 				_ = os.Remove(filepath.Join("internal", "types", "types.go"))
+				filename := desc.GetApiFrameEtcFilename(ja.Wd, ja.Style)
+				if filename != "etc.yaml" {
+					_ = os.Remove(filepath.Join("etc", filename))
+				}
 				command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", cv, dir, goctlHome, ja.Style)
 				logx.Debugf("command: %s", command)
 				if _, err := execx.Run(command, ja.Wd); err != nil {

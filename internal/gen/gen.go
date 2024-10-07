@@ -5,12 +5,10 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/config"
@@ -94,13 +92,15 @@ func Gen(c config.Config) error {
 
 func RemoveExtraFiles(wd, style string) {
 	if pathx.FileExists(filepath.Join("desc", "api")) {
-		if getApiFrameMainGoFilename(wd, style) != "main.go" {
-			if err := os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd, style))); err != nil {
+		if desc.GetApiFrameMainGoFilename(wd, style) != "main.go" {
+			if err := os.Remove(filepath.Join(wd, desc.GetApiFrameMainGoFilename(wd, style))); err != nil {
 				logx.Debugf("remove api frame main go file error: %s", err.Error())
 			}
 		}
-		if err := os.Remove(filepath.Join(wd, "etc", getApiFrameEtcFilename(wd, style))); err != nil {
-			logx.Debugf("remove api etc file error: %s", err.Error())
+		if desc.GetApiFrameEtcFilename(wd, style) != "etc.yaml" {
+			if err := os.Remove(filepath.Join(wd, "etc", desc.GetApiFrameEtcFilename(wd, style))); err != nil {
+				logx.Debugf("remove api etc file error: %s", err.Error())
+			}
 		}
 	}
 
@@ -110,58 +110,17 @@ func RemoveExtraFiles(wd, style string) {
 			for _, v := range protoFilenames {
 				v = filepath.Base(v)
 				fileBase := v[0 : len(v)-len(path.Ext(v))]
-				if getProtoFrameMainGoFilename(fileBase, style) != "main.go" {
-					if err = os.Remove(filepath.Join(wd, getProtoFrameMainGoFilename(fileBase, style))); err != nil {
+				if desc.GetProtoFrameMainGoFilename(fileBase, style) != "main.go" {
+					if err = os.Remove(filepath.Join(wd, desc.GetProtoFrameMainGoFilename(fileBase, style))); err != nil {
 						logx.Debugf("remove proto frame main go file error: %s", err.Error())
 					}
 				}
-				if err = os.Remove(filepath.Join(wd, "etc", getProtoFrameEtcFilename(fileBase, style))); err != nil {
-					logx.Debugf("remove proto etc file error: %s", err.Error())
+				if desc.GetProtoFrameEtcFilename(fileBase, style) != "etc.yaml" {
+					if err = os.Remove(filepath.Join(wd, "etc", desc.GetProtoFrameEtcFilename(fileBase, style))); err != nil {
+						logx.Debugf("remove proto etc file error: %s", err.Error())
+					}
 				}
 			}
 		}
 	}
-}
-
-// getApiFrameMainGoFilename: goctl/api/gogen/genmain.go
-func getApiFrameMainGoFilename(wd, style string) string {
-	serviceName := desc.GetApiServiceName(filepath.Join(wd, "desc", "api"))
-	serviceName = strings.ToLower(serviceName)
-	filename, err := format.FileNamingFormat(style, serviceName)
-	if err != nil {
-		return ""
-	}
-
-	if strings.HasSuffix(filename, "-api") {
-		filename = strings.ReplaceAll(filename, "-api", "")
-	}
-	return filename + ".go"
-}
-
-// getApiFrameEtcFilename: goctl/api/gogen/genetc.go
-func getApiFrameEtcFilename(wd, style string) string {
-	serviceName := desc.GetApiServiceName(filepath.Join(wd, "desc", "api"))
-	filename, err := format.FileNamingFormat(style, serviceName)
-	if err != nil {
-		return ""
-	}
-	return filename + ".yaml"
-}
-
-// getProtoFrameMainGoFilename: goctl/rpc/generator/genmain.go
-func getProtoFrameMainGoFilename(source, style string) string {
-	filename, err := format.FileNamingFormat(style, source)
-	if err != nil {
-		return ""
-	}
-	return filename + ".go"
-}
-
-// getProtoFrameEtcFilename: goctl/rpc/generator/genetc.go
-func getProtoFrameEtcFilename(source, style string) string {
-	filename, err := format.FileNamingFormat(style, source)
-	if err != nil {
-		return ""
-	}
-	return filename + ".yaml"
 }

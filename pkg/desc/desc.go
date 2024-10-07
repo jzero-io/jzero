@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
+	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
@@ -228,4 +229,47 @@ func FindRouteApiFiles(dir string) ([]string, error) {
 	}
 
 	return apiFiles, nil
+}
+
+// GetApiFrameMainGoFilename goctl/api/gogen/genmain.go
+func GetApiFrameMainGoFilename(wd, style string) string {
+	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
+	serviceName = strings.ToLower(serviceName)
+	filename, err := format.FileNamingFormat(style, serviceName)
+	if err != nil {
+		return ""
+	}
+
+	if strings.HasSuffix(filename, "-api") {
+		filename = strings.ReplaceAll(filename, "-api", "")
+	}
+	return filename + ".go"
+}
+
+// GetApiFrameEtcFilename goctl/api/gogen/genetc.go
+func GetApiFrameEtcFilename(wd, style string) string {
+	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
+	filename, err := format.FileNamingFormat(style, serviceName)
+	if err != nil {
+		return ""
+	}
+	return filename + ".yaml"
+}
+
+// GetProtoFrameMainGoFilename goctl/rpc/generator/genmain.go
+func GetProtoFrameMainGoFilename(source, style string) string {
+	filename, err := format.FileNamingFormat(style, source)
+	if err != nil {
+		return ""
+	}
+	return filename + ".go"
+}
+
+// GetProtoFrameEtcFilename goctl/rpc/generator/genetc.go
+func GetProtoFrameEtcFilename(source, style string) string {
+	filename, err := format.FileNamingFormat(style, source)
+	if err != nil {
+		return ""
+	}
+	return filename + ".yaml"
 }
