@@ -46,22 +46,17 @@ func (t *Typescript) Gen() ([]*GeneratedFile, error) {
 	var apiSpecs []*spec.ApiSpec
 
 	if pathx.FileExists(t.config.ApiDir) {
-		mainApiFilePath, isDelete, err := jzerodesc.GetMainApiFilePath(t.config.ApiDir)
-		if isDelete {
-			defer os.Remove(mainApiFilePath)
-		}
+		files, err := jzerodesc.FindApiFiles(t.config.ApiDir)
 		if err != nil {
 			return nil, err
 		}
-		apiSpec, err := apiparser.Parse(mainApiFilePath)
-		if err != nil {
-			return nil, err
+		for _, v := range files {
+			apiSpec, err := apiparser.Parse(v)
+			if err != nil {
+				return nil, err
+			}
+			apiSpecs = append(apiSpecs, apiSpec)
 		}
-		if mainApiFilePath != filepath.Join(t.config.ApiDir, "main.api") {
-			os.Remove(mainApiFilePath)
-		}
-
-		apiSpecs = append(apiSpecs, apiSpec)
 	}
 
 	protoFiles, err := jzerodesc.GetProtoFilepath(t.config.ProtoDir)

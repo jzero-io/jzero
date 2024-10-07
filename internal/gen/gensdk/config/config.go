@@ -1,14 +1,9 @@
 package config
 
+import "github.com/jzero-io/jzero/config"
+
 type Config struct {
-	Language     string
-	Scope        string
-	GenModule    bool
-	GoVersion    string
-	GoPackage    string
-	GoModule     string
-	Output       string
-	ApiDir       string
-	ProtoDir     string
-	WrapResponse bool
+	GenModule bool
+	config.GenConfig
+	config.GenSdkConfig
 }

@@ -128,6 +128,11 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 						Type:         "api",
 						FullName:     fmt.Sprintf("param %s.%s", "types", stringx.FirstUpper(route.RequestType.Name())),
 					}
+					if config.SplitApiTypesDir {
+						httpInterface.Request.Package = apiSpec.Info.Properties["go_package"]
+						httpInterface.Request.FullName = fmt.Sprintf("param %s.%s", strings.ToLower(strings.ReplaceAll(apiSpec.Info.Properties["go_package"], "/", "")), stringx.FirstUpper(route.RequestType.Name()))
+					}
+
 					if strings.ToUpper(route.Method) == http.MethodPost || strings.ToUpper(route.Method) == http.MethodPut || strings.ToUpper(route.Method) == http.MethodPatch {
 						httpInterface.Request.Body = "*"
 					}
@@ -138,8 +143,11 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 
 				if route.ResponseType != nil {
 					httpInterface.Response = &vars.Response{
-						FullName: BuildApiResponseFullName(route.ResponseType),
+						FullName: BuildApiResponseFullName(apiSpec, route.ResponseType, config.SplitApiTypesDir),
 						Package:  "types",
+					}
+					if config.SplitApiTypesDir {
+						httpInterface.Response.Package = apiSpec.Info.Properties["go_package"]
 					}
 				} else {
 					httpInterface.IsStreamServer = true
@@ -164,7 +172,7 @@ func BuildProtoResponseFullName(goPackage, responseTypeName string) string {
 	return fmt.Sprintf("*%s.%s", filepath.Base(goPackage), responseTypeName)
 }
 
-func BuildApiResponseFullName(t spec.Type) string {
+func BuildApiResponseFullName(apiSpec *spec.ApiSpec, t spec.Type, splitApiTypesDir bool) string {
 	switch v := t.(type) {
 	case spec.PrimitiveType:
 		return "*" + t.Name()
@@ -172,8 +180,14 @@ func BuildApiResponseFullName(t spec.Type) string {
 		if _, ok := v.Value.(spec.PrimitiveType); ok {
 			return t.Name()
 		}
+		if splitApiTypesDir {
+			return fmt.Sprintf("[]*%s.%s", strings.ToLower(strings.ReplaceAll(apiSpec.Info.Properties["go_package"], "/", "")), strings.TrimPrefix(t.Name(), "[]"))
+		}
 		return fmt.Sprintf("[]*types.%s", strings.TrimPrefix(t.Name(), "[]"))
 	default:
+		if splitApiTypesDir {
+			return fmt.Sprintf("*%s.%s", strings.ToLower(strings.ReplaceAll(apiSpec.Info.Properties["go_package"], "/", "")), stringx.FirstUpper(t.Name()))
+		}
 		return fmt.Sprintf("*types.%s", stringx.FirstUpper(strings.TrimPrefix(t.Name(), "*")))
 	}
 }

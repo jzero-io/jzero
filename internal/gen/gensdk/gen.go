@@ -19,16 +19,9 @@ func GenSdk(c config.Config, genModule bool) error {
 	}
 
 	gc := gensdkconfig.Config{
-		Language:     c.Gen.Sdk.Language,
-		Scope:        c.Gen.Sdk.Scope,
+		GenConfig:    c.Gen,
+		GenSdkConfig: c.Gen.Sdk,
 		GenModule:    genModule,
-		GoVersion:    c.Gen.Sdk.GoVersion,
-		GoModule:     c.Gen.Sdk.GoModule,
-		GoPackage:    c.Gen.Sdk.GoPackage,
-		Output:       c.Gen.Sdk.Output,
-		ApiDir:       c.Gen.Sdk.ApiDir,
-		ProtoDir:     c.Gen.Sdk.ProtoDir,
-		WrapResponse: c.Gen.Sdk.WrapResponse,
 	}
 
 	gen, err := generator.New(gc)

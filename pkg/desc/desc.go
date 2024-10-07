@@ -1,7 +1,6 @@
 package desc
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -76,52 +75,6 @@ func protoHasService(fp string) (bool, error) {
 		return false, err
 	}
 	return len(parse.Service) > 0, nil
-}
-
-func GetMainApiFilePath(apiDirName string) (string, bool, error) {
-	apiDir, err := os.ReadDir(apiDirName)
-	if err != nil {
-		return "", false, err
-	}
-
-	var mainApiFilePath string
-	var isDelete bool
-
-	for _, file := range apiDir {
-		if file.Name() == "main.api" {
-			mainApiFilePath = filepath.Join(apiDirName, file.Name())
-			isDelete = false
-			break
-		}
-	}
-
-	if mainApiFilePath == "" {
-		apiFilePath, err := getApiFileRelPath(apiDirName)
-		if err != nil {
-			return "", false, err
-		}
-		sb := strings.Builder{}
-		sb.WriteString("syntax = \"v1\"")
-		sb.WriteString("\n")
-
-		for _, api := range apiFilePath {
-			sb.WriteString(fmt.Sprintf("import \"%s\"\n", api))
-		}
-
-		f, err := os.CreateTemp(apiDirName, "*.api")
-		if err != nil {
-			return "", false, err
-		}
-
-		_, err = f.WriteString(sb.String())
-		if err != nil {
-			return f.Name(), true, err
-		}
-		mainApiFilePath = f.Name()
-		isDelete = true
-		f.Close()
-	}
-	return mainApiFilePath, isDelete, nil
 }
 
 func GetApiServiceName(apiDirName string) string {
