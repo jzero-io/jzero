@@ -7,8 +7,9 @@ package cmd
 import (
 	"os"
 
-	"github.com/jzero-io/jzero/pkg/gitdiff"
 	"github.com/spf13/cobra"
+
+	"github.com/jzero-io/jzero/pkg/gitdiff"
 )
 
 // toolsCmd represents the tools command
