@@ -41,12 +41,9 @@ func Gen(c config.Config) error {
 	}()
 
 	jzeroRpc := genrpc.JzeroRpc{
-		Wd:               c.Wd(),
-		Module:           module,
-		Style:            c.Gen.Style,
-		RemoveSuffix:     c.Gen.RemoveSuffix,
-		ChangeLogicTypes: c.Gen.ChangeLogicTypes,
-		RpcStylePatch:    c.Gen.RpcStylePatch,
+		Wd:        c.Wd(),
+		Module:    module,
+		GenConfig: c.Gen,
 	}
 	err = jzeroRpc.Gen()
 	if err != nil {
@@ -54,15 +51,9 @@ func Gen(c config.Config) error {
 	}
 
 	jzeroApi := genapi.JzeroApi{
-		Wd:                 c.Wd(),
-		Module:             module,
-		Style:              c.Gen.Style,
-		RemoveSuffix:       c.Gen.RemoveSuffix,
-		ChangeReplaceTypes: c.Gen.ChangeLogicTypes,
-		RegenApiHandler:    c.Gen.RegenApiHandler,
-		SplitApiTypesDir:   c.Gen.SplitApiTypesDir,
-		GitDiff:            c.Gen.GitDiff,
-		ApiGitDiffPath:     c.Gen.ApiGitDiffPath,
+		Wd:        c.Wd(),
+		Module:    module,
+		GenConfig: c.Gen,
 	}
 	err = jzeroApi.Gen()
 	if err != nil {
@@ -70,17 +61,9 @@ func Gen(c config.Config) error {
 	}
 
 	jzeroSql := genmodel.JzeroSql{
-		Wd:                        c.Wd(),
-		Style:                     c.Gen.Style,
-		ModelStrict:               c.Gen.ModelMysqlStrict,
-		ModelIgnoreColumns:        c.Gen.ModelMysqlIgnoreColumns,
-		ModelMysqlDatasource:      c.Gen.ModelMysqlDatasource,
-		ModelMysqlDatasourceUrl:   c.Gen.ModelMysqlDatasourceUrl,
-		ModelMysqlDatasourceTable: c.Gen.ModelMysqlDatasourceTable,
-		ModelMysqlCache:           c.Gen.ModelMysqlCache,
-		ModelMysqlCachePrefix:     c.Gen.ModelMysqlCachePrefix,
-		GitDiff:                   c.Gen.GitDiff,
-		ModelGitDiffPath:          c.Gen.ModelGitDiffPath,
+		Wd:        c.Wd(),
+		Style:     c.Gen.Style,
+		GenConfig: c.Gen,
 	}
 	err = jzeroSql.Gen()
 	if err != nil {

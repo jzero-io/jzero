@@ -31,16 +31,7 @@ import (
 type JzeroSql struct {
 	Wd    string
 	Style string
-
-	ModelStrict               bool
-	ModelIgnoreColumns        []string
-	ModelMysqlDatasource      bool
-	ModelMysqlDatasourceUrl   string
-	ModelMysqlDatasourceTable []string
-	ModelMysqlCache           bool
-	ModelMysqlCachePrefix     string
-	GitDiff                   bool
-	ModelGitDiffPath          string
+	config.GenConfig
 }
 
 func (js *JzeroSql) Gen() error {
@@ -92,7 +83,7 @@ func (js *JzeroSql) Gen() error {
 		}, func(table string) {
 			fmt.Printf("%s table %s\n", color.WithColor("Using", color.FgGreen), table)
 
-			cmd := exec.Command("goctl", "model", "mysql", "datasource", "--url", js.ModelMysqlDatasourceUrl, "--table", table, "--dir", filepath.Join(dir, "internal", "model", strings.ToLower(table)), "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelStrict))
+			cmd := exec.Command("goctl", "model", "mysql", "datasource", "--url", js.ModelMysqlDatasourceUrl, "--table", table, "--dir", filepath.Join(dir, "internal", "model", strings.ToLower(table)), "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelMysqlIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelMysqlStrict))
 			resp, err := cmd.CombinedOutput()
 			if err != nil {
 				console.Warning("[warning]: %s:%s", err.Error(), resp)
@@ -129,7 +120,7 @@ func (js *JzeroSql) Gen() error {
 				}
 
 				modelDir := filepath.Join(dir, "internal", "model", strings.ToLower(f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))]))
-				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--src", filepath.Join(dir, "desc", "sql", f.Name()), "--dir", modelDir, "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelStrict))
+				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--src", filepath.Join(dir, "desc", "sql", f.Name()), "--dir", modelDir, "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelMysqlIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelMysqlStrict))
 				resp, err := cmd.CombinedOutput()
 				if err != nil {
 					console.Warning("[warning]: %s:%s", err.Error(), resp)

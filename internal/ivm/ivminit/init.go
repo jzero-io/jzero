@@ -90,11 +90,9 @@ func Init(ic config.IvmConfig) error {
 	}
 
 	jzeroRpc := genrpc.JzeroRpc{
-		Wd:               wd,
-		Module:           moduleStruct.Path,
-		Style:            ic.Init.Style,
-		RemoveSuffix:     ic.Init.RemoveSuffix,
-		ChangeLogicTypes: ic.Init.ChangeLogicTypes,
+		Wd:        wd,
+		Module:    moduleStruct.Path,
+		GenConfig: config.C.Gen,
 	}
 	ivmInit.jzeroRpc = jzeroRpc
 	err = ivmInit.gen()

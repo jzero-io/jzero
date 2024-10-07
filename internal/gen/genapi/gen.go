@@ -27,15 +27,10 @@ import (
 )
 
 type JzeroApi struct {
-	Wd                 string
-	Module             string
-	Style              string
-	RemoveSuffix       bool
-	ChangeReplaceTypes bool
-	RegenApiHandler    bool
-	GitDiff            bool
-	ApiGitDiffPath     string
-	SplitApiTypesDir   bool
+	Wd     string
+	Module string
+
+	config.GenConfig
 
 	ApiFiles          []string
 	GenCodeApiFiles   []string
@@ -132,7 +127,7 @@ func (ja *JzeroApi) Gen() error {
 	}
 
 	// 自动替换 logic 层的 request 和 response name
-	if ja.ChangeReplaceTypes {
+	if ja.ChangeLogicTypes {
 		for _, file := range allLogicFiles {
 			if _, ok := ja.GenCodeApiSpecMap[file.ApiFilepath]; ok {
 				if err := ja.changeLogicTypes(file); err != nil {

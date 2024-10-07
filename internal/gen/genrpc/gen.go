@@ -14,6 +14,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen/genapi"
 	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
@@ -21,12 +22,9 @@ import (
 )
 
 type JzeroRpc struct {
-	Wd               string
-	Module           string
-	Style            string
-	RemoveSuffix     bool
-	ChangeLogicTypes bool
-	RpcStylePatch    bool
+	Wd     string
+	Module string
+	config.GenConfig
 }
 
 func (jr *JzeroRpc) Gen() error {
