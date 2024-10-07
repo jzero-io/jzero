@@ -258,6 +258,8 @@ func init() {
 		genCmd.Flags().StringP("api-git-diff-path", "", filepath.Join("desc", "api"), "set api git diff path")
 		genCmd.Flags().StringP("model-git-diff-path", "", filepath.Join("desc", "sql"), "set model git diff path")
 
+		genCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
+
 		// used for goctl
 		// gen command persistentFlags
 		genCmd.PersistentFlags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")

@@ -23,6 +23,7 @@ import (
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/gitstatus"
+	"github.com/jzero-io/jzero/pkg/osx"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -87,7 +88,10 @@ func (ja *JzeroApi) Gen() error {
 	}
 
 	var genCodeApiFiles []string
-	if ja.GitDiff {
+
+	switch {
+	case ja.GitDiff && len(ja.Desc) == 0:
+		// 从 git status 获取变动的文件生成
 		m, _, err := gitstatus.ChangedFiles(ja.ApiGitDiffPath, ".api")
 		if err == nil {
 			// 获取变动的 api 文件
@@ -96,7 +100,25 @@ func (ja *JzeroApi) Gen() error {
 				ja.GenCodeApiSpecMap[file] = ja.ApiSpecMap[file]
 			}
 		}
-	} else {
+	case len(ja.Desc) > 0:
+		// 从指定的 desc 文件夹或者文件生成
+		for _, v := range ja.Desc {
+			if !osx.IsDir(v) {
+				if filepath.Ext(v) == ".api" {
+					genCodeApiFiles = append(genCodeApiFiles, filepath.Join(strings.Split(filepath.ToSlash(v), "/")...))
+				}
+			} else {
+				specifiedApiFiles, err := desc.FindApiFiles(v)
+				if err != nil {
+					return err
+				}
+				genCodeApiFiles = append(genCodeApiFiles, specifiedApiFiles...)
+				for _, saf := range specifiedApiFiles {
+					ja.GenCodeApiSpecMap[saf] = ja.ApiSpecMap[saf]
+				}
+			}
+		}
+	default:
 		// 否则就是全量的 api 文件
 		genCodeApiFiles = ja.ApiFiles
 		ja.GenCodeApiSpecMap = ja.ApiSpecMap

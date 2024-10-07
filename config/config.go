@@ -60,19 +60,26 @@ type GenConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
 	// global flags
-	Home string `mapstructure:"home"`
 
+	Home             string `mapstructure:"home"`
 	Style            string `mapstructure:"style"`
 	Branch           string `mapstructure:"branch"`
 	SplitApiTypesDir bool   `mapstructure:"split-api-types-dir"`
 
-	ChangeLogicTypes bool   `mapstructure:"change-logic-types"`
-	RemoveSuffix     bool   `mapstructure:"remove-suffix"`
-	RegenApiHandler  bool   `mapstructure:"regen-api-handler"`
+	// code style flags
+
+	ChangeLogicTypes bool `mapstructure:"change-logic-types"`
+	RpcStylePatch    bool `mapstructure:"rpc-style-patch"`
+	RemoveSuffix     bool `mapstructure:"remove-suffix"`
+	RegenApiHandler  bool `mapstructure:"regen-api-handler"`
+
+	// git flags
+
 	GitDiff          bool   `mapstructure:"git-diff"`
 	ApiGitDiffPath   string `mapstructure:"api-git-diff-path"`
-	RpcStylePatch    bool   `mapstructure:"rpc-style-patch"`
 	ModelGitDiffPath string `mapstructure:"model-git-diff-path"`
+
+	// model flags
 
 	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`
 	ModelMysqlIgnoreColumns   []string `mapstructure:"model-mysql-ignore-columns"`
@@ -81,6 +88,9 @@ type GenConfig struct {
 	ModelMysqlDatasourceTable []string `mapstructure:"model-mysql-datasource-table"`
 	ModelMysqlCache           bool     `mapstructure:"model-mysql-cache"`
 	ModelMysqlCachePrefix     string   `mapstructure:"model-mysql-cache-prefix"`
+
+	// gen code flags
+	Desc []string `mapstructure:"desc"`
 
 	Sdk        GenSdkConfig        `mapstructure:"sdk"`
 	Swagger    GenSwaggerConfig    `mapstructure:"swagger"`
