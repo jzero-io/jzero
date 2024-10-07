@@ -94,8 +94,10 @@ func Gen(c config.Config) error {
 
 func RemoveExtraFiles(wd, style string) {
 	if pathx.FileExists(filepath.Join("desc", "api")) {
-		if err := os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd, style))); err != nil {
-			logx.Debugf("remove api frame main go file error: %s", err.Error())
+		if getApiFrameMainGoFilename(wd, style) != "main.go" {
+			if err := os.Remove(filepath.Join(wd, getApiFrameMainGoFilename(wd, style))); err != nil {
+				logx.Debugf("remove api frame main go file error: %s", err.Error())
+			}
 		}
 		if err := os.Remove(filepath.Join(wd, "etc", getApiFrameEtcFilename(wd, style))); err != nil {
 			logx.Debugf("remove api etc file error: %s", err.Error())
@@ -108,8 +110,10 @@ func RemoveExtraFiles(wd, style string) {
 			for _, v := range protoFilenames {
 				v = filepath.Base(v)
 				fileBase := v[0 : len(v)-len(path.Ext(v))]
-				if err = os.Remove(filepath.Join(wd, getProtoFrameMainGoFilename(fileBase, style))); err != nil {
-					logx.Debugf("remove proto frame main go file error: %s", err.Error())
+				if getProtoFrameMainGoFilename(fileBase, style) != "main.go" {
+					if err = os.Remove(filepath.Join(wd, getProtoFrameMainGoFilename(fileBase, style))); err != nil {
+						logx.Debugf("remove proto frame main go file error: %s", err.Error())
+					}
 				}
 				if err = os.Remove(filepath.Join(wd, "etc", getProtoFrameEtcFilename(fileBase, style))); err != nil {
 					logx.Debugf("remove proto etc file error: %s", err.Error())
