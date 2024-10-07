@@ -254,10 +254,9 @@ func init() {
 		// fix rpc style
 		genCmd.Flags().BoolP("rpc-style-patch", "", false, "")
 		// git-diff
-		genCmd.Flags().BoolP("api-git-diff", "", false, "set is api git diff, if changes then generate api code")
-		genCmd.Flags().StringP("api-git-diff-path", "", filepath.Join("desc", "api"), "set api git diff path, if changes then generate api code")
-		genCmd.Flags().BoolP("model-git-diff", "", false, "set is model git diff, if changes then generate model code")
-		genCmd.Flags().StringP("model-git-diff-path", "", filepath.Join("desc", "sql"), "set model git diff path, if changes then generate model code")
+		genCmd.Flags().BoolP("git-diff", "", false, "set is git diff, if changes then generate code")
+		genCmd.Flags().StringP("api-git-diff-path", "", filepath.Join("desc", "api"), "set api git diff path")
+		genCmd.Flags().StringP("model-git-diff-path", "", filepath.Join("desc", "sql"), "set model git diff path")
 
 		// used for goctl
 		// gen command persistentFlags
