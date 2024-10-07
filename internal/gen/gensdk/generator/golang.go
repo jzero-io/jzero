@@ -57,13 +57,15 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 			return nil, err
 		}
 
+		if isDelete {
+			defer func() {
+				_ = os.Remove(mainApiFilePath)
+			}()
+		}
+
 		apiSpec, err := apiparser.Parse(mainApiFilePath)
 		if err != nil {
 			return nil, err
-		}
-
-		if isDelete {
-			_ = os.Remove(mainApiFilePath)
 		}
 
 		apiSpecs = append(apiSpecs, apiSpec)
