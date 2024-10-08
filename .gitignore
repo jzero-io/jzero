@@ -1,12 +1,6 @@
-tools
 .vscode
 .idea
-filedata
 dist
-*.sock
 node_modules
-web
 docs/package-lock.json
-logs
 /jzero
-!.template/jzero
