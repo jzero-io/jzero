@@ -15,6 +15,7 @@
 ![Static Badge](https://img.shields.io/badge/Latest_New_Feature-blue?style=for-the-badge)
 
 * 将 jzero 应用部署在 [Vercel](https://vercel.com), [模板仓库分支](https://github.com/jzero-io/templates/tree/api-vercel), [代码示例](https://github.com/jaronnie/go-serverless-vercel)
+* 基于 git change 生成代码, 极大提升大型项目开发体验
 
 中文 | [ENGLISH](README-EN.md)
 
