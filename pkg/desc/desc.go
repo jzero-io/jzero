@@ -132,8 +132,8 @@ func getApiFileRelPath(apiDirName string) ([]string, error) {
 	return apiFiles, nil
 }
 
-func FindApiFiles(dir string) ([]string, error) {
-	var apiFiles []string
+func findDescFiles(dir, descExt string) ([]string, error) {
+	var descFiles []string
 
 	files, err := os.ReadDir(dir)
 	if err != nil {
@@ -142,46 +142,43 @@ func FindApiFiles(dir string) ([]string, error) {
 
 	for _, file := range files {
 		if file.IsDir() {
-			subFiles, err := FindApiFiles(filepath.Join(dir, file.Name()))
+			subFiles, err := findDescFiles(filepath.Join(dir, file.Name()), descExt)
 			if err != nil {
 				return nil, err
 			}
-			apiFiles = append(apiFiles, subFiles...)
-		} else if filepath.Ext(file.Name()) == ".api" {
-			apiFiles = append(apiFiles, filepath.Join(dir, file.Name()))
+			descFiles = append(descFiles, subFiles...)
+		} else if filepath.Ext(file.Name()) == descExt {
+			descFiles = append(descFiles, filepath.Join(dir, file.Name()))
 		}
 	}
 
-	return apiFiles, nil
+	return descFiles, nil
+}
+
+func FindApiFiles(dir string) ([]string, error) {
+	return findDescFiles(dir, ".api")
+}
+
+func FindSqlFiles(dir string) ([]string, error) {
+	return findDescFiles(dir, ".sql")
 }
 
 func FindRouteApiFiles(dir string) ([]string, error) {
-	var apiFiles []string
-
-	files, err := os.ReadDir(dir)
+	var routeFiles []string
+	files, err := findDescFiles(dir, ".api")
 	if err != nil {
 		return nil, err
 	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			subFiles, err := FindRouteApiFiles(filepath.Join(dir, file.Name()))
-			if err != nil {
-				return nil, err
-			}
-			apiFiles = append(apiFiles, subFiles...)
-		} else if filepath.Ext(file.Name()) == ".api" {
-			parse, err := parser.Parse(filepath.Join(dir, file.Name()), "")
-			if err != nil {
-				return nil, errors.Wrapf(err, "parse api: %s meet error", filepath.Join(dir, file.Name()))
-			}
-			if len(parse.Service.Routes()) > 0 {
-				apiFiles = append(apiFiles, filepath.Join(dir, file.Name()))
-			}
+	for _, f := range files {
+		parse, err := parser.Parse(f, "")
+		if err != nil {
+			return nil, errors.Errorf("parse api file: %s", f)
+		}
+		if len(parse.Service.Routes()) > 0 {
+			routeFiles = append(routeFiles, f)
 		}
 	}
-
-	return apiFiles, nil
+	return routeFiles, nil
 }
 
 // GetApiFrameMainGoFilename goctl/api/gogen/genmain.go

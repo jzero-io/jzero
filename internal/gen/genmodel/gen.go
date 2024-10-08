@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/mr"
@@ -25,7 +26,9 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
+	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/gitstatus"
+	"github.com/jzero-io/jzero/pkg/osx"
 )
 
 type JzeroSql struct {
@@ -35,7 +38,6 @@ type JzeroSql struct {
 }
 
 func (js *JzeroSql) Gen() error {
-	dir := "."
 	var goctlHome string
 
 	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "model")) {
@@ -56,7 +58,6 @@ func (js *JzeroSql) Gen() error {
 
 	if js.ModelMysqlDatasource {
 		fmt.Printf("%s to generate model code from url %s.\n", color.WithColor("Start", color.FgGreen), js.ModelMysqlDatasourceUrl)
-		// get tables from url
 		tables, err := getMysqlAllTables(js.ModelMysqlDatasourceUrl)
 		if err != nil {
 			return err
@@ -71,7 +72,7 @@ func (js *JzeroSql) Gen() error {
 			files = append(files, m...)
 
 			for _, v := range files {
-				changesTables = append(changesTables, getTableName(v)...)
+				changesTables = append(changesTables, getTableNameByGoMethod(v)...)
 			}
 			tables = changesTables
 		}
@@ -83,7 +84,7 @@ func (js *JzeroSql) Gen() error {
 		}, func(table string) {
 			fmt.Printf("%s table %s\n", color.WithColor("Using", color.FgGreen), table)
 
-			cmd := exec.Command("goctl", "model", "mysql", "datasource", "--url", js.ModelMysqlDatasourceUrl, "--table", table, "--dir", filepath.Join(dir, "internal", "model", strings.ToLower(table)), "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelMysqlIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelMysqlStrict))
+			cmd := exec.Command("goctl", "model", "mysql", "datasource", "--url", js.ModelMysqlDatasourceUrl, "--table", table, "--dir", filepath.Join("internal", "model", strings.ToLower(table)), "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelMysqlIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelMysqlStrict))
 			resp, err := cmd.CombinedOutput()
 			if err != nil {
 				console.Warning("[warning]: %s:%s", err.Error(), resp)
@@ -92,7 +93,7 @@ func (js *JzeroSql) Gen() error {
 
 			if js.ModelMysqlCachePrefix != "" && js.ModelMysqlCache {
 				namingFormat, _ := format.FileNamingFormat(table, js.Style)
-				err = js.addModelMysqlCachePrefix(filepath.Join(dir, "internal", "model", strings.ToLower(table), namingFormat+"model_gen.go"))
+				err = js.addModelMysqlCachePrefix(filepath.Join("internal", "model", strings.ToLower(table), namingFormat+"model_gen.go"))
 				if err != nil {
 					console.Warning("[warning]: %s", err.Error())
 					return
@@ -102,46 +103,76 @@ func (js *JzeroSql) Gen() error {
 		fmt.Println(color.WithColor("Done", color.FgGreen))
 		return nil
 	}
-	sqlDir := filepath.Join(js.Wd, "desc", "sql")
-	if f, err := os.Stat(sqlDir); err == nil && f.IsDir() {
-		fs, err := os.ReadDir(sqlDir)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("%s to generate model code.\n", color.WithColor("Start", color.FgGreen))
-		for _, f := range fs {
-			if !f.IsDir() && strings.HasSuffix(f.Name(), ".sql") {
-				sqlFilePath := filepath.Join(sqlDir, f.Name())
-				fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), sqlFilePath)
 
-				tables, err := parser.Parse(sqlFilePath, "", false)
+	sqlDir := filepath.Join(js.Wd, "desc", "sql")
+	if !pathx.FileExists(sqlDir) {
+		return nil
+	}
+
+	var (
+		files []string
+		err   error
+	)
+
+	switch {
+	case js.GitDiff && len(js.Desc) == 0:
+		m, _, err := gitstatus.ChangedFiles(js.ModelGitDiffPath, ".sql")
+		if err == nil {
+			files = append(files, m...)
+		}
+	case len(js.Desc) > 0:
+		for _, v := range js.Desc {
+			if !osx.IsDir(v) {
+				if filepath.Ext(v) == ".sql" {
+					files = append(files, v)
+				}
+			} else {
+				specifiedSqlFiles, err := jzerodesc.FindApiFiles(v)
 				if err != nil {
 					return err
 				}
+				files = append(files, specifiedSqlFiles...)
+			}
+		}
+	default:
+		files, err = jzerodesc.FindSqlFiles(sqlDir)
+		if err != nil {
+			return err
+		}
+	}
 
-				modelDir := filepath.Join(dir, "internal", "model", strings.ToLower(f.Name()[0:len(f.Name())-len(path.Ext(f.Name()))]))
-				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--src", filepath.Join(dir, "desc", "sql", f.Name()), "--dir", modelDir, "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelMysqlIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelMysqlStrict))
-				resp, err := cmd.CombinedOutput()
+	if len(files) == 0 {
+		return nil
+	}
+
+	fmt.Printf("%s to generate model code from sql files.\n", color.WithColor("Start", color.FgGreen))
+	for _, f := range files {
+		fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), f)
+		tables, err := parser.Parse(filepath.Join(js.Wd, f), "", js.ModelMysqlStrict)
+		if err != nil {
+			return err
+		}
+		bf := filepath.Base(f)
+		modelDir := filepath.Join("internal", "model", strings.ToLower(bf[0:len(bf)-len(path.Ext(bf))]))
+		cmd := exec.Command("goctl", "model", "mysql", "ddl", "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", js.Style, "-i", strings.Join(js.ModelMysqlIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", js.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", js.ModelMysqlStrict))
+		resp, err := cmd.CombinedOutput()
+		if err != nil {
+			return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
+		}
+		if js.ModelMysqlCachePrefix != "" && js.ModelMysqlCache {
+			for _, table := range tables {
+				namingFormat, err := format.FileNamingFormat(js.Style, table.Name.Source())
 				if err != nil {
-					console.Warning("[warning]: %s:%s", err.Error(), resp)
-					continue
+					return err
 				}
-				if js.ModelMysqlCachePrefix != "" && js.ModelMysqlCache {
-					for _, table := range tables {
-						namingFormat, err := format.FileNamingFormat(js.Style, table.Name.Source())
-						if err != nil {
-							return err
-						}
-						err = js.addModelMysqlCachePrefix(filepath.Join(modelDir, namingFormat+"model_gen.go"))
-						if err != nil {
-							return err
-						}
-					}
+				err = js.addModelMysqlCachePrefix(filepath.Join(modelDir, namingFormat+"model_gen.go"))
+				if err != nil {
+					return err
 				}
 			}
 		}
-		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
+	fmt.Println(color.WithColor("Done", color.FgGreen))
 
 	return nil
 }
@@ -170,7 +201,6 @@ func (js *JzeroSql) addModelMysqlCachePrefix(fp string) error {
 		}
 		return true
 	})
-	// Write the modified AST back to the file
 	buf := bytes.NewBuffer(nil)
 	if err := goformat.Node(buf, fset, f); err != nil {
 		return err
@@ -197,7 +227,7 @@ func getMysqlAllTables(url string) ([]string, error) {
 	return tables, nil
 }
 
-func getTableName(fp string) []string {
+func getTableNameByGoMethod(fp string) []string {
 	var tables []string
 	if filepath.Ext(fp) == ".go" {
 		fset := token.NewFileSet()
@@ -207,16 +237,11 @@ func getTableName(fp string) []string {
 			return nil
 		}
 
-		// 遍历 AST 节点
 		for _, decl := range f.Decls {
-			// 查找函数声明
 			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
-				// 检查是否是 TableName 方法
 				if funcDecl.Name.Name == "TableName" {
-					// 查找 return 语句
 					for _, stmt := range funcDecl.Body.List {
 						if retStmt, ok := stmt.(*ast.ReturnStmt); ok {
-							// 获取 return 的基本字面值
 							if len(retStmt.Results) > 0 {
 								if basicLit, ok := retStmt.Results[0].(*ast.BasicLit); ok {
 									tables = append(tables, strings.ReplaceAll(basicLit.Value, `"`, ""))
@@ -228,6 +253,5 @@ func getTableName(fp string) []string {
 			}
 		}
 	}
-
 	return tables
 }
