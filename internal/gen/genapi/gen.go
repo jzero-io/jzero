@@ -248,6 +248,7 @@ func (ja *JzeroApi) generateApiCode() error {
 				dir := "."
 				fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), cv)
 				_ = os.Remove(filepath.Join("internal", "types", "types.go"))
+				_ = os.Remove(filepath.Join("internal", "handler", "routes.go"))
 				filename := desc.GetApiFrameEtcFilename(ja.Wd, ja.Style)
 				if filename != "etc.yaml" {
 					_ = os.Remove(filepath.Join("etc", filename))
