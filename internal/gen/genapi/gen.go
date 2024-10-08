@@ -90,9 +90,9 @@ func (ja *JzeroApi) Gen() error {
 	var genCodeApiFiles []string
 
 	switch {
-	case ja.GitDiff && len(ja.Desc) == 0:
+	case ja.GitChange && len(ja.Desc) == 0:
 		// 从 git status 获取变动的文件生成
-		m, _, err := gitstatus.ChangedFiles(ja.ApiGitDiffPath, ".api")
+		m, _, err := gitstatus.ChangedFiles(ja.ApiGitChangePath, ".api")
 		if err == nil {
 			// 获取变动的 api 文件
 			genCodeApiFiles = append(genCodeApiFiles, m...)

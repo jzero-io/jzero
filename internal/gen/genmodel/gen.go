@@ -62,10 +62,10 @@ func (js *JzeroSql) Gen() error {
 		if err != nil {
 			return err
 		}
-		if js.GitDiff {
+		if js.GitChange {
 			var changesTables []string
 			var files []string
-			m, _, err := gitstatus.ChangedFiles(js.ModelGitDiffPath, "")
+			m, _, err := gitstatus.ChangedFiles(js.ModelGitChangePath, "")
 			if err != nil {
 				return err
 			}
@@ -115,8 +115,8 @@ func (js *JzeroSql) Gen() error {
 	)
 
 	switch {
-	case js.GitDiff && len(js.Desc) == 0:
-		m, _, err := gitstatus.ChangedFiles(js.ModelGitDiffPath, ".sql")
+	case js.GitChange && len(js.Desc) == 0:
+		m, _, err := gitstatus.ChangedFiles(js.ModelGitChangePath, ".sql")
 		if err == nil {
 			files = append(files, m...)
 		}

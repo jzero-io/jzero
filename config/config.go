@@ -75,9 +75,10 @@ type GenConfig struct {
 
 	// git flags
 
-	GitDiff          bool   `mapstructure:"git-diff"`
-	ApiGitDiffPath   string `mapstructure:"api-git-diff-path"`
-	ModelGitDiffPath string `mapstructure:"model-git-diff-path"`
+	GitChange          bool   `mapstructure:"git-change"`
+	ApiGitChangePath   string `mapstructure:"api-git-change-path"`
+	ModelGitChangePath string `mapstructure:"model-git-change-path"`
+	ProtoGitChangePath string `mapstructure:"proto-git-change-path"`
 
 	// model flags
 

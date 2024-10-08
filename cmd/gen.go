@@ -254,9 +254,10 @@ func init() {
 		// fix rpc style
 		genCmd.Flags().BoolP("rpc-style-patch", "", false, "")
 		// git-diff
-		genCmd.Flags().BoolP("git-diff", "", false, "set is git diff, if changes then generate code")
-		genCmd.Flags().StringP("api-git-diff-path", "", filepath.Join("desc", "api"), "set api git diff path")
-		genCmd.Flags().StringP("model-git-diff-path", "", filepath.Join("desc", "sql"), "set model git diff path")
+		genCmd.Flags().BoolP("git-change", "", false, "set is git change, if changes then generate code")
+		genCmd.Flags().StringP("api-git-change-path", "", filepath.Join("desc", "api"), "set api git change path")
+		genCmd.Flags().StringP("model-git-change-path", "", filepath.Join("desc", "sql"), "set model git change path")
+		genCmd.Flags().StringP("proto-git-change-path", "", filepath.Join("desc", "proto"), "set proto git change path")
 
 		genCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
 
