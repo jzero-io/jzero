@@ -29,5 +29,5 @@ var upgradeCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(upgradeCmd)
 
-	upgradeCmd.Flags().StringP("channel", "c", "main", "channel to upgrade jzero")
+	upgradeCmd.Flags().StringP("channel", "c", "stable", "channel to upgrade jzero")
 }
