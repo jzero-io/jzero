@@ -18,7 +18,7 @@ import (
 	"github.com/jzero-io/jzero/internal/gen/genapi"
 )
 
-func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]genapi.LogicFile, error) {
+func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Proto) ([]genapi.LogicFile, error) {
 	var logicFiles []genapi.LogicFile
 	for _, service := range protoSpec.Service {
 		for _, rpc := range service.RPC {
@@ -35,6 +35,7 @@ func (jr *JzeroRpc) GetAllLogicFiles(protoSpec rpcparser.Proto) ([]genapi.LogicF
 
 			f := genapi.LogicFile{
 				Path:             fp,
+				DescFilepath:     descFilepath,
 				Package:          protoSpec.PbPackage,
 				Handler:          rpc.Name,
 				Group:            service.Name,

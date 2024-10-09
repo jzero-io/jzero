@@ -106,6 +106,7 @@ func (ja *JzeroApi) Gen() error {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".api" {
 					genCodeApiFiles = append(genCodeApiFiles, filepath.Join(strings.Split(filepath.ToSlash(v), "/")...))
+					ja.GenCodeApiSpecMap[v] = ja.ApiSpecMap[v]
 				}
 			} else {
 				specifiedApiFiles, err := desc.FindApiFiles(v)
@@ -140,7 +141,7 @@ func (ja *JzeroApi) Gen() error {
 			}
 		}
 		for _, file := range allLogicFiles {
-			if _, ok := ja.GenCodeApiSpecMap[file.ApiFilepath]; ok {
+			if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
 				if err = ja.removeLogicSuffix(file.Path); err != nil {
 					return errors.Wrapf(err, "rewrite %s", file.Path)
 				}
@@ -151,7 +152,7 @@ func (ja *JzeroApi) Gen() error {
 	// 自动替换 logic 层的 request 和 response name
 	if ja.ChangeLogicTypes {
 		for _, file := range allLogicFiles {
-			if _, ok := ja.GenCodeApiSpecMap[file.ApiFilepath]; ok {
+			if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
 				if err := ja.changeLogicTypes(file); err != nil {
 					console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
 					continue
