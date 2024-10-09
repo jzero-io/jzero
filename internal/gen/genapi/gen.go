@@ -177,12 +177,11 @@ func (ja *JzeroApi) generateApiCode() error {
 			for _, group := range parse.Service.Groups {
 				if ja.RegenApiHandler {
 					dirFile, err := os.ReadDir(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group")))
-					if err != nil {
-						return err
-					}
-					for _, v := range dirFile {
-						if !v.IsDir() {
-							_ = os.Remove(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group"), v.Name()))
+					if err == nil {
+						for _, v := range dirFile {
+							if !v.IsDir() {
+								_ = os.Remove(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group"), v.Name()))
+							}
 						}
 					}
 				}
