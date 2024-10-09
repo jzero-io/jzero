@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/sync/errgroup"
 
@@ -41,18 +40,17 @@ func Gen(c config.Config) error {
 				if err != nil {
 					return err
 				}
+				apiFile := fmt.Sprintf("%s.swagger.json", strings.TrimSuffix(filepath.Base(v), filepath.Base(filepath.Ext(v))))
 				if goPackage, ok := parse.Info.Properties["go_package"]; ok {
-					apiFile := fmt.Sprintf("%s.swagger.json", strings.ReplaceAll(goPackage, "/", "-"))
-					cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", cv, "-dir", c.Gen.Swagger.Output)
-					resp, err := cmd.CombinedOutput()
-					if err != nil {
-						return errors.Wrap(err, strings.TrimRight(string(resp), "\r\n"))
-					}
-					if strings.TrimRight(string(resp), "\r\n") != "" {
-						fmt.Println(strings.TrimRight(string(resp), "\r\n"))
-					}
-				} else {
-					console.Warning("[warning]: 暂不支持非 package api")
+					apiFile = fmt.Sprintf("%s.swagger.json", strings.ReplaceAll(goPackage, "/", "-"))
+				}
+				cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", cv, "-dir", c.Gen.Swagger.Output)
+				resp, err := cmd.CombinedOutput()
+				if err != nil {
+					return errors.Wrap(err, strings.TrimRight(string(resp), "\r\n"))
+				}
+				if strings.TrimRight(string(resp), "\r\n") != "" {
+					fmt.Println(strings.TrimRight(string(resp), "\r\n"))
 				}
 				return nil
 			})
