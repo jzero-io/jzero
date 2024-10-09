@@ -27,7 +27,7 @@ type JzeroProtoApiMiddleware struct {
 	Routes []string
 }
 
-func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
+func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 	var fds []*desc.FileDescriptor
 
 	// parse proto
@@ -36,7 +36,7 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFilenames []string) (err error) {
 	protoParser.InferImportPaths = false
 
 	var files []string
-	for _, protoFilename := range protoFilenames {
+	for _, protoFilename := range jr.ProtoFiles {
 		rel, err := filepath.Rel(filepath.Join("desc", "proto"), protoFilename)
 		if err != nil {
 			return err

@@ -32,12 +32,12 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 		return err
 	}
 
-	files, err := ivm.jzeroRpc.GetAllLogicFiles(parse)
+	files, err := ivm.jzeroRpc.GetAllLogicFiles(fp, parse)
 	if err != nil {
 		return err
 	}
 
-	oldFiles, err := ivm.jzeroRpc.GetAllLogicFiles(oldParse)
+	oldFiles, err := ivm.jzeroRpc.GetAllLogicFiles(fp, oldParse)
 	if err != nil {
 		return err
 	}

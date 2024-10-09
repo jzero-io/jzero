@@ -17,8 +17,8 @@ type LogicFile struct {
 	// rpc name
 	Handler string
 
-	Path        string
-	ApiFilepath string
+	Path         string
+	DescFilepath string
 
 	RequestTypeName  string
 	RequestType      spec.Type
@@ -40,7 +40,7 @@ func (ja *JzeroApi) getAllLogicFiles(apiFilepath string, apiSpec *spec.ApiSpec) 
 			fp := filepath.Join(ja.Wd, "internal", "logic", group.GetAnnotation("group"), namingFormat+".go")
 
 			hf := LogicFile{
-				ApiFilepath:  apiFilepath,
+				DescFilepath: apiFilepath,
 				Path:         fp,
 				Group:        group.GetAnnotation("group"),
 				Handler:      route.Handler,

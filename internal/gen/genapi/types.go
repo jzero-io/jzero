@@ -70,8 +70,8 @@ var (
 
 	if ja.SplitApiTypesDir {
 		for _, v := range allLogicFiles {
-			if _, ok := ja.GenCodeApiSpecMap[v.ApiFilepath]; ok {
-				for _, g := range ja.GenCodeApiSpecMap[v.ApiFilepath].Service.Groups {
+			if _, ok := ja.GenCodeApiSpecMap[v.DescFilepath]; ok {
+				for _, g := range ja.GenCodeApiSpecMap[v.DescFilepath].Service.Groups {
 					if g.GetAnnotation("group") == v.Group {
 						// todo 控制是否是新增的文件才更新
 						if err := ja.updateLogicImportedTypesPath(v); err != nil {

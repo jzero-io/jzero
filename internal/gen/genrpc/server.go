@@ -16,8 +16,9 @@ import (
 )
 
 type ServerFile struct {
-	Path    string
-	Service string
+	DescFilepath string
+	Path         string
+	Service      string
 }
 
 func (jr *JzeroRpc) genServer(serverImports, pbImports jzerodesc.ImportLines, registerServers jzerodesc.RegisterLines) error {
@@ -39,7 +40,7 @@ func (jr *JzeroRpc) genServer(serverImports, pbImports jzerodesc.ImportLines, re
 	return nil
 }
 
-func (jr *JzeroRpc) GetAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, error) {
+func (jr *JzeroRpc) GetAllServerFiles(descFilepath string, protoSpec rpcparser.Proto) ([]ServerFile, error) {
 	var serverFiles []ServerFile
 	for _, service := range protoSpec.Service {
 		namingFormat, err := format.FileNamingFormat(jr.Style, service.Name+"Server")
@@ -53,8 +54,9 @@ func (jr *JzeroRpc) GetAllServerFiles(protoSpec rpcparser.Proto) ([]ServerFile, 
 		}
 
 		f := ServerFile{
-			Path:    fp,
-			Service: service.Name,
+			DescFilepath: descFilepath,
+			Path:         fp,
+			Service:      service.Name,
 		}
 
 		serverFiles = append(serverFiles, f)
