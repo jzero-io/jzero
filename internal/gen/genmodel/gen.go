@@ -58,10 +58,10 @@ func (js *JzeroSql) Gen() error {
 
 	if js.ModelMysqlDatasource {
 		fmt.Printf("%s to generate model code from url %s.\n", color.WithColor("Start", color.FgGreen), js.ModelMysqlDatasourceUrl)
-		tables, err := getMysqlAllTables(js.ModelMysqlDatasourceUrl)
-		if err != nil {
-			return err
-		}
+		var (
+			tables []string
+			err    error
+		)
 		if js.GitChange {
 			var changesTables []string
 			var files []string
@@ -75,6 +75,11 @@ func (js *JzeroSql) Gen() error {
 				changesTables = append(changesTables, getTableNameByGoMethod(v)...)
 			}
 			tables = changesTables
+		} else {
+			tables, err = getMysqlAllTables(js.ModelMysqlDatasourceUrl)
+			if err != nil {
+				return err
+			}
 		}
 
 		mr.ForEach(func(source chan<- string) {
