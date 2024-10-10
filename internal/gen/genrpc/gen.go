@@ -17,7 +17,6 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/internal/gen/genapi"
 	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/gitstatus"
 	"github.com/jzero-io/jzero/pkg/osx"
@@ -42,8 +41,6 @@ func (jr *JzeroRpc) Gen() error {
 		serverImports   jzerodesc.ImportLines
 		pbImports       jzerodesc.ImportLines
 		registerServers jzerodesc.RegisterLines
-		allServerFiles  []ServerFile
-		allLogicFiles   []genapi.LogicFile
 	)
 
 	// 获取全量 proto 文件
@@ -66,16 +63,6 @@ func (jr *JzeroRpc) Gen() error {
 			return err
 		}
 		jr.ProtoSpecMap[v] = parse
-
-		allLogicFiles, err = jr.GetAllLogicFiles(v, parse)
-		if err != nil {
-			return err
-		}
-
-		allServerFiles, err = jr.GetAllServerFiles(v, parse)
-		if err != nil {
-			return err
-		}
 	}
 
 	// 获取需要生成代码的proto 文件
@@ -118,6 +105,16 @@ func (jr *JzeroRpc) Gen() error {
 
 	fmt.Printf("%s to generate proto code. \n", color.WithColor("Start", color.FgGreen))
 	for _, v := range jr.ProtoFiles {
+		allLogicFiles, err := jr.GetAllLogicFiles(v, jr.ProtoSpecMap[v])
+		if err != nil {
+			return err
+		}
+
+		allServerFiles, err := jr.GetAllServerFiles(v, jr.ProtoSpecMap[v])
+		if err != nil {
+			return err
+		}
+
 		if jr.RpcStylePatch {
 			if lo.Contains(genCodeProtoFiles, v) {
 				for _, s := range jr.ProtoSpecMap[v].Service {
@@ -180,10 +177,12 @@ func (jr *JzeroRpc) Gen() error {
 
 		if jr.RemoveSuffix {
 			for _, file := range allServerFiles {
-				if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
-					if err := jr.removeServerSuffix(file.Path); err != nil {
-						console.Warning("[warning]: remove server suffix %s meet error %v", file.Path, err)
-						continue
+				if filepath.Clean(file.DescFilepath) == filepath.Clean(v) {
+					if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
+						if err := jr.removeServerSuffix(file.Path); err != nil {
+							console.Warning("[warning]: remove server suffix %s meet error %v", file.Path, err)
+							continue
+						}
 					}
 				}
 			}
