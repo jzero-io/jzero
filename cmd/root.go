@@ -47,6 +47,12 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if len(os.Args) >= 2 {
+		if os.Args[1] == versionCmd.Use {
+			return
+		}
+	}
+
 	if pathx.FileExists(CfgFile) {
 		viper.SetConfigFile(CfgFile)
 		// If a config file is found, read it in.
