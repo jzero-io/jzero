@@ -17,25 +17,24 @@ title: 首页
 jzero 具备以下特点:
 
 * 极简命令, 通过配置文件 .jzero.yaml 控制不同命令的参数
+* 基于 git 仅对改动文件部分生成代码, 极大提升大型项目代码生成效率
 * 具备不同场景下的开发模板, 具备快速复制项目的能力
 * 优化 go-zero 已有的痛点并扩展新特性, 并完全兼容
 * 模板特性支持新增任意文件, 基于模板特性理论上可以支持任意框架
+* 所有配套工具链跨平台使用, 支持 windows/mac/linux
 
 在以下场景优化点:
 
 * api 场景
-    * 支持 types 文件分组(原生 goctl 将所有 api 文件生成的 types 放到单文件 types.go 中, 导致该文件爆炸)
     * 编写多个 api 文件, 无需显示的编写一个 main.api 文件, 框架自动处理好
-    * 默认集成 `https://github.com/go-playground/validator` 校验框架
+    * 默认集成 [https://github.com/go-playground/validator](https://github.com/go-playground/validator) 校验框架
     * 支持重新生成 handler 文件, 并支持不同场景(有输入输出, 有输入没输出, 没输入有输出, 没输入没输出), 无需再手动维护 handler 代码, 提升开发过程中的体验
     * 支持自动修改 logic 文件函数的入参和出参, 当 api 文件修改后, 自动适配修改, 提升开发过程中的体验
     * 支持 types 文件分组分文件夹, 即每个 api 文件的入参和出参可以一致, 保持每个模块命名简洁化, 提升开发体验
-    * 支持基于 git 对改动的文件部分更新, 只更新改动的文件, 提升代码生成效率, 从而提升开发体验
-    * 支持不同的项目使用不同的 jzero 版本, 保持项目稳定性
 * rpc 场景
     * 支持多个 proto, 自动注册, 无需手动编写
     * 默认支持 proto message 的字段校验, 且支持自定义错误信息
-    * 默认支持通过 proto 新增拦截器, 可以设定某个 method, 也可以设定整个 service
+    * 默认支持通过 proto option 新增拦截器, 可以设定某个 method, 也可以设定整个 service
 * gateway 场景
     * 默认可新增 rpc + gateway 的项目
     * 新增接口版本控制特性, 默认为 v1, 可一键初始化 v2, v3等版本的接口, 无需任何配置

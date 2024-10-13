@@ -26,7 +26,7 @@ export default sidebar({
       collapsible: true,
     },
     {
-      text: "RoadMap",
+      text: "路线图",
       icon: "mdi:roadmap",
       prefix: "roadmap/",
       children: "structure",
