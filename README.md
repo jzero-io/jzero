@@ -116,7 +116,7 @@ go run main.go server
 
 ## Stargazers over time
 
-[![Stargazers over time](https://starchart.cc/jzero-io/jzero.svg)](https://starchart.cc/jzero-io/jzero)
+[![Star History Chart](https://api.star-history.com/svg?repos=jzero-io/jzero&type=Date)](https://star-history.com/#jzero-io/jzero&Date)
 
 ## 联系我
 
