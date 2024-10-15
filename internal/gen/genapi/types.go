@@ -21,7 +21,7 @@ import (
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
-func (ja *JzeroApi) separateTypesGo(allLogicFiles []LogicFile, allHandlerFiles []HandlerFile) error {
+func (ja *JzeroApi) separateTypesGo() error {
 	_ = os.Remove(filepath.Join("internal", "types", "types.go"))
 
 	var allTypes []spec.Type
@@ -68,32 +68,7 @@ var (
 		}
 	}
 
-	if ja.SplitApiTypesDir {
-		for _, v := range allLogicFiles {
-			if _, ok := ja.GenCodeApiSpecMap[v.DescFilepath]; ok {
-				for _, g := range ja.GenCodeApiSpecMap[v.DescFilepath].Service.Groups {
-					if g.GetAnnotation("group") == v.Group {
-						// todo 控制是否是新增的文件才更新
-						if err := ja.updateLogicImportedTypesPath(v); err != nil {
-							return err
-						}
-					}
-				}
-			}
-		}
-		for _, v := range allHandlerFiles {
-			if _, ok := ja.GenCodeApiSpecMap[v.ApiFilepath]; ok {
-				for _, g := range ja.GenCodeApiSpecMap[v.ApiFilepath].Service.Groups {
-					if g.GetAnnotation("group") == v.Group {
-						// todo 控制是否是新增的文件才更新
-						if err := ja.updateHandlerImportedTypesPath(v); err != nil {
-							return err
-						}
-					}
-				}
-			}
-		}
-	} else {
+	if !ja.SplitApiTypesDir {
 		// 去除重复
 		var realAllTypes []spec.Type
 		exist := make(map[string]struct{})

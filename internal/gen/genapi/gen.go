@@ -42,9 +42,6 @@ type JzeroApi struct {
 func (ja *JzeroApi) Gen() error {
 	apiDirName := filepath.Join("desc", "api")
 
-	var allHandlerFiles []HandlerFile
-	var allLogicFiles []LogicFile
-
 	if !pathx.FileExists(apiDirName) {
 		return nil
 	}
@@ -73,18 +70,6 @@ func (ja *JzeroApi) Gen() error {
 			return err
 		}
 		ja.ApiSpecMap[v] = apiSpec
-
-		logicFiles, err := ja.getAllLogicFiles(v, apiSpec)
-		if err != nil {
-			return err
-		}
-		allLogicFiles = append(allLogicFiles, logicFiles...)
-
-		handlerFiles, err := ja.getAllHandlerFiles(v, apiSpec)
-		if err != nil {
-			return err
-		}
-		allHandlerFiles = append(allHandlerFiles, handlerFiles...)
 	}
 
 	var genCodeApiFiles []string
@@ -131,38 +116,8 @@ func (ja *JzeroApi) Gen() error {
 		return err
 	}
 
-	// 处理多余后缀
-	if ja.RemoveSuffix {
-		for _, file := range allHandlerFiles {
-			if _, ok := ja.GenCodeApiSpecMap[file.ApiFilepath]; ok {
-				if err = ja.removeHandlerSuffix(file.Path); err != nil {
-					return errors.Wrapf(err, "rewrite %s", file.Path)
-				}
-			}
-		}
-		for _, file := range allLogicFiles {
-			if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
-				if err = ja.removeLogicSuffix(file.Path); err != nil {
-					return errors.Wrapf(err, "rewrite %s", file.Path)
-				}
-			}
-		}
-	}
-
-	// 自动替换 logic 层的 request 和 response name
-	if ja.ChangeLogicTypes {
-		for _, file := range allLogicFiles {
-			if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
-				if err := ja.changeLogicTypes(file); err != nil {
-					console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
-					continue
-				}
-			}
-		}
-	}
-
 	// 将 types.go 分 group 或者分 dir
-	err = ja.separateTypesGo(allLogicFiles, allHandlerFiles)
+	err = ja.separateTypesGo()
 	if err != nil {
 		return err
 	}
@@ -240,30 +195,81 @@ func (ja *JzeroApi) generateApiCode() error {
 		}
 	}
 
-	eg.SetLimit(len(ja.GenCodeApiFiles))
 	for _, v := range ja.GenCodeApiFiles {
-		cv := v
-		if len(ja.ApiSpecMap[cv].Service.Routes()) > 0 {
-			eg.Go(func() error {
-				dir := "."
-				fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), cv)
-				_ = os.Remove(filepath.Join("internal", "types", "types.go"))
-				_ = os.Remove(filepath.Join("internal", "handler", "routes.go"))
-				filename := desc.GetApiFrameEtcFilename(ja.Wd, ja.Style)
-				if filename != "etc.yaml" {
-					_ = os.Remove(filepath.Join("etc", filename))
+		if len(ja.ApiSpecMap[v].Service.Routes()) > 0 {
+			dir := "."
+			fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), v)
+			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, ja.Style)
+			logx.Debugf("command: %s", command)
+			if _, err := execx.Run(command, ja.Wd); err != nil {
+				return errors.Wrapf(err, "api file: %s", v)
+			}
+
+			logicFiles, err := ja.getAllLogicFiles(v, ja.ApiSpecMap[v])
+			if err != nil {
+				return err
+			}
+
+			handlerFiles, err := ja.getAllHandlerFiles(v, ja.ApiSpecMap[v])
+			if err != nil {
+				return err
+			}
+
+			// 处理多余后缀
+			if ja.RemoveSuffix {
+				for _, file := range handlerFiles {
+					if _, ok := ja.GenCodeApiSpecMap[file.ApiFilepath]; ok {
+						if err = ja.removeHandlerSuffix(file.Path); err != nil {
+							return errors.Wrapf(err, "rewrite %s", file.Path)
+						}
+					}
 				}
-				command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", cv, dir, goctlHome, ja.Style)
-				logx.Debugf("command: %s", command)
-				if _, err := execx.Run(command, ja.Wd); err != nil {
-					return errors.Wrapf(err, "api file: %s", cv)
+				for _, file := range logicFiles {
+					if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
+						if err = ja.removeLogicSuffix(file.Path); err != nil {
+							return errors.Wrapf(err, "rewrite %s", file.Path)
+						}
+					}
 				}
-				return nil
-			})
+			}
+
+			// 自动替换 logic 层的 request 和 response name
+			if ja.ChangeLogicTypes {
+				for _, file := range logicFiles {
+					if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
+						if err := ja.changeLogicTypes(file); err != nil {
+							console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
+							continue
+						}
+					}
+				}
+			}
+
+			if ja.SplitApiTypesDir {
+				for _, v := range logicFiles {
+					if _, ok := ja.GenCodeApiSpecMap[v.DescFilepath]; ok {
+						for _, g := range ja.GenCodeApiSpecMap[v.DescFilepath].Service.Groups {
+							if g.GetAnnotation("group") == v.Group {
+								if err := ja.updateLogicImportedTypesPath(v); err != nil {
+									return err
+								}
+							}
+						}
+					}
+				}
+				for _, v := range handlerFiles {
+					if _, ok := ja.GenCodeApiSpecMap[v.ApiFilepath]; ok {
+						for _, g := range ja.GenCodeApiSpecMap[v.ApiFilepath].Service.Groups {
+							if g.GetAnnotation("group") == v.Group {
+								if err := ja.updateHandlerImportedTypesPath(v); err != nil {
+									return err
+								}
+							}
+						}
+					}
+				}
+			}
 		}
-	}
-	if err := eg.Wait(); err != nil {
-		return err
 	}
 
 	exist := make(map[string]struct{})
