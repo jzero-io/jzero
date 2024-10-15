@@ -90,8 +90,8 @@ func (ja *JzeroApi) Gen() error {
 		for _, v := range ja.Desc {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".api" {
-					genCodeApiFiles = append(genCodeApiFiles, filepath.Join(strings.Split(filepath.ToSlash(v), "/")...))
-					ja.GenCodeApiSpecMap[v] = ja.ApiSpecMap[v]
+					genCodeApiFiles = append(genCodeApiFiles, filepath.Join(strings.Split(filepath.ToSlash(filepath.Clean(v)), "/")...))
+					ja.GenCodeApiSpecMap[filepath.Clean(v)] = ja.ApiSpecMap[filepath.Clean(v)]
 				}
 			} else {
 				specifiedApiFiles, err := desc.FindApiFiles(v)
