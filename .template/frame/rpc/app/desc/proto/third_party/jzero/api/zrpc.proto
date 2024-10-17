@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package jzero.api;
+
+option go_package = "github.com/jzero-io/desc/proto/third_party/jzero/api";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MethodOptions {
+  ZrpcRule zrpc = 10002;
+}
+
+extend google.protobuf.ServiceOptions {
+  ZrpcRule zrpc_group = 10003;
+}
+
+message ZrpcRule {
+  string middleware = 1;
+}

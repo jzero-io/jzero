@@ -49,11 +49,6 @@ var newCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 
-		if !pathx.FileExists(config.C.New.Home) {
-			home, _ := os.UserHomeDir()
-			config.C.New.Home = filepath.Join(home, ".jzero", Version)
-		}
-
 		if config.C.New.Remote != "" && config.C.New.Branch != "" {
 			// clone to local
 			home, _ := os.UserHomeDir()
@@ -118,6 +113,7 @@ func init() {
 	newCmd.Flags().StringP("module", "m", "", "set go module")
 	newCmd.Flags().StringP("output", "o", "", "set output dir")
 	newCmd.Flags().StringP("home", "", filepath.Join(wd, ".template"), "set home dir")
+	newCmd.Flags().StringP("frame", "", "api", "frame")
 	newCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringP("branch", "b", "", "remote templates repo branch")
 	newCmd.Flags().BoolP("cache", "", false, "get templates in local templates dir")

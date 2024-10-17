@@ -61,8 +61,6 @@ go mod tidy
 jzero gen swagger
 # 生成 http 客户端 sdk
 jzero gen sdk
-# 生成 zrpc 客户端 sdk
-jzero gen zrpcclient
 # 运行服务端
 go run main.go server
 ```
@@ -79,8 +77,6 @@ go mod tidy
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 # 生成 http 客户端 sdk
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen sdk
-# 生成 zrpc 客户端 sdk
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen zrpcclient
 # 运行服务端
 go run main.go server
 ```

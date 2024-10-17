@@ -25,6 +25,7 @@ type TemplateData struct {
 type JzeroNew struct {
 	TemplateData map[string]any
 	nc           config.NewConfig
+	base         string
 }
 
 type GeneratedFile struct {
@@ -43,12 +44,22 @@ func NewProject(c config.Config, appName string) error {
 	templateData["Module"] = c.New.Module
 	templateData["APP"] = appName
 
+	var base string
+	if c.New.Branch == "" {
+		// 使用内置 frame
+		base = filepath.Join("frame", c.New.Frame, "app")
+	} else {
+		// 使用第三方模板仓库的模板
+		base = filepath.Join("app")
+	}
+
 	jn := JzeroNew{
 		TemplateData: templateData,
 		nc:           c.New,
+		base:         base,
 	}
 
-	gfs, err := jn.New(filepath.Join("app"))
+	gfs, err := jn.New(base)
 	if err != nil {
 		return err
 	}
@@ -100,7 +111,7 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 			gsf = append(gsf, files...)
 		}
 		filename := strings.TrimSuffix(file.Name(), ".tpl")
-		rel, err := filepath.Rel(filepath.Join("app"), filepath.Join(dirname, filename))
+		rel, err := filepath.Rel(jn.base, filepath.Join(dirname, filename))
 		if err != nil {
 			return nil, err
 		}

@@ -28,7 +28,7 @@ func (jr *JzeroRpc) genServer(serverImports, pbImports jzerodesc.ImportLines, re
 		"ServerImports":   serverImports,
 		"PbImports":       pbImports,
 		"RegisterServers": registerServers,
-	}, embeded.ReadTemplateFile(filepath.Join("app", "internal", "server", "server.go.tpl")))
+	}, embeded.ReadTemplateFile(filepath.Join("plugins", "rpc", "server.go.tpl")))
 	if err != nil {
 		return err
 	}

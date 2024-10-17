@@ -28,21 +28,58 @@ jobs:
           jzero check
           go install github.com/jaronnie/grum@latest
 
-      - name: upload
+      - name: upload examples
         run: |
           GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum clone https://github.com/jzero-io/examples
           cd examples
-          git fetch 
-          rm -rf quickstart
-          jzero new quickstart
-          cd quickstart && jzero gen
+          rm -rf simpleapi
+          jzero new simpleapi
+          cd simpleapi && jzero gen
           jzero gen swagger
           jzero gen sdk
-          jzero gen zrpcclient
           go mod tidy && go mod download
           go run main.go version
           git config user.name "dependabot[bot]"
           git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
           git add .
-          git diff-index --quiet HEAD || git commit -m "chore(quickstart): update quickstart"
+          git diff-index --quiet HEAD || git commit -m "chore(simpleapi): update simpleapi"
+          git push -f
+          
+          cd ..
+          
+          rm -rf simplegateway
+          jzero new simplegateway --frame gateway
+          cd simplegateway && jzero gen
+          jzero gen swagger
+          jzero gen sdk
+          jzero gen zrpcclient
+          go mod tidy && go mod download
+          go run main.go version
+          git add .
+          git diff-index --quiet HEAD || git commit -m "chore(simplegateway): update simplegateway"
+          git push -f
+          
+          cd ..
+          
+          rm -rf simplerpc
+          jzero new simplerpc --frame rpc
+          cd simplerpc && jzero gen
+          jzero gen swagger
+          jzero gen zrpcclient
+          go mod tidy && go mod download
+          go run main.go version
+          git add .
+          git diff-index --quiet HEAD || git commit -m "chore(simplerpc): update simplerpc"
+          git push -f
+          
+          # 测试第三方仓库(https://github.com/jzero-io/templates)模板
+          rm -rf simplerpc-goctl
+          jzero new simplerpc-goctl --branch rpc-goctl
+          cd simplerpc-goctl && jzero gen
+          jzero gen swagger
+          jzero gen zrpcclient
+          go mod tidy && go mod download
+          go build
+          git add .
+          git diff-index --quiet HEAD || git commit -m "chore(simplerpc-goctl): update simplerpc-goctl"
           git push -f

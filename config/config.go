@@ -50,6 +50,7 @@ type NewConfig struct {
 	Output       string   `mapstructure:"output"`
 	Remote       string   `mapstructure:"remote"`
 	Cache        bool     `mapstructure:"cache"`
+	Frame        string   `mapstructure:"frame"`
 	Branch       string   `mapstructure:"branch"`
 	WithTemplate bool     `mapstructure:"with-template"`
 	Style        string   `mapstructure:"style"`

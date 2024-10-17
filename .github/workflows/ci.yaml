@@ -27,14 +27,6 @@ jobs:
           jzero check
           go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
 
-      - name: Test new project and run
-        run: |
-          jzero new quickstart
-          cd quickstart && jzero gen && go mod tidy
-          go run main.go version
-          cd ..
-          rm -rf quickstart
-
       - name: format go
         run: |
           gorgeous -d ./... 

@@ -289,7 +289,7 @@ func (ja *JzeroApi) generateApiCode() error {
 		"Routes":         allRoutesGoBody,
 		"Module":         ja.Module,
 		"HandlerImports": handlerImports,
-	}, embeded.ReadTemplateFile(filepath.Join("app", "internal", "handler", "routes.go.tpl")))
+	}, embeded.ReadTemplateFile(filepath.Join("plugins", "api", "routes.go.tpl")))
 	if err != nil {
 		return err
 	}
