@@ -41,6 +41,18 @@ go run main.go server
 
 ## 高级教程
 
+### 基于 git 变动生成代码
+
+```shell
+jzero gen --git-change
+```
+
+### 指定 desc 生成代码
+
+```shell
+jzero gen --desc desc/api/xx.api
+```
+
 ### 生成数据库代码
 
 :::tip 支持基于 sql 文件和数据库 dsn 连接生成代码, 默认使用 sql 文件生成

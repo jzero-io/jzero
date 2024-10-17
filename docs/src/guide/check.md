@@ -8,12 +8,16 @@ order: 2
 
 ## 安装 golang
 
-:::tip 推荐采用 go 1.21 版本以及以上
+:::tip 推荐采用 go 1.21 及以上版本
 :::
 
 使用 gvm 工具安装 golang, 并能管理 golang 的版本.
 
 [gvm Release](https://github.com/jaronnie/gvm/releases)
+
+**注意该工具暂不支持 windows 版本**
+
+**如果你已经有 go 环境, 可以跳过该步骤**
 
 ```shell
 # 以 linux 为例子, 下载 tar.gz 后

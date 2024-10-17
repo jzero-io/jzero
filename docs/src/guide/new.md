@@ -21,6 +21,8 @@ order: 3
 
 :::tip 
 [点击了解 go-zero api 的特性以及如何使用](https://go-zero.dev/docs/tutorials)
+
+[点击了解在 jzero 脚手架中 api 使用教程](https://jzero.jaronnie.com/guide/develop/api.html)
 :::
 
 ::: code-tabs#shell
@@ -54,6 +56,8 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --
 
 :::tip
 [点击了解 go-zero zrpc 的特性以及如何使用](https://go-zero.dev/docs/tutorials/grpc/server/configuration)
+
+[点击了解在 jzero 脚手架中 proto 使用教程](https://jzero.jaronnie.com/guide/develop/proto.html)
 :::
 
 ::: code-tabs#shell

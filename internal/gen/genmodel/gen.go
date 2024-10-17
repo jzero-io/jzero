@@ -66,10 +66,9 @@ func (js *JzeroSql) Gen() error {
 			var changesTables []string
 			var files []string
 			m, _, err := gitstatus.ChangedFiles(js.ModelGitChangePath, "")
-			if err != nil {
-				return err
+			if err == nil {
+				files = append(files, m...)
 			}
-			files = append(files, m...)
 
 			for _, v := range files {
 				changesTables = append(changesTables, getTableNameByGoMethod(v)...)

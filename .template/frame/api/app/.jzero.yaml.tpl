@@ -5,4 +5,4 @@ gen:
         after:
             - jzero gen swagger
 
-    spilt-api-types-dir: true
+    split-api-types-dir: true
