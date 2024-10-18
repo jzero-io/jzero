@@ -4,9 +4,9 @@ info (
 	go_package: "version"
 )
 
-type GetVersionRequest {}
+type GetRequest {}
 
-type GetVersionResponse {
+type GetResponse {
     version string `json:"version"`
     goVersion string `json:"goVersion"`
     commit string `json:"commit"`
@@ -18,6 +18,6 @@ type GetVersionResponse {
     group: version
 )
 service {{ .APP | ToCamel }} {
-    @handler GetVersionHandler
-    get /version (GetVersionRequest) returns (GetVersionResponse)
+    @handler GetHandler
+    get /version (GetRequest) returns (GetResponse)
 }

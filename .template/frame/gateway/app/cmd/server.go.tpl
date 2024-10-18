@@ -10,8 +10,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/gateway"
-	"github.com/zeromicro/go-zero/core/proc"
-	"golang.org/x/sync/errgroup"
+
 	"{{ .Module }}/desc/pb"
 	"{{ .Module }}/internal/config"
 	"{{ .Module }}/internal/middleware"
@@ -25,71 +24,50 @@ var serverCmd = &cobra.Command{
 	Short: "{{ .APP }} server",
 	Long:  "{{ .APP }} server",
 	Run: func(cmd *cobra.Command, args []string) {
-		Start(cfgFile)
+	    var c config.Config
+    	conf.MustLoad(cfgFile, &c)
+    	config.C = c
+
+    	// write pb to local
+        var err error
+        c.Gateway.Upstreams[0].ProtoSets, err = gwx.WritePbToLocal(pb.Embed)
+        if err != nil {
+        	logx.Must(err)
+        }
+
+    	// set up logger
+    	if err = logx.SetUp(c.Log.LogConf); err != nil {
+    		logx.Must(err)
+    	}
+    	if c.Log.LogConf.Mode != "console" {
+            logx.AddWriter(logx.NewWriter(os.Stdout))
+        }
+
+    	ctx := svc.NewServiceContext(c)
+    	run(ctx)
 	},
 }
 
-func Start(cfgFile string) {
-	var c config.Config
-	conf.MustLoad(cfgFile, &c)
-	config.C = c
-
-	// write pb to local
-    var err error
-    c.Gateway.Upstreams[0].ProtoSets, err = gwx.WritePbToLocal(pb.Embed)
-    if err != nil {
-    	logx.Must(err)
-    }
-
-	// set up logger
-	if err = logx.SetUp(c.Log.LogConf); err != nil {
-		logx.Must(err)
-	}
-	if c.Log.LogConf.Mode != "console" {
-        logx.AddWriter(logx.NewWriter(os.Stdout))
-    }
-
-	ctx := svc.NewServiceContext(c)
-	start(ctx)
-}
-
-func start(svcCtx *svc.ServiceContext) {
+func run(svcCtx *svc.ServiceContext) {
 	zrpc := server.RegisterZrpc(svcCtx.Config, svcCtx)
 	gw := gateway.MustNewServer(svcCtx.Config.Gateway.GatewayConf, middleware.WithHeaderProcessor())
 
 	// register middleware
 	middleware.Register(zrpc, gw)
 
-    // gw add custom routes
-    svcCtx.Custom.AddRoutes(gw)
+	// gw add custom routes
+	svcCtx.Custom.AddRoutes(gw)
 
 	group := service.NewServiceGroup()
 	group.Add(zrpc)
 	group.Add(gw)
+	group.Add(svcCtx.Custom)
 
-	// shutdown listener
-	waitExit := proc.AddShutdownListener(svcCtx.Custom.Stop)
+	printBanner(svcCtx.Config)
+	logx.Infof("Starting rpc server at %s...", svcCtx.Config.Zrpc.ListenOn)
+	logx.Infof("Starting gateway server at %s:%d...", svcCtx.Config.Gateway.Host, svcCtx.Config.Gateway.Port)
 
-	eg := errgroup.Group{}
-	eg.Go(func() error {
-	    printBanner(svcCtx.Config)
-	    logx.Infof("Starting rpc server at %s...", svcCtx.Config.Zrpc.ListenOn)
-		logx.Infof("Starting gateway server at %s:%d...", svcCtx.Config.Gateway.Host, svcCtx.Config.Gateway.Port)
-		group.Start()
-		return nil
-	})
-
-	// add custom start logic
-	eg.Go(func() error {
-		svcCtx.Custom.Start()
-		return nil
-	})
-
-	if err := eg.Wait(); err != nil {
-		panic(err)
-	}
-
-	waitExit()
+	group.Start()
 }
 
 func printBanner(c config.Config) {
