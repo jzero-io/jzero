@@ -108,7 +108,7 @@ func (js *JzeroSql) Gen() error {
 		return nil
 	}
 
-	sqlDir := filepath.Join(js.Wd, "desc", "sql")
+	sqlDir := filepath.Join("desc", "sql")
 	if !pathx.FileExists(sqlDir) {
 		return nil
 	}
