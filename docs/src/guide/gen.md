@@ -51,6 +51,8 @@ jzero gen --git-change
 
 ```shell
 jzero gen --desc desc/api/xx.api
+jzero gen --desc desc/proto/v1/xx.proto
+jzero gen --desc desc/sql/xx.sql
 ```
 
 ### 生成数据库代码

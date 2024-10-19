@@ -53,7 +53,7 @@ jobs:
           cd jzero-docs-deploy-pages
           git config user.name "dependabot[bot]"
           git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
-          rm -rf *
+          find . -mindepth 1 ! -name "api" ! -name ".git" ! -name "vercel.json" ! -path "./api/*" ! -path "./.git/*" -exec rm -rf {} +
           mv ../docs/src/.vuepress/dist/* ./
           git add .
           git diff-index --quiet HEAD || git commit -m "chore(docs): update docs"
