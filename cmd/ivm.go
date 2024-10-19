@@ -73,7 +73,6 @@ func init() {
 	{
 		rootCmd.AddCommand(ivmCmd)
 		ivmCmd.PersistentFlags().StringP("version", "v", "v1", "jzero ivm version")
-		ivmCmd.PersistentFlags().BoolP("split-api-types-dir", "", false, "")
 	}
 
 	{

@@ -141,8 +141,6 @@ type IvmConfig struct {
 	// global flags
 	Version string `mapstructure:"version"`
 
-	SplitApiTypesDir bool `mapstructure:"split-api-types-dir"`
-
 	Init IvmInitConfig `mapstructure:"init"`
 	Add  IvmAddConfig  `mapstructure:"add"`
 }

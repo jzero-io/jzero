@@ -45,7 +45,7 @@ func AddApi(c config.Config) error {
 		"Service":          service,
 		"Group":            c.Ivm.Add.Api.Group,
 		"GroupCamel":       stringx.FirstUpper(stringx.ToCamel(c.Ivm.Add.Api.Group)),
-		"SplitApiTypesDir": c.Ivm.SplitApiTypesDir,
+		"SplitApiTypesDir": c.Gen.SplitApiTypesDir,
 	}, embeded.ReadTemplateFile(filepath.Join("ivm", "add", "template.api.tpl")))
 	if err != nil {
 		return err
