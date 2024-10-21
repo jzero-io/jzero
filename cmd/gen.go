@@ -52,9 +52,6 @@ var genCmd = &cobra.Command{
 		if !pathx.FileExists(config.C.Gen.Home) {
 			config.C.Gen.Home = filepath.Join(home, ".jzero", Version)
 		}
-		if config.C.Gen.Branch != "" {
-			config.C.Gen.Home = filepath.Join(home, ".jzero", "templates", config.C.Gen.Branch)
-		}
 		embeded.Home = config.C.Gen.Home
 		return gen.Gen(config.C)
 	},
