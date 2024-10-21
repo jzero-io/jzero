@@ -64,7 +64,6 @@ type GenConfig struct {
 
 	Home             string `mapstructure:"home"`
 	Style            string `mapstructure:"style"`
-	Branch           string `mapstructure:"branch"`
 	SplitApiTypesDir bool   `mapstructure:"split-api-types-dir"`
 
 	// code style flags

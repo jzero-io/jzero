@@ -262,7 +262,6 @@ func init() {
 		// gen command persistentFlags
 		genCmd.PersistentFlags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 		genCmd.PersistentFlags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
-		genCmd.PersistentFlags().StringP("branch", "", "", "set branch")
 		genCmd.PersistentFlags().BoolP("split-api-types-dir", "", false, "")
 
 		genCmd.Flags().BoolP("model-mysql-strict", "", false, "goctl model mysql strict mode, see [https://go-zero.dev/docs/tutorials/cli/model]")
