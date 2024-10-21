@@ -187,7 +187,11 @@ func (js *JzeroModel) Gen() error {
 					if err != nil {
 						return err
 					}
-					err = js.addModelMysqlCachePrefix(filepath.Join(modelDir, namingFormat+"model_gen.go"))
+					file := namingFormat + "model_gen.go"
+					if js.Style == "go_zero" {
+						file = namingFormat + "_model_gen.go"
+					}
+					err = js.addModelMysqlCachePrefix(filepath.Join(modelDir, file))
 					if err != nil {
 						return err
 					}
