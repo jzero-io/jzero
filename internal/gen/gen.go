@@ -60,9 +60,10 @@ func Gen(c config.Config) error {
 		return err
 	}
 
-	jzeroSql := genmodel.JzeroSql{
+	jzeroSql := genmodel.JzeroModel{
 		Wd:        c.Wd(),
 		Style:     c.Gen.Style,
+		Module:    module,
 		GenConfig: c.Gen,
 	}
 	err = jzeroSql.Gen()
