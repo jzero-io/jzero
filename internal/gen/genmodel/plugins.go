@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/rinchsan/gosimports"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/templatex"
@@ -17,6 +18,9 @@ func (js *JzeroModel) GenRegister(tables []string) error {
 	var tablePackages []string
 
 	for _, t := range tables {
+		if !pathx.FileExists(fmt.Sprintf("internal/model/%s", strings.ToLower(t))) {
+			continue
+		}
 		imports = append(imports, fmt.Sprintf("%s/internal/model/%s", js.Module, strings.ToLower(t)))
 		tablePackages = append(tablePackages, strings.ToLower(t))
 	}
