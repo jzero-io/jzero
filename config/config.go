@@ -89,6 +89,7 @@ type GenConfig struct {
 	ModelMysqlDatasourceTable []string `mapstructure:"model-mysql-datasource-table"`
 	ModelMysqlCache           bool     `mapstructure:"model-mysql-cache"`
 	ModelMysqlCachePrefix     string   `mapstructure:"model-mysql-cache-prefix"`
+	GenMysqlCreateTableDDL    bool     `mapstructure:"gen-mysql-create-table-ddl"`
 
 	// gen code flags
 	Desc []string `mapstructure:"desc"`
