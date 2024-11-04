@@ -270,7 +270,7 @@ type ShowCreateTableResult struct {
 	DDL string `db:"Create Table"`
 }
 
-func getTableDDL(url string, table string) (string, error) {
+func getTableDDL(url, table string) (string, error) {
 	sqlConn := sqlx.NewSqlConn("mysql", url)
 
 	var showCreateTableResult ShowCreateTableResult
