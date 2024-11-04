@@ -213,6 +213,8 @@ func SetConfig(command string, flagSet *pflag.FlagSet) error {
 		}
 	})
 
+	viper.AutomaticEnv()
+
 	if err := viper.Unmarshal(&C); err != nil {
 		return err
 	}

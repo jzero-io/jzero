@@ -7,19 +7,26 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
+	"github.com/a8m/envsubst"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"gopkg.in/yaml.v3"
 
 	"github.com/jzero-io/jzero/config"
 )
 
-var CfgFile string
+var (
+	CfgFile    string
+	CfgEnvFile string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -41,6 +48,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVarP(&CfgFile, "config", "f", ".jzero.yaml", "set config file")
+	rootCmd.PersistentFlags().StringVarP(&CfgEnvFile, "config-env", "", ".jzero.env.yaml", "set config env file")
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "debug mode")
 	rootCmd.PersistentFlags().IntP("debug-sleep-time", "", 3, "debug sleep time")
 }
@@ -58,6 +66,22 @@ func initConfig() {
 		// If a config file is found, read it in.
 		if err := viper.ReadInConfig(); err != nil {
 			cobra.CheckErr(err)
+		}
+	}
+
+	if pathx.FileExists(CfgEnvFile) {
+		data, err := envsubst.ReadFile(CfgEnvFile)
+		if err != nil {
+			log.Fatalf("envsubst error: %v", err)
+		}
+		var env map[string]any
+		err = yaml.Unmarshal(data, &env)
+		if err != nil {
+			log.Fatalf("yaml unmarshal error: %v", err)
+		}
+
+		for k, v := range env {
+			_ = os.Setenv(k, cast.ToString(v))
 		}
 	}
 
