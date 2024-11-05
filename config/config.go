@@ -214,6 +214,7 @@ func SetConfig(command string, flagSet *pflag.FlagSet) error {
 		}
 	})
 
+	viper.SetEnvPrefix("JZERO")
 	viper.AutomaticEnv()
 
 	if err := viper.Unmarshal(&C); err != nil {
