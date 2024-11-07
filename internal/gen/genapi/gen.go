@@ -67,7 +67,7 @@ func (ja *JzeroApi) Gen() error {
 	for _, v := range apiFiles {
 		apiSpec, err := parser.Parse(v, nil)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "parse %s", v)
 		}
 		ja.ApiSpecMap[v] = apiSpec
 	}
