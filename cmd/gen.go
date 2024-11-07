@@ -257,6 +257,7 @@ func init() {
 		genCmd.Flags().StringP("proto-git-change-path", "", filepath.Join("desc", "proto"), "set proto git change path")
 
 		genCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
+		genCmd.Flags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
 
 		// used for goctl
 		// gen command persistentFlags

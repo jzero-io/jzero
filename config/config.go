@@ -94,6 +94,8 @@ type GenConfig struct {
 	// gen code flags
 	Desc []string `mapstructure:"desc"`
 
+	DescIgnore []string `mapstructure:"desc-ignore"`
+
 	Sdk        GenSdkConfig        `mapstructure:"sdk"`
 	Swagger    GenSwaggerConfig    `mapstructure:"swagger"`
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`

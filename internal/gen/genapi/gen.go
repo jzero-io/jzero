@@ -111,6 +111,27 @@ func (ja *JzeroApi) Gen() error {
 	}
 	ja.GenCodeApiFiles = genCodeApiFiles
 
+	// ignore api desc
+	for _, v := range ja.DescIgnore {
+		if !osx.IsDir(v) {
+			if filepath.Ext(v) == ".api" {
+				// delete item in genCodeApiFiles by filename
+				ja.GenCodeApiFiles = RemoveItems(ja.GenCodeApiFiles, v)
+				// delete map key
+				delete(ja.GenCodeApiSpecMap, v)
+			}
+		} else {
+			specifiedApiFiles, err := desc.FindApiFiles(v)
+			if err != nil {
+				return err
+			}
+			for _, saf := range specifiedApiFiles {
+				ja.GenCodeApiFiles = RemoveItems(ja.GenCodeApiFiles, saf)
+				delete(ja.GenCodeApiSpecMap, saf)
+			}
+		}
+	}
+
 	err = ja.generateApiCode()
 	if err != nil {
 		return err
@@ -298,4 +319,13 @@ func (ja *JzeroApi) generateApiCode() error {
 		return err
 	}
 	return os.WriteFile(filepath.Join("internal", "handler", "routes.go"), source, 0o644)
+}
+
+func RemoveItems(slice []string, s string) (result []string) {
+	for _, v := range slice {
+		if v != s {
+			result = append(result, v)
+		}
+	}
+	return
 }
