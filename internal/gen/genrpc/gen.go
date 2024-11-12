@@ -17,6 +17,7 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/pkg/desc"
 	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/gitstatus"
 	"github.com/jzero-io/jzero/pkg/osx"
@@ -102,6 +103,27 @@ func (jr *JzeroRpc) Gen() error {
 		jr.GenCodeProtoSpecMap = jr.ProtoSpecMap
 	}
 	jr.GenCodeProtoFiles = genCodeProtoFiles
+
+	// ignore proto desc
+	for _, v := range jr.DescIgnore {
+		if !osx.IsDir(v) {
+			if filepath.Ext(v) == ".proto" {
+				// delete item in genCodeApiFiles by filename
+				jr.GenCodeProtoFiles = RemoveItems(jr.GenCodeProtoFiles, v)
+				// delete map key
+				delete(jr.GenCodeProtoSpecMap, v)
+			}
+		} else {
+			specifiedApiFiles, err := desc.GetProtoFilepath(v)
+			if err != nil {
+				return err
+			}
+			for _, saf := range specifiedApiFiles {
+				jr.GenCodeProtoFiles = RemoveItems(jr.GenCodeProtoFiles, saf)
+				delete(jr.GenCodeProtoSpecMap, saf)
+			}
+		}
+	}
 
 	fmt.Printf("%s to generate proto code. \n", color.WithColor("Start", color.FgGreen))
 	for _, v := range jr.ProtoFiles {
@@ -294,4 +316,13 @@ func isNeedGenProtoDescriptor(proto rpcparser.Proto) bool {
 		}
 	}
 	return false
+}
+
+func RemoveItems(slice []string, s string) (result []string) {
+	for _, v := range slice {
+		if v != s {
+			result = append(result, v)
+		}
+	}
+	return
 }
