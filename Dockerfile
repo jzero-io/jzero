@@ -1,7 +1,7 @@
-FROM --platform=$TARGETPLATFORM golang:alpine
+FROM golang:alpine
 
-ENV CGO_ENABLED 0
-ENV GOPROXY https://goproxy.io,direct
+ENV CGO_ENABLED=0
+ENV GOPROXY=https://goproxy.io,direct
 
 LABEL \
   org.opencontainers.image.title="jzero" \
@@ -14,11 +14,11 @@ LABEL \
 
 WORKDIR /app
 
-COPY dist/jzero_linux_amd64_v1/jzero /dist/jzero_linux_amd64_v1/jzero
-COPY dist/jzero_linux_arm64/jzero /dist/jzero_linux_arm64/jzero
+COPY dist/jzero_linux_amd64_v1/jzero /dist/jzero_linux_amd64/jzero
+COPY dist/jzero_linux_arm64_v8.0/jzero /dist/jzero_linux_arm64/jzero
 
 RUN if [ `go env GOARCH` = "amd64" ]; then \
-      cp /dist/jzero_linux_amd64_v1/jzero /usr/local/bin/jzero; \
+      cp /dist/jzero_linux_amd64/jzero /usr/local/bin/jzero; \
     elif [ `go env GOARCH` = "arm64" ]; then \
       cp /dist/jzero_linux_arm64/jzero /usr/local/bin/jzero; \
     fi
