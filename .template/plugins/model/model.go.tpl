@@ -4,6 +4,7 @@ package model
 
 import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	{{if .withCache}}"github.com/zeromicro/go-zero/core/stores/cache"{{end}}
 
 	{{range $v := .Imports}}"{{$v}}"
 	{{end}}
@@ -14,9 +15,9 @@ type Model struct {
     {{end}}
 }
 
-func NewModel(conn sqlx.SqlConn) Model {
+func NewModel(conn sqlx.SqlConn, {{if .withCache}}c cache.CacheConf, opts ...cache.Option{{end}}) Model {
 	return Model{
-         {{range $v := .TablePackages}}{{$v | FirstUpper | ToCamel}}: {{$v}}.New{{ $v | FirstUpper | ToCamel }}Model(conn),
+         {{range $v := .TablePackages}}{{$v | FirstUpper | ToCamel}}: {{$v}}.New{{ $v | FirstUpper | ToCamel }}Model(conn, {{if $.withCache}}c, opts...{{end}}),
          {{end}}
 	}
 }

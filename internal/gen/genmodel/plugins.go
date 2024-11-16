@@ -32,6 +32,7 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 	template, err := templatex.ParseTemplate(map[string]any{
 		"Imports":       imports,
 		"TablePackages": tablePackages,
+		"withCache":     jm.ModelMysqlCache,
 	}, embeded.ReadTemplateFile(filepath.Join("plugins", "model", "model.go.tpl")))
 	if err != nil {
 		return err
