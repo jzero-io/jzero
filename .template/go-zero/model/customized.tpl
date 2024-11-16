@@ -10,7 +10,7 @@ func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, 
     if session != nil {
         _, err = session.ExecCtx(ctx, statement, args...)
     } else {
-        _, err = m.ExecNoCacheCtx(ctx, statement, args...)
+        {{if .withCache}}_, err = m.ExecNoCacheCtx(ctx, statement, args...){{else}}_, err = m.conn.ExecCtx(ctx, statement, args...){{end}}
     }
     return err
 }
@@ -26,7 +26,7 @@ func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Cont
 	if session != nil {
 		err = session.QueryRowsCtx(ctx, &resp, statement, args...)
 	} else {
-		err = m.QueryRowsNoCacheCtx(ctx, &resp, statement, args...)
+	    {{if .withCache}}err = m.QueryRowsNoCacheCtx(ctx, &resp, statement, args...){{else}}err = m.conn.QueryRowsCtx(ctx, &resp, statement, args...){{end}}
 	}
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.C
 	if session != nil {
 		err = session.QueryRowCtx(ctx, &resp, statement, args...)
 	} else {
-		err = m.QueryRowNoCacheCtx(ctx, &resp, statement, args...)
+	    {{if .withCache}}err = m.QueryRowNoCacheCtx(ctx, &resp, statement, args...){{else}}err = m.conn.QueryRowCtx(ctx, &resp, statement, args...){{end}}
 	}
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 	if session != nil {
 		err = session.QueryRowsCtx(ctx, &resp, statement, args...)
 	} else {
-		err = m.QueryRowsNoCacheCtx(ctx, &resp, statement, args...)
+		{{if .withCache}}err = m.QueryRowsNoCacheCtx(ctx, &resp, statement, args...){{else}}err = m.conn.QueryRowsCtx(ctx, &resp, statement, args...){{end}}
 	}
 	if err != nil {
 		return nil, 0, err
@@ -88,7 +88,7 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
     if session != nil {
     	err = session.QueryRowCtx(ctx, &total, statement, args...)
     } else {
-    	err = m.QueryRowNoCacheCtx(ctx, &total, statement, args...)
+    	{{if .withCache}}err = m.QueryRowNoCacheCtx(ctx, &total, statement, args...){{else}}err = m.conn.QueryRowCtx(ctx, &total, statement, args...){{end}}
     }
     if err != nil {
     	return nil, 0, err
@@ -117,7 +117,7 @@ func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx cont
 	if session != nil {
 		_, err = session.ExecCtx(ctx, statement, args...)
 	} else {
-		_, err = m.ExecNoCacheCtx(ctx, statement, args...)
+		{{if .withCache}}_, err = m.ExecNoCacheCtx(ctx, statement, args...){{else}}_, err = m.conn.ExecCtx(ctx, statement, args...){{end}}
 	}
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (m *custom{{.upperStartCamelObject}}Model) DeleteByCondition(ctx context.Co
 	if session != nil {
 		_, err = session.ExecCtx(ctx, statement, args...)
 	} else {
-		_, err = m.ExecNoCacheCtx(ctx, statement, args...)
+		{{if .withCache}}_, err = m.ExecNoCacheCtx(ctx, statement, args...){{else}}_, err = m.conn.ExecCtx(ctx, statement, args...){{end}}
 	}
 	return err
 }
