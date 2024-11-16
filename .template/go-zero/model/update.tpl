@@ -1,11 +1,10 @@
-func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, {{if .containsIndexCache}}newData{{else}}data{{end}} *{{.upperStartCamelObject}}) error {
-	{{if .withCache}}{{if .containsIndexCache}}data, err:=m.FindOne(ctx, newData.{{.upperStartCamelPrimaryKey}})
-	if err!=nil{
+func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, session sqlx.Session, {{if .containsIndexCache}}newData{{else}}data{{end}} *{{.upperStartCamelObject}}) error {
+	{{if .withCache}}{{if .containsIndexCache}}data, err := m.FindOne(ctx, newData.{{.upperStartCamelPrimaryKey}})
+	if err != nil{
 		return err
 	}
-
-{{end}}	{{.keys}}
-    _, {{if .containsIndexCache}}err{{else}}err:{{end}}= m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+    {{end}}{{.keys}}
+    _, {{if .containsIndexCache}}err{{else}}err :{{end}}= m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
         sb := sqlbuilder.Update(m.table)
         split := strings.Split({{.lowerStartCamelObject}}RowsExpectAutoSet, ",")
         var assigns []string
@@ -14,8 +13,11 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, {{i
         }
         sb.Set(assigns...)
         sb.Where(sb.EQ("{{.originalPrimaryKey}}", nil))
-        sql, _ := sb.Build()
-		return conn.ExecCtx(ctx, sql, {{.expressionValues}})
+        statement, _ := sb.Build()
+        if session != nil{
+            return session.ExecCtx(ctx, statement, {{.expressionValues}})
+        }
+		return conn.ExecCtx(ctx, statement, {{.expressionValues}})
 	}, {{.keyValues}}){{else}} sb := sqlbuilder.Update(m.table)
 	split := strings.Split({{.lowerStartCamelObject}}RowsExpectAutoSet, ",")
 	var assigns []string
@@ -24,7 +26,13 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, {{i
     }
     sb.Set(assigns...)
     sb.Where(sb.EQ("{{.originalPrimaryKey}}", nil))
-    sql, _ := sb.Build()
-    _,err:=m.conn.ExecCtx(ctx, sql, {{.expressionValues}}){{end}}
+    statement, _ := sb.Build()
+
+    var err error
+    if session != nil{
+        _, err = session.ExecCtx(ctx, statement, {{.expressionValues}})
+    }else{
+        _, err = m.conn.ExecCtx(ctx, statement, {{.expressionValues}})
+    }{{end}}
 	return err
 }

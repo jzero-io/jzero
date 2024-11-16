@@ -1,4 +1,4 @@
-func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.lowerStartCamelPrimaryKey}} {{.dataType}}) error {
+func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, session sqlx.Session, {{.lowerStartCamelPrimaryKey}} {{.dataType}}) error {
 	{{if .withCache}}{{if .containsIndexCache}}data, err:=m.FindOne(ctx, {{.lowerStartCamelPrimaryKey}})
 	if err!=nil{
 		return err
@@ -9,10 +9,19 @@ func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, {{.
 		sb := sqlbuilder.DeleteFrom(m.table)
         sb.Where(sb.EQ("{{.originalPrimaryKey}}", {{.lowerStartCamelPrimaryKey}}))
         sql, args := sb.Build()
+        if session != nil {
+			return session.ExecCtx(ctx, sql, args...)
+		}
 		return conn.ExecCtx(ctx, sql, args...)
 	}, {{.keyValues}}){{else}}sb := sqlbuilder.DeleteFrom(m.table)
 		 sb.Where(sb.EQ("{{.originalPrimaryKey}}", {{.lowerStartCamelPrimaryKey}}))
          sql, args := sb.Build()
-         _,err:=m.conn.ExecCtx(ctx, sql, args...){{end}}
+         var err error
+         if session != nil {
+            _, err = session.ExecCtx(ctx, sql, args...)
+		 }else{
+			_, err = m.conn.ExecCtx(ctx, sql, args...)
+		 }
+         {{end}}
 	return err
 }

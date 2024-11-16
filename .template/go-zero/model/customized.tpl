@@ -1,42 +1,61 @@
-func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, datas []*{{.upperStartCamelObject}}) error {
+func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, session sqlx.Session, datas []*{{.upperStartCamelObject}}) error {
     sb := sqlbuilder.InsertInto(m.table)
     sb.Cols({{.lowerStartCamelObject}}RowsExpectAutoSet)
     for _, data := range datas {
         sb.Values({{.expressionValues}})
     }
-    sql, args := sb.Build()
-    _, err:= m.conn.ExecCtx(ctx, sql, args...)
+    statement, args := sb.Build()
+
+    var err error
+    if session != nil {
+        _, err = session.ExecCtx(ctx, statement, args...)
+    } else {
+        _, err = m.ExecNoCacheCtx(ctx, statement, args...)
+    }
     return err
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Context, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
-	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
+func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
+    sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
 	condition.ApplySelect(sb, conds...)
-	sql, args := sb.Build()
+	statement, args := sb.Build()
 
 	var resp []*{{.upperStartCamelObject}}
-	err := m.conn.QueryRowsCtx(ctx, &resp, sql, args...)
+	var err error
+
+	if session != nil {
+		err = session.QueryRowsCtx(ctx, &resp, statement, args...)
+	} else {
+		err = m.QueryRowsNoCacheCtx(ctx, &resp, statement, args...)
+	}
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.Context, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
+func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
+
 	condition.ApplySelect(sb, conds...)
 	sb.Limit(1)
-	sql, args := sb.Build()
+	statement, args := sb.Build()
 
 	var resp {{.upperStartCamelObject}}
-	err := m.conn.QueryRowCtx(ctx, &resp, sql, args...)
+	var err error
+
+	if session != nil {
+		err = session.QueryRowCtx(ctx, &resp, statement, args...)
+	} else {
+		err = m.QueryRowNoCacheCtx(ctx, &resp, statement, args...)
+	}
 	if err != nil {
 		return nil, err
 	}
 	return &resp, nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Context, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, int64 ,error) {
+func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, int64 ,error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
 	countsb := sqlbuilder.Select("count(*)").From(m.table)
 
@@ -51,16 +70,26 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
     condition.ApplySelect(countsb, countConds...)
 
 	var resp []*{{.upperStartCamelObject}}
+	var err error
 
-	sql, args := sb.Build()
-	err := m.conn.QueryRowsCtx(ctx, &resp, sql, args...)
+	statement, args := sb.Build()
+
+	if session != nil {
+		err = session.QueryRowsCtx(ctx, &resp, statement, args...)
+	} else {
+		err = m.QueryRowsNoCacheCtx(ctx, &resp, statement, args...)
+	}
 	if err != nil {
 		return nil, 0, err
 	}
 
     var total int64
-    sql, args = countsb.Build()
-    err = m.conn.QueryRowCtx(ctx, &total, sql, args...)
+    statement, args = countsb.Build()
+    if session != nil {
+    	err = session.QueryRowCtx(ctx, &total, statement, args...)
+    } else {
+    	err = m.QueryRowNoCacheCtx(ctx, &total, statement, args...)
+    }
     if err != nil {
     	return nil, 0, err
     }
@@ -68,7 +97,7 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 	return resp, total, nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx context.Context, field map[string]any, conds ...condition.Condition) error {
+func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx context.Context, session sqlx.Session, field map[string]any, conds ...condition.Condition) error {
     if field == nil {
         return nil
     }
@@ -82,21 +111,33 @@ func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx cont
     }
     sb.Set(assigns...)
 
-	sql, args := sb.Build()
-	_, err := m.conn.ExecCtx(ctx, sql, args...)
+	statement, args := sb.Build()
+
+	var err error
+	if session != nil {
+		_, err = session.ExecCtx(ctx, statement, args...)
+	} else {
+		_, err = m.ExecNoCacheCtx(ctx, statement, args...)
+	}
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) DeleteByCondition(ctx context.Context, conds ...condition.Condition) error {
+func (m *custom{{.upperStartCamelObject}}Model) DeleteByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) error {
     if len(conds) == 0 {
 		return nil
 	}
 	sb := sqlbuilder.DeleteFrom(m.table)
 	condition.ApplyDelete(sb, conds...)
-	sql, args := sb.Build()
-	_, err := m.conn.ExecCtx(ctx, sql, args...)
+	statement, args := sb.Build()
+
+	var err error
+	if session != nil {
+		_, err = session.ExecCtx(ctx, statement, args...)
+	} else {
+		_, err = m.ExecNoCacheCtx(ctx, statement, args...)
+	}
 	return err
 }
