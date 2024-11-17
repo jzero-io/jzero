@@ -55,6 +55,16 @@ jzero gen --desc desc/proto/v1/xx.proto
 jzero gen --desc desc/sql/xx.sql
 ```
 
+### 生成代码忽略 desc
+
+> 支持传入数组, 支持指定文件夹或者文件
+
+```shell
+jzero gen --desc-ignore desc/api/xx.api
+jzero gen --desc-ignore desc/proto/v1/xx.proto
+jzero gen --desc-ignore desc/sql/xx.sql
+```
+
 ### 生成数据库代码
 
 :::tip 支持基于 sql 文件和数据库 dsn 连接生成代码, 默认使用 sql 文件生成
