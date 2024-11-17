@@ -91,6 +91,9 @@ type GenConfig struct {
 	ModelMysqlCachePrefix     string   `mapstructure:"model-mysql-cache-prefix"`
 	GenMysqlCreateTableDDL    bool     `mapstructure:"gen-mysql-create-table-ddl"`
 
+	// rpc flags
+	RpcClient bool `mapstructure:"rpc-client"`
+
 	// gen code flags
 	Desc []string `mapstructure:"desc"`
 

@@ -157,13 +157,14 @@ func (jr *JzeroRpc) Gen() error {
 		if lo.Contains(genCodeProtoFiles, v) {
 			fmt.Printf("%s proto file %s\n", color.WithColor("Using", color.FgGreen), v)
 			zrpcOut := "."
-			command := fmt.Sprintf("goctl rpc protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s ",
+			command := fmt.Sprintf("goctl rpc protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=%t --home %s -m --style %s ",
 				v,
 				protoDirPath,
 				filepath.Join(protoDirPath, "third_party"),
 				filepath.Join("internal"),
 				filepath.Join("internal"),
 				zrpcOut,
+				jr.RpcClient,
 				filepath.Join(embeded.Home, "go-zero"),
 				jr.Style)
 
