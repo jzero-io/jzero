@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/mr"
@@ -159,6 +160,27 @@ func (jm *JzeroModel) Gen() error {
 			genCodeFiles, err = jzerodesc.FindSqlFiles(sqlDir)
 			if err != nil {
 				return err
+			}
+		}
+
+		// ignore sql desc
+		for _, v := range jm.DescIgnore {
+			if !osx.IsDir(v) {
+				if filepath.Ext(v) == ".sql" {
+					genCodeFiles = lo.Reject(genCodeFiles, func(item string, _ int) bool {
+						return item == v
+					})
+				}
+			} else {
+				specifiedSqlFiles, err := jzerodesc.FindSqlFiles(v)
+				if err != nil {
+					return err
+				}
+				for _, saf := range specifiedSqlFiles {
+					genCodeFiles = lo.Reject(genCodeFiles, func(item string, _ int) bool {
+						return item == saf
+					})
+				}
 			}
 		}
 

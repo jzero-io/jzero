@@ -109,7 +109,9 @@ func (jr *JzeroRpc) Gen() error {
 		if !osx.IsDir(v) {
 			if filepath.Ext(v) == ".proto" {
 				// delete item in genCodeApiFiles by filename
-				jr.GenCodeProtoFiles = RemoveItems(jr.GenCodeProtoFiles, v)
+				jr.GenCodeProtoFiles = lo.Reject(jr.GenCodeProtoFiles, func(item string, _ int) bool {
+					return item == v
+				})
 				// delete map key
 				delete(jr.GenCodeProtoSpecMap, v)
 			}
@@ -119,7 +121,9 @@ func (jr *JzeroRpc) Gen() error {
 				return err
 			}
 			for _, saf := range specifiedApiFiles {
-				jr.GenCodeProtoFiles = RemoveItems(jr.GenCodeProtoFiles, saf)
+				jr.GenCodeProtoFiles = lo.Reject(jr.GenCodeProtoFiles, func(item string, _ int) bool {
+					return item == saf
+				})
 				delete(jr.GenCodeProtoSpecMap, saf)
 			}
 		}
@@ -316,13 +320,4 @@ func isNeedGenProtoDescriptor(proto rpcparser.Proto) bool {
 		}
 	}
 	return false
-}
-
-func RemoveItems(slice []string, s string) (result []string) {
-	for _, v := range slice {
-		if v != s {
-			result = append(result, v)
-		}
-	}
-	return
 }

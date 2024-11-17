@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -107,7 +108,10 @@ func (ja *JzeroApi) Gen() error {
 	default:
 		// 否则就是全量的 api 文件
 		genCodeApiFiles = ja.ApiFiles
-		ja.GenCodeApiSpecMap = ja.ApiSpecMap
+		// clone 一份 gen code api spec map
+		for k, v := range ja.ApiSpecMap {
+			ja.GenCodeApiSpecMap[k] = v
+		}
 	}
 	ja.GenCodeApiFiles = genCodeApiFiles
 
@@ -116,7 +120,9 @@ func (ja *JzeroApi) Gen() error {
 		if !osx.IsDir(v) {
 			if filepath.Ext(v) == ".api" {
 				// delete item in genCodeApiFiles by filename
-				ja.GenCodeApiFiles = RemoveItems(ja.GenCodeApiFiles, v)
+				ja.GenCodeApiFiles = lo.Reject(ja.GenCodeApiFiles, func(item string, _ int) bool {
+					return item == v
+				})
 				// delete map key
 				delete(ja.GenCodeApiSpecMap, v)
 			}
@@ -126,7 +132,9 @@ func (ja *JzeroApi) Gen() error {
 				return err
 			}
 			for _, saf := range specifiedApiFiles {
-				ja.GenCodeApiFiles = RemoveItems(ja.GenCodeApiFiles, saf)
+				ja.GenCodeApiFiles = lo.Reject(ja.GenCodeApiFiles, func(item string, _ int) bool {
+					return item == saf
+				})
 				delete(ja.GenCodeApiSpecMap, saf)
 			}
 		}
@@ -319,13 +327,4 @@ func (ja *JzeroApi) generateApiCode() error {
 		return err
 	}
 	return os.WriteFile(filepath.Join("internal", "handler", "routes.go"), source, 0o644)
-}
-
-func RemoveItems(slice []string, s string) (result []string) {
-	for _, v := range slice {
-		if v != s {
-			result = append(result, v)
-		}
-	}
-	return
 }
