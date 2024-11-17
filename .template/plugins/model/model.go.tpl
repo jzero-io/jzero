@@ -4,7 +4,8 @@ package model
 
 import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	{{if .withCache}}"github.com/zeromicro/go-zero/core/stores/cache"{{end}}
+	"github.com/jzero-io/jzero-contrib/modelx"
+    "github.com/eddieowens/opts"
 
 	{{range $v := .Imports}}"{{$v}}"
 	{{end}}
@@ -15,9 +16,9 @@ type Model struct {
     {{end}}
 }
 
-func NewModel(conn sqlx.SqlConn, {{if .withCache}}c cache.CacheConf, opts ...cache.Option{{end}}) Model {
+func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
 	return Model{
-         {{range $v := .TablePackages}}{{$v | FirstUpper | ToCamel}}: {{$v}}.New{{ $v | FirstUpper | ToCamel }}Model(conn, {{if $.withCache}}c, opts...{{end}}),
+         {{range $v := .TablePackages}}{{$v | FirstUpper | ToCamel}}: {{$v}}.New{{ $v | FirstUpper | ToCamel }}Model(conn, op...),
          {{end}}
 	}
 }
