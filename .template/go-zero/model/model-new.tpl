@@ -1,6 +1,8 @@
-func new{{.upperStartCamelObject}}Model(conn sqlx.SqlConn{{if .withCache}}, c cache.CacheConf, opts ...cache.Option{{end}}) *default{{.upperStartCamelObject}}Model {
+func new{{.upperStartCamelObject}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) *default{{.upperStartCamelObject}}Model {
+	{{if .withCache}}o := opts.DefaultApply(op...){{end}}
 	return &default{{.upperStartCamelObject}}Model{
-		{{if .withCache}}CachedConn: sqlc.NewConn(conn, c, opts...){{else}}conn:conn{{end}},
+		{{if .withCache}}cachedConn: sqlc.NewConn(conn, o.CacheConf, o.CacheOpts...),{{end}}
+		conn: conn,
 		table:      {{.table}},
 	}
 }

@@ -1,15 +1,10 @@
 package {{.pkg}}
-{{if .withCache}}
 import (
-	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"github.com/jzero-io/jzero-contrib/modelx"
+	"github.com/eddieowens/opts"
 )
-{{else}}
 
-import (
-    "github.com/zeromicro/go-zero/core/stores/sqlx"
-)
-{{end}}
 var _ {{.upperStartCamelObject}}Model = (*custom{{.upperStartCamelObject}}Model)(nil)
 
 type (
@@ -17,7 +12,6 @@ type (
 	// and implement the added methods in custom{{.upperStartCamelObject}}Model.
 	{{.upperStartCamelObject}}Model interface {
 		{{.lowerStartCamelObject}}Model
-		{{if not .withCache}}WithSession(session sqlx.Session) {{.upperStartCamelObject}}Model{{end}}
 	}
 
 	custom{{.upperStartCamelObject}}Model struct {
@@ -26,15 +20,9 @@ type (
 )
 
 // New{{.upperStartCamelObject}}Model returns a model for the database table.
-func New{{.upperStartCamelObject}}Model(conn sqlx.SqlConn{{if .withCache}}, c cache.CacheConf, opts ...cache.Option{{end}}) {{.upperStartCamelObject}}Model {
+func New{{.upperStartCamelObject}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) {{.upperStartCamelObject}}Model {
 	return &custom{{.upperStartCamelObject}}Model{
-		default{{.upperStartCamelObject}}Model: new{{.upperStartCamelObject}}Model(conn{{if .withCache}}, c, opts...{{end}}),
+		default{{.upperStartCamelObject}}Model: new{{.upperStartCamelObject}}Model(conn, op...),
 	}
 }
-
-{{if not .withCache}}
-func (m *custom{{.upperStartCamelObject}}Model) WithSession(session sqlx.Session) {{.upperStartCamelObject}}Model {
-    return New{{.upperStartCamelObject}}Model(sqlx.NewSqlConnFromSession(session))
-}
-{{end}}
 

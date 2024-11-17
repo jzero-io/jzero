@@ -1,7 +1,33 @@
 func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx context.Context, session sqlx.Session, {{.in}}) (*{{.upperStartCamelObject}}, error) {
+	var resp {{.upperStartCamelObject}}
+    var err error
+
+	sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
+	sb.Where(sb.EQ(strings.Split(strings.ReplaceAll("{{.originalField}}", " ", ""), "=")[0], {{.lowerStartCamelField}}))
+    sb.Limit(1)
+
+    sql, args := sb.Build()
+
+    if session != nil {
+        err = session.QueryRowCtx(ctx, &resp, sql, args...)
+    } else {
+        err = m.conn.QueryRowCtx(ctx, &resp, sql, args...)
+    }
+
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlx.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
+func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}WithCache(ctx context.Context, session sqlx.Session, {{.in}}) (*{{.upperStartCamelObject}}, error) {
 	{{if .withCache}}{{.cacheKey}}
 	var resp {{.upperStartCamelObject}}
-	err := m.QueryRowIndexCtx(ctx, &resp, {{.cacheKeyVariable}}, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
+	err := m.cachedConn.QueryRowIndexCtx(ctx, &resp, {{.cacheKeyVariable}}, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
 		sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
 		sb.Where(sb.EQ(strings.Split(strings.ReplaceAll("{{.originalField}}", " ", ""), "=")[0], {{.lowerStartCamelField}}))
 		sb.Limit(1)
@@ -25,28 +51,5 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 		return nil, ErrNotFound
 	default:
 		return nil, err
-	}
-}{{else}}var resp {{.upperStartCamelObject}}
-    var err error
-
-	sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-	sb.Where(sb.EQ(strings.Split(strings.ReplaceAll("{{.originalField}}", " ", ""), "=")[0], {{.lowerStartCamelField}}))
-    sb.Limit(1)
-
-    sql, args := sb.Build()
-
-    if session != nil {
-        err = session.QueryRowCtx(ctx, &resp, sql, args...)
-    } else {
-        err = m.conn.QueryRowCtx(ctx, &resp, sql, args...)
-    }
-
-	switch err {
-	case nil:
-		return &resp, nil
-	case sqlx.ErrNotFound:
-		return nil, ErrNotFound
-	default:
-		return nil, err
-	}
-}{{end}}
+	}{{else}}return m.FindOneBy{{.upperField}}(ctx, session, {{ $length := len .upperField }}{{ printf "%.*s" $length .in }}){{end}}
+}

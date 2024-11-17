@@ -12,7 +12,8 @@ type (
 	}
 
 	default{{.upperStartCamelObject}}Model struct {
-		{{if .withCache}}sqlc.CachedConn{{else}}conn sqlx.SqlConn{{end}}
+		{{if .withCache}}cachedConn sqlc.CachedConn
+		conn sqlx.SqlConn{{else}}conn sqlx.SqlConn{{end}}
 		table string
 	}
 
