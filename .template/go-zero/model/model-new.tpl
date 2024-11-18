@@ -1,9 +1,15 @@
 func new{{.upperStartCamelObject}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) *default{{.upperStartCamelObject}}Model {
-	{{if .withCache}}o := opts.DefaultApply(op...){{end}}
+	o := opts.DefaultApply(op...)
+    var cachedConn sqlc.CachedConn
+    if len(o.CacheConf) > 0 {
+    	cachedConn = sqlc.NewConn(conn, o.CacheConf, o.CacheOpts...)
+    }
+    if o.CachedConn != nil {
+    	cachedConn = *o.CachedConn
+    }
 	return &default{{.upperStartCamelObject}}Model{
-		{{if .withCache}}cachedConn: sqlc.NewConn(conn, o.CacheConf, o.CacheOpts...),{{end}}
+		cachedConn: cachedConn,
 		conn: conn,
 		table:      {{.table}},
 	}
 }
-
