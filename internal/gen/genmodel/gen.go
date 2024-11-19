@@ -102,8 +102,15 @@ func (jm *JzeroModel) Gen() error {
 			}
 
 			if jm.ModelMysqlCachePrefix != "" && jm.ModelMysqlCache {
-				namingFormat, _ := format.FileNamingFormat(table, jm.Style)
-				err = jm.addModelMysqlCachePrefix(filepath.Join("internal", "model", strings.ToLower(table), namingFormat+"model_gen.go"))
+				namingFormat, err := format.FileNamingFormat(jm.Style, table)
+				if err != nil {
+					return
+				}
+				file := namingFormat + "model_gen.go"
+				if jm.Style == "go_zero" {
+					file = namingFormat + "_model_gen.go"
+				}
+				err = jm.addModelMysqlCachePrefix(filepath.Join("internal", "model", strings.ToLower(table), file))
 				if err != nil {
 					console.Warning("[warning]: %s", err.Error())
 					return
@@ -149,7 +156,7 @@ func (jm *JzeroModel) Gen() error {
 						genCodeFiles = append(genCodeFiles, v)
 					}
 				} else {
-					specifiedSqlFiles, err := jzerodesc.FindApiFiles(v)
+					specifiedSqlFiles, err := jzerodesc.FindSqlFiles(v)
 					if err != nil {
 						return err
 					}
@@ -187,7 +194,7 @@ func (jm *JzeroModel) Gen() error {
 		fmt.Printf("%s to generate model code from sql files.\n", color.WithColor("Start", color.FgGreen))
 		for _, f := range genCodeFiles {
 			fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), f)
-			tableParsers, err := parser.Parse(filepath.Join(jm.Wd, f), "", jm.ModelMysqlStrict)
+			tableParsers, err := parser.Parse(filepath.Join(jm.Wd, f), jm.ModelMysqlDDLDatabase, jm.ModelMysqlStrict)
 			if err != nil {
 				return err
 			}
@@ -198,7 +205,7 @@ func (jm *JzeroModel) Gen() error {
 
 			bf := filepath.Base(f)
 			modelDir := filepath.Join("internal", "model", strings.ToLower(bf[0:len(bf)-len(path.Ext(bf))]))
-			cmd := exec.Command("goctl", "model", "mysql", "ddl", "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", jm.Style, "-i", strings.Join(jm.ModelMysqlIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", jm.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", jm.ModelMysqlStrict))
+			cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", jm.ModelMysqlDDLDatabase, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", jm.Style, "-i", strings.Join(jm.ModelMysqlIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", jm.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", jm.ModelMysqlStrict))
 			resp, err := cmd.CombinedOutput()
 			if err != nil {
 				return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)

@@ -269,6 +269,7 @@ func init() {
 
 		genCmd.Flags().BoolP("model-mysql-strict", "", false, "goctl model mysql strict mode, see [https://go-zero.dev/docs/tutorials/cli/model]")
 		genCmd.Flags().StringSliceP("model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
+		genCmd.Flags().StringP("model-mysql-ddl-database", "", "", "goctl model mysql ddl database")
 		genCmd.Flags().BoolP("model-mysql-datasource", "", false, "goctl model mysql datasource")
 		genCmd.Flags().StringP("model-mysql-datasource-url", "", "", "goctl model mysql datasource url")
 		genCmd.Flags().StringSliceP("model-mysql-datasource-table", "", []string{"*"}, "goctl model mysql datasource table")

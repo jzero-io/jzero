@@ -84,6 +84,7 @@ type GenConfig struct {
 
 	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`
 	ModelMysqlIgnoreColumns   []string `mapstructure:"model-mysql-ignore-columns"`
+	ModelMysqlDDLDatabase     string   `mapstructure:"model-mysql-ddl-database"`
 	ModelMysqlDatasource      bool     `mapstructure:"model-mysql-datasource"`
 	ModelMysqlDatasourceUrl   string   `mapstructure:"model-mysql-datasource-url"`
 	ModelMysqlDatasourceTable []string `mapstructure:"model-mysql-datasource-table"`
