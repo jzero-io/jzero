@@ -17,8 +17,8 @@ func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, 
 
 func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
     sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
-	condition.ApplySelect(sb, conds...)
-	statement, args := sb.Build()
+	builder := condition.Select(*sb, conds...)
+	statement, args := builder.Build()
 
 	var resp []*{{.upperStartCamelObject}}
 	var err error
@@ -37,9 +37,9 @@ func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Cont
 func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
 
-	condition.ApplySelect(sb, conds...)
-	sb.Limit(1)
-	statement, args := sb.Build()
+	builder := condition.Select(*sb, conds...)
+	builder.Limit(1)
+	statement, args := builder.Build()
 
 	var resp {{.upperStartCamelObject}}
 	var err error
@@ -59,7 +59,7 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
 	countsb := sqlbuilder.Select("count(*)").From(m.table)
 
-	condition.ApplySelect(sb, conds...)
+	builder := condition.Select(*sb, conds...)
 
 	var countConds []condition.Condition
     for _, cond := range conds {
@@ -67,12 +67,12 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
     		countConds = append(countConds, cond)
     	}
     }
-    condition.ApplySelect(countsb, countConds...)
+    countBuilder := condition.Select(*countsb, countConds...)
 
 	var resp []*{{.upperStartCamelObject}}
 	var err error
 
-	statement, args := sb.Build()
+	statement, args := builder.Build()
 
 	if session != nil {
 		err = session.QueryRowsCtx(ctx, &resp, statement, args...)
@@ -84,7 +84,7 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 	}
 
     var total int64
-    statement, args = countsb.Build()
+    statement, args = countBuilder.Build()
     if session != nil {
     	err = session.QueryRowCtx(ctx, &total, statement, args...)
     } else {
@@ -103,15 +103,15 @@ func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx cont
     }
 
 	sb := sqlbuilder.Update(m.table)
-	condition.ApplyUpdate(sb, conds...)
+	builder := condition.Update(*sb, conds...)
 
 	var assigns []string
     for key, value := range field {
         assigns = append(assigns, sb.Assign(key, value))
     }
-    sb.Set(assigns...)
+    builder.Set(assigns...)
 
-	statement, args := sb.Build()
+	statement, args := builder.Build()
 
 	var err error
 	if session != nil {
@@ -130,8 +130,8 @@ func (m *custom{{.upperStartCamelObject}}Model) DeleteByCondition(ctx context.Co
 		return nil
 	}
 	sb := sqlbuilder.DeleteFrom(m.table)
-	condition.ApplyDelete(sb, conds...)
-	statement, args := sb.Build()
+	builder := condition.Delete(*sb, conds...)
+	statement, args := builder.Build()
 
 	var err error
 	if session != nil {

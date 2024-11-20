@@ -1,13 +1,13 @@
 func (m *default{{.upperStartCamelObject}}Model) Delete(ctx context.Context, session sqlx.Session, {{.lowerStartCamelPrimaryKey}} {{.dataType}}) error {
 	sb := sqlbuilder.DeleteFrom(m.table)
-		 sb.Where(sb.EQ("{{.originalPrimaryKey}}", {{.lowerStartCamelPrimaryKey}}))
-         statement, args := sb.Build()
-         var err error
-         if session != nil {
-            _, err = session.ExecCtx(ctx, statement, args...)
-		 }else{
-			_, err = m.conn.ExecCtx(ctx, statement, args...)
-		 }
+    sb.Where(sb.EQ("{{.originalPrimaryKey}}", {{.lowerStartCamelPrimaryKey}}))
+    statement, args := sb.Build()
+    var err error
+    if session != nil {
+        _, err = session.ExecCtx(ctx, statement, args...)
+    } else {
+        _, err = m.conn.ExecCtx(ctx, statement, args...)
+	}
 	return err
 }
 
