@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"sync"
 
@@ -18,6 +19,8 @@ import (
 )
 
 func (jm *JzeroModel) GenRegister(tables []string) error {
+	slices.Sort(tables)
+
 	var imports []string
 	var tablePackages []string
 
