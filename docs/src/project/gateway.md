@@ -2,7 +2,7 @@
 title: gateway 项目实战
 icon: mdi:arrow-projectile-multiple
 star: true
-order: 1
+order: 2
 category: project
 tag:
   - Guide
@@ -18,7 +18,7 @@ gateway 项目包含以下技术栈:
 ## 2. 新建项目
 
 ```shell
-jzero new simplegateway --branch gateway
+jzero new simplegateway --frame gateway
 cd simplegateway
 jzero gen
 go mod tidy
