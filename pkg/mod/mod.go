@@ -63,7 +63,10 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 			return &m, nil
 		}
 	}
-	return nil, errors.New("get mod error")
+
+	// 非 go.mod 项目, 作为 sub module
+	// TODO
+	return &ms[0], nil
 }
 
 // ModuleStruct contains the relative data of go module,
