@@ -244,7 +244,6 @@ func init() {
 		rootCmd.AddCommand(genCmd)
 
 		// used for jzero
-		genCmd.Flags().BoolP("remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
 		genCmd.Flags().BoolP("change-logic-types", "", false, "if api file or proto change, e.g. Request or Response type, change logic file content types but not file")
 		genCmd.Flags().BoolP("regen-api-handler", "", false, "")
 

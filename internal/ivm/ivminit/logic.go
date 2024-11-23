@@ -43,15 +43,12 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 	}
 
 	for i, file := range files {
-		newFilePath := file.Path
-		if ivm.jzeroRpc.RemoveSuffix {
-			// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
-			newFilePath = file.Path[:len(file.Path)-8]
-			// patch
-			newFilePath = strings.TrimSuffix(newFilePath, "_")
-			newFilePath = strings.TrimSuffix(newFilePath, "-")
-			newFilePath += ".go"
-		}
+		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
+		newFilePath := file.Path[:len(file.Path)-8]
+		// patch
+		newFilePath = strings.TrimSuffix(newFilePath, "_")
+		newFilePath = strings.TrimSuffix(newFilePath, "-")
+		newFilePath += ".go"
 
 		fset := token.NewFileSet()
 
@@ -74,10 +71,7 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 		fileContent := strings.ReplaceAll(buf.String(), "__TEMPLATE_BODY__", "{{ .Body }}")
 		fileContent = strings.ReplaceAll(fileContent, "var __TEMPLATE_ADAPTOR__ string", "{{ .Adaptor }}")
 
-		logicTypeName := fmt.Sprintf("%sLogic", file.Handler)
-		if ivm.jzeroRpc.RemoveSuffix {
-			logicTypeName = file.Handler
-		}
+		logicTypeName := file.Handler
 
 		templateValue := map[string]any{
 			"Service":          strings.ToLower(file.Group),

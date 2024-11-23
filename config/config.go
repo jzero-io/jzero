@@ -70,7 +70,6 @@ type GenConfig struct {
 
 	ChangeLogicTypes bool `mapstructure:"change-logic-types"`
 	RpcStylePatch    bool `mapstructure:"rpc-style-patch"`
-	RemoveSuffix     bool `mapstructure:"remove-suffix"`
 	RegenApiHandler  bool `mapstructure:"regen-api-handler"`
 
 	// git flags
@@ -153,7 +152,6 @@ type IvmConfig struct {
 
 type IvmInitConfig struct {
 	Style            string `mapstructure:"style"`
-	RemoveSuffix     bool   `mapstructure:"remove-suffix"`
 	ChangeLogicTypes bool   `mapstructure:"change-logic-types"`
 }
 

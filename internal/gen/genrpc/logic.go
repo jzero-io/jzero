@@ -52,15 +52,12 @@ func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Pr
 }
 
 func (jr *JzeroRpc) changeLogicTypes(file genapi.LogicFile) error {
-	fp := file.Path // logic file path
-	if jr.RemoveSuffix {
-		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
-		fp = file.Path[:len(file.Path)-8]
-		// patch
-		fp = strings.TrimSuffix(fp, "_")
-		fp = strings.TrimSuffix(fp, "-")
-		fp += ".go"
-	}
+	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
+	fp := file.Path[:len(file.Path)-8]
+	// patch
+	fp = strings.TrimSuffix(fp, "_")
+	fp = strings.TrimSuffix(fp, "-")
+	fp += ".go"
 
 	fset := token.NewFileSet()
 

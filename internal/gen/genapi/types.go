@@ -113,14 +113,11 @@ var (
 }
 
 func (ja *JzeroApi) updateHandlerImportedTypesPath(file HandlerFile) error {
-	fp := file.Path // handler file path
-	if ja.RemoveSuffix {
-		fp = file.Path[:len(file.Path)-10]
-		// patch
-		fp = strings.TrimSuffix(fp, "_")
-		fp = strings.TrimSuffix(fp, "-")
-		fp += ".go"
-	}
+	fp := file.Path[:len(file.Path)-10]
+	// patch
+	fp = strings.TrimSuffix(fp, "_")
+	fp = strings.TrimSuffix(fp, "-")
+	fp += ".go"
 
 	fset := token.NewFileSet()
 
@@ -147,15 +144,12 @@ func (ja *JzeroApi) updateHandlerImportedTypesPath(file HandlerFile) error {
 }
 
 func (ja *JzeroApi) updateLogicImportedTypesPath(file LogicFile) error {
-	fp := file.Path // logic file path
-	if ja.RemoveSuffix {
-		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
-		fp = file.Path[:len(file.Path)-8]
-		// patch
-		fp = strings.TrimSuffix(fp, "_")
-		fp = strings.TrimSuffix(fp, "-")
-		fp += ".go"
-	}
+	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
+	fp := file.Path[:len(file.Path)-8]
+	// patch
+	fp = strings.TrimSuffix(fp, "_")
+	fp = strings.TrimSuffix(fp, "-")
+	fp += ".go"
 
 	fset := token.NewFileSet()
 
@@ -183,15 +177,12 @@ func (ja *JzeroApi) updateLogicImportedTypesPath(file LogicFile) error {
 
 // changeLogicTypes just change logic file logic function params and resp, but not body and others code
 func (ja *JzeroApi) changeLogicTypes(file LogicFile) error {
-	fp := file.Path // logic file path
-	if ja.RemoveSuffix {
-		// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
-		fp = file.Path[:len(file.Path)-8]
-		// patch
-		fp = strings.TrimSuffix(fp, "_")
-		fp = strings.TrimSuffix(fp, "-")
-		fp += ".go"
-	}
+	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
+	fp := file.Path[:len(file.Path)-8]
+	// patch
+	fp = strings.TrimSuffix(fp, "_")
+	fp = strings.TrimSuffix(fp, "-")
+	fp += ".go"
 
 	fset := token.NewFileSet()
 

@@ -18,13 +18,11 @@ import (
 
 func (jr *JzeroRpc) rpcStylePatchLogic(file genapi.LogicFile) error {
 	fp := file.Path
-	if jr.RemoveSuffix {
-		fp = fp[:len(fp)-8]
-		// patch
-		fp = strings.TrimSuffix(fp, "_")
-		fp = strings.TrimSuffix(fp, "-")
-		fp = fp + ".go"
-	}
+	fp = fp[:len(fp)-8]
+	// patch
+	fp = strings.TrimSuffix(fp, "_")
+	fp = strings.TrimSuffix(fp, "-")
+	fp = fp + ".go"
 
 	fset := token.NewFileSet()
 
@@ -50,14 +48,12 @@ func (jr *JzeroRpc) rpcStylePatchLogic(file genapi.LogicFile) error {
 
 func (jr *JzeroRpc) rpcStylePatchServer(file ServerFile) error {
 	fp := file.Path
-	if jr.RemoveSuffix {
-		// Get the new file name of the file (without the 5 characters(Server or server) before the ".go" extension)
-		fp = fp[:len(fp)-9]
-		// patch
-		fp = strings.TrimSuffix(fp, "_")
-		fp = strings.TrimSuffix(fp, "-")
-		fp = fp + ".go"
-	}
+	// Get the new file name of the file (without the 5 characters(Server or server) before the ".go" extension)
+	fp = fp[:len(fp)-9]
+	// patch
+	fp = strings.TrimSuffix(fp, "_")
+	fp = strings.TrimSuffix(fp, "-")
+	fp = fp + ".go"
 
 	fset := token.NewFileSet()
 

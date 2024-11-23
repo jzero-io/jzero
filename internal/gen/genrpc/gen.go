@@ -202,23 +202,21 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 
-		if jr.RemoveSuffix {
-			for _, file := range allServerFiles {
-				if filepath.Clean(file.DescFilepath) == filepath.Clean(v) {
-					if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
-						if err := jr.removeServerSuffix(file.Path); err != nil {
-							console.Warning("[warning]: remove server suffix %s meet error %v", file.Path, err)
-							continue
-						}
+		for _, file := range allServerFiles {
+			if filepath.Clean(file.DescFilepath) == filepath.Clean(v) {
+				if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
+					if err := jr.removeServerSuffix(file.Path); err != nil {
+						console.Warning("[warning]: remove server suffix %s meet error %v", file.Path, err)
+						continue
 					}
 				}
 			}
-			for _, file := range allLogicFiles {
-				if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
-					if err := jr.removeLogicSuffix(file.Path); err != nil {
-						console.Warning("[warning]: remove logic suffix %s meet error %v", file.Path, err)
-						continue
-					}
+		}
+		for _, file := range allLogicFiles {
+			if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
+				if err := jr.removeLogicSuffix(file.Path); err != nil {
+					console.Warning("[warning]: remove logic suffix %s meet error %v", file.Path, err)
+					continue
 				}
 			}
 		}
@@ -278,11 +276,7 @@ func (jr *JzeroRpc) Gen() error {
 				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, strings.ToLower(s.Name), jr.Module, strings.ToLower(s.Name)))
 			}
 
-			if jr.RemoveSuffix {
-				registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%s(ctx))", filepath.Base(jr.ProtoSpecMap[v].GoPackage), stringx.FirstUpper(s.Name), strings.ToLower(s.Name), stringx.FirstUpper(stringx.ToCamel(s.Name))))
-			} else {
-				registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%sServer(ctx))", filepath.Base(jr.ProtoSpecMap[v].GoPackage), stringx.FirstUpper(s.Name), strings.ToLower(s.Name), stringx.FirstUpper(stringx.ToCamel(s.Name))))
-			}
+			registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%s(ctx))", filepath.Base(jr.ProtoSpecMap[v].GoPackage), stringx.FirstUpper(s.Name), strings.ToLower(s.Name), stringx.FirstUpper(stringx.ToCamel(s.Name))))
 		}
 		pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(jr.ProtoSpecMap[v].GoPackage, "./")))
 	}

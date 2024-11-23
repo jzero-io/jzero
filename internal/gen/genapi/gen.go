@@ -245,19 +245,17 @@ func (ja *JzeroApi) generateApiCode() error {
 			}
 
 			// 处理多余后缀
-			if ja.RemoveSuffix {
-				for _, file := range handlerFiles {
-					if _, ok := ja.GenCodeApiSpecMap[file.ApiFilepath]; ok {
-						if err = ja.removeHandlerSuffix(file.Path); err != nil {
-							return errors.Wrapf(err, "rewrite %s", file.Path)
-						}
+			for _, file := range handlerFiles {
+				if _, ok := ja.GenCodeApiSpecMap[file.ApiFilepath]; ok {
+					if err = ja.removeHandlerSuffix(file.Path); err != nil {
+						return errors.Wrapf(err, "rewrite %s", file.Path)
 					}
 				}
-				for _, file := range logicFiles {
-					if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
-						if err = ja.removeLogicSuffix(file.Path); err != nil {
-							return errors.Wrapf(err, "rewrite %s", file.Path)
-						}
+			}
+			for _, file := range logicFiles {
+				if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
+					if err = ja.removeLogicSuffix(file.Path); err != nil {
+						return errors.Wrapf(err, "rewrite %s", file.Path)
 					}
 				}
 			}
