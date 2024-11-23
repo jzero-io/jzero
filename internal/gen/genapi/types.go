@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go/ast"
 	goformat "go/format"
-	goparser "go/parser"
 	"go/token"
 	"os"
 	"path/filepath"
@@ -112,20 +111,7 @@ var (
 	return nil
 }
 
-func (ja *JzeroApi) updateHandlerImportedTypesPath(file HandlerFile) error {
-	fp := file.Path[:len(file.Path)-10]
-	// patch
-	fp = strings.TrimSuffix(fp, "_")
-	fp = strings.TrimSuffix(fp, "-")
-	fp += ".go"
-
-	fset := token.NewFileSet()
-
-	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
-	if err != nil {
-		return err
-	}
-
+func (ja *JzeroApi) updateHandlerImportedTypesPath(f *ast.File, fset *token.FileSet, file HandlerFile) error {
 	if astutil.UsesImport(f, fmt.Sprintf("%s/internal/types", ja.Module)) {
 		astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
 		astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
@@ -137,60 +123,19 @@ func (ja *JzeroApi) updateHandlerImportedTypesPath(file HandlerFile) error {
 		return err
 	}
 
-	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
-		return err
-	}
 	return nil
 }
 
-func (ja *JzeroApi) updateLogicImportedTypesPath(file LogicFile) error {
-	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
-	fp := file.Path[:len(file.Path)-8]
-	// patch
-	fp = strings.TrimSuffix(fp, "_")
-	fp = strings.TrimSuffix(fp, "-")
-	fp += ".go"
-
-	fset := token.NewFileSet()
-
-	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
-	if err != nil {
-		return err
-	}
-
+func (ja *JzeroApi) updateLogicImportedTypesPath(f *ast.File, fset *token.FileSet, file LogicFile) error {
 	if astutil.UsesImport(f, fmt.Sprintf("%s/internal/types", ja.Module)) {
 		astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
 		astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
-	}
-
-	// Write the modified AST back to the file
-	buf := bytes.NewBuffer(nil)
-	if err := goformat.Node(buf, fset, f); err != nil {
-		return err
-	}
-
-	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
-		return err
 	}
 	return nil
 }
 
 // changeLogicTypes just change logic file logic function params and resp, but not body and others code
-func (ja *JzeroApi) changeLogicTypes(file LogicFile) error {
-	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
-	fp := file.Path[:len(file.Path)-8]
-	// patch
-	fp = strings.TrimSuffix(fp, "_")
-	fp = strings.TrimSuffix(fp, "-")
-	fp += ".go"
-
-	fset := token.NewFileSet()
-
-	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
-	if err != nil {
-		return err
-	}
-
+func (ja *JzeroApi) changeLogicTypes(f *ast.File, fset *token.FileSet, file LogicFile) error {
 	var (
 		methodFunc                string
 		requestType, responseType spec.Type
@@ -428,16 +373,5 @@ func (ja *JzeroApi) changeLogicTypes(file LogicFile) error {
 			astutil.DeleteImport(fset, f, "net/http")
 		}
 	}
-
-	// Write the modified AST back to the file
-	buf := bytes.NewBuffer(nil)
-	if err := goformat.Node(buf, fset, f); err != nil {
-		return err
-	}
-
-	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
-		return err
-	}
-
 	return nil
 }

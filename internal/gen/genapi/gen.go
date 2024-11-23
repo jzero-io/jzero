@@ -16,7 +16,6 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/sync/errgroup"
 
@@ -244,68 +243,26 @@ func (ja *JzeroApi) generateApiCode() error {
 				return err
 			}
 
-			// 处理多余后缀
+			// patch handler
 			for _, file := range handlerFiles {
 				if _, ok := ja.GenCodeApiSpecMap[file.ApiFilepath]; ok {
-					if err = ja.removeHandlerSuffix(file.Path); err != nil {
+					if err = ja.patchHandler(file); err != nil {
 						return errors.Wrapf(err, "rewrite %s", file.Path)
 					}
 				}
 			}
 			for _, file := range logicFiles {
 				if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
-					if err = ja.removeLogicSuffix(file.Path); err != nil {
+					if err = ja.patchLogic(file); err != nil {
 						return errors.Wrapf(err, "rewrite %s", file.Path)
-					}
-				}
-			}
-
-			// 自动替换 logic 层的 request 和 response name
-			if ja.ChangeLogicTypes {
-				for _, file := range logicFiles {
-					if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
-						if err := ja.changeLogicTypes(file); err != nil {
-							console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
-							continue
-						}
-					}
-				}
-			}
-
-			if ja.SplitApiTypesDir {
-				for _, v := range logicFiles {
-					if _, ok := ja.GenCodeApiSpecMap[v.DescFilepath]; ok {
-						for _, g := range ja.GenCodeApiSpecMap[v.DescFilepath].Service.Groups {
-							if g.GetAnnotation("group") == v.Group {
-								if err := ja.updateLogicImportedTypesPath(v); err != nil {
-									return err
-								}
-							}
-						}
-					}
-				}
-				for _, v := range handlerFiles {
-					if _, ok := ja.GenCodeApiSpecMap[v.ApiFilepath]; ok {
-						for _, g := range ja.GenCodeApiSpecMap[v.ApiFilepath].Service.Groups {
-							if g.GetAnnotation("group") == v.Group {
-								if err := ja.updateHandlerImportedTypesPath(v); err != nil {
-									return err
-								}
-							}
-						}
 					}
 				}
 			}
 		}
 	}
 
-	exist := make(map[string]struct{})
 	for _, v := range ja.ApiFiles {
 		for _, g := range ja.ApiSpecMap[v].Service.Groups {
-			if _, ok := exist[g.GetAnnotation("group")]; ok {
-				continue
-			}
-			exist[g.GetAnnotation("group")] = struct{}{}
 			if g.GetAnnotation("group") != "" {
 				handlerImports = append(handlerImports, fmt.Sprintf(`%s "%s/internal/handler/%s"`, strings.ToLower(strings.ReplaceAll(g.GetAnnotation("group"), "/", "")), ja.Module, g.GetAnnotation("group")))
 			}
@@ -315,7 +272,7 @@ func (ja *JzeroApi) generateApiCode() error {
 	template, err := templatex.ParseTemplate(map[string]any{
 		"Routes":         allRoutesGoBody,
 		"Module":         ja.Module,
-		"HandlerImports": handlerImports,
+		"HandlerImports": lo.Uniq(handlerImports),
 	}, embeded.ReadTemplateFile(filepath.Join("plugins", "api", "routes.go.tpl")))
 	if err != nil {
 		return err
