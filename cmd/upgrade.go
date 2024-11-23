@@ -6,6 +6,8 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 
@@ -19,10 +21,9 @@ var upgradeCmd = &cobra.Command{
 		switch config.C.Upgrade.Channel {
 		case "stable":
 			return golang.Install("github.com/jzero-io/jzero@latest")
-		case "main":
-			return golang.Install("github.com/jzero-io/jzero@main")
+		default:
+			return golang.Install(fmt.Sprintf("github.com/jzero-io/jzero@%s", config.C.Upgrade.Channel))
 		}
-		return nil
 	},
 }
 
