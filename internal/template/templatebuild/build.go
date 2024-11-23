@@ -32,7 +32,7 @@ func checkWrite(path string, bytes []byte) error {
 	return os.WriteFile(path, bytes, 0o644)
 }
 
-func Build(tc config.TemplateConfig) error {
+func Run(tc config.TemplateConfig) error {
 	wd, _ := os.Getwd()
 
 	modfileBytes, err := os.ReadFile(filepath.Join(tc.Build.WorkingDir, "go.mod"))

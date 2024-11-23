@@ -34,7 +34,7 @@ type GeneratedFile struct {
 	Skip    bool
 }
 
-func NewProject(c config.Config, appName string) error {
+func Run(c config.Config, appName string) error {
 	err := os.MkdirAll(c.New.Output, 0o755)
 	cobra.CheckErr(err)
 
@@ -43,7 +43,9 @@ func NewProject(c config.Config, appName string) error {
 	templateData["Features"] = c.New.Features
 	templateData["Module"] = c.New.Module
 	templateData["APP"] = appName
-
+	if abs, err := filepath.Abs(c.New.Output); err == nil {
+		templateData["DirName"] = filepath.Base(abs)
+	}
 	var base string
 	if c.New.Branch == "" {
 		// 使用内置 frame

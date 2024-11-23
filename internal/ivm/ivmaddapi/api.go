@@ -19,7 +19,7 @@ type Handler struct {
 	Verb string
 }
 
-func AddApi(c config.Config) error {
+func Run(c config.Config) error {
 	baseApiDir := filepath.Join("desc", "api")
 
 	service := desc.GetApiServiceName(filepath.Join("desc", "api"))

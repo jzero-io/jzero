@@ -32,7 +32,7 @@ var templateInitCmd = &cobra.Command{
 			home, _ := os.UserHomeDir()
 			config.C.Template.Init.Output = filepath.Join(home, ".jzero", Version)
 		}
-		return templateinit.Init(config.C)
+		return templateinit.Run(config.C)
 	},
 }
 
@@ -48,7 +48,7 @@ var templateBuildCmd = &cobra.Command{
 		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return templatebuild.Build(config.C.Template)
+		return templatebuild.Run(config.C.Template)
 	},
 }
 

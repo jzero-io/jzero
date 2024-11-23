@@ -19,7 +19,7 @@ import (
 	"github.com/jzero-io/jzero/pkg/mod"
 )
 
-func Gen(c config.Config) error {
+func Run(c config.Config) error {
 	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), c.Wd())
 
 	var module string

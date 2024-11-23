@@ -27,7 +27,7 @@ type IvmInit struct {
 	jzeroRpc genrpc.JzeroRpc
 }
 
-func Init(ic config.IvmConfig) error {
+func Run(ic config.IvmConfig) error {
 	var ivmInit IvmInit
 
 	err := ivmInit.setOldVersion(ic.Version)

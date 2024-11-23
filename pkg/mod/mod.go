@@ -1,6 +1,7 @@
 package mod
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -8,7 +9,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
-	"golang.org/x/mod/modfile"
 )
 
 // GetParentPackage if is submodule project, root package is based on go.mod and add its dir
@@ -43,26 +43,27 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 		return nil, err
 	}
 
-	var m ModuleStruct
-	err = json.Unmarshal([]byte(data), &m)
-	if err != nil {
-		// patch. 当项目存在 go.work 文件时, 为多段 json 值, 无法正常解析
-		file, err := os.ReadFile(filepath.Join(workDir, "go.mod"))
+	var ms []ModuleStruct
+	decoder := json.NewDecoder(bytes.NewReader([]byte(data)))
+	for {
+		var m ModuleStruct
+		err := decoder.Decode(&m)
 		if err != nil {
-			return nil, err
+			if err.Error() == "EOF" {
+				break
+			}
 		}
-		parse, err := modfile.Parse("", file, nil)
-		if err != nil {
-			return nil, err
-		}
-		m = ModuleStruct{
-			Path:      parse.Module.Mod.Path,
-			GoVersion: parse.Module.Mod.Version,
-		}
-		return &m, err
+
+		ms = append(ms, m)
 	}
 
-	return &m, nil
+	wd, _ := os.Getwd()
+	for _, m := range ms {
+		if filepath.Clean(wd) == filepath.Clean(m.Dir) {
+			return &m, nil
+		}
+	}
+	return nil, errors.New("get mod error")
 }
 
 // ModuleStruct contains the relative data of go module,

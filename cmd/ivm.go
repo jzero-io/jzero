@@ -30,7 +30,7 @@ var ivmInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: `Init newer version from older version, no need to do any more`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return ivminit.Init(config.C.Ivm)
+		return ivminit.Run(config.C.Ivm)
 	},
 }
 
@@ -49,7 +49,7 @@ var ivmAddProtoCmd = &cobra.Command{
 		if len(config.C.Ivm.Add.Proto.Services) == 0 {
 			config.C.Ivm.Add.Proto.Services = []string{config.C.Ivm.Add.Proto.Name}
 		}
-		return ivmaddproto.AddProto(config.C)
+		return ivmaddproto.Run(config.C)
 	},
 	SilenceUsage: true,
 }
@@ -64,7 +64,7 @@ var ivmAddApiCmd = &cobra.Command{
 		if config.C.Ivm.Add.Api.Group == "" {
 			config.C.Ivm.Add.Api.Group = config.C.Ivm.Add.Api.Name
 		}
-		return ivmaddapi.AddApi(config.C)
+		return ivmaddapi.Run(config.C)
 	},
 	SilenceUsage: true,
 }

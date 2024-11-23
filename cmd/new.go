@@ -101,7 +101,7 @@ var newCmd = &cobra.Command{
 		}
 		embeded.Home = config.C.New.Home
 
-		return new.NewProject(config.C, args[0])
+		return new.Run(config.C, args[0])
 	},
 	Args: cobra.ExactArgs(1),
 }

@@ -19,7 +19,7 @@ type Method struct {
 	Verb string
 }
 
-func AddProto(c config.Config) error {
+func Run(c config.Config) error {
 	var methods []Method
 	for _, v := range c.Ivm.Add.Proto.Methods {
 		split := strings.Split(v, ":")

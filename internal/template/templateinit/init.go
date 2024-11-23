@@ -15,7 +15,7 @@ import (
 	"github.com/jzero-io/jzero/embeded"
 )
 
-func Init(c config.Config) error {
+func Run(c config.Config) error {
 	if c.Template.Init.Remote != "" && c.Template.Init.Branch != "" {
 		_ = os.MkdirAll(c.Template.Init.Output, 0o755)
 		fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), c.Template.Init.Output, c.Template.Init.Branch)

@@ -3,5 +3,5 @@
 jzero template repo with gateway project
 
 ```shell
-jzero new simplegateway --branch gateway
+jzero new simplegateway --frame gateway
 ```

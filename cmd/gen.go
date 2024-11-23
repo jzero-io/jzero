@@ -53,7 +53,7 @@ var genCmd = &cobra.Command{
 			config.C.Gen.Home = filepath.Join(home, ".jzero", Version)
 		}
 		embeded.Home = config.C.Gen.Home
-		return gen.Gen(config.C)
+		return gen.Run(config.C)
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
 		if len(config.C.Gen.Hooks.After) > 0 {
