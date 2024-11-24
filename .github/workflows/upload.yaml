@@ -73,6 +73,18 @@ jobs:
           git push -f
           
           cd ..
+
+          rm -rf simpleapi-serverless
+          jzero new simpleapi-serverless --frame api-serverless
+          cd simpleapi-serverless && jzero gen
+          jzero gen swagger
+          go mod tidy && go mod download
+          go run main.go version
+          git add .
+          git diff-index --quiet HEAD || git commit -m "chore(simpleapi-serverless): update simpleapi-serverless"
+          git push -f
+          
+          cd ..
           
           # 测试第三方仓库(https://github.com/jzero-io/templates)模板
           rm -rf simplerpc-goctl
