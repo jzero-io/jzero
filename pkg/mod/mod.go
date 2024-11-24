@@ -3,12 +3,18 @@ package mod
 import (
 	"bytes"
 	"encoding/json"
+	"go/ast"
+	"go/token"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"golang.org/x/tools/go/ast/astutil"
 )
 
 // GetParentPackage if is submodule project, root package is based on go.mod and add its dir
@@ -69,10 +75,58 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 	return &ms[0], nil
 }
 
+func GetGoMods(workDir string) ([]ModuleStruct, error) {
+	data, err := execx.Run("go list -json -m", workDir)
+	if err != nil {
+		return nil, err
+	}
+
+	var ms []ModuleStruct
+	decoder := json.NewDecoder(bytes.NewReader([]byte(data)))
+	for {
+		var m ModuleStruct
+		err = decoder.Decode(&m)
+		if err != nil {
+			if err.Error() == "EOF" {
+				break
+			}
+		}
+		ms = append(ms, m)
+	}
+	return ms, nil
+}
+
 // ModuleStruct contains the relative data of go module,
 // which is the result of the command go list
 type ModuleStruct struct {
 	Path      string
 	Dir       string
 	GoVersion string
+}
+
+func UpdateImportedModule(f *ast.File, fset *token.FileSet, workDir string, module string) error {
+	// 当前项目存在 go.mod 项目, 并且 go list -json -m 有多个, 即使用了 go workspace 机制
+	if pathx.FileExists("go.mod") {
+		mods, err := GetGoMods(workDir)
+		if err != nil {
+			return err
+		}
+		if len(mods) > 1 {
+			rootPkg, err := golang.GetParentPackage(workDir)
+			if err != nil {
+				return err
+			}
+			imports := astutil.Imports(fset, f)
+			for _, imp := range imports {
+				for _, name := range imp {
+					if strings.HasPrefix(name.Path.Value, "\""+rootPkg) {
+						unQuote, _ := strconv.Unquote(name.Path.Value)
+						newImp := strings.Replace(unQuote, rootPkg, module, 1)
+						astutil.RewriteImport(fset, f, unQuote, newImp)
+					}
+				}
+			}
+		}
+	}
+	return nil
 }

@@ -13,6 +13,8 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/pkg/mod"
 )
 
 type HandlerFile struct {
@@ -74,11 +76,15 @@ func (ja *JzeroApi) patchHandler(file HandlerFile) error {
 		return err
 	}
 
+	if err = mod.UpdateImportedModule(f, fset, ja.Wd, ja.Module); err != nil {
+		return err
+	}
+
 	// split api types dir
 	if ja.SplitApiTypesDir {
 		for _, g := range ja.GenCodeApiSpecMap[file.ApiFilepath].Service.Groups {
 			if g.GetAnnotation("group") == file.Group {
-				if err := ja.updateHandlerImportedTypesPath(f, fset, file); err != nil {
+				if err = ja.updateHandlerImportedTypesPath(f, fset, file); err != nil {
 					return err
 				}
 			}
@@ -124,7 +130,6 @@ func (ja *JzeroApi) removeHandlerSuffix(f *ast.File) error {
 			}
 			return false
 		}
-
 		return true
 	})
 	return nil

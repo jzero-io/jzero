@@ -16,6 +16,8 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/pkg/mod"
 )
 
 type LogicFile struct {
@@ -90,6 +92,10 @@ func (ja *JzeroApi) patchLogic(file LogicFile) error {
 	// remove-suffix
 	if err = ja.removeLogicSuffix(f); err != nil {
 		return errors.Errorf("remove suffix meet error: [%v]", err)
+	}
+
+	if err = mod.UpdateImportedModule(f, fset, ja.Wd, ja.Module); err != nil {
+		return err
 	}
 
 	// change logic types
