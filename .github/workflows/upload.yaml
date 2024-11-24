@@ -27,6 +27,7 @@ jobs:
           go install
           jzero check
           go install github.com/jaronnie/grum@latest
+          go install github.com/jzero-io/gorename@latest
 
       - name: upload examples
         run: |

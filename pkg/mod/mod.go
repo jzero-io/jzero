@@ -104,7 +104,7 @@ type ModuleStruct struct {
 	GoVersion string
 }
 
-func UpdateImportedModule(f *ast.File, fset *token.FileSet, workDir string, module string) error {
+func UpdateImportedModule(f *ast.File, fset *token.FileSet, workDir, module string) error {
 	// 当前项目存在 go.mod 项目, 并且 go list -json -m 有多个, 即使用了 go workspace 机制
 	if pathx.FileExists("go.mod") {
 		mods, err := GetGoMods(workDir)
