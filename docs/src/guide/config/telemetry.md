@@ -15,7 +15,7 @@ tag:
 ```yaml
 rest:
   telemetry:
-    name: "your_project-rpc"
+    name: "your_project-api"
     endpoint: "http://jaeger:14268/api/traces"
     sampler: 1.0
     batcher: "jaeger"
