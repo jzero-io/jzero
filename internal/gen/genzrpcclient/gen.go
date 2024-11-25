@@ -29,8 +29,10 @@ type DirContext struct {
 }
 
 func (d DirContext) GetCall() generator.Dir {
+	fileName := filepath.Join(d.Output, "typed", d.Scope)
+	fmt.Println("GetCall--->", fileName)
 	return generator.Dir{
-		Filename: filepath.Join(d.Output, "typed", d.Scope),
+		Filename: fileName,
 		GetChildPackage: func(childPath string) (string, error) {
 			return strings.ToLower(childPath), nil
 		},
@@ -62,15 +64,28 @@ func (d DirContext) GetSvc() generator.Dir {
 }
 
 func (d DirContext) GetPb() generator.Dir {
+	//return generator.Dir{
+	//	Package: filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, d.Scope, strings.TrimPrefix(d.OptionGoPackage, "./"))),
+	//}
 	return generator.Dir{
-		Package: filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, d.Scope, strings.TrimPrefix(d.OptionGoPackage, "./"))),
+		Package: d.packagePath(),
 	}
 }
 
+func (d DirContext) packagePath() string {
+	packagePath := filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, d.Scope, strings.TrimPrefix(d.OptionGoPackage, "./")))
+	fmt.Println("packagePath--->", packagePath)
+	return packagePath
+}
+
 func (d DirContext) GetProtoGo() generator.Dir {
+	//return generator.Dir{
+	//	Filename: d.OptionGoPackage,
+	//	Package:  filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, d.Scope, strings.TrimPrefix(d.OptionGoPackage, "./"))),
+	//}
 	return generator.Dir{
 		Filename: d.OptionGoPackage,
-		Package:  filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, d.Scope, strings.TrimPrefix(d.OptionGoPackage, "./"))),
+		Package:  d.packagePath(),
 	}
 }
 
