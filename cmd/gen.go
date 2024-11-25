@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
@@ -49,6 +50,7 @@ var genCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		home, _ := os.UserHomeDir()
+		config.C.Gen.Home, _ = homedir.Expand(config.C.Gen.Home)
 		if !pathx.FileExists(config.C.Gen.Home) {
 			config.C.Gen.Home = filepath.Join(home, ".jzero", Version)
 		}

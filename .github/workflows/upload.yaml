@@ -90,7 +90,7 @@ jobs:
           # 测试第三方仓库(https://github.com/jzero-io/templates)模板
           rm -rf simplerpc-goctl
           jzero new simplerpc-goctl --branch rpc-goctl
-          cd simplerpc-goctl && jzero gen --home ~/.jzero/templates/rpc-goctl
+          cd simplerpc-goctl && jzero gen
           jzero gen swagger
           jzero gen zrpcclient
           go mod tidy && go mod download

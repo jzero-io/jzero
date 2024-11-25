@@ -13,6 +13,7 @@ require (
 	github.com/iancoleman/orderedmap v0.3.0
 	github.com/jhump/protoreflect v1.16.0
 	github.com/jzero-io/desc v0.0.1
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/rinchsan/gosimports v0.3.8
 	github.com/samber/lo v1.47.0
