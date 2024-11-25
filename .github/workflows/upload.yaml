@@ -76,7 +76,7 @@ jobs:
           cd ..
 
           rm -rf simpleapi-serverless
-          jzero new simpleapi-serverless --frame api-serverless
+          jzero new simpleapi-serverless --frame api --features serverless
           cd simpleapi-serverless && jzero gen
           jzero gen swagger
           go mod tidy && go mod download

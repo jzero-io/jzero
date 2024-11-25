@@ -1,4 +1,4 @@
-package serverless
+{{ if has "serverless" .Features }}package serverless
 
 import (
 	"path/filepath"
@@ -40,4 +40,4 @@ func init() {
 
 func Routes() []rest.Route {
 	return server.Routes()
-}
+}{{end}}

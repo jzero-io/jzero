@@ -14,7 +14,7 @@ type GetResponse {
 }
 
 @server(
-    prefix: /api/v1
+    prefix: /api{{ if has "serverless" .Features }}/{{ .APP }}{{end}}/v1
     group: version
 )
 service {{ .APP | ToCamel }} {

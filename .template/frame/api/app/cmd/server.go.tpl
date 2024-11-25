@@ -11,9 +11,10 @@ import (
 	"github.com/common-nighthawk/go-figure"
 
 	"{{ .Module }}/internal/config"
+	"{{ .Module }}/internal/middleware"
 	"{{ .Module }}/internal/handler"
 	"{{ .Module }}/internal/svc"
-	"{{ .Module }}/internal/middleware"
+	{{ if has "serverless_core" .Features }}"{{ .Module }}/plugins"{{end}}
 )
 
 // serverCmd represents the server command
@@ -48,6 +49,9 @@ func run(svcCtx *svc.ServiceContext) {
 
 	// server add custom routes
     svcCtx.Custom.AddRoutes(server)
+
+    {{ if has "serverless_core" .Features }}// load plugins features
+    plugins.LoadPlugins(server){{end}}
 
 	group := service.NewServiceGroup()
 	group.Add(server)
