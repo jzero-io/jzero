@@ -81,7 +81,7 @@ func (d DirContext) packagePath() string {
 	packagePath := filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, d.Scope, strings.TrimPrefix(d.OptionGoPackage, "./")))
 
 	if d.PbDir != "" {
-		packagePath = filepath.ToSlash(fmt.Sprintf("%s/%s", d.ImportBase, d.PbDir))
+		packagePath = filepath.ToSlash(fmt.Sprintf("%s/%s/%s", d.ImportBase, d.PbDir, strings.TrimPrefix(d.OptionGoPackage, "./")))
 	}
 	fmt.Println("packagePath--->", packagePath)
 	return packagePath
