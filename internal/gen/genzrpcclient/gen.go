@@ -27,11 +27,15 @@ type DirContext struct {
 	Scope           string
 	Output          string
 	PbDir           string
+	ClientDir       string
 }
 
 func (d DirContext) GetCall() generator.Dir {
 	fileName := filepath.Join(d.Output, "typed", d.Scope)
-	fmt.Println("GetCall--->", fileName)
+	if d.ClientDir != "" {
+		fileName = filepath.Join(d.Output, d.ClientDir)
+	}
+	fmt.Println("GetCall--->", fileName, d.ClientDir)
 	return generator.Dir{
 		Filename: fileName,
 		GetChildPackage: func(childPath string) (string, error) {
@@ -136,6 +140,7 @@ func Generate(c config.Config, genModule bool) error {
 			Scope:           c.Gen.Zrpcclient.Scope,
 			Output:          c.Gen.Zrpcclient.Output,
 			PbDir:           c.Gen.Zrpcclient.PbDir,
+			ClientDir:       c.Gen.Zrpcclient.ClientDir,
 		}
 		for _, service := range parse.Service {
 			services = append(services, service.Name)
