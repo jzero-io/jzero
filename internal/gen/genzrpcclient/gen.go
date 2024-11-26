@@ -26,6 +26,7 @@ type DirContext struct {
 	OptionGoPackage string
 	Scope           string
 	Output          string
+	PbDir           string
 }
 
 func (d DirContext) GetCall() generator.Dir {
@@ -74,6 +75,10 @@ func (d DirContext) GetPb() generator.Dir {
 
 func (d DirContext) packagePath() string {
 	packagePath := filepath.ToSlash(fmt.Sprintf("%s/model/%s/%s", d.ImportBase, d.Scope, strings.TrimPrefix(d.OptionGoPackage, "./")))
+
+	if d.PbDir != "" {
+		packagePath = filepath.ToSlash(fmt.Sprintf("%s/%s", d.ImportBase, d.PbDir))
+	}
 	fmt.Println("packagePath--->", packagePath)
 	return packagePath
 }
@@ -130,18 +135,39 @@ func Generate(c config.Config, genModule bool) error {
 			OptionGoPackage: parse.GoPackage,
 			Scope:           c.Gen.Zrpcclient.Scope,
 			Output:          c.Gen.Zrpcclient.Output,
+			PbDir:           c.Gen.Zrpcclient.PbDir,
 		}
 		for _, service := range parse.Service {
 			services = append(services, service.Name)
 			_ = os.MkdirAll(filepath.Join(dirContext.GetCall().Filename, strings.ToLower(service.Name)), 0o755)
 		}
 
+		fmt.Println("baseProtoDir--->", baseProtoDir)
+		pbDir := filepath.Join(c.Gen.Zrpcclient.Output, "model", c.Gen.Zrpcclient.Scope)
+
+		if dirContext.PbDir != "" {
+			pbDir = filepath.Join(c.Gen.Zrpcclient.Output, dirContext.PbDir)
+		}
 		// gen pb model
-		err = os.MkdirAll(filepath.Join(c.Gen.Zrpcclient.Output, "model", c.Gen.Zrpcclient.Scope), 0o755)
+		err = os.MkdirAll(pbDir, 0o755)
 		if err != nil {
 			return err
 		}
-		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s --go_out=%s --go-grpc_out=%s %s", baseProtoDir, filepath.Join(baseProtoDir, "third_party"), filepath.Join(c.Gen.Zrpcclient.Output, "model", c.Gen.Zrpcclient.Scope), filepath.Join(c.Gen.Zrpcclient.Output, "model", c.Gen.Zrpcclient.Scope), fp), wd)
+		fmt.Println("goOutIdr--->", pbDir)
+		fmt.Println("fp--->", fp)
+		resp, err := execx.Run(
+			fmt.Sprintf(
+				"protoc -I%s -I%s --go_out=%s --go-grpc_out=%s %s",
+				baseProtoDir,
+				filepath.Join(baseProtoDir, "third_party"),
+				//filepath.Join(c.Gen.Zrpcclient.Output, "model", c.Gen.Zrpcclient.Scope),
+				pbDir,
+				//filepath.Join(c.Gen.Zrpcclient.Output, "model", c.Gen.Zrpcclient.Scope),
+				pbDir,
+				fp,
+			),
+			wd,
+		)
 		if err != nil {
 			return errors.Errorf("err: [%v], resp: [%s]", err, resp)
 		}

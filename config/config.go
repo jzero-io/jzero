@@ -127,6 +127,7 @@ type GenSwaggerConfig struct {
 
 type GenZrpcclientConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
+	PbDir string      `mapstructure:"pb-dir"`
 
 	Scope     string `mapstructure:"scope"`
 	Output    string `mapstructure:"output"`
