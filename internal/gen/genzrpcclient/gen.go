@@ -116,7 +116,6 @@ func Generate(c config.Config, genModule bool) error {
 	}
 
 	var services []string
-
 	for _, fp := range fps {
 		parser := rpcparser.NewDefaultProtoParser()
 		parse, err := parser.Parse(fp, true)
@@ -189,10 +188,14 @@ func Generate(c config.Config, genModule bool) error {
 	}
 
 	// generate scope client
-
+	scope := "typed/" + c.Gen.Zrpcclient.Scope
+	if c.Gen.Zrpcclient.PbDir != "" {
+		scope = c.Gen.Zrpcclient.ClientDir
+	}
 	template, err = templatex.ParseTemplate(map[string]any{
 		"Module":   c.Gen.Zrpcclient.GoModule,
-		"Scope":    c.Gen.Zrpcclient.Scope,
+		"Scope":    scope,
+		"Package":  c.Gen.Zrpcclient.Scope,
 		"Services": services,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "typed", "scope_client.go.tpl"))))
 	if err != nil {
