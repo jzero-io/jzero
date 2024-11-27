@@ -3,15 +3,20 @@ package genapi
 import (
 	"bytes"
 	"go/ast"
+	goformat "go/format"
 	goparser "go/parser"
 	"go/printer"
 	"go/token"
+	"path/filepath"
 	"strings"
 
+	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	zeroconfig "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 
+	"github.com/jzero-io/jzero/embeded"
 	jgogen "github.com/jzero-io/jzero/pkg/gogen"
+	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
 func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {
@@ -62,4 +67,35 @@ func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {
 		}
 	}
 	return "", nil
+}
+
+type Route struct {
+	Group string
+	spec.Route
+}
+
+func (ja *JzeroApi) genRoute2Code() ([]byte, error) {
+	var routes []Route
+	for _, s := range ja.ApiSpecMap {
+		for _, g := range s.Service.Groups {
+			for _, r := range g.Routes {
+				routes = append(routes, Route{
+					Group: g.GetAnnotation("group"),
+					Route: r,
+				})
+			}
+		}
+	}
+
+	template, err := templatex.ParseTemplate(map[string]any{
+		"Routes": routes,
+	}, embeded.ReadTemplateFile(filepath.Join("plugins", "api", "route2code.go.tpl")))
+	if err != nil {
+		return nil, err
+	}
+	source, err := goformat.Source(template)
+	if err != nil {
+		return nil, err
+	}
+	return source, nil
 }

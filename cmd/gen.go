@@ -260,7 +260,7 @@ func init() {
 		genCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
 		genCmd.Flags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
 
-		genCmd.Flags().BoolP("rpc-client", "", false, "is generate rpc client code by goctl")
+		genCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
 
 		// used for goctl
 		// gen command persistentFlags
@@ -277,6 +277,8 @@ func init() {
 		genCmd.Flags().BoolP("model-mysql-cache", "", false, "goctl model mysql cache")
 		genCmd.Flags().StringP("model-mysql-cache-prefix", "", "", "goctl model mysql cache prefix")
 		genCmd.Flags().BoolP("gen-mysql-create-table-ddl", "", false, "is generate mysql create table ddl, only datasource mode takes effective")
+
+		genCmd.Flags().BoolP("rpc-client", "", false, "is generate rpc client code by goctl")
 	}
 
 	{

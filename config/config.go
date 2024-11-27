@@ -61,27 +61,27 @@ type GenConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
 	// global flags
+	Home string `mapstructure:"home"`
 
-	Home             string `mapstructure:"home"`
 	Style            string `mapstructure:"style"`
 	SplitApiTypesDir bool   `mapstructure:"split-api-types-dir"`
 
 	// code style flags
-
 	ChangeLogicTypes bool `mapstructure:"change-logic-types"`
-	RpcStylePatch    bool `mapstructure:"rpc-style-patch"`
-	RegenApiHandler  bool `mapstructure:"regen-api-handler"`
+
+	RpcStylePatch   bool `mapstructure:"rpc-style-patch"`
+	RegenApiHandler bool `mapstructure:"regen-api-handler"`
 
 	// git flags
+	GitChange bool `mapstructure:"git-change"`
 
-	GitChange          bool   `mapstructure:"git-change"`
 	ApiGitChangePath   string `mapstructure:"api-git-change-path"`
 	ModelGitChangePath string `mapstructure:"model-git-change-path"`
 	ProtoGitChangePath string `mapstructure:"proto-git-change-path"`
 
 	// model flags
+	ModelMysqlStrict bool `mapstructure:"model-mysql-strict"`
 
-	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`
 	ModelMysqlIgnoreColumns   []string `mapstructure:"model-mysql-ignore-columns"`
 	ModelMysqlDDLDatabase     string   `mapstructure:"model-mysql-ddl-database"`
 	ModelMysqlDatasource      bool     `mapstructure:"model-mysql-datasource"`
@@ -98,6 +98,9 @@ type GenConfig struct {
 	Desc []string `mapstructure:"desc"`
 
 	DescIgnore []string `mapstructure:"desc-ignore"`
+
+	// other
+	Route2Code bool
 
 	Sdk        GenSdkConfig        `mapstructure:"sdk"`
 	Swagger    GenSwaggerConfig    `mapstructure:"swagger"`

@@ -281,5 +281,18 @@ func (ja *JzeroApi) generateApiCode() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join("internal", "handler", "routes.go"), source, 0o644)
+	if err = os.WriteFile(filepath.Join("internal", "handler", "routes.go"), source, 0o644); err != nil {
+		return err
+	}
+
+	if ja.Route2Code {
+		if route2CodeBytes, err := ja.genRoute2Code(); err != nil {
+			return err
+		} else {
+			if err = os.WriteFile(filepath.Join("internal", "handler", "route2code.go"), route2CodeBytes, 0o644); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
