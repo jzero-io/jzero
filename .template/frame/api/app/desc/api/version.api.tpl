@@ -18,6 +18,6 @@ type GetResponse {
     group: version
 )
 service {{ .APP | ToCamel }} {
-    @handler GetHandler
+    @handler Get
     get /version (GetRequest) returns (GetResponse)
 }
