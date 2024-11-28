@@ -3,9 +3,10 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
+
+	casbinutil "github.com/casbin/casbin/v2/util"
 )
 
 var routesCodesMap = map[string]string{
@@ -14,7 +15,12 @@ var routesCodesMap = map[string]string{
 }
 
 func Route2Code(r *http.Request) string {
-	path := r.URL.Path
-	method := r.Method
-	return routesCodesMap[fmt.Sprintf("%s:%s", strings.ToUpper(method), path)]
+	for k, v := range routesCodesMap {
+		if splits := strings.Split(k, ":"); len(splits) >= 2 && splits[0] == strings.ToUpper(r.Method) {
+			if casbinutil.KeyMatch2(r.URL.Path, strings.Join(splits[1:], ":")) {
+				return v
+			}
+		}
+	}
+	return "unknown_code"
 }

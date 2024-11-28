@@ -8,6 +8,7 @@ import (
 	"go/printer"
 	"go/token"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
@@ -86,6 +87,15 @@ func (ja *JzeroApi) genRoute2Code() ([]byte, error) {
 			}
 		}
 	}
+
+	slices.SortFunc(routes, func(a, b Route) int {
+		if a.Path < b.Path {
+			return -1
+		} else if a.Path > b.Path {
+			return 1
+		}
+		return 0
+	})
 
 	template, err := templatex.ParseTemplate(map[string]any{
 		"Routes": routes,

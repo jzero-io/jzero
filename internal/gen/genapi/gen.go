@@ -286,6 +286,7 @@ func (ja *JzeroApi) generateApiCode() error {
 	}
 
 	if ja.Route2Code {
+		fmt.Printf("%s to generate internal/handler/route2code.go\n", color.WithColor("Start", color.FgGreen))
 		if route2CodeBytes, err := ja.genRoute2Code(); err != nil {
 			return err
 		} else {
@@ -293,6 +294,7 @@ func (ja *JzeroApi) generateApiCode() error {
 				return err
 			}
 		}
+		fmt.Printf("%s", color.WithColor("Done\n", color.FgGreen))
 	}
 	return nil
 }
