@@ -2,6 +2,7 @@ package cmd
 
 import (
     "os"
+    "path/filepath"
 
 	"github.com/common-nighthawk/go-figure"
 	"github.com/jzero-io/jzero-contrib/embedx"
