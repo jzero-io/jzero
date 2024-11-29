@@ -1,7 +1,6 @@
 package genapi
 
 import (
-	"bytes"
 	"fmt"
 	"go/ast"
 	goformat "go/format"
@@ -117,20 +116,12 @@ func (ja *JzeroApi) updateHandlerImportedTypesPath(f *ast.File, fset *token.File
 		astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
 	}
 
-	// Write the modified AST back to the file
-	buf := bytes.NewBuffer(nil)
-	if err := goformat.Node(buf, fset, f); err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func (ja *JzeroApi) updateLogicImportedTypesPath(f *ast.File, fset *token.FileSet, file LogicFile) error {
-	if astutil.UsesImport(f, fmt.Sprintf("%s/internal/types", ja.Module)) {
-		astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
-		astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
-	}
+	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
+	astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
 	return nil
 }
 
