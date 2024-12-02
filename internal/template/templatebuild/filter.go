@@ -7,7 +7,7 @@ import (
 
 var IgnoreDirs = []string{".git", ".idea", ".vscode", ".DS_Store", "node_modules"}
 
-func filter(dir string, name string, ignoreDirs []string) bool {
+func filter(dir, name string, ignoreDirs []string) bool {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return false
