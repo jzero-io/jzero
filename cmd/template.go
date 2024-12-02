@@ -62,6 +62,7 @@ func init() {
 		templateBuildCmd.Flags().StringP("name", "n", "", "template name")
 		_ = templateBuildCmd.MarkFlagRequired("name")
 		templateBuildCmd.Flags().StringP("output", "o", "", "default output directory")
+		templateBuildCmd.Flags().StringSliceP("ignore", "i", templatebuild.IgnoreDirs, "dir list for ignored files")
 	}
 
 	{

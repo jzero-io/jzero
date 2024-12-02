@@ -2,6 +2,7 @@ package templatebuild
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/ast"
 	goformat "go/format"
@@ -33,6 +34,9 @@ func checkWrite(path string, bytes []byte) error {
 }
 
 func Run(tc config.TemplateConfig) error {
+	if pathx.FileExists(tc.Build.Output) {
+		return errors.New("template build output already exists")
+	}
 	wd, _ := os.Getwd()
 
 	modfileBytes, err := os.ReadFile(filepath.Join(tc.Build.WorkingDir, "go.mod"))
@@ -55,7 +59,7 @@ func build(tc config.TemplateConfig, dirname string, mod *modfile.File) error {
 	}
 
 	for _, file := range dir {
-		if filter(file.Name()) {
+		if filter(dirname, file.Name(), tc.Build.Ignore) {
 			continue
 		}
 		if file.IsDir() {
