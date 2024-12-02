@@ -55,7 +55,7 @@ func build(tc config.TemplateConfig, dirname string, mod *modfile.File) error {
 	}
 
 	for _, file := range dir {
-		if filter(file.Name()) {
+		if filter(dirname, file.Name(), tc.Build.Ignore) {
 			continue
 		}
 		if file.IsDir() {

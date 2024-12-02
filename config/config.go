@@ -190,9 +190,10 @@ type TemplateInitConfig struct {
 }
 
 type TemplateBuildConfig struct {
-	Output     string `mapstructure:"output"`
-	WorkingDir string `mapstructure:"working-dir"`
-	Name       string `mapstructure:"name"`
+	Output     string   `mapstructure:"output"`
+	WorkingDir string   `mapstructure:"working-dir"`
+	Name       string   `mapstructure:"name"`
+	Ignore     []string `mapstructure:"ignore"`
 }
 
 type UpgradeConfig struct {
