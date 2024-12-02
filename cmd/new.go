@@ -40,8 +40,8 @@ var newCmd = &cobra.Command{
 		if config.C.New.Module == "" {
 			config.C.New.Module = args[0]
 		}
-		// 在 go mod 项目的一个子模块
-		if config.C.New.SubModule {
+		// 在 go.mod 项目下但是项目本身没有 go.mod 文件
+		if config.C.New.Mono {
 			wd, _ := os.Getwd()
 			var err error
 			parentPackage, err := mod.GetParentPackage(wd)
@@ -49,76 +49,59 @@ var newCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 
+		home, _ := os.UserHomeDir()
+
+		// 使用远程仓库模板
 		if config.C.New.Remote != "" && config.C.New.Branch != "" {
 			// clone to local
-			home, _ := os.UserHomeDir()
 			_ = os.MkdirAll(filepath.Join(home, ".jzero"), 0o755)
 
-			if !pathx.FileExists(filepath.Join(home, ".jzero", "templates", config.C.New.Branch)) || !config.C.New.Cache {
-				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(home, ".jzero", "templates", config.C.New.Branch))
+			fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(home, ".jzero", "templates", config.C.New.Branch))
 
-				_ = os.RemoveAll(filepath.Join(home, ".jzero", "templates", config.C.New.Branch))
+			_ = os.RemoveAll(filepath.Join(home, ".jzero", "templates", config.C.New.Branch))
 
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-				defer cancel()
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
 
-				_, err := git.PlainCloneContext(ctx, filepath.Join(home, ".jzero", "templates", config.C.New.Branch), false, &git.CloneOptions{
-					SingleBranch:  true,
-					URL:           config.C.New.Remote,
-					Depth:         0,
-					ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
-				})
-				cobra.CheckErr(err)
-				fmt.Println(color.WithColor("Done", color.FgGreen))
-			} else {
-				fmt.Printf("%s cache: %s\n", color.WithColor("Using", color.FgGreen), filepath.Join(home, ".jzero", "templates", config.C.New.Branch))
-			}
-			config.C.New.Home = filepath.Join(home, ".jzero", "templates", config.C.New.Branch)
-
-			if config.C.New.WithTemplate {
-				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), filepath.Join(config.C.New.Output, ".template"))
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-				defer cancel()
-
-				_, err := git.PlainCloneContext(ctx, filepath.Join(config.C.New.Output, ".template"), false, &git.CloneOptions{
-					SingleBranch:  true,
-					URL:           config.C.New.Remote,
-					Depth:         0,
-					ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
-				})
-				cobra.CheckErr(err)
-				fmt.Println(color.WithColor("Done", color.FgGreen))
-
-				if pathx.FileExists(filepath.Join(config.C.New.Output, ".template", "go-zero")) {
-					fmt.Printf("If you want to use all go-zero templates. Please exec `goctl template init --home %s/.template/go-zero`\n", config.C.New.Output)
-				}
-			}
+			_, err := git.PlainCloneContext(ctx, filepath.Join(home, ".jzero", "templates", config.C.New.Branch), false, &git.CloneOptions{
+				SingleBranch:  true,
+				URL:           config.C.New.Remote,
+				Depth:         0,
+				ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
+			})
+			cobra.CheckErr(err)
+			fmt.Println(color.WithColor("Done", color.FgGreen))
+			embeded.Home = filepath.Join(home, ".jzero", "templates", config.C.New.Branch)
 		}
 
-		if !pathx.FileExists(config.C.New.Home) {
-			home, _ := os.UserHomeDir()
-			config.C.New.Home = filepath.Join(home, ".jzero", Version)
+		// 使用本地模板
+		if config.C.New.Local != "" {
+			embeded.Home = filepath.Join(home, ".jzero", "templates", config.C.New.Local)
 		}
-		embeded.Home = config.C.New.Home
 
+		// 指定 home 时优先级最高
+		if config.C.New.Home != "" {
+			embeded.Home = config.C.New.Home
+		}
+
+		if !pathx.FileExists(embeded.Home) {
+			embeded.Home = filepath.Join(home, ".jzero", Version)
+		}
 		return new.Run(config.C, args[0])
 	},
 	Args: cobra.ExactArgs(1),
 }
 
 func init() {
-	wd, _ := os.Getwd()
-
 	rootCmd.AddCommand(newCmd)
 	newCmd.Flags().StringP("module", "m", "", "set go module")
 	newCmd.Flags().StringP("output", "o", "", "set output dir")
-	newCmd.Flags().StringP("home", "", filepath.Join(wd, ".template"), "set home dir")
+	newCmd.Flags().StringP("home", "", "", "set templates path")
 	newCmd.Flags().StringP("frame", "", "api", "frame")
 	newCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringP("branch", "b", "", "remote templates repo branch")
-	newCmd.Flags().BoolP("cache", "", false, "get templates in local templates dir")
-	newCmd.Flags().BoolP("with-template", "", false, "with template files in your project")
+	newCmd.Flags().StringP("local", "", "", "local templates")
 	newCmd.Flags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 	newCmd.Flags().StringSliceP("features", "", []string{}, "select features")
-	newCmd.Flags().BoolP("submodule", "", false, "is project's submodule")
+	newCmd.Flags().BoolP("mono", "", false, "mono project under go mod project")
 }

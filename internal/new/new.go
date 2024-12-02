@@ -47,7 +47,7 @@ func Run(c config.Config, appName string) error {
 		templateData["DirName"] = filepath.Base(abs)
 	}
 	var base string
-	if c.New.Branch == "" {
+	if c.New.Branch == "" && c.New.Local == "" && c.New.Home == "" {
 		// 使用内置 frame
 		base = filepath.Join("frame", c.New.Frame, "app")
 	} else {
@@ -132,7 +132,7 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 		}
 
 		// specify
-		if filename == "go.mod" && jn.nc.SubModule {
+		if filename == "go.mod" && jn.nc.Mono {
 			continue
 		}
 

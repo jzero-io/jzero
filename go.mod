@@ -13,6 +13,7 @@ require (
 	github.com/iancoleman/orderedmap v0.3.0
 	github.com/jhump/protoreflect v1.16.0
 	github.com/jzero-io/desc v0.0.1
+	github.com/jzero-io/jzero-contrib v0.14.1-0.20241202072226-245e83cee9d4
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/rinchsan/gosimports v0.3.8
@@ -47,6 +48,7 @@ require (
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/eddieowens/opts v0.1.0 // indirect
 	github.com/emicklei/proto v1.13.2 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fatih/color v1.17.0 // indirect
