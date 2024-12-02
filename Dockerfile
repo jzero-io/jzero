@@ -1,7 +1,6 @@
 FROM golang:alpine
 
 ENV CGO_ENABLED=0
-ENV GOPROXY=https://goproxy.io,direct
 
 LABEL \
   org.opencontainers.image.title="jzero" \
