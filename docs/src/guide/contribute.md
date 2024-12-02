@@ -37,7 +37,14 @@ go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
 gorgeous ./...
 ```
 
-### 5. push
+### 4. lint codes
+
+```shell
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+golangci-lint run --fix
+```
+
+### 6. push
 
 ```shell
 git add .
@@ -45,7 +52,9 @@ git commit -m "feat(xx): custom message"
 git push
 ```
 
-### 6. pull request
+### 7. pull request
+
+Create your pull request!!!
 
 ## debug jzero
 
