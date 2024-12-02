@@ -56,7 +56,7 @@ jzero check
 ```shell
 docker pull ghcr.io/jzero-io/jzero:latest
 # 如果无法 pull
-docker pull registry.cn-hangzhou.aliyuncs.com/ghcr.io/jzero-io/jzero:latest
-docker tag registry.cn-hangzhou.aliyuncs.com/ghcr.io/jzero-io/jzero:latest ghcr.io/jzero-io/jzero:latest
+docker pull registry.cn-hangzhou.aliyuncs.com/ghcr.io/jaronnie/jzero:latest
+docker tag registry.cn-hangzhou.aliyuncs.com/ghcr.io/jaronnie/jzero:latest ghcr.io/jzero-io/jzero:latest
 ```
 :::
