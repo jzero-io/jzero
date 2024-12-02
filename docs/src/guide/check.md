@@ -32,6 +32,8 @@ gvm activate go1.22.2
 ## 安装 jzero
 
 ```shell
+# 设置国内代理
+go env -w GOPROXY=https://goproxy.cn,direct
 go install github.com/jzero-io/jzero@latest
 
 jzero version
