@@ -2,7 +2,6 @@
 
 import (
 	"path/filepath"
-	"os"
 
 	"{{ .Module }}/server/config"
 	"{{ .Module }}/server/handler"

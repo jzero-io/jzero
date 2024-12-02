@@ -63,9 +63,8 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 		ms = append(ms, m)
 	}
 
-	wd, _ := os.Getwd()
 	for _, m := range ms {
-		if filepath.Clean(wd) == filepath.Clean(m.Dir) {
+		if filepath.Clean(workDir) == filepath.Clean(m.Dir) {
 			return &m, nil
 		}
 	}
