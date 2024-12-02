@@ -38,12 +38,16 @@ type Config struct {
 	// upgrade command
 	Upgrade UpgradeConfig `mapstructure:"upgrade"`
 
+	// serverless command
+	Serverless ServerlessConfig `mapstructure:"serverless"`
+
 	/*
 		==============================command flags end=========================================
 	*/
 }
 
 type NewConfig struct {
+	Core     bool     `mapstructure:"core"`
 	Home     string   `mapstructure:"home"`     // 新建项目使用的模板文件目录
 	Module   string   `mapstructure:"module"`   // 新建的项目的 go module
 	Mono     bool     `mapstructure:"mono"`     // 是否是 mono 项目(即在一个mod项目之下, 但该项目本身无 go.mod 文件)
@@ -193,6 +197,24 @@ type TemplateBuildConfig struct {
 
 type UpgradeConfig struct {
 	Channel string `mapstructure:"channel"`
+}
+
+type ServerlessConfig struct {
+	New    NewConfig              `mapstructure:"new"`
+	Delete ServerlessDeleteConfig `mapstructure:"delete"`
+}
+
+type ServerlessNewConfig struct {
+	Module string `mapstructure:"module"` // 新建的项目的 go module
+	Remote string `mapstructure:"remote"` // 远程仓库地址
+	Frame  string `mapstructure:"frame"`  // 使用 jzero 内置的框架
+	Branch string `mapstructure:"branch"` // 使用远程模板仓库的某个分支
+	Local  string `mapstructure:"local"`  // 使用本地模板与 branch 对应
+	Style  string `mapstructure:"style"`  // 项目代码风格
+}
+
+type ServerlessDeleteConfig struct {
+	Plugin []string `mapstructure:"plugin"`
 }
 
 type HooksConfig struct {
