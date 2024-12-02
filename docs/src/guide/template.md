@@ -25,7 +25,42 @@ goctl template init --home .template/go-zero
 ## 将当前项目转化为 jzero 的模板
 
 ```shell
-jzero template build --name my_template
+jzero template build --name template_name
+```
 
-jzero new my_template_project --branch my_template
+生成的模版将默认放在 `$HOME/.jzero/templates` 下。
+
+## 使用模版构建项目
+
+1. 使用远程模版
+
+- 使用默认仓库：`https://github.com/jzero-io/templates`
+
+```shell
+jzero new project_name --branch template_branch
+```
+
+- 指定远程仓库
+
+```shell
+jzero new project_name --remote repo_to_your_templates --branch template_branch 
+```
+
+2. 使用本地缓存的远程模版
+
+```shell
+jzero new project_name --branch --cache template_branch
+```
+本地缓存的模版也在 `$HOME/.jzero/templates` 下。
+
+3. 使用本地模版
+
+```shell
+jzero new project_name --local template_name
+```
+
+4. 使用特定模版
+
+```shell
+jzero new project_name --home path_to_template
 ```
