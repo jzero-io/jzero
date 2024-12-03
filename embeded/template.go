@@ -14,46 +14,31 @@ var (
 )
 
 func ReadTemplateFile(filename string) []byte {
+	if Home != "" {
+		file, err := os.ReadFile(filepath.Join(Home, filename))
+		if err == nil {
+			return file
+		}
+	}
 	path := filepath.ToSlash(filepath.Join(".template", filename))
 	data, err := Template.ReadFile(path)
 	if err != nil {
-		if Home != "" {
-			file, err := os.ReadFile(filepath.Join(Home, filename))
-			if err == nil {
-				return file
-			}
-		}
 		return nil
-	}
-	if Home != "" {
-		file, err := os.ReadFile(filepath.Join(Home, filename))
-		if err != nil {
-			return data
-		}
-		return file
 	}
 	return data
 }
 
 func ReadTemplateDir(dirname string) []os.DirEntry {
+	if Home != "" {
+		file, err := os.ReadDir(filepath.Join(Home, dirname))
+		if err == nil {
+			return file
+		}
+	}
 	path := filepath.ToSlash(filepath.Join(".template", dirname))
 	data, err := Template.ReadDir(path)
 	if err != nil {
-		if Home != "" {
-			file, err := os.ReadDir(filepath.Join(Home, dirname))
-			if err != nil {
-				return nil
-			}
-			return file
-		}
 		return nil
-	}
-	if Home != "" {
-		file, err := os.ReadDir(filepath.Join(Home, dirname))
-		if err != nil {
-			return data
-		}
-		data = file
 	}
 	return data
 }
