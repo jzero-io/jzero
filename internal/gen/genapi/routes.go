@@ -80,10 +80,14 @@ func (ja *JzeroApi) genRoute2Code() ([]byte, error) {
 	for _, s := range ja.ApiSpecMap {
 		for _, g := range s.Service.Groups {
 			for _, r := range g.Routes {
-				routes = append(routes, Route{
+				route := Route{
 					Group: g.GetAnnotation("group"),
 					Route: r,
-				})
+				}
+				if g.GetAnnotation("prefix") != "" {
+					route.Path = g.GetAnnotation("prefix") + r.Path
+				}
+				routes = append(routes, route)
 			}
 		}
 	}
