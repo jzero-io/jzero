@@ -52,7 +52,7 @@ var genCmd = &cobra.Command{
 		home, _ := os.UserHomeDir()
 		config.C.Gen.Home, _ = homedir.Expand(config.C.Gen.Home)
 		if !pathx.FileExists(config.C.Gen.Home) {
-			config.C.Gen.Home = filepath.Join(home, ".jzero", Version)
+			config.C.Gen.Home = filepath.Join(home, ".jzero", "templates", Version)
 		}
 		embeded.Home = config.C.Gen.Home
 		return gen.Run(config.C)
@@ -205,7 +205,7 @@ var genSdkCmd = &cobra.Command{
 			return err
 		}
 		if embeded.Home == "" {
-			embeded.Home = filepath.Join(homeDir, ".jzero", Version)
+			embeded.Home = filepath.Join(homeDir, ".jzero", "templates", Version)
 		}
 		return gensdk.GenSdk(config.C, genModule)
 	},

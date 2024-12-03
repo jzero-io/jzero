@@ -17,12 +17,13 @@ import (
 
 func Run(c config.Config) error {
 	if c.Template.Init.Remote != "" && c.Template.Init.Branch != "" {
-		_ = os.MkdirAll(c.Template.Init.Output, 0o755)
-		fmt.Printf("%s templates into '%s/templates/%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), c.Template.Init.Output, c.Template.Init.Branch)
+		target := filepath.Join(c.Template.Init.Output, c.Template.Init.Branch)
+		_ = os.MkdirAll(target, 0o755)
+		fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), target)
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
-		_, err := git.PlainCloneContext(ctx, filepath.Join(c.Template.Init.Output), false, &git.CloneOptions{
+		_, err := git.PlainCloneContext(ctx, target, false, &git.CloneOptions{
 			SingleBranch:  true,
 			URL:           c.Template.Init.Remote,
 			Depth:         0,
@@ -31,11 +32,15 @@ func Run(c config.Config) error {
 		if err != nil {
 			return err
 		}
+		_ = os.RemoveAll(filepath.Join(target, ".git"))
 		fmt.Println(color.WithColor("Done", color.FgGreen))
-
 		return nil
 	}
-
+	fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Initializing embedded", color.FgGreen), c.Template.Init.Output)
 	err := embeded.WriteTemplateDir("", c.Template.Init.Output)
-	return err
+	if err != nil {
+		return err
+	}
+	fmt.Println(color.WithColor("Done", color.FgGreen))
+	return nil
 }
