@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/moby/patternmatcher"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/mod/modfile"
 
@@ -58,8 +59,13 @@ func build(tc config.TemplateConfig, dirname string, mod *modfile.File) error {
 		return err
 	}
 
+	pm, err := patternmatcher.New(tc.Build.Ignore)
+	if err != nil {
+		return err
+	}
+
 	for _, file := range dir {
-		if filter(dirname, file.Name(), tc.Build.Ignore) {
+		if filter(dirname, file.Name(), pm) {
 			continue
 		}
 		if file.IsDir() {
