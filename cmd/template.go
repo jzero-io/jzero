@@ -19,18 +19,23 @@ import (
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
 	Use:   "template",
-	Short: `Used to save and build templates`,
+	Short: `Used to initialize or build templates`,
 }
 
 var templateInitCmd = &cobra.Command{
 	Use:    "init",
-	Short:  `Save template files on your disk`,
+	Short:  `Initialize templates`,
+	Long:   `Initialize specific remote template or embedded templates on your disk`,
 	PreRun: func(_ *cobra.Command, _ []string) {},
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if config.C.Template.Init.Output == "" {
 			home, _ := os.UserHomeDir()
-			config.C.Template.Init.Output = filepath.Join(home, ".jzero", Version)
+			if config.C.Template.Init.Remote != "" && config.C.Template.Init.Branch != "" {
+				config.C.Template.Init.Output = filepath.Join(home, ".jzero", "templates", "remote")
+			} else {
+				config.C.Template.Init.Output = filepath.Join(home, ".jzero", "templates", Version)
+			}
 		}
 		return templateinit.Run(config.C)
 	},
@@ -39,12 +44,11 @@ var templateInitCmd = &cobra.Command{
 var templateBuildCmd = &cobra.Command{
 	Use:   "build",
 	Short: `Build your current project to template`,
+	Long:  `Build your current project to template and save them in to ${HOME}/.jzero/templates/local.`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if config.C.Template.Build.Output == "" {
 			home, _ := os.UserHomeDir()
-			config.C.Template.Build.Output = filepath.Join(home, ".jzero", "templates", config.C.Template.Build.Name, "app")
-		} else {
-			config.C.Template.Build.Output = filepath.Join(config.C.Template.Build.Output, "app")
+			config.C.Template.Build.Output = filepath.Join(home, ".jzero", "templates", "local", config.C.Template.Build.Name)
 		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -58,10 +62,10 @@ func init() {
 	{
 		templateCmd.AddCommand(templateBuildCmd)
 
-		templateBuildCmd.Flags().StringP("working-dir", "w", ".", "default working directory")
+		templateBuildCmd.Flags().StringP("working-dir", "w", ".", "working directory")
 		templateBuildCmd.Flags().StringP("name", "n", "", "template name")
 		_ = templateBuildCmd.MarkFlagRequired("name")
-		templateBuildCmd.Flags().StringP("output", "o", "", "default output directory")
+		templateBuildCmd.Flags().StringP("output", "o", "", "output directory")
 		templateBuildCmd.Flags().StringSliceP("ignore", "i", templatebuild.IgnoreDirs, "dir list for ignored files")
 	}
 
@@ -69,7 +73,7 @@ func init() {
 		templateCmd.AddCommand(templateInitCmd)
 
 		templateInitCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
-		templateInitCmd.Flags().StringP("branch", "b", "", "remote templates repo branch")
+		templateInitCmd.Flags().StringP("branch", "b", "", "remote template repo branch. If not set, init the embedded templates.")
 		templateInitCmd.Flags().StringP("output", "o", "", "template output dir")
 	}
 }

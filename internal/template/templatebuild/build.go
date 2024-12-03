@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/moby/patternmatcher"
+	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/mod/modfile"
 
@@ -38,6 +39,8 @@ func Run(tc config.TemplateConfig) error {
 	if pathx.FileExists(tc.Build.Output) {
 		return errors.New("template build output already exists")
 	}
+	fmt.Printf("%s your project to templates into '%s', please wait...\n", color.WithColor("Building", color.FgGreen), tc.Build.Output)
+	tc.Build.Output = filepath.Join(tc.Build.Output, "app")
 	wd, _ := os.Getwd()
 
 	modfileBytes, err := os.ReadFile(filepath.Join(tc.Build.WorkingDir, "go.mod"))
@@ -50,7 +53,12 @@ func Run(tc config.TemplateConfig) error {
 		return err
 	}
 	tc.Build.WorkingDir = filepath.Join(wd, tc.Build.WorkingDir)
-	return build(tc, tc.Build.WorkingDir, mod)
+	err = build(tc, tc.Build.WorkingDir, mod)
+	if err != nil {
+		return err
+	}
+	fmt.Println(color.WithColor("Done", color.FgGreen))
+	return nil
 }
 
 func build(tc config.TemplateConfig, dirname string, mod *modfile.File) error {
