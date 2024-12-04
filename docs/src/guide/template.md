@@ -36,6 +36,7 @@ jzero template build --name template_name
 1. 使用远程模版
 
 :::tip 此指令将重新从远程拉去模版
+:::
 
 - 使用默认仓库：`https://github.com/jzero-io/templates`
 
@@ -52,6 +53,7 @@ jzero new project_name --remote repo_to_your_templates --branch template_branch
 2. 使用本地缓存的远程模版
 
 :::tip 本地缓存的模版在 `$HOME/.jzero/templates/remote` 下。
+:::
 
 ```shell
 jzero new project_name --branch --cache template_branch
