@@ -1,9 +1,9 @@
-package {{.Scope}}
+package {{.Package}}
 
 import (
 	"github.com/zeromicro/go-zero/zrpc"
 	{{ range $v := .Services}}
-	"{{ $.Module }}/typed/{{$.Scope}}/{{ $v | lower }}"
+	"{{ $.Module }}/{{$.Scope}}/{{ $v | lower }}"
 	{{ end }}
 )
 

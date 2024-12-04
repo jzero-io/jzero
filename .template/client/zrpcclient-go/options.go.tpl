@@ -3,7 +3,7 @@ package {{ .Package }}
 import (
 	"github.com/zeromicro/go-zero/zrpc"
 
-	{{range $v := .Scopes}}"{{$.Module}}/typed/{{$v | lower}}"{{end}}
+	{{range $v := .Scopes}}"{{$.Module}}/{{ $.ClientDir }}"{{end}}
 )
 
 type Opt func(client *Clientset)

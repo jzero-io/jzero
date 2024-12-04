@@ -1,7 +1,7 @@
 package {{ .Package }}
 
 import (
-	{{range $v := .Scopes}}"{{$.Module}}/typed/{{$v | lower}}"{{end}}
+	{{range $v := .Scopes}}"{{$.Module}}/{{ $.ClientDir }}"{{end}}
 )
 
 type Interface interface {
