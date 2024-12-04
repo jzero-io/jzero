@@ -160,11 +160,21 @@ func Generate(c config.Config, genModule bool) error {
 		}
 	}
 
+	var clientDir string
+	filePath := filepath.Join(c.Gen.Zrpcclient.Output, "typed", c.Gen.Zrpcclient.Scope, fmt.Sprintf("%s_client.go", c.Gen.Zrpcclient.Scope))
+	if c.Gen.Zrpcclient.ClientDir != "" {
+		filePath = filepath.Join(c.Gen.Zrpcclient.Output, c.Gen.Zrpcclient.ClientDir, fmt.Sprintf("%s_client.go", c.Gen.Zrpcclient.Scope))
+		clientDir = c.Gen.Zrpcclient.ClientDir
+	} else {
+		clientDir = "typed/" + c.Gen.Zrpcclient.Scope
+	}
+
 	// gen clientset and options
 	template, err := templatex.ParseTemplate(map[string]any{
-		"Module":  c.Gen.Zrpcclient.GoModule,
-		"Package": c.Gen.Zrpcclient.GoPackage,
-		"Scopes":  []string{c.Gen.Zrpcclient.Scope},
+		"Module":    c.Gen.Zrpcclient.GoModule,
+		"Package":   c.Gen.Zrpcclient.GoPackage,
+		"Scopes":    []string{c.Gen.Zrpcclient.Scope},
+		"ClientDir": clientDir,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "clientset.go.tpl"))))
 	if err != nil {
 		return err
@@ -175,9 +185,10 @@ func Generate(c config.Config, genModule bool) error {
 	}
 
 	template, err = templatex.ParseTemplate(map[string]any{
-		"Module":  c.Gen.Zrpcclient.GoModule,
-		"Package": c.Gen.Zrpcclient.GoPackage,
-		"Scopes":  []string{c.Gen.Zrpcclient.Scope},
+		"Module":    c.Gen.Zrpcclient.GoModule,
+		"Package":   c.Gen.Zrpcclient.GoPackage,
+		"Scopes":    []string{c.Gen.Zrpcclient.Scope},
+		"ClientDir": clientDir,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "options.go.tpl"))))
 	if err != nil {
 		return err
@@ -201,10 +212,7 @@ func Generate(c config.Config, genModule bool) error {
 	if err != nil {
 		return err
 	}
-	filePath := filepath.Join(c.Gen.Zrpcclient.Output, "typed", c.Gen.Zrpcclient.Scope, fmt.Sprintf("%s_client.go", c.Gen.Zrpcclient.Scope))
-	if c.Gen.Zrpcclient.ClientDir != "" {
-		filePath = filepath.Join(c.Gen.Zrpcclient.Output, c.Gen.Zrpcclient.ClientDir, fmt.Sprintf("%s_client.go", c.Gen.Zrpcclient.Scope))
-	}
+
 	err = os.WriteFile(filePath, template, 0o644)
 	if err != nil {
 		return err
