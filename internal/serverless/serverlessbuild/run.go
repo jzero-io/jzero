@@ -10,7 +10,9 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
 
+	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/serverless"
+	"github.com/jzero-io/jzero/pkg/mod"
 )
 
 func Run() error {
@@ -60,9 +62,14 @@ func Run() error {
 	}
 
 	// write plugins/plugins.go
+	goMod, err := mod.GetGoMod(wd)
+	if err != nil {
+		return err
+	}
 	pluginsGoBytes, err := templatex.ParseTemplate(map[string]any{
 		"Plugins": plugins,
-	}, []byte(serverless.PluginsTemplate))
+		"Module":  goMod.Path,
+	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("plugins", "api", "serverless_plugins.go.tpl"))))
 	if err != nil {
 		return err
 	}

@@ -8,10 +8,14 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/new"
-	"github.com/jzero-io/jzero/internal/serverless/serverlessbuild"
 )
 
 func Run(args []string) error {
+	if config.C.Serverless.New.Core {
+		config.C.Serverless.New.Features = append(config.C.Serverless.New.Features, "serverless_core")
+	} else {
+		config.C.Serverless.New.Features = append(config.C.Serverless.New.Features, "serverless")
+	}
 	config.C.New = config.NewConfig{
 		Home:     config.C.Serverless.New.Home,
 		Module:   config.C.Serverless.New.Module,
@@ -21,10 +25,9 @@ func Run(args []string) error {
 		Branch:   config.C.Serverless.New.Branch,
 		Local:    config.C.Serverless.New.Local,
 		Style:    config.C.Serverless.New.Style,
-		Features: []string{"serverless"},
+		Features: config.C.Serverless.New.Features,
 	}
 	if config.C.Serverless.New.Core {
-		config.C.New.Features = append(config.C.New.Features, "serverless_core")
 		config.C.New.Output = args[0]
 	}
 	err := new.Run(config.C, args[0])
@@ -51,5 +54,5 @@ func Run(args []string) error {
 			return err
 		}
 	}
-	return serverlessbuild.Run()
+	return nil
 }

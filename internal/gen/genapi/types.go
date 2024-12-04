@@ -121,6 +121,9 @@ func (ja *JzeroApi) updateHandlerImportedTypesPath(f *ast.File, fset *token.File
 
 func (ja *JzeroApi) updateLogicImportedTypesPath(f *ast.File, fset *token.FileSet, file LogicFile) error {
 	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
+	if file.RequestType == nil && file.ResponseType == nil {
+		return nil
+	}
 	astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
 	return nil
 }

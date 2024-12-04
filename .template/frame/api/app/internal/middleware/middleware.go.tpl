@@ -7,7 +7,7 @@ import (
 
 type Middleware struct {}
 
-func NewMiddleware() Middleware {
+func New() Middleware {
 	return Middleware{}
 }
 
