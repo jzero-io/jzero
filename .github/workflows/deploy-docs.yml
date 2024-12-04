@@ -41,7 +41,7 @@ jobs:
           > src/.vuepress/dist/.nojekyll
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.7.1
+        uses: JamesIves/github-pages-deploy-action@v4.7.2
         with:
           branch: gh-pages
           folder: docs/src/.vuepress/dist
