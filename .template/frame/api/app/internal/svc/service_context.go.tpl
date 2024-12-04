@@ -8,16 +8,15 @@ import (
 
 type ServiceContext struct {
 	Config config.Config
-	Custom *custom.Custom
-
-	// middleware
 	middleware.Middleware
+	Custom *custom.Custom
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	return &ServiceContext{
+    sc := &ServiceContext{
 		Config: c,
 		Custom: custom.New(),
-		Middleware: middleware.NewMiddleware(),
+		Middleware: middleware.New(),
 	}
+	return sc
 }

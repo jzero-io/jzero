@@ -12,20 +12,6 @@ type Plugin struct {
 	Module string
 }
 
-var PluginsTemplate = `package plugins
-
-import (
-	"github.com/zeromicro/go-zero/rest"
-	
-	{{range $v := .Plugins}}{{ $v.Path | base }} "{{ $v.Module }}/serverless"
-	{{end}}
-)
-
-func LoadPlugins(server *rest.Server) {
-	{{ range $v := .Plugins }}server.AddRoutes({{ $v.Path | base }}.Routes())
-	{{end}}
-}`
-
 func GetPlugins() ([]Plugin, error) {
 	wd, _ := os.Getwd()
 
