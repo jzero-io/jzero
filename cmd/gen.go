@@ -316,8 +316,6 @@ func init() {
 		genCmd.AddCommand(genZRpcClientCmd)
 
 		genZRpcClientCmd.Flags().StringP("output", "o", "zrpcclient-go", "generate rpcclient code")
-		genZRpcClientCmd.Flags().StringP("pb-dir", "", "", "set output pb dir ")
-		genZRpcClientCmd.Flags().StringP("client-dir", "", "", "set output client dir ")
 		genZRpcClientCmd.Flags().StringP("scope", "", "", "set scope name")
 		genZRpcClientCmd.Flags().StringP("goModule", "", "", "set go module name")
 		genZRpcClientCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")
