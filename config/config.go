@@ -132,14 +132,13 @@ type GenSwaggerConfig struct {
 }
 
 type GenZrpcclientConfig struct {
-	Hooks     HooksConfig `mapstructure:"hooks"`
-	PbDir     string      `mapstructure:"pb-dir"`
-	ClientDir string      `mapstructure:"client-dir"`
-	Scope     string      `mapstructure:"scope"`
-	Output    string      `mapstructure:"output"`
-	GoVersion string      `mapstructure:"goVersion"`
-	GoModule  string      `mapstructure:"goModule"`
-	GoPackage string      `mapstructure:"goPackage"`
+	Hooks HooksConfig `mapstructure:"hooks"`
+
+	Scope     string `mapstructure:"scope"`
+	Output    string `mapstructure:"output"`
+	GoVersion string `mapstructure:"goVersion"`
+	GoModule  string `mapstructure:"goModule"`
+	GoPackage string `mapstructure:"goPackage"`
 }
 
 type GenDocsConfig struct {
