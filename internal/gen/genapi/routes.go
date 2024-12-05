@@ -87,6 +87,7 @@ func (ja *JzeroApi) genRoute2Code() ([]byte, error) {
 				if g.GetAnnotation("prefix") != "" {
 					route.Path = g.GetAnnotation("prefix") + r.Path
 				}
+				route.Handler = strings.TrimSuffix(r.Handler, "Handler")
 				routes = append(routes, route)
 			}
 		}

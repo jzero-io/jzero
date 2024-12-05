@@ -9,13 +9,13 @@ import (
 	casbinutil "github.com/casbin/casbin/v2/util"
 )
 
-var routesCodesMap = map[string]string{
+var RoutesCodesMap = map[string]string{
     {{ range $v := .Routes }}"{{ $v.Method | upper }}:{{ $v.Path }}":"{{ replace `/` `:` $v.Group | FirstLower }}:{{ $v.Handler | FirstLower}}",
     {{ end }}
 }
 
 func Route2Code(r *http.Request) string {
-	for k, v := range routesCodesMap {
+	for k, v := range RoutesCodesMap {
 		if splits := strings.Split(k, ":"); len(splits) >= 2 && splits[0] == strings.ToUpper(r.Method) {
 			if casbinutil.KeyMatch2(r.URL.Path, strings.Join(splits[1:], ":")) {
 				return v
