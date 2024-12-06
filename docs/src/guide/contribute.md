@@ -14,7 +14,7 @@ tag:
 
 ### 1. fork jzero
 
-https://github.com/jzero-io/jzero/fork
+[点击这里 fork](https://github.com/jzero-io/jzero/fork)
 
 ### 2. clone
 
