@@ -266,7 +266,7 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 		return nil, err
 	}
 
-	resourceGoFormatBytes, err := gosimports.Process("", resourceGoBytes, &gosimports.Options{Comments: true, FormatOnly: true})
+	resourceGoFormatBytes, err := gosimports.Process("", resourceGoBytes, &gosimports.Options{Comments: true})
 	if err != nil {
 		return nil, errors.Errorf("format resource.go meet error: %s", err)
 	}

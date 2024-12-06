@@ -187,7 +187,9 @@ var genSdkCmd = &cobra.Command{
 			}
 		} else {
 			// module 不为空, 则生成 go.mod 文件
-			genModule = true
+			if !config.C.Gen.Sdk.Mono {
+				genModule = true
+			}
 		}
 
 		if config.C.Gen.Sdk.GoPackage == "" {
@@ -293,6 +295,7 @@ func init() {
 		genSdkCmd.Flags().StringP("proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
 		genSdkCmd.Flags().BoolP("wrap-response", "", true, "wrap response: code, data, message")
 		genSdkCmd.Flags().StringP("scope", "", "", "set scope name")
+		genSdkCmd.Flags().BoolP("mono", "", false, "mono sdk project under go mod project")
 	}
 
 	{

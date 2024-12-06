@@ -123,6 +123,7 @@ type GenSdkConfig struct {
 	GoVersion    string `mapstructure:"goVersion"`
 	GoModule     string `mapstructure:"goModule"`
 	GoPackage    string `mapstructure:"goPackage"`
+	Mono         bool   `mapstructure:"mono"`
 }
 
 type GenSwaggerConfig struct {
