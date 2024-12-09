@@ -203,6 +203,8 @@ type UpgradeConfig struct {
 }
 
 type ServerlessConfig struct {
+	Home string `mapstructure:"home"` // 使用的模板文件目录
+
 	New    NewConfig              `mapstructure:"new"`
 	Delete ServerlessDeleteConfig `mapstructure:"delete"`
 }

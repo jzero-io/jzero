@@ -4,9 +4,12 @@ package handler
 
 import (
 	"net/http"
+	"path"
 	"strings"
+	"sync"
 
-	casbinutil "github.com/casbin/casbin/v2/util"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/search"
 )
 
 var RoutesCodesMap = map[string]string{
@@ -14,13 +17,37 @@ var RoutesCodesMap = map[string]string{
     {{ end }}
 }
 
+var (
+	MST  map[string]*search.Tree
+	once sync.Once
+)
+
 func Route2Code(r *http.Request) string {
-	for k, v := range RoutesCodesMap {
-		if splits := strings.Split(k, ":"); len(splits) >= 2 && splits[0] == strings.ToUpper(r.Method) {
-			if casbinutil.KeyMatch2(r.URL.Path, strings.Join(splits[1:], ":")) {
-				return v
+	once.Do(func() {
+		RegisterRoute2Code(RoutesCodesMap)
+	})
+	if tree, ok := MST[strings.ToUpper(r.Method)]; ok {
+		if result, ok := tree.Search(path.Clean(r.URL.Path)); ok {
+			return result.Item.(string)
+		}
+	}
+
+	return "unknown"
+}
+
+func RegisterRoute2Code(maps map[string]string) {
+	if MST == nil {
+		MST = make(map[string]*search.Tree)
+	}
+	for k, v := range maps {
+		if splits := strings.Split(k, ":"); len(splits) >= 2 {
+			if _, ok := MST[splits[0]]; ok {
+				logx.Must(MST[splits[0]].Add(path.Clean(strings.Join(splits[1:], ":")), v))
+			} else {
+				tree := search.NewTree()
+				logx.Must(tree.Add(strings.Join(splits[1:], ":"), v))
+				MST[splits[0]] = tree
 			}
 		}
 	}
-	return "unknown_code"
 }

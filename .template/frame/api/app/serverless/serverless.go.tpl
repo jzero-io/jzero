@@ -11,8 +11,13 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
+type Serverless struct {
+	SvcCtx        *svc.ServiceContext                                   // 服务上下文
+	HandlerFunc   func(server *rest.Server, svcCtx *svc.ServiceContext) // 服务路由
+}
+
 // Serverless please replace coreSvcCtx any type to real core svcCtx
-func Serverless(server *rest.Server, coreSvcCtx any) {
+func New(coreSvcCtx any) *Serverless {
 	var c config.Config
 
 	if err := conf.Load(filepath.Join("plugins", "{{ .DirName }}", "etc", "etc.yaml"), &c); err != nil {
@@ -21,5 +26,8 @@ func Serverless(server *rest.Server, coreSvcCtx any) {
 	config.C = c
 
 	svcCtx := svc.NewServiceContext(c)
-	handler.RegisterHandlers(server, svcCtx)
+	return &Serverless{
+    	SvcCtx:        svcCtx,
+    	HandlerFunc:   handler.RegisterHandlers,
+    }
 }{{end}}

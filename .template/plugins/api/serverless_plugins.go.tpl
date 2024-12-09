@@ -10,6 +10,10 @@ import (
 )
 
 func LoadPlugins(server *rest.Server, svcCtx *svc.ServiceContext) {
-	{{ range $v := .Plugins }}{{ $v.Path | base }}.Serverless(server, svcCtx)
+	{{ range $v := .Plugins }}
+	{
+        serverless := {{ $v.Path | base }}.New(svcCtx)
+        serverless.HandlerFunc(server, serverless.SvcCtx)
+    }
 	{{end}}
 }
