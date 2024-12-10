@@ -13,7 +13,7 @@ require (
 	github.com/iancoleman/orderedmap v0.3.0
 	github.com/jhump/protoreflect v1.16.0
 	github.com/jzero-io/desc v0.0.1
-	github.com/jzero-io/jzero-contrib v0.14.1-0.20241202072226-245e83cee9d4
+	github.com/jzero-io/jzero-contrib v0.15.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1
