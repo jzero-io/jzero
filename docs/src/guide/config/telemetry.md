@@ -8,6 +8,17 @@ tag:
   - Guide
 ---
 
+# 开发指南
+
+* 获取 trace 值
+
+```go
+import "github.com/zeromicro/go-zero/core/trace"
+
+# 从 ctx 中获取 trace 值
+traceId := trace.TraceIDFromContext(l.ctx)
+```
+
 ## rest
 
 修改 etc/etc.yaml 添加一下内容
