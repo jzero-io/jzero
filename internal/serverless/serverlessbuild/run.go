@@ -75,6 +75,9 @@ func Run() error {
 		return err
 	}
 	pluginsGoFormatBytes, err := gosimports.Process("", pluginsGoBytes, &gosimports.Options{Comments: true})
+	if err != nil {
+		return err
+	}
 	if err := os.WriteFile(filepath.Join("plugins", "plugins.go"), pluginsGoFormatBytes, 0o644); err != nil {
 		return err
 	}
