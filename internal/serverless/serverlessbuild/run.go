@@ -1,6 +1,7 @@
 package serverlessbuild
 
 import (
+	"github.com/rinchsan/gosimports"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -73,7 +74,8 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(filepath.Join("plugins", "plugins.go"), pluginsGoBytes, 0o644); err != nil {
+	pluginsGoFormatBytes, err := gosimports.Process("", pluginsGoBytes, &gosimports.Options{Comments: true})
+	if err := os.WriteFile(filepath.Join("plugins", "plugins.go"), pluginsGoFormatBytes, 0o644); err != nil {
 		return err
 	}
 	return nil
