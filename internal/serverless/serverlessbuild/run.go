@@ -1,7 +1,6 @@
 package serverlessbuild
 
 import (
-	"github.com/rinchsan/gosimports"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/jzero-io/jzero-contrib/templatex"
 	"github.com/pkg/errors"
+	"github.com/rinchsan/gosimports"
 	"golang.org/x/mod/modfile"
 
 	"github.com/jzero-io/jzero/embeded"
