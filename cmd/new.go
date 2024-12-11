@@ -14,6 +14,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
@@ -67,6 +68,10 @@ var newCmd = &cobra.Command{
 				URL:           config.C.New.Remote,
 				Depth:         0,
 				ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
+				Auth: &http.BasicAuth{
+					Username: os.Getenv("JZERO_REMOTE_USERNAME"),
+					Password: os.Getenv("JZERO_REMOTE_PASSWORD"),
+				},
 			})
 			cobra.CheckErr(err)
 			_ = os.RemoveAll(filepath.Join(fp, ".git"))
