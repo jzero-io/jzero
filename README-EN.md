@@ -79,11 +79,13 @@ go run main.go server
 
 For more examples code please see: https://github.com/jzero-io/examples
 
-Project Practice please see: https://jzero.jaronnie.com/project
+Project Practice please see:
+* api frame: https://jzero.jaronnie.com/project/api.html
+* gateway frame: https://jzero.jaronnie.com/project/gateway.html
 
 ## Roadmap
 
-please see: https://jzero.jaronnie.com/roadmap
+please see: https://jzero.jaronnie.com/roadmap/base.html
 
 ## Contributors
 

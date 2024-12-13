@@ -84,11 +84,13 @@ go run main.go server
 
 更多示例代码请参阅: https://github.com/jzero-io/examples
 
-项目实战请参阅: https://jzero.jaronnie.com/project
+项目实战请参阅:
+* api 框架: https://jzero.jaronnie.com/project/api.html
+* gateway 框架: https://jzero.jaronnie.com/project/gateway.html
 
 ## 路线图
 
-请参阅: https://jzero.jaronnie.com/roadmap
+请参阅: https://jzero.jaronnie.com/roadmap/base.html
 
 ## 贡献者
 
