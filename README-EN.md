@@ -27,7 +27,7 @@ It has the following features:
 
 * Maintain commonly used development templates and generate projects that meet enterprise-level code specifications with one click
 
-For more details please see: https://jzero.jaronnie.com/en. The English documentation is incomplete and is still being supplemented
+For more details please see: https://docs.jzero.io/en. The English documentation is incomplete and is still being supplemented
 
 ## Install
 
@@ -80,12 +80,12 @@ go run main.go server
 For more examples code please see: https://github.com/jzero-io/examples
 
 Project Practice please see:
-* api frame: https://jzero.jaronnie.com/project/api.html
-* gateway frame: https://jzero.jaronnie.com/project/gateway.html
+* api frame: https://docs.jzero.io/project/api.html
+* gateway frame: https://docs.jzero.io/project/gateway.html
 
 ## Roadmap
 
-please see: https://jzero.jaronnie.com/roadmap/base.html
+please see: https://docs.jzero.io/roadmap/base.html
 
 ## Contributors
 

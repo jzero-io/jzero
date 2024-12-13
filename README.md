@@ -16,7 +16,7 @@
 
 * 将 jzero 应用部署在 [Vercel](https://vercel.com), [模板仓库分支](https://github.com/jzero-io/templates/tree/api-vercel), [代码示例](https://github.com/jaronnie/go-serverless-vercel)
 * 基于 git change 生成代码, 极大提升大型项目开发体验
-* 基于 jzero 的[后台管理系统](https://github.com/jzero-io/jzero-admin), [演示地址](https://demo.jzero-admin.jaronnie.com)
+* 基于 jzero 的[后台管理系统](https://github.com/jzero-io/jzero-admin), [演示地址](https://admin.jzero.io)
 
 中文 | [ENGLISH](README-EN.md)
 
@@ -32,7 +32,7 @@
 * 维护常用开发模板, 一键生成符合企业级代码规范的项目
 * 所有配套工具链跨平台使用, 支持 windows/mac/linux
 
-更多详情请参阅：https://jzero.jaronnie.com
+更多详情请参阅：https://docs.jzero.io
 
 ## 下载
 
@@ -85,16 +85,16 @@ go run main.go server
 更多示例代码请参阅: https://github.com/jzero-io/examples
 
 项目实战请参阅:
-* api 框架: https://jzero.jaronnie.com/project/api.html
-* gateway 框架: https://jzero.jaronnie.com/project/gateway.html
+* api 框架: https://docs.jzero.io/project/api.html
+* gateway 框架: https://docs.jzero.io/project/gateway.html
 
 ## 路线图
 
-请参阅: https://jzero.jaronnie.com/roadmap/base.html
+请参阅: https://docs.jzero.io/roadmap/base.html
 
 ## 贡献者
 
-[贡献](https://jzero.jaronnie.com/guide/contribute)
+[贡献](https://docs.jzero.io/guide/contribute.html)
 
 <div>
   <a href="https://github.com/jzero-io/jzero/graphs/contributors">

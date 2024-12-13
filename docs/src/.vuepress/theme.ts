@@ -5,7 +5,7 @@ import sidebar from "./sidebar.js";
 
 // @ts-ignore
 export default hopeTheme({
-  hostname: "https://jzero.jaronnie.com",
+  hostname: "https://docs.jzero.io",
 
   author: {
     name: "jaronnie",
