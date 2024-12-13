@@ -2,4 +2,4 @@
 User-agent:*
 Disallow:
 
-Sitemap: https://jzero.jaronnie.com/sitemap.xml
+Sitemap: https://docs.jzero.io/sitemap.xml
