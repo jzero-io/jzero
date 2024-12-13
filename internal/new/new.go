@@ -119,11 +119,11 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 		}
 		fileBytes, err := templatex.ParseTemplate(jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
 		if err != nil {
-			return nil, errors.Wrapf(err, "parse template: %s", filepath.Join(dirname, file.Name()))
+			fileBytes = embeded.ReadTemplateFile(filepath.Join(dirname, file.Name()))
 		}
 
 		stylePath := filepath.Join(filepath.Dir(rel), filename)
-		if filepath.Ext(filename) == ".go" {
+		if filepath.Ext(filename) == ".go" && !bytes.Contains(fileBytes, []byte("DO NOT EDIT")) {
 			formatFilename, err := format.FileNamingFormat(jn.nc.Style, filename[0:len(filename)-len(filepath.Ext(filename))])
 			if err != nil {
 				return nil, err
