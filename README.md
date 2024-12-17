@@ -16,7 +16,7 @@
 
 * 将 jzero 应用部署在 [Vercel](https://vercel.com), [模板仓库分支](https://github.com/jzero-io/templates/tree/api-vercel), [代码示例](https://github.com/jaronnie/go-serverless-vercel)
 * 基于 git change 生成代码, 极大提升大型项目开发体验
-* 基于 jzero 的[后台管理系统](https://github.com/jzero-io/jzero-admin), [演示地址](https://admin.jzero.io)
+* 基于 jzero 的[后台管理系统](https://github.com/jzero-io/jzero-admin), [演示地址1-部署在vercel](https://admin.jzero.io), [演示地址2-部署在阿里云函数计算](https://jzero-admin.jaronnie.com)
 
 中文 | [ENGLISH](README-EN.md)
 
