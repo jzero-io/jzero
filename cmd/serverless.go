@@ -5,9 +5,6 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/spf13/cobra"
 
 	"github.com/jzero-io/jzero/config"
@@ -59,14 +56,12 @@ var serverlessDeleteCmd = &cobra.Command{
 }
 
 func init() {
-	wd, _ := os.Getwd()
-
 	rootCmd.AddCommand(serverlessCmd)
 	serverlessCmd.AddCommand(serverlessBuildCmd)
 	serverlessCmd.AddCommand(serverlessDeleteCmd)
 	serverlessCmd.AddCommand(serverlessNewCmd)
 
-	serverlessCmd.PersistentFlags().StringP("home", "", filepath.Join(wd, ".template"), "set templates path")
+	serverlessCmd.PersistentFlags().StringP("home", "", "", "set templates path")
 	serverlessNewCmd.Flags().BoolP("core", "", false, "is core serverless")
 	serverlessNewCmd.Flags().StringP("module", "m", "", "set go module")
 	serverlessNewCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
