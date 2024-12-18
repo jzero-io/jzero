@@ -112,7 +112,7 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --
 ```
 :::
 
-## 场景五: 命令行项目
+## 场景四: 命令行项目
 
 :::tip
 基于 [cobra](https://github.com/spf13/cobra) 构建命令行项目

@@ -1,5 +1,5 @@
 ---
-title: 模版
+title: 模版特性
 icon: vscode-icons:folder-type-template
 star: true
 order: 5.3
