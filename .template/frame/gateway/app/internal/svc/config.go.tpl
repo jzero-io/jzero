@@ -7,12 +7,11 @@ import (
 	"{{ .Module }}/internal/config"
 )
 
-func (sc *ServiceContext) DynamicConfListener(cc configurator.Configurator[config.Config]) {
+func (sc *ServiceContext) SetConfigListener(c config.Config, cc configurator.Configurator[config.Config]) {
 	cc.AddListener(func() {
-		logLevel := sc.Config.Log.Level
 		logx.Infof("config file changed")
 		if v, err := cc.GetConfig(); err == nil {
-			if v.Log.Level != logLevel {
+			if v.Log.Level != c.Log.Level {
 				logx.Infof("log level changed: %s", v.Log.Level)
 				switch v.Log.Level {
 				case "debug":
@@ -25,9 +24,6 @@ func (sc *ServiceContext) DynamicConfListener(cc configurator.Configurator[confi
 					logx.SetLevel(logx.SevereLevel)
 				}
 			}
-
-			config.C = v
-			sc.Config = v
 		}
 	})
 }

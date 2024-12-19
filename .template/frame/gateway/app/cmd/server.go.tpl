@@ -33,7 +33,6 @@ var serverCmd = &cobra.Command{
 		}, ss)
 		c, err := cc.GetConfig()
 		logx.Must(err)
-		config.C = c
 
         // set up logger
     	if err = logx.SetUp(c.Log.LogConf); err != nil {
@@ -50,13 +49,13 @@ var serverCmd = &cobra.Command{
         logx.Must(err)
 
     	svcCtx := svc.NewServiceContext(c, cc)
-    	run(svcCtx)
+    	run(c, svcCtx)
 	},
 }
 
-func run(svcCtx *svc.ServiceContext) {
-	zrpc := server.RegisterZrpc(svcCtx.Config, svcCtx)
-	gw := gateway.MustNewServer(svcCtx.Config.Gateway.GatewayConf, middleware.WithHeaderProcessor())
+func run(c config.Config, svcCtx *svc.ServiceContext) {
+	zrpc := server.RegisterZrpc(c, svcCtx)
+	gw := gateway.MustNewServer(c.Gateway.GatewayConf, middleware.WithHeaderProcessor())
 
 	// register middleware
 	middleware.Register(zrpc, gw)
@@ -69,9 +68,9 @@ func run(svcCtx *svc.ServiceContext) {
 	group.Add(gw)
 	group.Add(svcCtx.Custom)
 
-	printBanner(svcCtx.Config)
-	logx.Infof("Starting rpc server at %s...", svcCtx.Config.Zrpc.ListenOn)
-	logx.Infof("Starting gateway server at %s:%d...", svcCtx.Config.Gateway.Host, svcCtx.Config.Gateway.Port)
+	printBanner(c)
+	logx.Infof("Starting rpc server at %s...", c.Zrpc.ListenOn)
+	logx.Infof("Starting gateway server at %s:%d...", c.Gateway.Host, c.Gateway.Port)
 
 	group.Start()
 }
