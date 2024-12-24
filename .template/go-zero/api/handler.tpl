@@ -17,7 +17,7 @@ func {{.HandlerName}}(svcCtx *svc.ServiceContext) http.HandlerFunc {
                         return
                 }
 
-                l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx)
+                l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx, r)
                 resp, err := l.{{.Call}}(&req)
                 if err != nil {
                         httpx.ErrorCtx(r.Context(), w, err)
@@ -31,7 +31,7 @@ func {{.HandlerName}}(svcCtx *svc.ServiceContext) http.HandlerFunc {
                         return
                 }
 
-                l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx, w)
+                l := {{.LogicName}}.New{{.LogicType}}(r.Context(), svcCtx, r, w)
                 err := l.{{.Call}}(&req)
                 if err != nil {
                         httpx.ErrorCtx(r.Context(), w, err)
