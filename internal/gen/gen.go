@@ -76,14 +76,19 @@ func Run(c config.Config) error {
 
 func RemoveExtraFiles(wd, style string) {
 	if pathx.FileExists(filepath.Join("desc", "api")) {
-		if desc.GetApiFrameMainGoFilename(wd, style) != "main.go" {
-			if err := os.Remove(filepath.Join(wd, desc.GetApiFrameMainGoFilename(wd, style))); err != nil {
-				logx.Debugf("remove api frame main go file error: %s", err.Error())
-			}
-		}
-		if desc.GetApiFrameEtcFilename(wd, style) != "etc.yaml" {
-			if err := os.Remove(filepath.Join(wd, "etc", desc.GetApiFrameEtcFilename(wd, style))); err != nil {
-				logx.Debugf("remove api etc file error: %s", err.Error())
+		apiFilenames, err := desc.FindApiFiles(filepath.Join("desc", "api"))
+		if err == nil {
+			for _, v := range apiFilenames {
+				if desc.GetApiFrameMainGoFilename(wd, v, style) != "main.go" {
+					if err := os.Remove(filepath.Join(wd, desc.GetApiFrameMainGoFilename(wd, v, style))); err != nil {
+						logx.Debugf("remove api frame main go file error: %s", err.Error())
+					}
+				}
+				if desc.GetApiFrameEtcFilename(wd, v, style) != "etc.yaml" {
+					if err := os.Remove(filepath.Join(wd, "etc", desc.GetApiFrameEtcFilename(wd, v, style))); err != nil {
+						logx.Debugf("remove api etc file error: %s", err.Error())
+					}
+				}
 			}
 		}
 	}

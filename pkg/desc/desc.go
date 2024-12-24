@@ -77,13 +77,24 @@ func protoHasService(fp string) (bool, error) {
 	return len(parse.Service) > 0, nil
 }
 
-func GetApiServiceName(apiDirName string) string {
-	fs, err := getApiFileRelPath(apiDirName)
-	if err != nil {
-		return ""
-	}
-	for _, file := range fs {
-		apiSpec, err := parser.Parse(filepath.Join(apiDirName, file), "")
+func GetApiServiceName(apiDirName string, files ...string) string {
+	if len(files) == 0 {
+		fs, err := getApiFileRelPath(apiDirName)
+		if err != nil {
+			return ""
+		}
+		for _, file := range fs {
+			apiSpec, err := parser.Parse(filepath.Join(apiDirName, file), "")
+			if err != nil {
+				return ""
+			}
+			if apiSpec.Service.Name != "" {
+				return apiSpec.Service.Name
+			}
+		}
+	} else {
+		file := files[0]
+		apiSpec, err := parser.Parse(file, "")
 		if err != nil {
 			return ""
 		}
@@ -91,6 +102,7 @@ func GetApiServiceName(apiDirName string) string {
 			return apiSpec.Service.Name
 		}
 	}
+
 	return ""
 }
 
@@ -182,8 +194,8 @@ func FindRouteApiFiles(dir string) ([]string, error) {
 }
 
 // GetApiFrameMainGoFilename goctl/api/gogen/genmain.go
-func GetApiFrameMainGoFilename(wd, style string) string {
-	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
+func GetApiFrameMainGoFilename(wd, file, style string) string {
+	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"), file)
 	serviceName = strings.ToLower(serviceName)
 	filename, err := format.FileNamingFormat(style, serviceName)
 	if err != nil {
@@ -197,8 +209,8 @@ func GetApiFrameMainGoFilename(wd, style string) string {
 }
 
 // GetApiFrameEtcFilename goctl/api/gogen/genetc.go
-func GetApiFrameEtcFilename(wd, style string) string {
-	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"))
+func GetApiFrameEtcFilename(wd, file, style string) string {
+	serviceName := GetApiServiceName(filepath.Join(wd, "desc", "api"), file)
 	filename, err := format.FileNamingFormat(style, serviceName)
 	if err != nil {
 		return ""
