@@ -79,7 +79,7 @@ func (ja *JzeroApi) patchLogic(file LogicFile) error {
 
 	if pathx.FileExists(newFilePath) {
 		_ = os.Remove(file.Path)
-		return nil
+		file.Path = newFilePath
 	}
 
 	fset := token.NewFileSet()

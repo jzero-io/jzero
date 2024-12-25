@@ -211,21 +211,12 @@ func (ja *JzeroApi) changeLogicTypes(f *ast.File, fset *token.FileSet, file Logi
 								}
 							}
 						}
-						if structType != nil && requestType == nil && !lo.Contains(names, "r") {
+						if structType != nil && !lo.Contains(names, "r") {
 							newField := &ast.Field{
 								Names: []*ast.Ident{ast.NewIdent("r")},
 								Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
 							}
 							structType.Fields.List = append(structType.Fields.List, newField)
-						} else if structType != nil && requestType != nil && lo.Contains(names, "r") {
-							for i, v := range structType.Fields.List {
-								if len(v.Names) > 0 {
-									if v.Names[0].Name == "r" {
-										// 删除这个元素
-										structType.Fields.List = append(structType.Fields.List[:i], structType.Fields.List[i+1:]...)
-									}
-								}
-							}
 						}
 
 						if structType != nil && responseType == nil && !lo.Contains(names, "w") {
@@ -259,12 +250,12 @@ func (ja *JzeroApi) changeLogicTypes(f *ast.File, fset *token.FileSet, file Logi
 						paramNames = append(paramNames, name.Name)
 					}
 				}
-				if requestType == nil && !lo.Contains(paramNames, "r") {
+				if !lo.Contains(paramNames, "r") {
 					fn.Type.Params.List = append(fn.Type.Params.List, &ast.Field{
 						Names: []*ast.Ident{ast.NewIdent("r")},
 						Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
 					})
-				} else if requestType != nil && lo.Contains(paramNames, "r") {
+				} else if lo.Contains(paramNames, "r") {
 					for i, v := range fn.Type.Params.List {
 						if len(v.Names) > 0 {
 							if v.Names[0].Name == "r" {
@@ -311,24 +302,13 @@ func (ja *JzeroApi) changeLogicTypes(f *ast.File, fset *token.FileSet, file Logi
 											}
 										}
 
-										if requestType == nil && !hasR {
+										if !hasR {
 											// Add new field
 											newField := &ast.KeyValueExpr{
 												Key:   ast.NewIdent("r"),
 												Value: ast.NewIdent("r"), // or any default value you want
 											}
 											compositeLit.Elts = append(compositeLit.Elts, newField)
-										} else if requestType != nil && hasR {
-											for i, v := range compositeLit.Elts {
-												if kv, ok := v.(*ast.KeyValueExpr); ok {
-													if key, ok := kv.Key.(*ast.Ident); ok {
-														if key.Name == "r" {
-															// 删除这个元素
-															compositeLit.Elts = append(compositeLit.Elts[:i], compositeLit.Elts[i+1:]...)
-														}
-													}
-												}
-											}
 										}
 
 										if responseType == nil && !hasW {
@@ -361,11 +341,7 @@ func (ja *JzeroApi) changeLogicTypes(f *ast.File, fset *token.FileSet, file Logi
 		})
 
 		// check `net/http` import
-		if requestType == nil || responseType == nil {
-			astutil.AddImport(fset, f, "net/http")
-		} else if requestType != nil && responseType != nil {
-			astutil.DeleteImport(fset, f, "net/http")
-		}
+		astutil.AddImport(fset, f, "net/http")
 	}
 	return nil
 }
