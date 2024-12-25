@@ -20,3 +20,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 	return sc
 }
+
+func (sc *ServiceContext) MustGetConfig() config.Config {
+	return sc.Config
+}
