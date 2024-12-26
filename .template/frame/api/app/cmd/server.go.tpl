@@ -4,7 +4,8 @@ import (
     "os"
 
 	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/core/conf"
+	configurator "github.com/zeromicro/go-zero/core/configcenter"
+	"github.com/jzero-io/jzero-contrib/dynamic_conf"
     "github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/rest"
@@ -23,9 +24,13 @@ var serverCmd = &cobra.Command{
 	Short: "{{ .APP }} server",
 	Long:  "{{ .APP }} server",
 	Run: func(cmd *cobra.Command, args []string) {
-		var c config.Config
-        conf.MustLoad(cfgFile, &c)
-        config.C = c
+		ss, err := dynamic_conf.NewFsNotify(cfgFile, dynamic_conf.WithUseEnv(true))
+		logx.Must(err)
+		cc := configurator.MustNewConfigCenter[config.Config](configurator.Config{
+			Type: "yaml",
+		}, ss)
+		c, err := cc.GetConfig()
+		logx.Must(err)
 
         // set up logger
         if err := logx.SetUp(c.Log.LogConf); err != nil {
@@ -35,13 +40,15 @@ var serverCmd = &cobra.Command{
             logx.AddWriter(logx.NewWriter(os.Stdout))
         }
 
-        ctx := svc.NewServiceContext(c)
-        run(ctx)
+        svcCtx := svc.NewServiceContext(cc)
+        run(svcCtx)
 	},
 }
 
 func run(svcCtx *svc.ServiceContext) {
-	server := rest.MustNewServer(svcCtx.Config.Rest.RestConf)
+    c := svcCtx.MustGetConfig()
+
+	server := rest.MustNewServer(c.Rest.RestConf)
 	middleware.Register(server)
 
 	// server add api handlers
@@ -57,8 +64,8 @@ func run(svcCtx *svc.ServiceContext) {
 	group.Add(server)
 	group.Add(svcCtx.Custom)
 
-	printBanner(svcCtx.Config)
-    logx.Infof("Starting rest server at %s:%d...", svcCtx.Config.Rest.Host, svcCtx.Config.Rest.Port)
+	printBanner(c)
+    logx.Infof("Starting rest server at %s:%d...", c.Rest.Host, c.Rest.Port)
     group.Start()
 }
 

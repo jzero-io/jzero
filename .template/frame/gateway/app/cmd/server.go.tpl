@@ -48,12 +48,14 @@ var serverCmd = &cobra.Command{
 		}))
         logx.Must(err)
 
-    	svcCtx := svc.NewServiceContext(c, cc)
-    	run(c, svcCtx)
+    	svcCtx := svc.NewServiceContext(cc)
+    	run(svcCtx)
 	},
 }
 
-func run(c config.Config, svcCtx *svc.ServiceContext) {
+func run(svcCtx *svc.ServiceContext) {
+    c := svcCtx.MustGetConfig()
+
 	zrpc := server.RegisterZrpc(c, svcCtx)
 	gw := gateway.MustNewServer(c.Gateway.GatewayConf, middleware.WithHeaderProcessor())
 

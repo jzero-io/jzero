@@ -13,11 +13,11 @@ type ServiceContext struct {
 	Custom *custom.Custom
 }
 
-func NewServiceContext(c config.Config, cc configurator.Configurator[config.Config]) *ServiceContext {
+func NewServiceContext(cc configurator.Configurator[config.Config]) *ServiceContext {
     sc := &ServiceContext{
 		Config: cc,
 		Custom: custom.New(cc),
 	}
-	sc.SetConfigListener(c, cc)
+	sc.SetConfigListener()
 	return sc
 }
