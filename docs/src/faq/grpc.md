@@ -1,6 +1,6 @@
 ---
 title: gateway/rpc 框架问题记录
-icon: vscode-icons:file-type-swagger
+icon: logos:grpc
 star: true
 order: 3
 category: faq
