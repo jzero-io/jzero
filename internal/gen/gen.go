@@ -80,12 +80,12 @@ func RemoveExtraFiles(wd, style string) {
 		if err == nil {
 			for _, v := range apiFilenames {
 				if desc.GetApiFrameMainGoFilename(wd, v, style) != "main.go" {
-					if err := os.Remove(filepath.Join(wd, desc.GetApiFrameMainGoFilename(wd, v, style))); err != nil {
+					if err := os.Remove(filepath.Join(wd, desc.GetApiFrameMainGoFilename(wd, v, style))); err != nil && !errors.Is(err, os.ErrNotExist) {
 						logx.Debugf("remove api frame main go file error: %s", err.Error())
 					}
 				}
 				if desc.GetApiFrameEtcFilename(wd, v, style) != "etc.yaml" {
-					if err := os.Remove(filepath.Join(wd, "etc", desc.GetApiFrameEtcFilename(wd, v, style))); err != nil {
+					if err := os.Remove(filepath.Join(wd, "etc", desc.GetApiFrameEtcFilename(wd, v, style))); err != nil && !errors.Is(err, os.ErrNotExist) {
 						logx.Debugf("remove api etc file error: %s", err.Error())
 					}
 				}
@@ -100,12 +100,12 @@ func RemoveExtraFiles(wd, style string) {
 				v = filepath.Base(v)
 				fileBase := v[0 : len(v)-len(path.Ext(v))]
 				if desc.GetProtoFrameMainGoFilename(fileBase, style) != "main.go" {
-					if err = os.Remove(filepath.Join(wd, desc.GetProtoFrameMainGoFilename(fileBase, style))); err != nil {
+					if err = os.Remove(filepath.Join(wd, desc.GetProtoFrameMainGoFilename(fileBase, style))); err != nil && !errors.Is(err, os.ErrNotExist) {
 						logx.Debugf("remove proto frame main go file error: %s", err.Error())
 					}
 				}
 				if desc.GetProtoFrameEtcFilename(fileBase, style) != "etc.yaml" {
-					if err = os.Remove(filepath.Join(wd, "etc", desc.GetProtoFrameEtcFilename(fileBase, style))); err != nil {
+					if err = os.Remove(filepath.Join(wd, "etc", desc.GetProtoFrameEtcFilename(fileBase, style))); err != nil && !errors.Is(err, os.ErrNotExist) {
 						logx.Debugf("remove proto etc file error: %s", err.Error())
 					}
 				}
