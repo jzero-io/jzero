@@ -4,7 +4,7 @@ package plugins
 import (
 	"github.com/zeromicro/go-zero/rest"
 
-    "{{ .Module }}/server/svc"
+    "{{ .Module }}/internal/svc"
 	{{range $v := .Plugins}}{{ $v.Path | base }} "{{ $v.Module }}/serverless"
 	{{end}}
 )

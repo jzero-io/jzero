@@ -34,3 +34,5 @@ dist
 
 # unix sock
 *.sock
+
+/{{ .APP }}
