@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/rinchsan/gosimports"
+	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/sync/errgroup"
@@ -51,7 +52,7 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 	return os.WriteFile(filepath.Join("internal", "model", "model.go"), format, 0o644)
 }
 
-func (jm *JzeroModel) GenDDL(tables []string) error {
+func (jm *JzeroModel) GenDDL(tables []string) ([]string, error) {
 	var (
 		eg          errgroup.Group
 		tableDDLMap sync.Map
@@ -71,19 +72,31 @@ func (jm *JzeroModel) GenDDL(tables []string) error {
 		})
 	}
 	if err := eg.Wait(); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := os.MkdirAll(filepath.Join("desc", "sql"), 0o755); err != nil {
-		return err
+		return nil, err
 	}
+
+	var writeTables []string
 	for _, v := range tables {
 		if s, ok := tableDDLMap.Load(v); ok {
-			if err := os.WriteFile(filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)), []byte(cast.ToString(s)), 0o644); err != nil {
-				return err
+			if len(jm.ModelMysqlDatasourceTable) != 0 && jm.ModelMysqlDatasourceTable[0] != "*" {
+				if lo.Contains(jm.ModelMysqlDatasourceTable, cast.ToString(s)) {
+					writeTables = append(writeTables, "desc", "sql", fmt.Sprintf("%s.sql", v))
+					if err := os.WriteFile(filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)), []byte(cast.ToString(s)), 0o644); err != nil {
+						return nil, err
+					}
+				}
+			} else if len(jm.ModelMysqlDatasourceTable) != 0 && jm.ModelMysqlDatasourceTable[0] == "*" {
+				writeTables = append(writeTables, "desc", "sql", fmt.Sprintf("%s.sql", v))
+				if err := os.WriteFile(filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)), []byte(cast.ToString(s)), 0o644); err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
 
-	return nil
+	return writeTables, nil
 }

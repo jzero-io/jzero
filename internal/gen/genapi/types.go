@@ -255,14 +255,6 @@ func (ja *JzeroApi) changeLogicTypes(f *ast.File, fset *token.FileSet, file Logi
 						Names: []*ast.Ident{ast.NewIdent("r")},
 						Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
 					})
-				} else if lo.Contains(paramNames, "r") {
-					for i, v := range fn.Type.Params.List {
-						if len(v.Names) > 0 {
-							if v.Names[0].Name == "r" {
-								fn.Type.Params.List = append(fn.Type.Params.List[:i], fn.Type.Params.List[i+1:]...)
-							}
-						}
-					}
 				}
 
 				if responseType == nil && !lo.Contains(paramNames, "w") {
