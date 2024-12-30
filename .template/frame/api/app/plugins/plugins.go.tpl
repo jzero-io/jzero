@@ -7,4 +7,6 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
-func LoadPlugins(server *rest.Server, svcCtx *svc.ServiceContext) {}{{ end }}
+type CoreSvcCtx = svc.ServiceContext
+
+func LoadPlugins(server *rest.Server, svcCtx CoreSvcCtx) {}{{ end }}

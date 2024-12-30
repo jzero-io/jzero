@@ -58,7 +58,7 @@ func run(svcCtx *svc.ServiceContext) {
     svcCtx.Custom.AddRoutes(server)
 
     {{ if has "serverless_core" .Features }}// load plugins features
-    plugins.LoadPlugins(server, svcCtx){{end}}
+    plugins.LoadPlugins(server, *svcCtx){{end}}
 
 	group := service.NewServiceGroup()
 	group.Add(server)

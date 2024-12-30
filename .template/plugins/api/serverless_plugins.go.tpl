@@ -4,12 +4,14 @@ package plugins
 import (
 	"github.com/zeromicro/go-zero/rest"
 
-    "{{ .Module }}/server/svc"
+    "{{ .Module }}/internal/svc"
 	{{range $v := .Plugins}}{{ $v.Path | base }} "{{ $v.Module }}/serverless"
 	{{end}}
 )
 
-func LoadPlugins(server *rest.Server, svcCtx *svc.ServiceContext) {
+type CoreSvcCtx = svc.ServiceContext
+
+func LoadPlugins(server *rest.Server, svcCtx CoreSvcCtx) {
 	{{ range $v := .Plugins }}
 	{
         serverless := {{ $v.Path | base }}.New(svcCtx)

@@ -3,12 +3,14 @@
 import (
 	"path/filepath"
 
-	"{{ .Module }}/server/config"
-	"{{ .Module }}/server/handler"
-	"{{ .Module }}/server/svc"
-
-	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/jzero-io/jzero-contrib/dynamic_conf"
+	configurator "github.com/zeromicro/go-zero/core/configcenter"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
+
+	"{{ .Module }}/internal/config"
+    "{{ .Module }}/internal/handler"
+    "{{ .Module }}/internal/svc"
 )
 
 type Serverless struct {
@@ -16,18 +18,17 @@ type Serverless struct {
 	HandlerFunc   func(server *rest.Server, svcCtx *svc.ServiceContext) // 服务路由
 }
 
-// Serverless please replace coreSvcCtx any type to real core svcCtx
+// Serverless please replace coreSvcCtx any type to real CoreSvcCtx
 func New(coreSvcCtx any) *Serverless {
-	var c config.Config
+    ss, err := dynamic_conf.NewFsNotify(filepath.Join("plugins", "hello", "etc", "etc.yaml"), dynamic_conf.WithUseEnv(true))
+	logx.Must(err)
+	cc := configurator.MustNewConfigCenter[config.Config](configurator.Config{
+		Type: "yaml",
+	}, ss)
 
-	if err := conf.Load(filepath.Join("plugins", "{{ .DirName }}", "etc", "etc.yaml"), &c); err != nil {
-		panic(err)
-	}
-	config.C = c
-
-	svcCtx := svc.NewServiceContext(c)
+	svcCtx := svc.NewServiceContext(cc)
 	return &Serverless{
-    	SvcCtx:        svcCtx,
-    	HandlerFunc:   handler.RegisterHandlers,
-    }
+		SvcCtx:      svcCtx,
+		HandlerFunc: handler.RegisterHandlers,
+	}
 }{{end}}
