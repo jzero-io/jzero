@@ -106,7 +106,6 @@ func init() {
 	newCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringP("branch", "b", "", "use remote template repo branch")
 	newCmd.Flags().StringP("local", "", "", "use local template")
-	newCmd.Flags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 	newCmd.Flags().StringSliceP("features", "", []string{}, "select features")
 	newCmd.Flags().BoolP("mono", "", false, "mono project under go mod project")
 }

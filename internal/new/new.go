@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/config"
@@ -123,13 +122,6 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 		}
 
 		stylePath := filepath.Join(filepath.Dir(rel), filename)
-		if filepath.Ext(filename) == ".go" && !bytes.Contains(fileBytes, []byte("DO NOT EDIT")) {
-			formatFilename, err := format.FileNamingFormat(jn.nc.Style, filename[0:len(filename)-len(filepath.Ext(filename))])
-			if err != nil {
-				return nil, err
-			}
-			stylePath = filepath.Join(filepath.Dir(rel), formatFilename+filepath.Ext(filename))
-		}
 
 		// specify
 		if filename == "go.mod" && jn.nc.Mono {

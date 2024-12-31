@@ -223,6 +223,10 @@ func (ja *JzeroApi) generateApiCode() error {
 		}
 	}
 
+	if err := ja.patchSvc(); err != nil {
+		return err
+	}
+
 	for _, v := range ja.GenCodeApiFiles {
 		if len(ja.ApiSpecMap[v].Service.Routes()) > 0 {
 			dir := "."

@@ -56,7 +56,6 @@ type NewConfig struct {
 	Frame    string   `mapstructure:"frame"`    // 使用 jzero 内置的框架
 	Branch   string   `mapstructure:"branch"`   // 使用远程模板仓库的某个分支
 	Local    string   `mapstructure:"local"`    // 使用本地模板与 branch 对应
-	Style    string   `mapstructure:"style"`    // 项目代码风格
 	Features []string `mapstructure:"features"` // 新建项目使用哪些特性, 灵活构建模板
 }
 
