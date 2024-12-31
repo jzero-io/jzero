@@ -68,7 +68,6 @@ func init() {
 	serverlessNewCmd.Flags().StringP("branch", "b", "", "remote templates repo branch")
 	serverlessNewCmd.Flags().StringP("frame", "", "api", "use frame")
 	serverlessNewCmd.Flags().StringP("local", "", "", "local templates")
-	serverlessNewCmd.Flags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 
 	serverlessDeleteCmd.Flags().StringSliceP("plugin", "p", nil, "plugin name")
 }

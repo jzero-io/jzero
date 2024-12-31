@@ -24,7 +24,6 @@ func Run(args []string) error {
 		Frame:    config.C.Serverless.New.Frame,
 		Branch:   config.C.Serverless.New.Branch,
 		Local:    config.C.Serverless.New.Local,
-		Style:    config.C.Serverless.New.Style,
 		Features: config.C.Serverless.New.Features,
 	}
 	if config.C.Serverless.New.Core {

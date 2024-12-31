@@ -130,6 +130,10 @@ func (jr *JzeroRpc) Gen() error {
 	}
 
 	fmt.Printf("%s to generate proto code. \n", color.WithColor("Start", color.FgGreen))
+	if err := jr.patchSvc(); err != nil {
+		return err
+	}
+
 	for _, v := range jr.ProtoFiles {
 		allLogicFiles, err := jr.GetAllLogicFiles(v, jr.ProtoSpecMap[v])
 		if err != nil {
