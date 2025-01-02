@@ -44,8 +44,8 @@ github.com/eddieowens/opts v0.1.0 h1:h/4KUhh/XD3W+KmnF2o6w3nVj4zV8i0FA9w6aoRjB6s
 github.com/eddieowens/opts v0.1.0/go.mod h1:sG2QH2EbNTFM0EOY/a7kPjBp8aX9urm1wUb6kp0Mfrc=
 github.com/elazarl/goproxy v1.2.1 h1:njjgvO6cRG9rIqN2ebkqy6cQz2Njkx7Fsfv/zIZqgug=
 github.com/elazarl/goproxy v1.2.1/go.mod h1:YfEbZtqP4AetfO6d40vWchF3znWX7C7Vd6ZMfdL8z64=
-github.com/emicklei/proto v1.13.2 h1:z/etSFO3uyXeuEsVPzfl56WNgzcvIr42aQazXaQmFZY=
-github.com/emicklei/proto v1.13.2/go.mod h1:rn1FgRS/FANiZdD2djyH7TMA9jdRDcYQ9IEN9yvjX0A=
+github.com/emicklei/proto v1.14.0 h1:WYxC0OrBuuC+FUCTZvb8+fzEHdZMwLEF+OnVfZA3LXU=
+github.com/emicklei/proto v1.14.0/go.mod h1:rn1FgRS/FANiZdD2djyH7TMA9jdRDcYQ9IEN9yvjX0A=
 github.com/emirpasic/gods v1.18.1 h1:FXtiHYKDGKCW2KzwZKx0iC0PQmdlorYgdFG9jPXJ1Bc=
 github.com/emirpasic/gods v1.18.1/go.mod h1:8tpGGwCnJ5H4r6BWwaV6OrWmMoPhUl5jm/FMNAnJvWQ=
 github.com/fatih/color v1.18.0 h1:S8gINlzdQ840/4pfAwic/ZE0djQEH3wM94VfqLTZcOM=
@@ -220,8 +220,8 @@ github.com/zeromicro/ddl-parser v1.0.5 h1:LaVqHdzMTjasua1yYpIYaksxKqRzFrEukj2Wi2
 github.com/zeromicro/ddl-parser v1.0.5/go.mod h1:ISU/8NuPyEpl9pa17Py9TBPetMjtsiHrb9f5XGiYbo8=
 github.com/zeromicro/go-zero v1.7.5 h1:B7Z2WszPQXHRhZTFbNQEt5Did2i/1jKTk8qNVRVQyY8=
 github.com/zeromicro/go-zero v1.7.5/go.mod h1:SmGykRm5e0Z4CGNj+GaSKDffaHzQV56fel0FkymTLlE=
-github.com/zeromicro/go-zero/tools/goctl v1.7.3 h1:Ym5G90vK5h2afFkAWtjRxqfhder+CLhWkUWuBKXTAng=
-github.com/zeromicro/go-zero/tools/goctl v1.7.3/go.mod h1:Mgl++dftDC3Xkyz+UzuBoDefWQgJuJdY+LawmpqesKo=
+github.com/zeromicro/go-zero/tools/goctl v1.7.4 h1:QiyXZn14oOSuKvDoQxXmb8B5PIQJ5EM04d+qYK6Ae1A=
+github.com/zeromicro/go-zero/tools/goctl v1.7.4/go.mod h1:nmsomLKdoutxG+mtEO1dURg4UBlKo4YFsEJdSLEHYsY=
 go.opentelemetry.io/otel v1.31.0 h1:NsJcKPIW0D0H3NgzPDHmo0WW6SptzPdqg/L1zsIm2hY=
 go.opentelemetry.io/otel v1.31.0/go.mod h1:O0C14Yl9FgkjqcCZAsE053C13OaddMYr/hz6clDkEJE=
 go.opentelemetry.io/otel/exporters/jaeger v1.17.0 h1:D7UpUy2Xc2wsi1Ras6V40q806WM07rqoCWzXu7Sqy+4=
