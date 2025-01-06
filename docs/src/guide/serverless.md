@@ -1,5 +1,5 @@
 ---
-title: serverless
+title: serverless 插件文档
 icon: catppuccin:serverless
 order: 3.5
 ---
