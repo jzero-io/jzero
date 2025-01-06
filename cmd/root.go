@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/a8m/envsubst"
@@ -16,7 +17,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"gopkg.in/yaml.v3"
 
@@ -33,6 +33,11 @@ var rootCmd = &cobra.Command{
 	Use: "jzero",
 	Short: `Used to create project by templates and generate server/client code by proto and api file.
 `,
+	Run: func(cmd *cobra.Command, args []string) {
+		if parseBool, err := strconv.ParseBool(cmd.Flags().Lookup("version").Value.String()); err == nil && parseBool {
+			getVersion()
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -47,6 +52,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	rootCmd.Flags().BoolP("version", "v", false, "show version")
 	rootCmd.PersistentFlags().StringVarP(&CfgFile, "config", "f", ".jzero.yaml", "set config file")
 	rootCmd.PersistentFlags().StringVarP(&CfgEnvFile, "config-env", "", ".jzero.env.yaml", "set config env file")
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "debug mode")
@@ -87,14 +93,6 @@ func initConfig() {
 
 	if err := traverseCommands("", rootCmd); err != nil {
 		panic(err)
-	}
-
-	// patch jzero version
-	if config.C.Version != "" {
-		fmt.Printf("use jzero version: %s\n", config.C.Version)
-		if err := golang.Install(fmt.Sprintf("github.com/jzero-io/jzero@%s", config.C.Version)); err != nil {
-			cobra.CheckErr(err)
-		}
 	}
 
 	if config.C.Debug {
