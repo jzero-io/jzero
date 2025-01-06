@@ -61,7 +61,7 @@ func init() {
 	serverlessCmd.AddCommand(serverlessDeleteCmd)
 	serverlessCmd.AddCommand(serverlessNewCmd)
 
-	serverlessCmd.PersistentFlags().StringP("home", "", "", "set templates path")
+	serverlessCmd.PersistentFlags().StringP("home", "", ".template", "set templates path")
 	serverlessNewCmd.Flags().BoolP("core", "", false, "is core serverless")
 	serverlessNewCmd.Flags().StringP("module", "m", "", "set go module")
 	serverlessNewCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
