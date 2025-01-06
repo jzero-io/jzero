@@ -69,8 +69,8 @@ var newCmd = &cobra.Command{
 				Depth:         0,
 				ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
 				Auth: &http.BasicAuth{
-					Username: os.Getenv("JZERO_REMOTE_USERNAME"),
-					Password: os.Getenv("JZERO_REMOTE_PASSWORD"),
+					Username: config.C.New.RemoteAuthUsername,
+					Password: config.C.New.RemoteAuthPassword,
 				},
 			})
 			cobra.CheckErr(err)
@@ -102,8 +102,10 @@ func init() {
 	newCmd.Flags().StringP("module", "m", "", "set go module")
 	newCmd.Flags().StringP("output", "o", "", "set output dir")
 	newCmd.Flags().StringP("home", "", "", "use the specified template.")
-	newCmd.Flags().StringP("frame", "", "api", "frame")
+	newCmd.Flags().StringP("frame", "", "api", "set frame")
 	newCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
+	newCmd.Flags().StringP("remote-auth-username", "", "", "remote templates repo auth username")
+	newCmd.Flags().StringP("remote-auth-password", "", "", "remote templates repo auth password")
 	newCmd.Flags().StringP("branch", "b", "", "use remote template repo branch")
 	newCmd.Flags().StringP("local", "", "", "use local template")
 	newCmd.Flags().StringSliceP("features", "", []string{}, "select features")
