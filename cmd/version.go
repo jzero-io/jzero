@@ -25,10 +25,12 @@ var (
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: `Print jzero version`,
-	RunE:  getVersion,
+	Run: func(cmd *cobra.Command, args []string) {
+		getVersion()
+	},
 }
 
-func getVersion(_ *cobra.Command, _ []string) error {
+func getVersion() {
 	var versionBuffer bytes.Buffer
 
 	if Version != "" {
@@ -51,7 +53,6 @@ func getVersion(_ *cobra.Command, _ []string) error {
 	}
 
 	fmt.Print(versionBuffer.String())
-	return nil
 }
 
 func init() {
