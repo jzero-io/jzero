@@ -1,5 +1,5 @@
 ---
-title: 新增 command 教程
+title: 命令行 cobra 使用文档
 icon: clarity:command-line
 star: true
 order: 0.1
