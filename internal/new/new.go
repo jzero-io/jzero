@@ -46,7 +46,7 @@ func Run(c config.Config, appName string) error {
 		templateData["DirName"] = filepath.Base(abs)
 	}
 	var base string
-	if c.New.Branch == "" && c.New.Local == "" && c.New.Home == "" {
+	if c.New.Frame != "" {
 		// 使用内置 frame
 		base = filepath.Join("frame", c.New.Frame, "app")
 	} else {

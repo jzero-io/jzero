@@ -15,6 +15,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/jzero-io/jzero-contrib/filex"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
@@ -35,7 +36,7 @@ var newCmd = &cobra.Command{
 			config.C.New.Output = args[0]
 
 			if pathx.FileExists(config.C.New.Output) {
-				cobra.CheckErr(errors.Errorf("%s already exists", config.C.New.Output))
+				return errors.Errorf("%s already exists", config.C.New.Output)
 			}
 		}
 		if config.C.New.Module == "" {
@@ -44,49 +45,56 @@ var newCmd = &cobra.Command{
 		// 在 go.mod 项目下但是项目本身没有 go.mod 文件
 		if config.C.New.Mono {
 			wd, _ := os.Getwd()
-			var err error
 			parentPackage, err := mod.GetParentPackage(wd)
+			if err != nil {
+				return err
+			}
 			config.C.New.Module = filepath.ToSlash(filepath.Join(parentPackage, config.C.New.Output))
-			cobra.CheckErr(err)
 		}
 
 		home, _ := os.UserHomeDir()
 
+		switch {
+		// 指定特定路径作为模板
+		case config.C.New.Home != "":
+			embeded.Home = config.C.New.Home
+		// 指定本地路径 ~/.jzero/templates/local 下的某文件夹作为模板
+		case config.C.New.Local != "":
+			embeded.Home = filepath.Join(home, ".jzero", "templates", "local", config.C.New.Local)
+		// 使用内置模板
+		case config.C.New.Frame != "":
+			// keep here
 		// 使用远程仓库模板
-		if config.C.New.Remote != "" && config.C.New.Branch != "" {
-			// clone to local
+		case config.C.New.Remote != "" && config.C.New.Branch != "":
 			fp := filepath.Join(home, ".jzero", "templates", "remote", config.C.New.Branch)
-			_ = os.MkdirAll(fp, 0o755)
-			fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), fp)
-			_ = os.RemoveAll(fp)
+			if filex.DirExists(fp) && config.C.New.Cache {
+				fmt.Printf("%s cache templates from '%s', please wait...\n", color.WithColor("Using", color.FgGreen), fp)
+			} else {
+				_ = os.RemoveAll(fp)
+				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), fp)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+				defer cancel()
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
-
-			_, err := git.PlainCloneContext(ctx, fp, false, &git.CloneOptions{
-				SingleBranch:  true,
-				URL:           config.C.New.Remote,
-				Depth:         0,
-				ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
-				Auth: &http.BasicAuth{
-					Username: config.C.New.RemoteAuthUsername,
-					Password: config.C.New.RemoteAuthPassword,
-				},
-			})
-			cobra.CheckErr(err)
-			_ = os.RemoveAll(filepath.Join(fp, ".git"))
+				// clone to local
+				if _, err := git.PlainCloneContext(ctx, fp, false, &git.CloneOptions{
+					SingleBranch:  true,
+					URL:           config.C.New.Remote,
+					Depth:         0,
+					ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
+					Auth: &http.BasicAuth{
+						Username: config.C.New.RemoteAuthUsername, // 远程仓库用户名
+						Password: config.C.New.RemoteAuthPassword, // 远程仓库密码(token)
+					},
+				}); err != nil {
+					return err
+				}
+				_ = os.RemoveAll(filepath.Join(fp, ".git"))
+			}
 			fmt.Println(color.WithColor("Done", color.FgGreen))
 			embeded.Home = fp
-		}
-
-		// 使用本地模板
-		if config.C.New.Local != "" {
-			embeded.Home = filepath.Join(home, ".jzero", "templates", "local", config.C.New.Local)
-		}
-
-		// 指定 home 时优先级最高
-		if config.C.New.Home != "" {
-			embeded.Home = config.C.New.Home
+		default:
+			// 默认使用 api 模板
+			config.C.New.Frame = "api"
 		}
 
 		if !pathx.FileExists(embeded.Home) {
@@ -102,11 +110,12 @@ func init() {
 	newCmd.Flags().StringP("module", "m", "", "set go module")
 	newCmd.Flags().StringP("output", "o", "", "set output dir")
 	newCmd.Flags().StringP("home", "", "", "use the specified template.")
-	newCmd.Flags().StringP("frame", "", "api", "set frame")
+	newCmd.Flags().StringP("frame", "", "", "set frame")
 	newCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringP("remote-auth-username", "", "", "remote templates repo auth username")
 	newCmd.Flags().StringP("remote-auth-password", "", "", "remote templates repo auth password")
 	newCmd.Flags().StringP("branch", "b", "", "use remote template repo branch")
+	newCmd.Flags().BoolP("cache", "", false, "remote template using cache")
 	newCmd.Flags().StringP("local", "", "", "use local template")
 	newCmd.Flags().StringSliceP("features", "", []string{}, "select features")
 	newCmd.Flags().BoolP("mono", "", false, "mono project under go mod project")
