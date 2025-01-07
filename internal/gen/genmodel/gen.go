@@ -65,12 +65,12 @@ func (jm *JzeroModel) Gen() error {
 	)
 
 	if jm.ModelMysqlDatasource {
-		allTables, err = getMysqlAllTables(jm.ModelMysqlDatasourceUrl)
+		tables, err := getMysqlAllTables(jm.ModelMysqlDatasourceUrl)
 		if err != nil {
 			return err
 		}
 
-		writeTables, err := jm.GenDDL(allTables)
+		writeTables, err := jm.GenDDL(tables)
 		if err != nil {
 			return err
 		}
