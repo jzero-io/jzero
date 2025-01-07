@@ -1,5 +1,5 @@
 ---
-title: proto 教程
+title: proto 使用文档
 icon: vscode-icons:file-type-protobuf
 star: true
 order: 1

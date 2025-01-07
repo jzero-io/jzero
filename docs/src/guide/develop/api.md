@@ -1,5 +1,5 @@
 ---
-title: api 教程
+title: api 文件使用文档
 icon: eos-icons:api
 star: true
 order: 0.2

@@ -1,6 +1,6 @@
 ---
-title: 日志打印规范
-icon: mdi:math-log
+title: 数据库 model 使用文档
+icon: uil:database
 star: true
 order: 4
 category: 开发
