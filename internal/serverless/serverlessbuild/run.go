@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero-contrib/modx"
 	"github.com/jzero-io/jzero-contrib/templatex"
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
@@ -31,7 +32,7 @@ func Run() error {
 			return err
 		}
 		for _, p := range plugins {
-			if !strings.HasPrefix(p.Module, "./") {
+			if !strings.HasPrefix(p.Path, "./") {
 				p.Path = "./" + p.Path
 			}
 			if err = work.DropUse(p.Path); err != nil {
@@ -39,7 +40,7 @@ func Run() error {
 			}
 		}
 		for _, p := range plugins {
-			if !strings.HasPrefix(p.Module, "./") {
+			if !strings.HasPrefix(p.Path, "./") {
 				p.Path = "./" + p.Path
 			}
 			if err = work.AddUse(p.Path, ""); err != nil {
@@ -66,6 +67,13 @@ func Run() error {
 	goMod, err := mod.GetGoMod(wd)
 	if err != nil {
 		return err
+	}
+	for i := 0; i < len(plugins); i++ {
+		pluginGoMod, err := modx.GetGoMod(filepath.Join(wd, plugins[i].Path))
+		if err != nil {
+			return err
+		}
+		plugins[i].Module = pluginGoMod.Path
 	}
 	pluginsGoBytes, err := templatex.ParseTemplate(map[string]any{
 		"Plugins": plugins,
