@@ -13,15 +13,18 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
+	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/jzero-io/jzero/config"
@@ -102,23 +105,10 @@ func (jm *JzeroModel) Gen() error {
 	}
 
 	switch {
-	case jm.GitChange && len(jm.Desc) == 0:
-		if jm.ModelMysqlDatasource {
-			// 从 struct migrate 而来
-			m, _, err := gitstatus.ChangedFiles(jm.ModelGitChangePath, ".go")
-			if err == nil {
-				for _, v := range m {
-					genCodeTables = append(genCodeTables, getTableNameByGoMethod(v)...)
-				}
-				for _, v := range genCodeTables {
-					genCodeSqlFiles = append(genCodeSqlFiles, filepath.Join("desc", "sql", v+".sql"))
-				}
-			}
-		} else {
-			m, _, err := gitstatus.ChangedFiles("desc", ".sql")
-			if err == nil {
-				genCodeSqlFiles = append(genCodeSqlFiles, m...)
-			}
+	case jm.GitChange && len(jm.Desc) == 0 && !jm.ModelMysqlDatasource:
+		m, _, err := gitstatus.ChangedFiles("desc", ".sql")
+		if err == nil {
+			genCodeSqlFiles = append(genCodeSqlFiles, m...)
 		}
 	case len(jm.Desc) > 0:
 		for _, v := range jm.Desc {
@@ -162,23 +152,50 @@ func (jm *JzeroModel) Gen() error {
 		}
 	}
 
+	var mu sync.Mutex
+
 	if len(genCodeSqlFiles) != 0 {
-		var eg errgroup.Group
-		for _, f := range allFiles {
-			eg.Go(func() error {
-				tableParsers, err := parser.Parse(filepath.Join(jm.Wd, f), "", jm.ModelMysqlStrict)
-				if err != nil {
-					return err
+		if jm.ModelMysqlDatasource {
+			tables, err := getMysqlAllTables(jm.ModelMysqlDatasourceUrl)
+			if err != nil {
+				return err
+			}
+			if len(jm.ModelMysqlDatasourceTable) != 0 && jm.ModelMysqlDatasourceTable[0] != "*" {
+				for _, v := range tables {
+					if lo.Contains(jm.ModelMysqlDatasourceTable, cast.ToString(v)) {
+						allTables = append(allTables, v)
+					}
 				}
-				genCodeSqlSpecMap[f] = tableParsers
-				for _, tp := range tableParsers {
-					allTables = append(allTables, tp.Name.Source())
+			} else if len(jm.ModelMysqlDatasourceTable) != 0 && jm.ModelMysqlDatasourceTable[0] == "*" {
+				allTables = tables
+			}
+			for _, f := range allFiles {
+				genCodeSqlSpecMap[f] = []*parser.Table{
+					{
+						Name: stringx.From(filepath.Base(f)),
+					},
 				}
-				return nil
-			})
-		}
-		if err = eg.Wait(); err != nil {
-			return err
+			}
+		} else {
+			var eg errgroup.Group
+			for _, f := range allFiles {
+				eg.Go(func() error {
+					tableParsers, err := parser.Parse(filepath.Join(jm.Wd, f), "", jm.ModelMysqlStrict)
+					if err != nil {
+						return err
+					}
+					mu.Lock()
+					defer mu.Unlock()
+					genCodeSqlSpecMap[f] = tableParsers
+					for _, tp := range tableParsers {
+						allTables = append(allTables, tp.Name.Source())
+					}
+					return nil
+				})
+			}
+			if err = eg.Wait(); err != nil {
+				return err
+			}
 		}
 	} else {
 		return nil
@@ -291,33 +308,4 @@ func getTableDDL(url, table string) (string, error) {
 		return "", err
 	}
 	return showCreateTableResult.DDL, nil
-}
-
-func getTableNameByGoMethod(fp string) []string {
-	var tables []string
-	if filepath.Ext(fp) == ".go" {
-		fset := token.NewFileSet()
-
-		f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
-		if err != nil {
-			return nil
-		}
-
-		for _, decl := range f.Decls {
-			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
-				if funcDecl.Name.Name == "TableName" {
-					for _, stmt := range funcDecl.Body.List {
-						if retStmt, ok := stmt.(*ast.ReturnStmt); ok {
-							if len(retStmt.Results) > 0 {
-								if basicLit, ok := retStmt.Results[0].(*ast.BasicLit); ok {
-									tables = append(tables, strings.ReplaceAll(basicLit.Value, `"`, ""))
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return tables
 }

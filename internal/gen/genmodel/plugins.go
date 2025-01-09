@@ -84,13 +84,13 @@ func (jm *JzeroModel) GenDDL(tables []string) ([]string, error) {
 		if s, ok := tableDDLMap.Load(v); ok {
 			if len(jm.ModelMysqlDatasourceTable) != 0 && jm.ModelMysqlDatasourceTable[0] != "*" {
 				if lo.Contains(jm.ModelMysqlDatasourceTable, cast.ToString(v)) {
-					writeTables = append(writeTables, "desc", "sql", fmt.Sprintf("%s.sql", v))
+					writeTables = append(writeTables, filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)))
 					if err := os.WriteFile(filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)), []byte(cast.ToString(s)), 0o644); err != nil {
 						return nil, err
 					}
 				}
 			} else if len(jm.ModelMysqlDatasourceTable) != 0 && jm.ModelMysqlDatasourceTable[0] == "*" {
-				writeTables = append(writeTables, "desc", "sql", fmt.Sprintf("%s.sql", v))
+				writeTables = append(writeTables, filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)))
 				if err := os.WriteFile(filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)), []byte(cast.ToString(s)), 0o644); err != nil {
 					return nil, err
 				}
