@@ -36,6 +36,10 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if parseBool, err := strconv.ParseBool(cmd.Flags().Lookup("version").Value.String()); err == nil && parseBool {
 			getVersion()
+			return
+		}
+		if err := cmd.Help(); err != nil {
+			cobra.CheckErr(err)
 		}
 	},
 }
