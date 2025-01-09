@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero-contrib/modx"
 	"github.com/jzero-io/jzero-contrib/templatex"
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
@@ -71,6 +72,13 @@ func Run() error {
 		return err
 	}
 
+	for i := 0; i < len(remainingPlugins); i++ {
+		pluginGoMod, err := modx.GetGoMod(filepath.Join(wd, remainingPlugins[i].Path))
+		if err != nil {
+			return err
+		}
+		remainingPlugins[i].Module = pluginGoMod.Path
+	}
 	pluginsGoBytes, err := templatex.ParseTemplate(map[string]any{
 		"Plugins": remainingPlugins,
 		"Module":  goMod.Path,
