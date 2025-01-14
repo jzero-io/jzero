@@ -45,7 +45,6 @@ type Config struct {
 }
 
 type NewConfig struct {
-	Core               bool     `mapstructure:"core"`
 	Home               string   `mapstructure:"home"`                 // 新建项目使用的模板文件目录
 	Module             string   `mapstructure:"module"`               // 新建的项目的 go module
 	Mono               bool     `mapstructure:"mono"`                 // 是否是 mono 项目(即在一个mod项目之下, 但该项目本身无 go.mod 文件)
@@ -205,7 +204,6 @@ type UpgradeConfig struct {
 type ServerlessConfig struct {
 	Home string `mapstructure:"home"` // 使用的模板文件目录
 
-	New    NewConfig              `mapstructure:"new"`
 	Delete ServerlessDeleteConfig `mapstructure:"delete"`
 }
 

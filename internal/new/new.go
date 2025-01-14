@@ -8,7 +8,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
-	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/config"
@@ -33,25 +32,23 @@ type GeneratedFile struct {
 	Skip    bool
 }
 
-func Run(c config.Config, appName string) error {
-	err := os.MkdirAll(c.New.Output, 0o755)
-	cobra.CheckErr(err)
+func Run(c config.Config, appName, base string) error {
+	if err := os.MkdirAll(c.New.Output, 0o755); err != nil {
+		return err
+	}
 
 	templateData, err := NewTemplateData()
-	cobra.CheckErr(err)
+	if err != nil {
+		return err
+	}
+
 	templateData["Features"] = c.New.Features
 	templateData["Module"] = c.New.Module
 	templateData["APP"] = appName
 	if abs, err := filepath.Abs(c.New.Output); err == nil {
 		templateData["DirName"] = filepath.Base(abs)
-	}
-	var base string
-	if c.New.Frame != "" {
-		// 使用内置 frame
-		base = filepath.Join("frame", c.New.Frame, "app")
 	} else {
-		// 使用第三方模板仓库的模板
-		base = filepath.Join("app")
+		return err
 	}
 
 	jn := JzeroNew{

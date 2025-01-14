@@ -54,16 +54,26 @@ var newCmd = &cobra.Command{
 
 		home, _ := os.UserHomeDir()
 
+		var base string
 		switch {
 		// 指定特定路径作为模板
 		case config.C.New.Home != "":
 			embeded.Home = config.C.New.Home
+			if config.C.New.Frame != "" {
+				base = filepath.Join("frame", config.C.New.Frame, "app")
+			} else {
+				base = filepath.Join("app")
+				if !pathx.FileExists(base) && pathx.FileExists(filepath.Join(embeded.Home, "frame")) {
+					base = filepath.Join("frame", "api", "app")
+				}
+			}
 		// 指定本地路径 ~/.jzero/templates/local 下的某文件夹作为模板
 		case config.C.New.Local != "":
 			embeded.Home = filepath.Join(home, ".jzero", "templates", "local", config.C.New.Local)
+			base = filepath.Join("app")
 		// 使用内置模板
 		case config.C.New.Frame != "":
-			// keep here
+			base = filepath.Join("frame", config.C.New.Frame, "app")
 		// 使用远程仓库模板
 		case config.C.New.Remote != "" && config.C.New.Branch != "":
 			fp := filepath.Join(home, ".jzero", "templates", "remote", config.C.New.Branch)
@@ -92,15 +102,17 @@ var newCmd = &cobra.Command{
 			}
 			fmt.Println(color.WithColor("Done", color.FgGreen))
 			embeded.Home = fp
+			base = filepath.Join("app")
 		default:
 			// 默认使用 api 模板
 			config.C.New.Frame = "api"
+			base = filepath.Join("frame", "api", "app")
 		}
 
 		if !pathx.FileExists(embeded.Home) {
 			embeded.Home = filepath.Join(home, ".jzero", "templates", Version)
 		}
-		return new.Run(config.C, args[0])
+		return new.Run(config.C, args[0], base)
 	},
 	Args: cobra.ExactArgs(1),
 }
