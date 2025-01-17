@@ -12,6 +12,7 @@ import (
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/sync/errgroup"
 
@@ -52,16 +53,17 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 	return os.WriteFile(filepath.Join("internal", "model", "model.go"), format, 0o644)
 }
 
-func (jm *JzeroModel) GenDDL(tables []string) ([]string, error) {
+func (jm *JzeroModel) GenDDL(sqlConn sqlx.SqlConn, tables []string) ([]string, error) {
 	var (
 		eg          errgroup.Group
 		tableDDLMap sync.Map
 	)
-	eg.SetLimit(len(tables))
+	// TODO: add flag to manage concurrency
+	eg.SetLimit(1)
 	for _, t := range tables {
 		ct := t
 		eg.Go(func() error {
-			ddl, err := getTableDDL(jm.ModelMysqlDatasourceUrl, t)
+			ddl, err := getTableDDL(sqlConn, ct)
 			if err != nil {
 				return err
 			}
