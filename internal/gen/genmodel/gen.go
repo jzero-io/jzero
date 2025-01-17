@@ -65,15 +65,18 @@ func (jm *JzeroModel) Gen() error {
 		allTables     []string
 		err           error
 		genCodeTables []string
+		sqlConn       sqlx.SqlConn
 	)
 
 	if jm.ModelMysqlDatasource {
-		tables, err := getMysqlAllTables(jm.ModelMysqlDatasourceUrl)
+		sqlConn = sqlx.NewMysql(jm.ModelMysqlDatasourceUrl)
+
+		tables, err := getMysqlAllTables(sqlConn)
 		if err != nil {
 			return err
 		}
 
-		writeTables, err := jm.GenDDL(tables)
+		writeTables, err := jm.GenDDL(sqlConn, tables)
 		if err != nil {
 			return err
 		}
@@ -156,7 +159,7 @@ func (jm *JzeroModel) Gen() error {
 
 	if len(genCodeSqlFiles) != 0 {
 		if jm.ModelMysqlDatasource {
-			tables, err := getMysqlAllTables(jm.ModelMysqlDatasourceUrl)
+			tables, err := getMysqlAllTables(sqlConn)
 			if err != nil {
 				return err
 			}
@@ -284,9 +287,7 @@ type Table struct {
 	Name string `db:"name"`
 }
 
-func getMysqlAllTables(url string) ([]string, error) {
-	sqlConn := sqlx.NewSqlConn("mysql", url)
-
+func getMysqlAllTables(sqlConn sqlx.SqlConn) ([]string, error) {
 	var tables []string
 	err := sqlConn.QueryRowsCtx(context.Background(), &tables, "show tables")
 	if err != nil {
@@ -299,9 +300,7 @@ type ShowCreateTableResult struct {
 	DDL string `db:"Create Table"`
 }
 
-func getTableDDL(url, table string) (string, error) {
-	sqlConn := sqlx.NewSqlConn("mysql", url)
-
+func getTableDDL(sqlConn sqlx.SqlConn, table string) (string, error) {
 	var showCreateTableResult ShowCreateTableResult
 	err := sqlConn.QueryRowCtx(context.Background(), &showCreateTableResult, "show create table "+table)
 	if err != nil {
