@@ -2,17 +2,23 @@ package genapi
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	goformat "go/format"
 	goparser "go/parser"
 	"go/token"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
+	"github.com/spf13/cast"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
+	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/jzero-io/jzero/pkg/mod"
 )
@@ -20,6 +26,7 @@ import (
 type HandlerFile struct {
 	Package     string
 	Group       string
+	Compact     bool
 	Handler     string
 	Path        string
 	ApiFilepath string
@@ -40,6 +47,7 @@ func (ja *JzeroApi) getAllHandlerFiles(apiFilepath string, apiSpec *spec.ApiSpec
 				ApiFilepath: apiFilepath,
 				Path:        fp,
 				Group:       group.GetAnnotation("group"),
+				Compact:     cast.ToBool(group.GetAnnotation("compact_handler")),
 				Handler:     route.Handler,
 			}
 			if goPackage, ok := apiSpec.Info.Properties["go_package"]; ok {
@@ -61,7 +69,7 @@ func (ja *JzeroApi) patchHandler(file HandlerFile) error {
 
 	if pathx.FileExists(newFilePath) {
 		_ = os.Remove(file.Path)
-		return nil
+		file.Path = newFilePath
 	}
 
 	fset := token.NewFileSet()
@@ -100,7 +108,21 @@ func (ja *JzeroApi) patchHandler(file HandlerFile) error {
 		return err
 	}
 
-	return os.Rename(file.Path, newFilePath)
+	if err = os.Rename(file.Path, newFilePath); err != nil {
+		return err
+	}
+
+	file.Path = newFilePath
+
+	// compact handler
+	if file.Compact {
+		err = ja.compactHandler(f, fset, file)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (ja *JzeroApi) removeHandlerSuffix(f *ast.File) error {
@@ -132,5 +154,77 @@ func (ja *JzeroApi) removeHandlerSuffix(f *ast.File) error {
 		}
 		return true
 	})
+	return nil
+}
+
+func (ja *JzeroApi) compactHandler(f *ast.File, fset *token.FileSet, file HandlerFile) error {
+	namingFormat, err := format.FileNamingFormat(ja.Style, filepath.Base(file.Group))
+	if err != nil {
+		return err
+	}
+	compactFile := filepath.Join(filepath.Dir(file.Path), namingFormat+".go")
+	if !pathx.FileExists(compactFile) {
+		_ = os.WriteFile(compactFile, []byte(fmt.Sprintf(`package %s`, f.Name.Name)), 0o644)
+	}
+	compactFset := token.NewFileSet()
+
+	compactF, err := goparser.ParseFile(compactFset, compactFile, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+
+	// 判断 compactFile 文件中是否已经存在该函数
+	var (
+		isExist     bool
+		handlerFunc *ast.FuncDecl
+	)
+	for _, decl := range compactF.Decls {
+		// 查找函数声明
+		if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+			// 已经存在, 删掉该 handler 文件
+			if funcDecl.Name.Name == util.Title(strings.TrimSuffix(file.Handler, "Handler")) {
+				isExist = true
+				break
+			}
+		}
+	}
+	if !isExist {
+		for _, decl := range f.Decls {
+			// 查找函数声明
+			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+				if funcDecl.Name.Name == util.Title(strings.TrimSuffix(file.Handler, "Handler")) {
+					handlerFunc = funcDecl
+				}
+			}
+		}
+		// 将文件内容追加到compactFile
+		if handlerFunc != nil {
+			compactF.Decls = append(compactF.Decls, handlerFunc)
+		}
+		// 将 import 语句添加到 compactFile 中
+		for _, i := range f.Imports {
+			unquote, err := strconv.Unquote(i.Path.Value)
+			if err != nil {
+				return err
+			}
+			if i.Name != nil && i.Name.Name != "" {
+				astutil.AddNamedImport(compactFset, compactF, i.Name.Name, unquote)
+			} else {
+				astutil.AddImport(compactFset, compactF, unquote)
+			}
+		}
+		buf := bytes.NewBuffer(nil)
+		if err := goformat.Node(buf, compactFset, compactF); err != nil {
+			return err
+		}
+		if err = os.WriteFile(compactFile, buf.Bytes(), 0o644); err != nil {
+			return err
+		}
+	}
+	logx.Debugf("remove old handler file: %s", file.Path)
+	if err = os.Remove(file.Path); err != nil {
+		return err
+	}
+
 	return nil
 }
