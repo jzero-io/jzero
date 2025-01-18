@@ -11,7 +11,6 @@ import (
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/pkg/errors"
-	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	apiparser "github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
@@ -52,8 +51,8 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	// parse api
 	var apiSpecs []*spec.ApiSpec
 
-	if pathx.FileExists(g.config.ApiDir) {
-		files, err := jzerodesc.FindApiFiles(g.config.ApiDir)
+	if pathx.FileExists(g.config.ApiDir()) {
+		files, err := jzerodesc.FindApiFiles(g.config.ApiDir())
 		if err != nil {
 			return nil, err
 		}
@@ -68,8 +67,8 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 
 	var protoFiles []string
 
-	if pathx.FileExists(g.config.ProtoDir) {
-		protoFiles, err = jzerodesc.GetProtoFilepath(g.config.ProtoDir)
+	if pathx.FileExists(g.config.ProtoDir()) {
+		protoFiles, err = jzerodesc.GetProtoFilepath(g.config.ProtoDir())
 		if err != nil {
 			return nil, err
 		}
@@ -80,10 +79,10 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	// parse proto
 	var protoParser protoparse.Parser
 	if len(protoFiles) > 0 {
-		protoParser.ImportPaths = []string{g.config.ProtoDir, filepath.Join(g.config.ProtoDir, "third_party")}
+		protoParser.ImportPaths = []string{g.config.ProtoDir(), filepath.Join(g.config.ProtoDir(), "third_party")}
 		var protoRelFiles []string
 		for _, v := range protoFiles {
-			rel, err := filepath.Rel(g.config.ProtoDir, v)
+			rel, err := filepath.Rel(g.config.ProtoDir(), v)
 			if err != nil {
 				return nil, err
 			}
@@ -266,14 +265,14 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 		return nil, err
 	}
 
-	resourceGoFormatBytes, err := gosimports.Process("", resourceGoBytes, &gosimports.Options{Comments: true})
-	if err != nil {
-		return nil, errors.Errorf("format resource.go meet error: %s", err)
-	}
+	// resourceGoFormatBytes, err := gosimports.Process("", resourceGoBytes, &gosimports.Options{Comments: true})
+	// if err != nil {
+	//	return nil, errors.Errorf("format resource.go meet error: %s", err)
+	// }
 
 	scopeResourceFiles = append(scopeResourceFiles, &GeneratedFile{
 		Path:    filepath.Join("typed", strings.ToLower(scope), strings.ToLower(resource)+".go"),
-		Content: *bytes.NewBuffer(resourceGoFormatBytes),
+		Content: *bytes.NewBuffer(resourceGoBytes),
 	})
 
 	return scopeResourceFiles, nil
@@ -282,17 +281,16 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 func (g *Golang) genApiTypesModel(apiSpecs []*spec.ApiSpec) ([]*GeneratedFile, error) {
 	var typesGoFiles []*GeneratedFile
 
-	if g.config.GenConfig.SplitApiTypesDir {
-		// types 分组分文件夹生成
-		for _, apiSpec := range apiSpecs {
-			typesGoString, err := gogen.BuildTypes(apiSpec.Types)
-			if err != nil {
-				return nil, err
-			}
-			goPackage, ok := apiSpec.Info.Properties["go_package"]
-			if !ok {
-				return nil, errors.New("do not has go_package option")
-			}
+	var allTypes []spec.Type
+
+	// types 分组分文件夹生成
+	for _, apiSpec := range apiSpecs {
+		typesGoString, err := gogen.BuildTypes(apiSpec.Types)
+		if err != nil {
+			return nil, err
+		}
+		goPackage, ok := apiSpec.Info.Properties["go_package"]
+		if ok {
 			typesGoBytes, err := templatex.ParseTemplate(map[string]any{
 				"Types":   typesGoString,
 				"Package": strings.ToLower(strings.ReplaceAll(goPackage, "/", "")),
@@ -320,12 +318,12 @@ var (
 				Path:    filepath.Join("model", strings.ToLower(g.config.Scope), goPackage, "types.go"),
 				Content: *bytes.NewBuffer(source),
 			})
-		}
-	} else {
-		var allTypes []spec.Type
-		for _, apiSpec := range apiSpecs {
+		} else {
 			allTypes = append(allTypes, apiSpec.Types...)
 		}
+	}
+
+	if len(allTypes) > 0 {
 		// 去除重复
 		var realAllTypes []spec.Type
 		exist := make(map[string]struct{})
@@ -367,6 +365,7 @@ var (
 			Content: *bytes.NewBuffer(source),
 		})
 	}
+
 	return typesGoFiles, nil
 }
 
@@ -378,7 +377,7 @@ func (g *Golang) genPbTypesModel(protoFiles []string) ([]*GeneratedFile, error) 
 	defer os.RemoveAll(tmpDir)
 
 	for _, pf := range protoFiles {
-		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s --go_out=%s %s", g.config.ProtoDir, filepath.Join(g.config.ProtoDir, "third_party"), tmpDir, pf), g.wd)
+		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s --go_out=%s %s", g.config.ProtoDir, filepath.Join(g.config.ProtoDir(), "third_party"), tmpDir, pf), g.wd)
 		if err != nil {
 			return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
 		}

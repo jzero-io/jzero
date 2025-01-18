@@ -77,7 +77,7 @@ func (ja *JzeroApi) Gen() error {
 	switch {
 	case ja.GitChange && len(ja.Desc) == 0:
 		// 从 git status 获取变动的文件生成
-		m, _, err := gitstatus.ChangedFiles(ja.ApiGitChangePath, ".api")
+		m, _, err := gitstatus.ChangedFiles(config.C.ApiDir(), ".api")
 		if err == nil {
 			// 获取变动的 api 文件
 			genCodeApiFiles = append(genCodeApiFiles, m...)
@@ -167,9 +167,6 @@ func (ja *JzeroApi) generateApiCode() error {
 							}
 						}
 					}
-				}
-				if ja.SplitApiTypesDir {
-					_ = os.RemoveAll(filepath.Join(ja.Wd, "internal", "types", group.GetAnnotation("group")))
 				}
 			}
 		}

@@ -18,7 +18,7 @@ import (
 )
 
 func Gen(c config.Config) error {
-	if pathx.FileExists(c.Gen.Swagger.ApiDir) {
+	if pathx.FileExists(c.ApiDir()) {
 		_ = os.MkdirAll(c.Gen.Swagger.Output, 0o755)
 
 		if !pathx.FileExists(c.Gen.Swagger.Output) {
@@ -26,7 +26,7 @@ func Gen(c config.Config) error {
 		}
 
 		// gen swagger by desc/api
-		files, err := desc.FindRouteApiFiles(c.Gen.Swagger.ApiDir)
+		files, err := desc.FindRouteApiFiles(c.ApiDir())
 		if err != nil {
 			return err
 		}
@@ -60,17 +60,17 @@ func Gen(c config.Config) error {
 		}
 	}
 
-	if pathx.FileExists(c.Gen.Swagger.ProtoDir) {
+	if pathx.FileExists(c.ProtoDir()) {
 		_ = os.MkdirAll(c.Gen.Swagger.Output, 0o755)
-		protoFilepath, err := desc.GetProtoFilepath(c.Gen.Swagger.ProtoDir)
+		protoFilepath, err := desc.GetProtoFilepath(c.ProtoDir())
 		if err != nil {
 			return err
 		}
 
 		for _, path := range protoFilepath {
 			command := fmt.Sprintf("protoc -I%s -I%s %s --openapiv2_out=%s",
-				c.Gen.Swagger.ProtoDir,
-				filepath.Join(c.Gen.Swagger.ProtoDir, "third_party"),
+				c.ProtoDir(),
+				filepath.Join(c.ProtoDir(), "third_party"),
 				path,
 				c.Gen.Swagger.Output,
 			)

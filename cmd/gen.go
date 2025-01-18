@@ -255,9 +255,6 @@ func init() {
 		genCmd.Flags().BoolP("rpc-style-patch", "", false, "")
 		// git-diff
 		genCmd.Flags().BoolP("git-change", "", false, "set is git change, if changes then generate code")
-		genCmd.Flags().StringP("api-git-change-path", "", filepath.Join("desc", "api"), "set api git change path")
-		genCmd.Flags().StringP("model-git-change-path", "", filepath.Join("desc", "sql"), "set model git change path")
-		genCmd.Flags().StringP("proto-git-change-path", "", filepath.Join("desc", "proto"), "set proto git change path")
 
 		genCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
 		genCmd.Flags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
@@ -268,7 +265,6 @@ func init() {
 		// gen command persistentFlags
 		genCmd.PersistentFlags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 		genCmd.PersistentFlags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
-		genCmd.PersistentFlags().BoolP("split-api-types-dir", "", false, "")
 
 		genCmd.Flags().BoolP("model-mysql-strict", "", false, "goctl model mysql strict mode, see [https://go-zero.dev/docs/tutorials/cli/model]")
 		genCmd.Flags().StringSliceP("model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
@@ -291,8 +287,6 @@ func init() {
 		genSdkCmd.Flags().StringP("goModule", "", "", "set go module name")
 		genSdkCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")
 		genSdkCmd.Flags().StringP("goPackage", "", "", "set package name")
-		genSdkCmd.Flags().StringP("api-dir", "", filepath.Join("desc", "api"), "set input api dir")
-		genSdkCmd.Flags().StringP("proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
 		genSdkCmd.Flags().BoolP("wrap-response", "", true, "wrap response: code, data, message")
 		genSdkCmd.Flags().StringP("scope", "", "", "set scope name")
 		genSdkCmd.Flags().BoolP("mono", "", false, "mono sdk project under go mod project")
@@ -302,8 +296,6 @@ func init() {
 		genCmd.AddCommand(genSwaggerCmd)
 
 		genSwaggerCmd.Flags().StringP("output", "o", filepath.Join("desc", "swagger"), "set swagger output dir")
-		genSwaggerCmd.Flags().StringP("api-dir", "", filepath.Join("desc", "api"), "set input api dir")
-		genSwaggerCmd.Flags().StringP("proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
 	}
 
 	{
@@ -311,8 +303,6 @@ func init() {
 
 		genDocsCmd.Flags().StringP("output", "o", filepath.Join("desc", "docs", "md"), "set docs output dir")
 		genDocsCmd.Flags().StringP("format", "", "md", "set output format")
-		genDocsCmd.Flags().StringP("api-dir", "", filepath.Join("desc", "api"), "set input api dir")
-		genDocsCmd.Flags().StringP("proto-dir", "", filepath.Join("desc", "proto"), "set input proto dir")
 	}
 
 	{

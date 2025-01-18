@@ -72,7 +72,7 @@ func (jr *JzeroRpc) Gen() error {
 
 	switch {
 	case jr.GitChange && len(jr.Desc) == 0:
-		m, _, err := gitstatus.ChangedFiles(jr.ProtoGitChangePath, ".proto")
+		m, _, err := gitstatus.ChangedFiles(config.C.ProtoDir(), ".proto")
 		if err == nil {
 			genCodeProtoFiles = append(genCodeProtoFiles, m...)
 			for _, file := range m {
