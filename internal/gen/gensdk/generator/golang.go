@@ -11,6 +11,7 @@ import (
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/pkg/errors"
+	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	apiparser "github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
@@ -265,14 +266,14 @@ func (g *Golang) genScopeResources(rhis vars.ScopeResourceHTTPInterfaceMap, scop
 		return nil, err
 	}
 
-	// resourceGoFormatBytes, err := gosimports.Process("", resourceGoBytes, &gosimports.Options{Comments: true})
-	// if err != nil {
-	//	return nil, errors.Errorf("format resource.go meet error: %s", err)
-	// }
+	resourceGoFormatBytes, err := gosimports.Process("", resourceGoBytes, &gosimports.Options{Comments: true})
+	if err != nil {
+		return nil, errors.Errorf("format resource.go meet error: %s", err)
+	}
 
 	scopeResourceFiles = append(scopeResourceFiles, &GeneratedFile{
 		Path:    filepath.Join("typed", strings.ToLower(scope), strings.ToLower(resource)+".go"),
-		Content: *bytes.NewBuffer(resourceGoBytes),
+		Content: *bytes.NewBuffer(resourceGoFormatBytes),
 	})
 
 	return scopeResourceFiles, nil
