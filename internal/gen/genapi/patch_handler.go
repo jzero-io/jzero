@@ -89,7 +89,7 @@ func (ja *JzeroApi) patchHandler(file HandlerFile) error {
 	}
 
 	// split api types dir
-	if ja.SplitApiTypesDir {
+	if file.Package != "" {
 		for _, g := range ja.GenCodeApiSpecMap[file.ApiFilepath].Service.Groups {
 			if g.GetAnnotation("group") == file.Group {
 				if err = ja.updateHandlerImportedTypesPath(f, fset, file); err != nil {

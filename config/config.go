@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/pflag"
@@ -65,8 +66,7 @@ type GenConfig struct {
 	// global flags
 	Home string `mapstructure:"home"`
 
-	Style            string `mapstructure:"style"`
-	SplitApiTypesDir bool   `mapstructure:"split-api-types-dir"`
+	Style string `mapstructure:"style"`
 
 	// code style flags
 	ChangeLogicTypes bool `mapstructure:"change-logic-types"`
@@ -76,10 +76,6 @@ type GenConfig struct {
 
 	// git flags
 	GitChange bool `mapstructure:"git-change"`
-
-	ApiGitChangePath   string `mapstructure:"api-git-change-path"`
-	ModelGitChangePath string `mapstructure:"model-git-change-path"`
-	ProtoGitChangePath string `mapstructure:"proto-git-change-path"`
 
 	// model flags
 	ModelMysqlStrict bool `mapstructure:"model-mysql-strict"`
@@ -114,8 +110,6 @@ type GenSdkConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
 	Scope        string `mapstructure:"scope"`
-	ApiDir       string `mapstructure:"api-dir"`
-	ProtoDir     string `mapstructure:"proto-dir"`
 	WrapResponse bool   `mapstructure:"wrap-response"`
 	Output       string `mapstructure:"output"`
 	Language     string `mapstructure:"language"`
@@ -126,9 +120,7 @@ type GenSdkConfig struct {
 }
 
 type GenSwaggerConfig struct {
-	Output   string `mapstructure:"output"`
-	ApiDir   string `mapstructure:"api-dir"`
-	ProtoDir string `mapstructure:"proto-dir"`
+	Output string `mapstructure:"output"`
 }
 
 type GenZrpcclientConfig struct {
@@ -143,10 +135,8 @@ type GenZrpcclientConfig struct {
 }
 
 type GenDocsConfig struct {
-	Output   string `mapstructure:"output"`
-	Format   string `mapstructure:"format"`
-	ApiDir   string `mapstructure:"api-dir"`
-	ProtoDir string `mapstructure:"proto-dir"`
+	Output string `mapstructure:"output"`
+	Format string `mapstructure:"format"`
 }
 
 type IvmConfig struct {
@@ -227,6 +217,35 @@ type HooksConfig struct {
 func (c *Config) Wd() string {
 	wd, _ := os.Getwd()
 	return wd
+}
+
+func (c *Config) ProtoDir() string {
+	return filepath.Join("desc", "proto")
+}
+
+func (c *Config) ApiDir() string {
+	return filepath.Join("desc", "api")
+}
+
+func (c *Config) SqlDir() string {
+	return filepath.Join("desc", "sql")
+}
+
+func (c *GenConfig) Wd() string {
+	wd, _ := os.Getwd()
+	return wd
+}
+
+func (c *GenConfig) ProtoDir() string {
+	return filepath.Join("desc", "proto")
+}
+
+func (c *GenConfig) ApiDir() string {
+	return filepath.Join("desc", "api")
+}
+
+func (c *GenConfig) SqlDir() string {
+	return filepath.Join("desc", "sql")
 }
 
 func SetConfig(command string, flagSet *pflag.FlagSet) error {

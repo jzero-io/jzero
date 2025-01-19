@@ -107,7 +107,7 @@ func (ja *JzeroApi) patchLogic(file LogicFile) error {
 		}
 	}
 
-	if ja.SplitApiTypesDir {
+	if file.Package != "" {
 		for _, g := range ja.GenCodeApiSpecMap[file.DescFilepath].Service.Groups {
 			if g.GetAnnotation("group") == file.Group {
 				if err := ja.updateLogicImportedTypesPath(f, fset, file); err != nil {

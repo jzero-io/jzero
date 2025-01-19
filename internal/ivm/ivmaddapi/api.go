@@ -41,11 +41,10 @@ func Run(c config.Config) error {
 	}
 
 	template, err := templatex.ParseTemplate(map[string]any{
-		"Handlers":         handlers,
-		"Service":          service,
-		"Group":            c.Ivm.Add.Api.Group,
-		"GroupCamel":       stringx.FirstUpper(stringx.ToCamel(c.Ivm.Add.Api.Group)),
-		"SplitApiTypesDir": c.Gen.SplitApiTypesDir,
+		"Handlers":   handlers,
+		"Service":    service,
+		"Group":      c.Ivm.Add.Api.Group,
+		"GroupCamel": stringx.FirstUpper(stringx.ToCamel(c.Ivm.Add.Api.Group)),
 	}, embeded.ReadTemplateFile(filepath.Join("ivm", "add", "template.api.tpl")))
 	if err != nil {
 		return err

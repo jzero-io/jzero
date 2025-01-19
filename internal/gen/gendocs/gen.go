@@ -14,16 +14,16 @@ import (
 )
 
 func Gen(c config.Config) error {
-	if pathx.FileExists(c.Gen.Docs.ProtoDir) {
+	if pathx.FileExists(c.ProtoDir()) {
 		_ = os.MkdirAll(c.Gen.Docs.Output, 0o755)
-		protoFilepath, err := desc.GetProtoFilepath(c.Gen.Swagger.ProtoDir)
+		protoFilepath, err := desc.GetProtoFilepath(c.ProtoDir())
 		if err != nil {
 			return err
 		}
 
 		command := fmt.Sprintf("protoc -I%s -I%s --doc_out=%s --doc_opt=%s,index.%s %s",
-			c.Gen.Docs.ProtoDir,
-			filepath.Join(c.Gen.Docs.ProtoDir, "third_party"),
+			c.ProtoDir(),
+			filepath.Join(c.ProtoDir(), "third_party"),
 			c.Gen.Docs.Output,
 			getFormat(c.Gen.Docs.Format),
 			c.Gen.Docs.Format,
