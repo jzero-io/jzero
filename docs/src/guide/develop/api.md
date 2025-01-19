@@ -26,10 +26,6 @@ type CreateRequest {
 
 ## api types 文件分组分文件夹
 
-:::tip
-保证 .jzero.yaml 文件中的 gen.split-api-types-dir 配置为 true, 否则不生效
-:::
-
 ```api
 syntax = "v1"
 
@@ -38,59 +34,25 @@ info (
 )
 ```
 
-jzero 脚手架推荐的 api 文件内容如下:
+## 合并同一个 group 的 handler 为同一个文件
 
-可以通过如下命令生成改文件:
+```api
+@server (
+	prefix:          /api/v1
+	group:           system/user
+	compact_handler: true
+)
+service simpleapi {
+	@handler GetUserHandler
+	get /system/user/getUser (GetUser2Request) returns (GetUserResponse)
+
+	@handler DeleteUserHandler
+	get /system/user/deleteUser (DeleteUserRequest) returns (DeleteUserResponse)
+}
+```
+
+## 自动生成 api 文件:
 
 ```shell
 jzero ivm add api --name user
-```
-
-```api
-syntax = "v1"
-
-info (
-	go_package: "user"
-)
-
-type CreateRequest {}
-
-type CreateResponse {}
-
-type ListRequest {}
-
-type ListResponse {}
-
-type GetRequest {}
-
-type GetResponse {}
-
-type EditRequest {}
-
-type EditResponse {}
-
-type DeleteRequest {}
-
-type DeleteResponse {}
-
-@server (
-	prefix: /api/v1
-	group:  user
-)
-service ntls {
-	@handler CreateHandler
-	post /user/create (CreateRequest) returns (CreateResponse)
-
-	@handler ListHandler
-	get /user/list (ListRequest) returns (ListResponse)
-
-	@handler GetHandler
-	get /user/get (GetRequest) returns (GetResponse)
-
-	@handler EditHandler
-	post /user/edit (EditRequest) returns (EditResponse)
-
-	@handler DeleteHandler
-	get /user/delete (DeleteRequest) returns (DeleteResponse)
-}
 ```

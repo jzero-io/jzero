@@ -4,40 +4,7 @@ icon: carbon:sdk
 order: 5
 ---
 
-## 自动生成 http sdk 参数
-
-```shell
-$ jzero gen sdk -h                   
-Generate sdk client by api file and proto file
-
-Usage:
-  jzero gen sdk [flags]
-
-Flags:
-      --api-dir string     set input api dir (default "desc/api")
-      --goModule string    set go module name
-      --goPackage string   set package name
-      --goVersion string   set go version, only effect when having goModule flag
-  -h, --help               help for sdk
-  -l, --language string    set language (default "go")
-  -o, --output string      set output dir
-      --proto-dir string   set input proto dir (default "desc/proto")
-      --scope string       set scope name
-      --wrap-response      warp response: code, data, message (default true)
-
-Global Flags:
-  -f, --config string   set config file (default ".jzero.yaml")
-      --debug           debug mode
-      --home string     set template home (default "/Users/jaronnie/Desktop/jaronnie/github/jzero-io/jzero/.template")
-      --style string    The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md] (default "gozero")
-```
-
 ## 自动生成 go http sdk
-
-* kubernetes client-go style
-* 根据 api 文件中的 group name 和 proto 文件中的 service name 进行业务分组
-* 链式调用, 调用逻辑清晰
-* 可自定义接口进行扩展
 
 ::: code-tabs#shell
 
