@@ -20,6 +20,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/tools/go/ast/astutil"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/pkg/mod"
 )
 
@@ -37,11 +38,11 @@ func (ja *JzeroApi) getAllHandlerFiles(apiFilepath string, apiSpec *spec.ApiSpec
 	for _, group := range apiSpec.Service.Groups {
 		for _, route := range group.Routes {
 			formatContent := strings.TrimSuffix(route.Handler, "Handler") + "Handler"
-			namingFormat, err := format.FileNamingFormat(ja.Style, formatContent)
+			namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, formatContent)
 			if err != nil {
 				return nil, err
 			}
-			fp := filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group"), namingFormat+".go")
+			fp := filepath.Join(config.C.Wd(), "internal", "handler", group.GetAnnotation("group"), namingFormat+".go")
 
 			hf := HandlerFile{
 				ApiFilepath: apiFilepath,
@@ -84,7 +85,7 @@ func (ja *JzeroApi) patchHandler(file HandlerFile) error {
 		return err
 	}
 
-	if err = mod.UpdateImportedModule(f, fset, ja.Wd, ja.Module); err != nil {
+	if err = mod.UpdateImportedModule(f, fset, config.C.Wd(), ja.Module); err != nil {
 		return err
 	}
 
@@ -158,7 +159,7 @@ func (ja *JzeroApi) removeHandlerSuffix(f *ast.File) error {
 }
 
 func (ja *JzeroApi) compactHandler(f *ast.File, fset *token.FileSet, file HandlerFile) error {
-	namingFormat, err := format.FileNamingFormat(ja.Style, filepath.Base(file.Group))
+	namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, filepath.Base(file.Group))
 	if err != nil {
 		return err
 	}

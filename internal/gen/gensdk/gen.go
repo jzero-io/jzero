@@ -11,17 +11,15 @@ import (
 	"github.com/jzero-io/jzero/internal/gen/gensdk/generator"
 )
 
-func GenSdk(c config.Config, genModule bool) error {
-	if !pathx.FileExists(c.Gen.Sdk.Output) {
-		if err := os.MkdirAll(c.Gen.Sdk.Output, 0o755); err != nil {
+func GenSdk(genModule bool) error {
+	if !pathx.FileExists(config.C.Gen.Sdk.Output) {
+		if err := os.MkdirAll(config.C.Gen.Sdk.Output, 0o755); err != nil {
 			return err
 		}
 	}
 
 	gc := gensdkconfig.Config{
-		GenConfig:    c.Gen,
-		GenSdkConfig: c.Gen.Sdk,
-		GenModule:    genModule,
+		GenModule: genModule,
 	}
 
 	gen, err := generator.New(gc)
@@ -35,15 +33,15 @@ func GenSdk(c config.Config, genModule bool) error {
 	}
 
 	for _, v := range files {
-		if !pathx.FileExists(filepath.Dir(filepath.Join(c.Gen.Sdk.Output, v.Path))) {
-			if err = os.MkdirAll(filepath.Dir(filepath.Join(c.Gen.Sdk.Output, v.Path)), 0o755); err != nil {
+		if !pathx.FileExists(filepath.Dir(filepath.Join(config.C.Gen.Sdk.Output, v.Path))) {
+			if err = os.MkdirAll(filepath.Dir(filepath.Join(config.C.Gen.Sdk.Output, v.Path)), 0o755); err != nil {
 				return err
 			}
 		}
-		if pathx.FileExists(filepath.Join(c.Gen.Sdk.Output, v.Path)) && v.Skip {
+		if pathx.FileExists(filepath.Join(config.C.Gen.Sdk.Output, v.Path)) && v.Skip {
 			continue
 		}
-		if err = os.WriteFile(filepath.Join(c.Gen.Sdk.Output, v.Path), v.Content.Bytes(), 0o644); err != nil {
+		if err = os.WriteFile(filepath.Join(config.C.Gen.Sdk.Output, v.Path), v.Content.Bytes(), 0o644); err != nil {
 			return err
 		}
 	}

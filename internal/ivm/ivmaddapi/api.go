@@ -19,13 +19,13 @@ type Handler struct {
 	Verb string
 }
 
-func Run(c config.Config) error {
+func Run() error {
 	baseApiDir := filepath.Join("desc", "api")
 
 	service := desc.GetApiServiceName(filepath.Join("desc", "api"))
 
 	var handlers []Handler
-	for _, v := range c.Ivm.Add.Api.Handlers {
+	for _, v := range config.C.Ivm.Add.Api.Handlers {
 		split := strings.Split(v, ":")
 		var method Handler
 		if len(split) == 2 {
@@ -43,18 +43,18 @@ func Run(c config.Config) error {
 	template, err := templatex.ParseTemplate(map[string]any{
 		"Handlers":   handlers,
 		"Service":    service,
-		"Group":      c.Ivm.Add.Api.Group,
-		"GroupCamel": stringx.FirstUpper(stringx.ToCamel(c.Ivm.Add.Api.Group)),
+		"Group":      config.C.Ivm.Add.Api.Group,
+		"GroupCamel": stringx.FirstUpper(stringx.ToCamel(config.C.Ivm.Add.Api.Group)),
 	}, embeded.ReadTemplateFile(filepath.Join("ivm", "add", "template.api.tpl")))
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(filepath.Join(baseApiDir, c.Ivm.Add.Api.Name+".api"), template, 0o644)
+	err = os.WriteFile(filepath.Join(baseApiDir, config.C.Ivm.Add.Api.Name+".api"), template, 0o644)
 	if err != nil {
 		return err
 	}
 
 	// format
-	return format.ApiFormatByPath(filepath.Join(baseApiDir, c.Ivm.Add.Api.Name+".api"), false)
+	return format.ApiFormatByPath(filepath.Join(baseApiDir, config.C.Ivm.Add.Api.Name+".api"), false)
 }

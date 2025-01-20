@@ -1,9 +1,27 @@
 package config
 
-import "github.com/jzero-io/jzero/config"
+import (
+	"os"
+	"path/filepath"
+)
 
 type Config struct {
 	GenModule bool
-	config.GenConfig
-	config.GenSdkConfig
+}
+
+func (c *Config) Wd() string {
+	wd, _ := os.Getwd()
+	return wd
+}
+
+func (c *Config) ProtoDir() string {
+	return filepath.Join("desc", "proto")
+}
+
+func (c *Config) ApiDir() string {
+	return filepath.Join("desc", "api")
+}
+
+func (c *Config) SqlDir() string {
+	return filepath.Join("desc", "sql")
 }

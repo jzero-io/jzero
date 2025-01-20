@@ -19,9 +19,9 @@ type Method struct {
 	Verb string
 }
 
-func Run(c config.Config) error {
+func Run() error {
 	var methods []Method
-	for _, v := range c.Ivm.Add.Proto.Methods {
+	for _, v := range config.C.Ivm.Add.Proto.Methods {
 		split := strings.Split(v, ":")
 		var method Method
 		if len(split) == 2 {
@@ -39,21 +39,21 @@ func Run(c config.Config) error {
 	var version string
 	var versionSuffix string
 
-	if c.Ivm.Version == "v1" {
+	if config.C.Ivm.Version == "v1" {
 		version = ""
 		versionSuffix = ""
 	} else {
-		version = c.Ivm.Version
-		versionSuffix = "_" + c.Ivm.Version
+		version = config.C.Ivm.Version
+		versionSuffix = "_" + config.C.Ivm.Version
 	}
 
 	template, err := templatex.ParseTemplate(map[string]any{
-		"Package":    c.Ivm.Add.Proto.Name,
+		"Package":    config.C.Ivm.Add.Proto.Name,
 		"Methods":    methods,
-		"Services":   c.Ivm.Add.Proto.Services,
+		"Services":   config.C.Ivm.Add.Proto.Services,
 		"Version":    version,
-		"UrlVersion": c.Ivm.Version,
-		"ProtoPath":  filepath.Join(c.Ivm.Version, fmt.Sprintf("%s%s.proto", c.Ivm.Add.Proto.Name, versionSuffix)),
+		"UrlVersion": config.C.Ivm.Version,
+		"ProtoPath":  filepath.Join(config.C.Ivm.Version, fmt.Sprintf("%s%s.proto", config.C.Ivm.Add.Proto.Name, versionSuffix)),
 	}, embeded.ReadTemplateFile(filepath.Join("ivm", "add", "template.proto.tpl")))
 	if err != nil {
 		return err
@@ -63,7 +63,7 @@ func Run(c config.Config) error {
 	// Create a new printer
 	// printer := &protoprint.Printer{}
 
-	output := filepath.Join("desc", "proto", c.Ivm.Version, fmt.Sprintf("%s%s.proto", c.Ivm.Add.Proto.Name, versionSuffix))
+	output := filepath.Join("desc", "proto", config.C.Ivm.Version, fmt.Sprintf("%s%s.proto", config.C.Ivm.Add.Proto.Name, versionSuffix))
 
 	if pathx.FileExists(output) {
 		return errors.New("proto file already exists")

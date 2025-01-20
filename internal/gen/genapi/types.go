@@ -15,6 +15,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"golang.org/x/tools/go/ast/astutil"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -186,7 +187,7 @@ func (ja *JzeroApi) changeLogicTypes(f *ast.File, fset *token.FileSet, file Logi
 	})
 
 	// change handler type struct
-	if ja.RegenApiHandler {
+	if config.C.Gen.RegenApiHandler {
 		ast.Inspect(f, func(node ast.Node) bool {
 			if genDecl, ok := node.(*ast.GenDecl); ok && genDecl.Tok == token.TYPE {
 				for _, ss := range genDecl.Specs {

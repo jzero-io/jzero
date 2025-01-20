@@ -139,6 +139,9 @@ type GenDocsConfig struct {
 	Format string `mapstructure:"format"`
 }
 
+type GenCrudConfig struct {
+}
+
 type IvmConfig struct {
 	// global flags
 	Version string `mapstructure:"version"`
@@ -228,23 +231,6 @@ func (c *Config) ApiDir() string {
 }
 
 func (c *Config) SqlDir() string {
-	return filepath.Join("desc", "sql")
-}
-
-func (c *GenConfig) Wd() string {
-	wd, _ := os.Getwd()
-	return wd
-}
-
-func (c *GenConfig) ProtoDir() string {
-	return filepath.Join("desc", "proto")
-}
-
-func (c *GenConfig) ApiDir() string {
-	return filepath.Join("desc", "api")
-}
-
-func (c *GenConfig) SqlDir() string {
 	return filepath.Join("desc", "sql")
 }
 

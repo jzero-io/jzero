@@ -15,6 +15,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/gen/genapi"
 )
 
@@ -22,15 +23,15 @@ func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Pr
 	var logicFiles []genapi.LogicFile
 	for _, service := range protoSpec.Service {
 		for _, rpc := range service.RPC {
-			namingFormat, err := format.FileNamingFormat(jr.Style, rpc.Name+"Logic")
+			namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, rpc.Name+"Logic")
 			if err != nil {
 				return nil, err
 			}
 
-			fp := filepath.Join(jr.Wd, "internal", "logic", strings.ToLower(service.Name), namingFormat+".go")
-			if jr.RpcStylePatch {
-				logicDir, _ := format.FileNamingFormat(jr.Style, service.Name)
-				fp = filepath.Join(jr.Wd, "internal", "logic", strings.ToLower(logicDir), namingFormat+".go")
+			fp := filepath.Join(config.C.Wd(), "internal", "logic", strings.ToLower(service.Name), namingFormat+".go")
+			if config.C.Gen.RpcStylePatch {
+				logicDir, _ := format.FileNamingFormat(config.C.Gen.Style, service.Name)
+				fp = filepath.Join(config.C.Wd(), "internal", "logic", strings.ToLower(logicDir), namingFormat+".go")
 			}
 
 			f := genapi.LogicFile{

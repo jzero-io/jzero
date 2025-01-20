@@ -15,9 +15,9 @@ import (
 	"github.com/jzero-io/jzero/embeded"
 )
 
-func Run(c config.Config) error {
-	if c.Template.Init.Remote != "" && c.Template.Init.Branch != "" {
-		target := filepath.Join(c.Template.Init.Output, c.Template.Init.Branch)
+func Run() error {
+	if config.C.Template.Init.Remote != "" && config.C.Template.Init.Branch != "" {
+		target := filepath.Join(config.C.Template.Init.Output, config.C.Template.Init.Branch)
 		_ = os.MkdirAll(target, 0o755)
 		fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), target)
 
@@ -25,9 +25,9 @@ func Run(c config.Config) error {
 		defer cancel()
 		_, err := git.PlainCloneContext(ctx, target, false, &git.CloneOptions{
 			SingleBranch:  true,
-			URL:           c.Template.Init.Remote,
+			URL:           config.C.Template.Init.Remote,
 			Depth:         0,
-			ReferenceName: plumbing.ReferenceName("refs/heads/" + c.Template.Init.Branch),
+			ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.Template.Init.Branch),
 		})
 		if err != nil {
 			return err
@@ -36,8 +36,8 @@ func Run(c config.Config) error {
 		fmt.Println(color.WithColor("Done", color.FgGreen))
 		return nil
 	}
-	fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Initializing embedded", color.FgGreen), c.Template.Init.Output)
-	err := embeded.WriteTemplateDir("", c.Template.Init.Output)
+	fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Initializing embedded", color.FgGreen), config.C.Template.Init.Output)
+	err := embeded.WriteTemplateDir("", config.C.Template.Init.Output)
 	if err != nil {
 		return err
 	}

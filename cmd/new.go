@@ -112,7 +112,7 @@ var newCmd = &cobra.Command{
 		if !pathx.FileExists(embeded.Home) {
 			embeded.Home = filepath.Join(home, ".jzero", "templates", Version)
 		}
-		return new.Run(config.C, args[0], base)
+		return new.Run(args[0], base)
 	},
 	Args: cobra.ExactArgs(1),
 }

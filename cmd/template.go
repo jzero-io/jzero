@@ -37,7 +37,7 @@ var templateInitCmd = &cobra.Command{
 				config.C.Template.Init.Output = filepath.Join(home, ".jzero", "templates", Version)
 			}
 		}
-		return templateinit.Run(config.C)
+		return templateinit.Run()
 	},
 }
 
