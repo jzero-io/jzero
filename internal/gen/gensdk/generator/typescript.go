@@ -2,7 +2,6 @@ package generator
 
 import (
 	"bytes"
-	"os"
 	"path/filepath"
 
 	"github.com/jhump/protoreflect/desc"
@@ -12,6 +11,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/api/tsgen"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
+	gconfig "github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser"
@@ -30,23 +30,14 @@ func init() {
 
 type Typescript struct {
 	config *config.Config
-
-	wd string
 }
 
 func (t *Typescript) Gen() ([]*GeneratedFile, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	t.wd = wd
-
 	// parse api
 	var apiSpecs []*spec.ApiSpec
 
-	if pathx.FileExists(t.config.ApiDir()) {
-		files, err := jzerodesc.FindApiFiles(t.config.ApiDir())
+	if pathx.FileExists(gconfig.C.ApiDir()) {
+		files, err := jzerodesc.FindApiFiles(gconfig.C.ApiDir())
 		if err != nil {
 			return nil, err
 		}
@@ -59,7 +50,7 @@ func (t *Typescript) Gen() ([]*GeneratedFile, error) {
 		}
 	}
 
-	protoFiles, err := jzerodesc.GetProtoFilepath(t.config.ProtoDir())
+	protoFiles, err := jzerodesc.GetProtoFilepath(gconfig.C.ProtoDir())
 	if err != nil {
 		return nil, err
 	}
@@ -69,10 +60,10 @@ func (t *Typescript) Gen() ([]*GeneratedFile, error) {
 	// parse proto
 	var protoParser protoparse.Parser
 	if len(protoFiles) > 0 {
-		protoParser.ImportPaths = []string{t.config.ProtoDir()}
+		protoParser.ImportPaths = []string{gconfig.C.ProtoDir()}
 		var protoRelFiles []string
 		for _, v := range protoFiles {
-			rel, err := filepath.Rel(t.config.ProtoDir(), v)
+			rel, err := filepath.Rel(gconfig.C.ProtoDir(), v)
 			if err != nil {
 				return nil, err
 			}
@@ -139,7 +130,7 @@ func (t *Typescript) Gen() ([]*GeneratedFile, error) {
 
 func (t *Typescript) genClientSet(scopes []string) (*GeneratedFile, error) {
 	clientBytes, err := templatex.ParseTemplate(map[string]any{
-		"APP":    t.config.Scope,
+		"APP":    gconfig.C.Gen.Sdk.Scope,
 		"Scopes": scopes,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "index.ts.tpl")))
 	if err != nil {
@@ -153,7 +144,7 @@ func (t *Typescript) genClientSet(scopes []string) (*GeneratedFile, error) {
 
 func (t *Typescript) genPackageJson(scopes []string) (*GeneratedFile, error) {
 	packageJsonBytes, err := templatex.ParseTemplate(map[string]any{
-		"APP": t.config.Scope,
+		"APP": gconfig.C.Gen.Sdk.Scope,
 	}, embeded.ReadTemplateFile(filepath.Join("client", "client-ts", "package.json.tpl")))
 	if err != nil {
 		return nil, err
@@ -216,7 +207,7 @@ func (t *Typescript) genApiTypesModel(types []spec.Type) (*GeneratedFile, error)
 	}
 
 	return &GeneratedFile{
-		Path:    filepath.Join("model", t.config.Scope, "types", "types.ts"),
+		Path:    filepath.Join("model", gconfig.C.Gen.Sdk.Scope, "types", "types.ts"),
 		Content: *bytes.NewBuffer([]byte(typesGoString)),
 	}, nil
 }

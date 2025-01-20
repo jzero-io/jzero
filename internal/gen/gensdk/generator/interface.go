@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	gconfig "github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
 )
 
@@ -23,9 +24,9 @@ var langGenerator = map[string]NewFunc{}
 type NewFunc func(target config.Config) (Generator, error)
 
 func New(config config.Config) (Generator, error) {
-	f, ok := langGenerator[config.Language]
+	f, ok := langGenerator[gconfig.C.Gen.Sdk.Language]
 	if !ok {
-		return nil, errors.Errorf("language %s not support", config.Language)
+		return nil, errors.Errorf("language %s not support", gconfig.C.Gen.Sdk.Language)
 	}
 	return f(config)
 }

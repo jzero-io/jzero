@@ -16,6 +16,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
@@ -37,7 +38,7 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 	template, err := templatex.ParseTemplate(map[string]any{
 		"Imports":       imports,
 		"TablePackages": tablePackages,
-		"withCache":     jm.ModelMysqlCache,
+		"withCache":     config.C.Gen.ModelMysqlCache,
 	}, embeded.ReadTemplateFile(filepath.Join("plugins", "model", "model.go.tpl")))
 	if err != nil {
 		return err
@@ -84,14 +85,14 @@ func (jm *JzeroModel) GenDDL(sqlConn sqlx.SqlConn, tables []string) ([]string, e
 	var writeTables []string
 	for _, v := range tables {
 		if s, ok := tableDDLMap.Load(v); ok {
-			if len(jm.ModelMysqlDatasourceTable) != 0 && jm.ModelMysqlDatasourceTable[0] != "*" {
-				if lo.Contains(jm.ModelMysqlDatasourceTable, cast.ToString(v)) {
+			if len(config.C.Gen.ModelMysqlDatasourceTable) != 0 && config.C.Gen.ModelMysqlDatasourceTable[0] != "*" {
+				if lo.Contains(config.C.Gen.ModelMysqlDatasourceTable, cast.ToString(v)) {
 					writeTables = append(writeTables, filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)))
 					if err := os.WriteFile(filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)), []byte(cast.ToString(s)), 0o644); err != nil {
 						return nil, err
 					}
 				}
-			} else if len(jm.ModelMysqlDatasourceTable) != 0 && jm.ModelMysqlDatasourceTable[0] == "*" {
+			} else if len(config.C.Gen.ModelMysqlDatasourceTable) != 0 && config.C.Gen.ModelMysqlDatasourceTable[0] == "*" {
 				writeTables = append(writeTables, filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)))
 				if err := os.WriteFile(filepath.Join("desc", "sql", fmt.Sprintf("%s.sql", v)), []byte(cast.ToString(s)), 0o644); err != nil {
 					return nil, err

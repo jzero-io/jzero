@@ -32,8 +32,8 @@ type GeneratedFile struct {
 	Skip    bool
 }
 
-func Run(c config.Config, appName, base string) error {
-	if err := os.MkdirAll(c.New.Output, 0o755); err != nil {
+func Run(appName, base string) error {
+	if err := os.MkdirAll(config.C.New.Output, 0o755); err != nil {
 		return err
 	}
 
@@ -42,10 +42,10 @@ func Run(c config.Config, appName, base string) error {
 		return err
 	}
 
-	templateData["Features"] = c.New.Features
-	templateData["Module"] = c.New.Module
+	templateData["Features"] = config.C.New.Features
+	templateData["Module"] = config.C.New.Module
 	templateData["APP"] = appName
-	if abs, err := filepath.Abs(c.New.Output); err == nil {
+	if abs, err := filepath.Abs(config.C.New.Output); err == nil {
 		templateData["DirName"] = filepath.Base(abs)
 	} else {
 		return err
@@ -53,7 +53,7 @@ func Run(c config.Config, appName, base string) error {
 
 	jn := JzeroNew{
 		TemplateData: templateData,
-		nc:           c.New,
+		nc:           config.C.New,
 		base:         base,
 	}
 

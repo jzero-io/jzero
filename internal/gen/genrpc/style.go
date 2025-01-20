@@ -13,6 +13,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"golang.org/x/tools/go/ast/astutil"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/gen/genapi"
 )
 
@@ -31,7 +32,7 @@ func (jr *JzeroRpc) rpcStylePatchLogic(file genapi.LogicFile) error {
 		return err
 	}
 
-	packageName, _ := format.FileNamingFormat(jr.Style, file.Group)
+	packageName, _ := format.FileNamingFormat(config.C.Gen.Style, file.Group)
 	f.Name = ast.NewIdent(strings.ToLower(packageName))
 
 	// Write the modified AST back to the file
@@ -64,7 +65,7 @@ func (jr *JzeroRpc) rpcStylePatchServer(file ServerFile) error {
 
 	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/logic/%s", jr.Module, strings.ToLower(file.Service)))
 
-	logicImportDir, _ := format.FileNamingFormat(jr.Style, file.Service)
+	logicImportDir, _ := format.FileNamingFormat(config.C.Gen.Style, file.Service)
 	importLogicName, _ := format.FileNamingFormat("gozero", file.Service)
 	astutil.AddNamedImport(fset, f, importLogicName+"logic", fmt.Sprintf("%s/internal/logic/%s", jr.Module, strings.ToLower(logicImportDir)))
 
