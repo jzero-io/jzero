@@ -36,8 +36,8 @@ func (t *Typescript) Gen() ([]*GeneratedFile, error) {
 	// parse api
 	var apiSpecs []*spec.ApiSpec
 
-	if pathx.FileExists(t.config.ApiDir()) {
-		files, err := jzerodesc.FindApiFiles(t.config.ApiDir())
+	if pathx.FileExists(gconfig.C.ApiDir()) {
+		files, err := jzerodesc.FindApiFiles(gconfig.C.ApiDir())
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +50,7 @@ func (t *Typescript) Gen() ([]*GeneratedFile, error) {
 		}
 	}
 
-	protoFiles, err := jzerodesc.GetProtoFilepath(t.config.ProtoDir())
+	protoFiles, err := jzerodesc.GetProtoFilepath(gconfig.C.ProtoDir())
 	if err != nil {
 		return nil, err
 	}
@@ -60,10 +60,10 @@ func (t *Typescript) Gen() ([]*GeneratedFile, error) {
 	// parse proto
 	var protoParser protoparse.Parser
 	if len(protoFiles) > 0 {
-		protoParser.ImportPaths = []string{t.config.ProtoDir()}
+		protoParser.ImportPaths = []string{gconfig.C.ProtoDir()}
 		var protoRelFiles []string
 		for _, v := range protoFiles {
-			rel, err := filepath.Rel(t.config.ProtoDir(), v)
+			rel, err := filepath.Rel(gconfig.C.ProtoDir(), v)
 			if err != nil {
 				return nil, err
 			}

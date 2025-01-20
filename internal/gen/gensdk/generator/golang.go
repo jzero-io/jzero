@@ -52,8 +52,8 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	// parse api
 	var apiSpecs []*spec.ApiSpec
 
-	if pathx.FileExists(g.config.ApiDir()) {
-		files, err := jzerodesc.FindApiFiles(g.config.ApiDir())
+	if pathx.FileExists(gconfig.C.ApiDir()) {
+		files, err := jzerodesc.FindApiFiles(gconfig.C.ApiDir())
 		if err != nil {
 			return nil, err
 		}
@@ -68,8 +68,8 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 
 	var protoFiles []string
 
-	if pathx.FileExists(g.config.ProtoDir()) {
-		protoFiles, err = jzerodesc.GetProtoFilepath(g.config.ProtoDir())
+	if pathx.FileExists(gconfig.C.ProtoDir()) {
+		protoFiles, err = jzerodesc.GetProtoFilepath(gconfig.C.ProtoDir())
 		if err != nil {
 			return nil, err
 		}
@@ -80,10 +80,10 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	// parse proto
 	var protoParser protoparse.Parser
 	if len(protoFiles) > 0 {
-		protoParser.ImportPaths = []string{g.config.ProtoDir(), filepath.Join(g.config.ProtoDir(), "third_party")}
+		protoParser.ImportPaths = []string{gconfig.C.ProtoDir(), filepath.Join(gconfig.C.ProtoDir(), "third_party")}
 		var protoRelFiles []string
 		for _, v := range protoFiles {
-			rel, err := filepath.Rel(g.config.ProtoDir(), v)
+			rel, err := filepath.Rel(gconfig.C.ProtoDir(), v)
 			if err != nil {
 				return nil, err
 			}
@@ -378,7 +378,7 @@ func (g *Golang) genPbTypesModel(protoFiles []string) ([]*GeneratedFile, error) 
 	defer os.RemoveAll(tmpDir)
 
 	for _, pf := range protoFiles {
-		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s --go_out=%s %s", g.config.ProtoDir(), filepath.Join(g.config.ProtoDir(), "third_party"), tmpDir, pf), g.wd)
+		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s --go_out=%s %s", gconfig.C.ProtoDir(), filepath.Join(gconfig.C.ProtoDir(), "third_party"), tmpDir, pf), g.wd)
 		if err != nil {
 			return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
 		}
