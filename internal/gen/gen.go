@@ -19,54 +19,47 @@ import (
 	"github.com/jzero-io/jzero/pkg/mod"
 )
 
-func Run(c config.Config) error {
-	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), c.Wd())
+func Run() error {
+	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), config.C.Wd())
 
 	var module string
-	moduleStruct, err := mod.GetGoMod(c.Wd())
+	moduleStruct, err := mod.GetGoMod(config.C.Wd())
 	if err != nil {
 		return errors.Wrapf(err, "get go module struct error")
 	}
 	module = moduleStruct.Path
 
 	if !pathx.FileExists("go.mod") {
-		module, err = mod.GetParentPackage(c.Wd())
+		module, err = mod.GetParentPackage(config.C.Wd())
 		if err != nil {
 			return errors.Wrapf(err, "get parent package error")
 		}
 	}
 
 	defer func() {
-		RemoveExtraFiles(c.Wd(), c.Gen.Style)
+		RemoveExtraFiles(config.C.Wd(), config.C.Gen.Style)
 	}()
 
-	jzeroRpc := genrpc.JzeroRpc{
-		Wd:        c.Wd(),
-		Module:    module,
-		GenConfig: c.Gen,
+	jzeroModel := genmodel.JzeroModel{
+		Module: module,
 	}
-	err = jzeroRpc.Gen()
+	err = jzeroModel.Gen()
 	if err != nil {
 		return err
 	}
 
 	jzeroApi := genapi.JzeroApi{
-		Wd:        c.Wd(),
-		Module:    module,
-		GenConfig: c.Gen,
+		Module: module,
 	}
 	err = jzeroApi.Gen()
 	if err != nil {
 		return err
 	}
 
-	jzeroSql := genmodel.JzeroModel{
-		Wd:        c.Wd(),
-		Style:     c.Gen.Style,
-		Module:    module,
-		GenConfig: c.Gen,
+	jzeroRpc := genrpc.JzeroRpc{
+		Module: module,
 	}
-	err = jzeroSql.Gen()
+	err = jzeroRpc.Gen()
 	if err != nil {
 		return err
 	}

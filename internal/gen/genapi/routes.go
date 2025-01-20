@@ -15,6 +15,7 @@ import (
 	zeroconfig "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	jgogen "github.com/jzero-io/jzero/pkg/gogen"
 	"github.com/jzero-io/jzero/pkg/templatex"
@@ -22,7 +23,7 @@ import (
 
 func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {
 	if len(ja.ApiSpecMap[fp].Service.Routes()) > 0 {
-		routesGoBody, err := jgogen.GenRoutesString(ja.Module, &zeroconfig.Config{NamingFormat: ja.Style}, ja.ApiSpecMap[fp])
+		routesGoBody, err := jgogen.GenRoutesString(ja.Module, &zeroconfig.Config{NamingFormat: config.C.Gen.Style}, ja.ApiSpecMap[fp])
 		if err != nil {
 			return "", err
 		}

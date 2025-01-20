@@ -12,6 +12,7 @@ import (
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
 
+	gconfig "github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/config"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser/api"
 	"github.com/jzero-io/jzero/internal/gen/gensdk/jparser/gateway"
@@ -87,7 +88,7 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 					httpInterface.Response.FullName = BuildProtoResponseFullName(httpInterface.Response.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
 				}
 				httpInterface.MethodName = method.GetName()
-				httpInterface.Scope = vars.Scope(config.Scope)
+				httpInterface.Scope = vars.Scope(gconfig.C.Gen.Sdk.Scope)
 				httpInterface.Resource = vars.Resource(service.GetName())
 
 				pathParams, err := gateway.PathParam(httpInterface.URL)
@@ -113,7 +114,7 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 					resource = "api"
 				}
 				httpInterface := vars.HTTPInterface{
-					Scope:      vars.Scope(config.Scope),
+					Scope:      vars.Scope(gconfig.C.Gen.Sdk.Scope),
 					Resource:   resource,
 					Method:     strings.ToUpper(route.Method),
 					URL:        path,

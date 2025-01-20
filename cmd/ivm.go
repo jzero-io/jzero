@@ -49,7 +49,7 @@ var ivmAddProtoCmd = &cobra.Command{
 		if len(config.C.Ivm.Add.Proto.Services) == 0 {
 			config.C.Ivm.Add.Proto.Services = []string{config.C.Ivm.Add.Proto.Name}
 		}
-		return ivmaddproto.Run(config.C)
+		return ivmaddproto.Run()
 	},
 	SilenceUsage: true,
 }
@@ -64,7 +64,7 @@ var ivmAddApiCmd = &cobra.Command{
 		if config.C.Ivm.Add.Api.Group == "" {
 			config.C.Ivm.Add.Api.Group = config.C.Ivm.Add.Api.Name
 		}
-		return ivmaddapi.Run(config.C)
+		return ivmaddapi.Run()
 	},
 	SilenceUsage: true,
 }
@@ -79,7 +79,6 @@ func init() {
 		ivmCmd.AddCommand(ivmInitCmd)
 
 		ivmInitCmd.Flags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
-		ivmInitCmd.Flags().BoolP("remove-suffix", "", true, "remove suffix Handler and Logic on filename or file content")
 		ivmInitCmd.Flags().BoolP("change-logic-types", "", true, "if api file or proto change, e.g. Request or Response type, change handler and logic file content types but not file")
 	}
 

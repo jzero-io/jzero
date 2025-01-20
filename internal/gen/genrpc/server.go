@@ -10,6 +10,7 @@ import (
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
 	"github.com/jzero-io/jzero/pkg/templatex"
@@ -32,7 +33,7 @@ func (jr *JzeroRpc) genServer(serverImports, pbImports jzerodesc.ImportLines, re
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(filepath.Join(jr.Wd, "internal", "server", "server.go"), serverFile, 0o644)
+	err = os.WriteFile(filepath.Join(config.C.Wd(), "internal", "server", "server.go"), serverFile, 0o644)
 	if err != nil {
 		return err
 	}
@@ -43,14 +44,14 @@ func (jr *JzeroRpc) genServer(serverImports, pbImports jzerodesc.ImportLines, re
 func (jr *JzeroRpc) GetAllServerFiles(descFilepath string, protoSpec rpcparser.Proto) ([]ServerFile, error) {
 	var serverFiles []ServerFile
 	for _, service := range protoSpec.Service {
-		namingFormat, err := format.FileNamingFormat(jr.Style, service.Name+"Server")
+		namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, service.Name+"Server")
 		if err != nil {
 			return nil, err
 		}
-		fp := filepath.Join(jr.Wd, "internal", "server", strings.ToLower(service.Name), namingFormat+".go")
-		if jr.RpcStylePatch {
-			serverDir, _ := format.FileNamingFormat(jr.Style, service.Name)
-			fp = filepath.Join(jr.Wd, "internal", "server", strings.ToLower(serverDir), namingFormat+".go")
+		fp := filepath.Join(config.C.Wd(), "internal", "server", strings.ToLower(service.Name), namingFormat+".go")
+		if config.C.Gen.RpcStylePatch {
+			serverDir, _ := format.FileNamingFormat(config.C.Gen.Style, service.Name)
+			fp = filepath.Join(config.C.Wd(), "internal", "server", strings.ToLower(serverDir), namingFormat+".go")
 		}
 
 		f := ServerFile{

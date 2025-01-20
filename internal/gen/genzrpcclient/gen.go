@@ -100,8 +100,8 @@ func (d DirContext) SetPbDir(pbDir, grpcDir string) {
 	panic("implement me")
 }
 
-func Generate(c config.Config, genModule bool) error {
-	g := generator.NewGenerator(c.Gen.Style, false)
+func Generate(genModule bool) error {
+	g := generator.NewGenerator(config.C.Gen.Style, false)
 
 	baseProtoDir := filepath.Join("desc", "proto")
 
@@ -123,21 +123,21 @@ func Generate(c config.Config, genModule bool) error {
 			return err
 		}
 		dirContext := DirContext{
-			ImportBase:      filepath.Join(c.Gen.Zrpcclient.GoModule),
+			ImportBase:      filepath.Join(config.C.Gen.Zrpcclient.GoModule),
 			PbPackage:       parse.PbPackage,
 			OptionGoPackage: parse.GoPackage,
-			Scope:           c.Gen.Zrpcclient.Scope,
-			Output:          c.Gen.Zrpcclient.Output,
-			PbDir:           c.Gen.Zrpcclient.PbDir,
-			ClientDir:       c.Gen.Zrpcclient.ClientDir,
+			Scope:           config.C.Gen.Zrpcclient.Scope,
+			Output:          config.C.Gen.Zrpcclient.Output,
+			PbDir:           config.C.Gen.Zrpcclient.PbDir,
+			ClientDir:       config.C.Gen.Zrpcclient.ClientDir,
 		}
 		for _, service := range parse.Service {
 			services = append(services, service.Name)
 			_ = os.MkdirAll(filepath.Join(dirContext.GetCall().Filename, strings.ToLower(service.Name)), 0o755)
 		}
-		pbDir := filepath.Join(c.Gen.Zrpcclient.Output, "model", c.Gen.Zrpcclient.Scope)
+		pbDir := filepath.Join(config.C.Gen.Zrpcclient.Output, "model", config.C.Gen.Zrpcclient.Scope)
 		if dirContext.PbDir != "" {
-			pbDir = filepath.Join(c.Gen.Zrpcclient.Output, dirContext.PbDir)
+			pbDir = filepath.Join(config.C.Gen.Zrpcclient.Output, dirContext.PbDir)
 		}
 		// gen pb model
 		err = os.MkdirAll(pbDir, 0o755)
@@ -150,7 +150,7 @@ func Generate(c config.Config, genModule bool) error {
 		}
 
 		err = g.GenCall(dirContext, parse, &conf.Config{
-			NamingFormat: c.Gen.Style,
+			NamingFormat: config.C.Gen.Style,
 		}, &generator.ZRpcContext{
 			Multiple:    true,
 			IsGenClient: true,
@@ -161,52 +161,52 @@ func Generate(c config.Config, genModule bool) error {
 	}
 
 	var clientDir string
-	filePath := filepath.Join(c.Gen.Zrpcclient.Output, "typed", c.Gen.Zrpcclient.Scope, fmt.Sprintf("%s_client.go", c.Gen.Zrpcclient.Scope))
-	if c.Gen.Zrpcclient.ClientDir != "" {
-		filePath = filepath.Join(c.Gen.Zrpcclient.Output, c.Gen.Zrpcclient.ClientDir, fmt.Sprintf("%s_client.go", c.Gen.Zrpcclient.Scope))
-		clientDir = c.Gen.Zrpcclient.ClientDir
+	filePath := filepath.Join(config.C.Gen.Zrpcclient.Output, "typed", config.C.Gen.Zrpcclient.Scope, fmt.Sprintf("%s_client.go", config.C.Gen.Zrpcclient.Scope))
+	if config.C.Gen.Zrpcclient.ClientDir != "" {
+		filePath = filepath.Join(config.C.Gen.Zrpcclient.Output, config.C.Gen.Zrpcclient.ClientDir, fmt.Sprintf("%s_client.go", config.C.Gen.Zrpcclient.Scope))
+		clientDir = config.C.Gen.Zrpcclient.ClientDir
 	} else {
-		clientDir = "typed/" + c.Gen.Zrpcclient.Scope
+		clientDir = "typed/" + config.C.Gen.Zrpcclient.Scope
 	}
 
 	// gen clientset and options
 	template, err := templatex.ParseTemplate(map[string]any{
-		"Module":    c.Gen.Zrpcclient.GoModule,
-		"Package":   c.Gen.Zrpcclient.GoPackage,
-		"Scopes":    []string{c.Gen.Zrpcclient.Scope},
+		"Module":    config.C.Gen.Zrpcclient.GoModule,
+		"Package":   config.C.Gen.Zrpcclient.GoPackage,
+		"Scopes":    []string{config.C.Gen.Zrpcclient.Scope},
 		"ClientDir": clientDir,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "clientset.go.tpl"))))
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(filepath.Join(c.Gen.Zrpcclient.Output, "clientset.go"), template, 0o644)
+	err = os.WriteFile(filepath.Join(config.C.Gen.Zrpcclient.Output, "clientset.go"), template, 0o644)
 	if err != nil {
 		return err
 	}
 
 	template, err = templatex.ParseTemplate(map[string]any{
-		"Module":    c.Gen.Zrpcclient.GoModule,
-		"Package":   c.Gen.Zrpcclient.GoPackage,
-		"Scopes":    []string{c.Gen.Zrpcclient.Scope},
+		"Module":    config.C.Gen.Zrpcclient.GoModule,
+		"Package":   config.C.Gen.Zrpcclient.GoPackage,
+		"Scopes":    []string{config.C.Gen.Zrpcclient.Scope},
 		"ClientDir": clientDir,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "options.go.tpl"))))
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(filepath.Join(c.Gen.Zrpcclient.Output, "options.go"), template, 0o644)
+	err = os.WriteFile(filepath.Join(config.C.Gen.Zrpcclient.Output, "options.go"), template, 0o644)
 	if err != nil {
 		return err
 	}
 
 	// generate scope client
-	scope := "typed/" + c.Gen.Zrpcclient.Scope
-	if c.Gen.Zrpcclient.PbDir != "" {
-		scope = c.Gen.Zrpcclient.ClientDir
+	scope := "typed/" + config.C.Gen.Zrpcclient.Scope
+	if config.C.Gen.Zrpcclient.PbDir != "" {
+		scope = config.C.Gen.Zrpcclient.ClientDir
 	}
 	template, err = templatex.ParseTemplate(map[string]any{
-		"Module":   c.Gen.Zrpcclient.GoModule,
+		"Module":   config.C.Gen.Zrpcclient.GoModule,
 		"Scope":    scope,
-		"Package":  c.Gen.Zrpcclient.Scope,
+		"Package":  config.C.Gen.Zrpcclient.Scope,
 		"Services": services,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "typed", "scope_client.go.tpl"))))
 	if err != nil {
@@ -224,15 +224,15 @@ func Generate(c config.Config, genModule bool) error {
 		if err != nil {
 			return err
 		}
-		data["Module"] = c.Gen.Zrpcclient.GoModule
-		if c.Gen.Zrpcclient.GoVersion != "" {
-			data["GoVersion"] = c.Gen.Zrpcclient.GoVersion
+		data["Module"] = config.C.Gen.Zrpcclient.GoModule
+		if config.C.Gen.Zrpcclient.GoVersion != "" {
+			data["GoVersion"] = config.C.Gen.Zrpcclient.GoVersion
 		}
 		template, err = templatex.ParseTemplate(data, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl"))))
 		if err != nil {
 			return err
 		}
-		err = os.WriteFile(filepath.Join(c.Gen.Zrpcclient.Output, "go.mod"), template, 0o644)
+		err = os.WriteFile(filepath.Join(config.C.Gen.Zrpcclient.Output, "go.mod"), template, 0o644)
 		if err != nil {
 			return err
 		}

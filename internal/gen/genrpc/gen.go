@@ -25,9 +25,7 @@ import (
 )
 
 type JzeroRpc struct {
-	Wd     string
 	Module string
-	config.GenConfig
 
 	ProtoFiles          []string
 	GenCodeProtoFiles   []string
@@ -71,7 +69,7 @@ func (jr *JzeroRpc) Gen() error {
 	jr.GenCodeProtoSpecMap = make(map[string]rpcparser.Proto, len(protoFiles))
 
 	switch {
-	case jr.GitChange && len(jr.Desc) == 0:
+	case config.C.Gen.GitChange && len(config.C.Gen.Desc) == 0:
 		m, _, err := gitstatus.ChangedFiles(config.C.ProtoDir(), ".proto")
 		if err == nil {
 			genCodeProtoFiles = append(genCodeProtoFiles, m...)
@@ -79,8 +77,8 @@ func (jr *JzeroRpc) Gen() error {
 				jr.GenCodeProtoSpecMap[file] = jr.ProtoSpecMap[file]
 			}
 		}
-	case len(jr.Desc) > 0:
-		for _, v := range jr.Desc {
+	case len(config.C.Gen.Desc) > 0:
+		for _, v := range config.C.Gen.Desc {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".proto" {
 					genCodeProtoFiles = append(genCodeProtoFiles, filepath.Join(strings.Split(filepath.ToSlash(v), "/")...))
@@ -105,7 +103,7 @@ func (jr *JzeroRpc) Gen() error {
 	jr.GenCodeProtoFiles = genCodeProtoFiles
 
 	// ignore proto desc
-	for _, v := range jr.DescIgnore {
+	for _, v := range config.C.Gen.DescIgnore {
 		if !osx.IsDir(v) {
 			if filepath.Ext(v) == ".proto" {
 				// delete item in genCodeApiFiles by filename
@@ -145,12 +143,12 @@ func (jr *JzeroRpc) Gen() error {
 			return err
 		}
 
-		if jr.RpcStylePatch {
+		if config.C.Gen.RpcStylePatch {
 			if lo.Contains(genCodeProtoFiles, v) {
 				for _, s := range jr.ProtoSpecMap[v].Service {
 					// rename logic dir and server dir
 					dirName, _ := format.FileNamingFormat("gozero", s.Name)
-					fixDirName, _ := format.FileNamingFormat(jr.Style, s.Name)
+					fixDirName, _ := format.FileNamingFormat(config.C.Gen.Style, s.Name)
 
 					_ = os.Rename(filepath.Join("internal", "logic", strings.ToLower(fixDirName)), filepath.Join("internal", "logic", dirName))
 					_ = os.Rename(filepath.Join("internal", "server", strings.ToLower(fixDirName)), filepath.Join("internal", "server", dirName))
@@ -168,24 +166,24 @@ func (jr *JzeroRpc) Gen() error {
 				filepath.Join("internal"),
 				filepath.Join("internal"),
 				zrpcOut,
-				jr.RpcClient,
+				config.C.Gen.RpcClient,
 				filepath.Join(embeded.Home, "go-zero"),
-				jr.Style)
+				config.C.Gen.Style)
 
 			logx.Debug(command)
 
-			_, err = execx.Run(command, jr.Wd)
+			_, err = execx.Run(command, config.C.Wd())
 			if err != nil {
 				return err
 			}
 		}
 
-		if jr.RpcStylePatch {
+		if config.C.Gen.RpcStylePatch {
 			if lo.Contains(genCodeProtoFiles, v) {
 				for _, s := range jr.ProtoSpecMap[v].Service {
 					// rename logic dir and server dir
 					dirName, _ := format.FileNamingFormat("gozero", s.Name)
-					fixDirName, _ := format.FileNamingFormat(jr.Style, s.Name)
+					fixDirName, _ := format.FileNamingFormat(config.C.Gen.Style, s.Name)
 
 					_ = os.Rename(filepath.Join("internal", "logic", strings.ToLower(dirName)), filepath.Join("internal", "logic", fixDirName))
 					_ = os.Rename(filepath.Join("internal", "server", strings.ToLower(dirName)), filepath.Join("internal", "server", fixDirName))
@@ -200,7 +198,7 @@ func (jr *JzeroRpc) Gen() error {
 				filepath.Join(protoDirPath, "third_party"),
 				"lang=go:internal",
 			)
-			_, err = execx.Run(command, jr.Wd)
+			_, err = execx.Run(command, config.C.Wd())
 			if err != nil {
 				return err
 			}
@@ -225,7 +223,7 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 
-		if jr.RpcStylePatch {
+		if config.C.Gen.RpcStylePatch {
 			if lo.Contains(genCodeProtoFiles, v) {
 				for _, file := range allServerFiles {
 					err = jr.rpcStylePatchServer(file)
@@ -242,7 +240,7 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 
-		if jr.ChangeLogicTypes {
+		if config.C.Gen.ChangeLogicTypes {
 			if lo.Contains(genCodeProtoFiles, v) {
 				for _, file := range allLogicFiles {
 					if err := jr.changeLogicTypes(file); err != nil {
@@ -265,7 +263,7 @@ func (jr *JzeroRpc) Gen() error {
 					getProtoDescriptorPath(v),
 					v,
 				)
-				_, err = execx.Run(protocCommand, jr.Wd)
+				_, err = execx.Run(protocCommand, config.C.Wd())
 				if err != nil {
 					return err
 				}
@@ -273,8 +271,8 @@ func (jr *JzeroRpc) Gen() error {
 		}
 
 		for _, s := range jr.ProtoSpecMap[v].Service {
-			if jr.RpcStylePatch {
-				serverDir, _ := format.FileNamingFormat(jr.Style, s.Name)
+			if config.C.Gen.RpcStylePatch {
+				serverDir, _ := format.FileNamingFormat(config.C.Gen.Style, s.Name)
 				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, strings.ToLower(s.Name), jr.Module, strings.ToLower(serverDir)))
 			} else {
 				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, strings.ToLower(s.Name), jr.Module, strings.ToLower(s.Name)))

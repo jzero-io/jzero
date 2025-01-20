@@ -7,10 +7,12 @@ import (
 
 	"github.com/jzero-io/jzero-contrib/filex"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
+
+	"github.com/jzero-io/jzero/config"
 )
 
 func (jr *JzeroRpc) patchSvc() error {
-	namingFormat, err := format.FileNamingFormat(jr.Style, "service_context.go")
+	namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, "service_context.go")
 	if err != nil {
 		return err
 	}

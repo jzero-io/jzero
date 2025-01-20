@@ -104,6 +104,7 @@ type GenConfig struct {
 	Swagger    GenSwaggerConfig    `mapstructure:"swagger"`
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`
 	Docs       GenDocsConfig       `mapstructure:"docs"`
+	Crud       GenCrudConfig       `mapstructure:"crud"`
 }
 
 type GenSdkConfig struct {
@@ -137,6 +138,9 @@ type GenZrpcclientConfig struct {
 type GenDocsConfig struct {
 	Output string `mapstructure:"output"`
 	Format string `mapstructure:"format"`
+}
+
+type GenCrudConfig struct {
 }
 
 type IvmConfig struct {
@@ -228,23 +232,6 @@ func (c *Config) ApiDir() string {
 }
 
 func (c *Config) SqlDir() string {
-	return filepath.Join("desc", "sql")
-}
-
-func (c *GenConfig) Wd() string {
-	wd, _ := os.Getwd()
-	return wd
-}
-
-func (c *GenConfig) ProtoDir() string {
-	return filepath.Join("desc", "proto")
-}
-
-func (c *GenConfig) ApiDir() string {
-	return filepath.Join("desc", "api")
-}
-
-func (c *GenConfig) SqlDir() string {
 	return filepath.Join("desc", "sql")
 }
 

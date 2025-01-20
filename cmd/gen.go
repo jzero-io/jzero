@@ -20,6 +20,7 @@ import (
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
+	"github.com/jzero-io/jzero/internal/gen/gencrud"
 	"github.com/jzero-io/jzero/internal/gen/gendocs"
 	"github.com/jzero-io/jzero/internal/gen/gensdk"
 	"github.com/jzero-io/jzero/internal/gen/genswagger"
@@ -55,7 +56,7 @@ var genCmd = &cobra.Command{
 			config.C.Gen.Home = filepath.Join(home, ".jzero", "templates", Version)
 		}
 		embeded.Home = config.C.Gen.Home
-		return gen.Run(config.C)
+		return gen.Run()
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
 		if len(config.C.Gen.Hooks.After) > 0 {
@@ -116,7 +117,7 @@ var genZRpcClientCmd = &cobra.Command{
 		if config.C.Gen.Zrpcclient.GoPackage == "" {
 			config.C.Gen.Zrpcclient.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(config.C.Gen.Zrpcclient.GoModule)), "-", "_")
 		}
-		return genzrpcclient.Generate(config.C, genModule)
+		return genzrpcclient.Generate(genModule)
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
 		if len(config.C.Gen.Zrpcclient.Hooks.After) > 0 {
@@ -141,7 +142,7 @@ var genSwaggerCmd = &cobra.Command{
 	Use:   "swagger",
 	Short: `Gen swagger json docs by proto and api file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return genswagger.Gen(config.C)
+		return genswagger.Gen()
 	},
 }
 
@@ -209,7 +210,7 @@ var genSdkCmd = &cobra.Command{
 		if embeded.Home == "" {
 			embeded.Home = filepath.Join(homeDir, ".jzero", "templates", Version)
 		}
-		return gensdk.GenSdk(config.C, genModule)
+		return gensdk.GenSdk(genModule)
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
 		if len(config.C.Gen.Sdk.Hooks.After) > 0 {
@@ -236,9 +237,20 @@ var genDocsCmd = &cobra.Command{
 	Long:  `jzero gen docs`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		config.C.Gen.Docs.Output = filepath.Join("desc", "docs", config.C.Gen.Docs.Format)
-		return gendocs.Gen(config.C)
+		return gendocs.Gen()
 	},
 	Aliases: []string{"doc"},
+}
+
+// genCrudCmd represents the gen crud command
+var genCrudCmd = &cobra.Command{
+	Use:   "crud",
+	Short: "jzero gen crud",
+	Long:  `jzero gen crud`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return gencrud.Run()
+	},
+	Aliases: []string{"curd"},
 }
 
 func init() {
@@ -247,25 +259,16 @@ func init() {
 	{
 		rootCmd.AddCommand(genCmd)
 
-		// used for jzero
-		genCmd.Flags().BoolP("change-logic-types", "", false, "if api file or proto change, e.g. Request or Response type, change logic file content types but not file")
-		genCmd.Flags().BoolP("regen-api-handler", "", false, "")
-
-		// fix rpc style
-		genCmd.Flags().BoolP("rpc-style-patch", "", false, "")
-		// git-diff
-		genCmd.Flags().BoolP("git-change", "", false, "set is git change, if changes then generate code")
-
-		genCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
-		genCmd.Flags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
-
-		genCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
-
-		// used for goctl
-		// gen command persistentFlags
 		genCmd.PersistentFlags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
 		genCmd.PersistentFlags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
+		genCmd.PersistentFlags().StringSliceP("desc", "", []string{}, "set desc path")
+		genCmd.PersistentFlags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
 
+		genCmd.Flags().BoolP("change-logic-types", "", false, "if api file or proto change, e.g. Request or Response type, change logic file content types but not file")
+		genCmd.Flags().BoolP("regen-api-handler", "", false, "")
+		genCmd.Flags().BoolP("rpc-style-patch", "", false, "")
+		genCmd.Flags().BoolP("git-change", "", false, "set is git change, if changes then generate code")
+		genCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
 		genCmd.Flags().BoolP("model-mysql-strict", "", false, "goctl model mysql strict mode, see [https://go-zero.dev/docs/tutorials/cli/model]")
 		genCmd.Flags().StringSliceP("model-mysql-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
 		genCmd.Flags().StringP("model-mysql-ddl-database", "", "", "goctl model mysql ddl database")
@@ -275,7 +278,6 @@ func init() {
 		genCmd.Flags().BoolP("model-mysql-cache", "", false, "goctl model mysql cache")
 		genCmd.Flags().StringP("model-mysql-cache-prefix", "", "", "goctl model mysql cache prefix")
 		genCmd.Flags().BoolP("gen-mysql-create-table-ddl", "", false, "is generate mysql create table ddl, only datasource mode takes effective")
-
 		genCmd.Flags().BoolP("rpc-client", "", false, "is generate rpc client code by goctl")
 	}
 
@@ -315,5 +317,9 @@ func init() {
 		genZRpcClientCmd.Flags().StringP("goModule", "", "", "set go module name")
 		genZRpcClientCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")
 		genZRpcClientCmd.Flags().StringP("goPackage", "", "", "set package name")
+	}
+
+	{
+		genCmd.AddCommand(genCrudCmd)
 	}
 }

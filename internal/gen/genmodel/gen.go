@@ -35,11 +35,7 @@ import (
 )
 
 type JzeroModel struct {
-	Wd     string
-	Style  string
 	Module string
-
-	config.GenConfig
 }
 
 func (jm *JzeroModel) Gen() error {
@@ -68,8 +64,8 @@ func (jm *JzeroModel) Gen() error {
 		sqlConn       sqlx.SqlConn
 	)
 
-	if jm.ModelMysqlDatasource {
-		sqlConn = sqlx.NewMysql(jm.ModelMysqlDatasourceUrl)
+	if config.C.Gen.ModelMysqlDatasource {
+		sqlConn = sqlx.NewMysql(config.C.Gen.ModelMysqlDatasourceUrl)
 
 		tables, err := getMysqlAllTables(sqlConn)
 		if err != nil {
@@ -80,7 +76,7 @@ func (jm *JzeroModel) Gen() error {
 		if err != nil {
 			return err
 		}
-		if !jm.GenMysqlCreateTableDDL {
+		if !config.C.Gen.GenMysqlCreateTableDDL {
 			defer func() {
 				for _, v := range writeTables {
 					if err = os.Remove(v); err != nil {
@@ -108,13 +104,13 @@ func (jm *JzeroModel) Gen() error {
 	}
 
 	switch {
-	case jm.GitChange && len(jm.Desc) == 0 && !jm.ModelMysqlDatasource:
+	case config.C.Gen.GitChange && len(config.C.Gen.Desc) == 0 && !config.C.Gen.ModelMysqlDatasource:
 		m, _, err := gitstatus.ChangedFiles("desc", ".sql")
 		if err == nil {
 			genCodeSqlFiles = append(genCodeSqlFiles, m...)
 		}
-	case len(jm.Desc) > 0:
-		for _, v := range jm.Desc {
+	case len(config.C.Gen.Desc) > 0:
+		for _, v := range config.C.Gen.Desc {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".sql" {
 					genCodeSqlFiles = append(genCodeSqlFiles, v)
@@ -135,7 +131,7 @@ func (jm *JzeroModel) Gen() error {
 	}
 
 	// ignore sql desc
-	for _, v := range jm.DescIgnore {
+	for _, v := range config.C.Gen.DescIgnore {
 		if !osx.IsDir(v) {
 			if filepath.Ext(v) == ".sql" {
 				genCodeSqlFiles = lo.Reject(genCodeSqlFiles, func(item string, _ int) bool {
@@ -158,18 +154,18 @@ func (jm *JzeroModel) Gen() error {
 	var mu sync.Mutex
 
 	if len(genCodeSqlFiles) != 0 {
-		if jm.ModelMysqlDatasource {
+		if config.C.Gen.ModelMysqlDatasource {
 			tables, err := getMysqlAllTables(sqlConn)
 			if err != nil {
 				return err
 			}
-			if len(jm.ModelMysqlDatasourceTable) != 0 && jm.ModelMysqlDatasourceTable[0] != "*" {
+			if len(config.C.Gen.ModelMysqlDatasourceTable) != 0 && config.C.Gen.ModelMysqlDatasourceTable[0] != "*" {
 				for _, v := range tables {
-					if lo.Contains(jm.ModelMysqlDatasourceTable, cast.ToString(v)) {
+					if lo.Contains(config.C.Gen.ModelMysqlDatasourceTable, cast.ToString(v)) {
 						allTables = append(allTables, v)
 					}
 				}
-			} else if len(jm.ModelMysqlDatasourceTable) != 0 && jm.ModelMysqlDatasourceTable[0] == "*" {
+			} else if len(config.C.Gen.ModelMysqlDatasourceTable) != 0 && config.C.Gen.ModelMysqlDatasourceTable[0] == "*" {
 				allTables = tables
 			}
 			for _, f := range allFiles {
@@ -183,7 +179,7 @@ func (jm *JzeroModel) Gen() error {
 			var eg errgroup.Group
 			for _, f := range allFiles {
 				eg.Go(func() error {
-					tableParsers, err := parser.Parse(filepath.Join(jm.Wd, f), "", jm.ModelMysqlStrict)
+					tableParsers, err := parser.Parse(filepath.Join(config.C.Wd(), f), "", config.C.Gen.ModelMysqlStrict)
 					if err != nil {
 						return err
 					}
@@ -215,19 +211,19 @@ func (jm *JzeroModel) Gen() error {
 
 		bf := filepath.Base(f)
 		modelDir := filepath.Join("internal", "model", strings.ToLower(bf[0:len(bf)-len(path.Ext(bf))]))
-		cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", jm.ModelMysqlDDLDatabase, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", jm.Style, "-i", strings.Join(jm.ModelMysqlIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", jm.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", jm.ModelMysqlStrict))
+		cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", config.C.Gen.ModelMysqlDDLDatabase, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelMysqlIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelMysqlCache), "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelMysqlStrict))
 		resp, err := cmd.CombinedOutput()
 		if err != nil {
 			return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
 		}
-		if jm.ModelMysqlCachePrefix != "" && jm.ModelMysqlCache {
+		if config.C.Gen.ModelMysqlCachePrefix != "" && config.C.Gen.ModelMysqlCache {
 			for _, tp := range tableParsers {
-				namingFormat, err := format.FileNamingFormat(jm.Style, tp.Name.Source())
+				namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, tp.Name.Source())
 				if err != nil {
 					return err
 				}
 				file := namingFormat + "model_gen.go"
-				if jm.Style == "go_zero" {
+				if config.C.Gen.Style == "go_zero" {
 					file = namingFormat + "_model_gen.go"
 				}
 				err = jm.addModelMysqlCachePrefix(filepath.Join(modelDir, file))
@@ -263,7 +259,7 @@ func (jm *JzeroModel) addModelMysqlCachePrefix(fp string) error {
 						if strings.HasPrefix(name.Name, "cache") && strings.HasSuffix(name.Name, "Prefix") {
 							value := valueSpec.Values[i]
 							if basicLit, ok := value.(*ast.BasicLit); ok {
-								basicLit.Value = fmt.Sprintf(`"%s%s"`, jm.ModelMysqlCachePrefix, strings.ReplaceAll(basicLit.Value, "\"", ""))
+								basicLit.Value = fmt.Sprintf(`"%s%s"`, config.C.Gen.ModelMysqlCachePrefix, strings.ReplaceAll(basicLit.Value, "\"", ""))
 							}
 						}
 					}

@@ -17,6 +17,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
+	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/pkg/mod"
 )
 
@@ -44,12 +45,12 @@ func (ja *JzeroApi) getAllLogicFiles(apiFilepath string, apiSpec *spec.ApiSpec) 
 	var logicFiles []LogicFile
 	for _, group := range apiSpec.Service.Groups {
 		for _, route := range group.Routes {
-			namingFormat, err := format.FileNamingFormat(ja.Style, strings.TrimSuffix(route.Handler, "Handler")+"Logic")
+			namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, strings.TrimSuffix(route.Handler, "Handler")+"Logic")
 			if err != nil {
 				return nil, err
 			}
 
-			fp := filepath.Join(ja.Wd, "internal", "logic", group.GetAnnotation("group"), namingFormat+".go")
+			fp := filepath.Join(config.C.Wd(), "internal", "logic", group.GetAnnotation("group"), namingFormat+".go")
 
 			hf := LogicFile{
 				DescFilepath: apiFilepath,
@@ -94,12 +95,12 @@ func (ja *JzeroApi) patchLogic(file LogicFile) error {
 		return errors.Errorf("remove suffix meet error: [%v]", err)
 	}
 
-	if err = mod.UpdateImportedModule(f, fset, ja.Wd, ja.Module); err != nil {
+	if err = mod.UpdateImportedModule(f, fset, config.C.Wd(), ja.Module); err != nil {
 		return err
 	}
 
 	// change logic types
-	if ja.ChangeLogicTypes {
+	if config.C.Gen.ChangeLogicTypes {
 		if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
 			if err := ja.changeLogicTypes(f, fset, file); err != nil {
 				console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)

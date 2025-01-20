@@ -8,9 +8,9 @@ tag:
   - Guide
 ---
 
-:::tip
-[go-zero api 文档](https://go-zero.dev/docs/tutorials)
-:::
+## 前言
+
+
 
 ## api 字段校验
 

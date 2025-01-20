@@ -28,10 +28,7 @@ import (
 )
 
 type JzeroApi struct {
-	Wd     string
 	Module string
-
-	config.GenConfig
 
 	ApiFiles          []string
 	GenCodeApiFiles   []string
@@ -50,7 +47,7 @@ func (ja *JzeroApi) Gen() error {
 
 	// format api dir
 	command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
-	_, err := execx.Run(command, ja.Wd)
+	_, err := execx.Run(command, config.C.Wd())
 	if err != nil {
 		return err
 	}
@@ -75,7 +72,7 @@ func (ja *JzeroApi) Gen() error {
 	var genCodeApiFiles []string
 
 	switch {
-	case ja.GitChange && len(ja.Desc) == 0:
+	case config.C.Gen.GitChange && len(config.C.Gen.Desc) == 0:
 		// 从 git status 获取变动的文件生成
 		m, _, err := gitstatus.ChangedFiles(config.C.ApiDir(), ".api")
 		if err == nil {
@@ -85,9 +82,9 @@ func (ja *JzeroApi) Gen() error {
 				ja.GenCodeApiSpecMap[file] = ja.ApiSpecMap[file]
 			}
 		}
-	case len(ja.Desc) > 0:
+	case len(config.C.Gen.Desc) > 0:
 		// 从指定的 desc 文件夹或者文件生成
-		for _, v := range ja.Desc {
+		for _, v := range config.C.Gen.Desc {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".api" {
 					genCodeApiFiles = append(genCodeApiFiles, filepath.Join(strings.Split(filepath.ToSlash(filepath.Clean(v)), "/")...))
@@ -115,7 +112,7 @@ func (ja *JzeroApi) Gen() error {
 	ja.GenCodeApiFiles = genCodeApiFiles
 
 	// ignore api desc
-	for _, v := range ja.DescIgnore {
+	for _, v := range config.C.Gen.DescIgnore {
 		if !osx.IsDir(v) {
 			if filepath.Ext(v) == ".api" {
 				// delete item in genCodeApiFiles by filename
@@ -158,12 +155,12 @@ func (ja *JzeroApi) generateApiCode() error {
 	for _, file := range ja.GenCodeApiFiles {
 		if parse, ok := ja.GenCodeApiSpecMap[file]; ok {
 			for _, group := range parse.Service.Groups {
-				if ja.RegenApiHandler {
-					dirFile, err := os.ReadDir(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group")))
+				if config.C.Gen.RegenApiHandler {
+					dirFile, err := os.ReadDir(filepath.Join(config.C.Wd(), "internal", "handler", group.GetAnnotation("group")))
 					if err == nil {
 						for _, v := range dirFile {
 							if !v.IsDir() {
-								_ = os.Remove(filepath.Join(ja.Wd, "internal", "handler", group.GetAnnotation("group"), v.Name()))
+								_ = os.Remove(filepath.Join(config.C.Wd(), "internal", "handler", group.GetAnnotation("group"), v.Name()))
 							}
 						}
 					}
@@ -228,9 +225,9 @@ func (ja *JzeroApi) generateApiCode() error {
 		if len(ja.ApiSpecMap[v].Service.Routes()) > 0 {
 			dir := "."
 			fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), v)
-			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, ja.Style)
+			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, config.C.Gen.Style)
 			logx.Debugf("command: %s", command)
-			if _, err := execx.Run(command, ja.Wd); err != nil {
+			if _, err := execx.Run(command, config.C.Wd()); err != nil {
 				return errors.Wrapf(err, "api file: %s", v)
 			}
 
@@ -286,7 +283,7 @@ func (ja *JzeroApi) generateApiCode() error {
 		return err
 	}
 
-	if ja.Route2Code {
+	if config.C.Gen.Route2Code {
 		fmt.Printf("%s to generate internal/handler/route2code.go\n", color.WithColor("Start", color.FgGreen))
 		if route2CodeBytes, err := ja.genRoute2Code(); err != nil {
 			return err

@@ -13,23 +13,23 @@ import (
 	"github.com/jzero-io/jzero/pkg/desc"
 )
 
-func Gen(c config.Config) error {
-	if pathx.FileExists(c.ProtoDir()) {
-		_ = os.MkdirAll(c.Gen.Docs.Output, 0o755)
-		protoFilepath, err := desc.GetProtoFilepath(c.ProtoDir())
+func Gen() error {
+	if pathx.FileExists(config.C.ProtoDir()) {
+		_ = os.MkdirAll(config.C.Gen.Docs.Output, 0o755)
+		protoFilepath, err := desc.GetProtoFilepath(config.C.ProtoDir())
 		if err != nil {
 			return err
 		}
 
 		command := fmt.Sprintf("protoc -I%s -I%s --doc_out=%s --doc_opt=%s,index.%s %s",
-			c.ProtoDir(),
-			filepath.Join(c.ProtoDir(), "third_party"),
-			c.Gen.Docs.Output,
-			getFormat(c.Gen.Docs.Format),
-			c.Gen.Docs.Format,
+			config.C.ProtoDir(),
+			filepath.Join(config.C.ProtoDir(), "third_party"),
+			config.C.Gen.Docs.Output,
+			getFormat(config.C.Gen.Docs.Format),
+			config.C.Gen.Docs.Format,
 			strings.Join(protoFilepath, " "),
 		)
-		_, err = execx.Run(command, c.Wd())
+		_, err = execx.Run(command, config.C.Wd())
 		if err != nil {
 			return err
 		}
