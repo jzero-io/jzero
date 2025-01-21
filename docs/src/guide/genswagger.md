@@ -22,6 +22,6 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 
 ## 在线访问 swagger ui
 
-ip:port/swagger
+swagger ui 地址: **localhost:8001/swagger**
 
 ![](https://oss.jaronnie.com/image-20240731134511973.png)

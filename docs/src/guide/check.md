@@ -37,7 +37,7 @@ docker tag registry.cn-hangzhou.aliyuncs.com/ghcr.io/jaronnie/jzero:latest ghcr.
 
 ## 不同姿势使用 jzero
 
-:::important 必看!!!
+:::important 涨知识的小技巧
 :::
 
 * 支持通过配置文件 .jzero.yaml 控制各种参数(**强烈推荐在每个项目的根目录新建该文件**)

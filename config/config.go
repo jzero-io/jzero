@@ -141,6 +141,7 @@ type GenDocsConfig struct {
 }
 
 type GenCrudConfig struct {
+	// todo: add flag
 }
 
 type IvmConfig struct {
