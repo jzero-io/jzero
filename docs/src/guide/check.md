@@ -4,14 +4,21 @@ icon: marketeq:download-alt-4
 order: 2
 ---
 
+## 安装 golang
+
+jzero 依赖于 golang 环境, 推荐使用 go1.23 版本
+
+如果你是 macOS 或者 Linux 用户, 推荐采用 [gvm](https://github.com/jaronnie/gvm) 安装 golang 环境
+
 ## 安装 jzero
 
-::: important go version >= 1.22.10
-:::
+提供以下三种方式使用 jzero, 请根据实际情况任选一种即可
 
-::: code-tabs#shell
+* 源码安装(**go version >= go1.22.10**)
+* 直接[下载 jzero 二进制文件](https://github.com/jzero-io/jzero/releases)
+* 基于 Docker 安装 jzero, [镜像地址](https://github.com/jzero-io/jzero/pkgs/container/jzero)
 
-@tab 本地安装 jzero(推荐)
+### 源码安装 jzero
 
 ```bash
 # 设置国内代理
@@ -25,40 +32,53 @@ jzero version
 jzero check
 ```
 
-@tab 基于 Docker 使用 jzero
+### 直接下载 jzero 二进制文件
 
-```bash
-docker pull ghcr.io/jzero-io/jzero:latest
-# 如果无法 pull
-docker pull registry.cn-hangzhou.aliyuncs.com/ghcr.io/jaronnie/jzero:latest
-docker tag registry.cn-hangzhou.aliyuncs.com/ghcr.io/jaronnie/jzero:latest ghcr.io/jzero-io/jzero:latest
-```
-:::
+[下载地址](https://github.com/jzero-io/jzero/releases)
 
-## 不同姿势使用 jzero
+根据自己的操作系统选择对应的压缩包, 解压后放在 `$GOPATH/bin` 目录下即可
 
-:::important 必看!!!
-:::
+执行以下内容完成 jzero 的环境准备
 
-* 支持通过配置文件 .jzero.yaml 控制各种参数(**强烈推荐在每个项目的根目录新建该文件**)
-* 支持通过 flag 控制各种参数
-* 支持通过环境变量控制各种参数
-* 支持通过以上组合的方式控制各种参数, 优先级从高到低为 环境变量  > flag  > 配置文件
+```shell
+# 获取 jzero 版本信息
+jzero version
 
-如: `jzero gen --style go_zero` 对应 .jzero.yaml 内容
-
-```yaml
-gen:
-  style: go_zero
+# 自动下载所依赖的环境
+jzero check
 ```
 
-即 `jzero gen` + `.jzero.yaml` = `jzero gen --style go_zero`
+### 基于 Docker 使用 jzero
 
-对于环境变量的使用, 需要增加前缀 `JZERO_`, 如 `JZERO_GEN_STYLE`
+好处便是将所有依赖的工具链全部集成在容器中, 减少用户环境依赖, 减少用户环境配置的复杂度
 
-即 `JZERO_GEN_STYLE=go_zero jzero gen` = `jzero gen --style go_zero`
+**github 镜像源**
 
-## jzero 命令补全(可选)
+```shell
+# 获取 jzero 版本信息
+docker run --rm ghcr.io/jzero-io/jzero:latest version
+```
+
+**国内阿里云镜像源**
+
+```shell
+# 获取 jzero 版本信息
+docker run --rm registry.cn-hangzhou.aliyuncs.com/jaronnie/jzero:latest version
+```
+
+## 命令补全
+
+命令自动补全作为命令行工具的一个重要特性, 能够显著提升开发效率, 减少输入错误, 并帮助用户快速掌握工具的使用方法.
+
+对于 jzero 这样的项目生成和开发工具来说，命令补全功能可以让用户更便捷地使用其丰富的功能, 尤其是在面对复杂的命令和参数时.
+
+* 减少输入错误：命令补全可以避免因拼写错误而导致的命令失败
+* 快速查找命令：用户可以通过部分输入快速定位到完整的命令或参数
+* 降低学习成本：新用户可以通过补全提示快速了解工具支持的命令和功能
+
+当然, jzero 为了更好的提升用户的使用体验, jzero 支持通过配置文件和环境变量的组合方式使用 jzero, 详情请查看[这里](/guide/overview.html#不同姿势使用-jzero)
+
+对于不同操作系统与不同的 shell 类型, jzero 命令行补全的安装方式如下:
 
 ### macOS
 
@@ -74,7 +94,7 @@ jzero completion zsh > "${fpath[1]}/_jzero"
 
 ```shell
 # bash
-gvm completion bash | sudo tee /etc/bash_completion.d/gvm > /dev/null
+gvm completion bash | sudo tee /etc/bash_completion.d/jzero > /dev/null
 # zsh
 echo "autoload -U compinit; compinit" >> ~/.zshrc
 jzero completion zsh > "${fpath[1]}/_jzero"

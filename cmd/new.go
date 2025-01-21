@@ -29,8 +29,9 @@ import (
 
 // newCmd represents the new command
 var newCmd = &cobra.Command{
-	Use:   "new",
-	Short: `Used to create project from templates`,
+	Use:          "new",
+	Short:        `Used to create project from templates`,
+	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if config.C.New.Output == "" {
 			config.C.New.Output = args[0]
@@ -109,6 +110,7 @@ var newCmd = &cobra.Command{
 			base = filepath.Join("frame", "api", "app")
 		}
 
+		// 没有设置 home，则使用内置模板持久化的默认路径 ~/.jzero/templates/$version
 		if !pathx.FileExists(embeded.Home) {
 			embeded.Home = filepath.Join(home, ".jzero", "templates", Version)
 		}

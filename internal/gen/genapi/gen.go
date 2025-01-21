@@ -136,6 +136,10 @@ func (ja *JzeroApi) Gen() error {
 		}
 	}
 
+	if len(ja.GenCodeApiFiles) == 0 {
+		return nil
+	}
+
 	err = ja.generateApiCode()
 	if err != nil {
 		return err
