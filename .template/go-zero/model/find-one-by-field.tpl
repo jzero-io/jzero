@@ -51,5 +51,5 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}WithCac
 		return nil, ErrNotFound
 	default:
 		return nil, err
-	}{{else}}return m.FindOneBy{{.upperField}}(ctx, session, {{ $length := len .upperField }}{{ printf "%.*s" $length .in }}){{end}}
+	}{{else}}return m.FindOneBy{{.upperField}}(ctx, session, {{ $length := len .lowerStartCamelField }}{{ printf "%.*s" $length .in }}){{end}}
 }
