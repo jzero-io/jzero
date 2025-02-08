@@ -14,9 +14,6 @@ import (
 var C Config
 
 type Config struct {
-	/*
-		===============================command flags start========================================
-	*/
 	// global flags
 	Debug bool `mapstructure:"debug"`
 
@@ -39,10 +36,6 @@ type Config struct {
 
 	// serverless command
 	Serverless ServerlessConfig `mapstructure:"serverless"`
-
-	/*
-		==============================command flags end=========================================
-	*/
 }
 
 type NewConfig struct {
@@ -200,14 +193,6 @@ type ServerlessConfig struct {
 	Home string `mapstructure:"home"` // 使用的模板文件目录
 
 	Delete ServerlessDeleteConfig `mapstructure:"delete"`
-}
-
-type ServerlessNewConfig struct {
-	Module string `mapstructure:"module"` // 新建的项目的 go module
-	Remote string `mapstructure:"remote"` // 远程仓库地址
-	Frame  string `mapstructure:"frame"`  // 使用 jzero 内置的框架
-	Branch string `mapstructure:"branch"` // 使用远程模板仓库的某个分支
-	Local  string `mapstructure:"local"`  // 使用本地模板与 branch 对应
 }
 
 type ServerlessDeleteConfig struct {
