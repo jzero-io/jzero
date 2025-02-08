@@ -266,7 +266,7 @@ func (ja *JzeroApi) generateApiCode() error {
 	for _, v := range ja.ApiFiles {
 		for _, g := range ja.ApiSpecMap[v].Service.Groups {
 			if g.GetAnnotation("group") != "" {
-				handlerImports = append(handlerImports, fmt.Sprintf(`%s "%s/internal/handler/%s"`, strings.ToLower(strings.ReplaceAll(g.GetAnnotation("group"), "/", "")), ja.Module, g.GetAnnotation("group")))
+				handlerImports = append(handlerImports, fmt.Sprintf(`%s "%s/internal/handler/%s"`, strings.ReplaceAll(g.GetAnnotation("group"), "/", ""), ja.Module, g.GetAnnotation("group")))
 			}
 		}
 	}
