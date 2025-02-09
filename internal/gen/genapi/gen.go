@@ -227,14 +227,6 @@ func (ja *JzeroApi) generateApiCode() error {
 
 	for _, v := range ja.GenCodeApiFiles {
 		if len(ja.ApiSpecMap[v].Service.Routes()) > 0 {
-			dir := "."
-			fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), v)
-			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, config.C.Gen.Style)
-			logx.Debugf("command: %s", command)
-			if _, err := execx.Run(command, config.C.Wd()); err != nil {
-				return errors.Wrapf(err, "api file: %s", v)
-			}
-
 			logicFiles, err := ja.getAllLogicFiles(v, ja.ApiSpecMap[v])
 			if err != nil {
 				return err
@@ -243,6 +235,14 @@ func (ja *JzeroApi) generateApiCode() error {
 			handlerFiles, err := ja.getAllHandlerFiles(v, ja.ApiSpecMap[v])
 			if err != nil {
 				return err
+			}
+
+			dir := "."
+			fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), v)
+			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, config.C.Gen.Style)
+			logx.Debugf("command: %s", command)
+			if _, err := execx.Run(command, config.C.Wd()); err != nil {
+				return errors.Wrapf(err, "api file: %s", v)
 			}
 
 			// patch handler

@@ -14,10 +14,9 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/internal/gen/genapi"
 )
 
-func (jr *JzeroRpc) rpcStylePatchLogic(file genapi.LogicFile) error {
+func (jr *JzeroRpc) rpcStylePatchLogic(file LogicFile) error {
 	fp := file.Path
 	fp = fp[:len(fp)-8]
 	// patch
@@ -32,7 +31,7 @@ func (jr *JzeroRpc) rpcStylePatchLogic(file genapi.LogicFile) error {
 		return err
 	}
 
-	packageName, _ := format.FileNamingFormat(config.C.Gen.Style, file.Group)
+	packageName, _ := format.FileNamingFormat(config.C.Gen.Style, file.Service)
 	f.Name = ast.NewIdent(strings.ToLower(packageName))
 
 	// Write the modified AST back to the file

@@ -16,7 +16,7 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/jzero-io/jzero/embeded"
-	"github.com/jzero-io/jzero/internal/gen/genapi"
+	"github.com/jzero-io/jzero/internal/gen/genrpc"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -71,13 +71,13 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 		fileContent := strings.ReplaceAll(buf.String(), "__TEMPLATE_BODY__", "{{ .Body }}")
 		fileContent = strings.ReplaceAll(fileContent, "var __TEMPLATE_ADAPTOR__ string", "{{ .Adaptor }}")
 
-		logicTypeName := file.Handler
+		logicTypeName := file.Rpc
 
 		templateValue := map[string]any{
-			"Service":          strings.ToLower(file.Group),
-			"OldService":       strings.ToLower(oldFiles[i].Group),
+			"Service":          strings.ToLower(file.Service),
+			"OldService":       strings.ToLower(oldFiles[i].Service),
 			"LogicTypeName":    logicTypeName,
-			"MethodName":       file.Handler,
+			"MethodName":       file.Rpc,
 			"RequestTypeName":  file.RequestTypeName,
 			"ResponseTypeName": file.ResponseTypeName,
 		}
@@ -225,9 +225,9 @@ func (ivm *IvmInit) astAddLogic(fset *token.FileSet, f *ast.File, oldService, lo
 	return nil
 }
 
-func (ivm *IvmInit) astInspect(fset *token.FileSet, f *ast.File, oldLogicFile, newLogicFile genapi.LogicFile) error {
-	logicMethodName := newLogicFile.Handler
-	oldService := oldLogicFile.Group
+func (ivm *IvmInit) astInspect(fset *token.FileSet, f *ast.File, oldLogicFile, newLogicFile genrpc.LogicFile) error {
+	logicMethodName := newLogicFile.Rpc
+	oldService := oldLogicFile.Service
 
 	if err := ivm.astRemoveDefaultFirstLineComments(f); err != nil {
 		return err

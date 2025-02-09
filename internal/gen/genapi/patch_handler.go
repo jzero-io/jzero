@@ -9,16 +9,16 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
+	"github.com/dave/dst"
+	"github.com/dave/dst/decorator"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/pkg/mod"
@@ -116,9 +116,12 @@ func (ja *JzeroApi) patchHandler(file HandlerFile) error {
 	file.Path = newFilePath
 
 	// compact handler
+	df, err := decorator.ParseFile(fset, file.Path, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
 	if file.Compact {
-		err = ja.compactHandler(f, fset, file)
-		if err != nil {
+		if err = ja.compactHandler(df, fset, file); err != nil {
 			return err
 		}
 	}
@@ -158,7 +161,7 @@ func (ja *JzeroApi) removeHandlerSuffix(f *ast.File) error {
 	return nil
 }
 
-func (ja *JzeroApi) compactHandler(f *ast.File, fset *token.FileSet, file HandlerFile) error {
+func (ja *JzeroApi) compactHandler(f *dst.File, fset *token.FileSet, file HandlerFile) error {
 	namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, filepath.Base(file.Group))
 	if err != nil {
 		return err
@@ -169,19 +172,18 @@ func (ja *JzeroApi) compactHandler(f *ast.File, fset *token.FileSet, file Handle
 	}
 	compactFset := token.NewFileSet()
 
-	compactF, err := goparser.ParseFile(compactFset, compactFile, nil, goparser.ParseComments)
+	compactF, err := decorator.ParseFile(compactFset, compactFile, nil, goparser.ParseComments)
 	if err != nil {
 		return err
 	}
 
 	// 判断 compactFile 文件中是否已经存在该函数
 	var (
-		isExist     bool
-		handlerFunc *ast.FuncDecl
+		isExist bool
 	)
 	for _, decl := range compactF.Decls {
 		// 查找函数声明
-		if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+		if funcDecl, ok := decl.(*dst.FuncDecl); ok {
 			// 已经存在, 删掉该 handler 文件
 			if funcDecl.Name.Name == util.Title(strings.TrimSuffix(file.Handler, "Handler")) {
 				isExist = true
@@ -190,35 +192,62 @@ func (ja *JzeroApi) compactHandler(f *ast.File, fset *token.FileSet, file Handle
 		}
 	}
 	if !isExist {
+		// 将 import 语句添加到 compactFile 中
+		for _, imp := range f.Imports {
+			importSpec := &dst.ImportSpec{
+				Path: &dst.BasicLit{
+					Kind:  token.STRING,
+					Value: imp.Path.Value,
+				},
+			}
+			if imp.Name != nil {
+				importSpec.Name = &dst.Ident{
+					Name: imp.Name.Name,
+				}
+			}
+
+			// 查找是否已经存在 import 声明
+			var foundImportDecl *dst.GenDecl
+			for _, decl := range compactF.Decls {
+				if genDecl, ok := decl.(*dst.GenDecl); ok && genDecl.Tok == token.IMPORT {
+					foundImportDecl = genDecl
+					break
+				}
+			}
+
+			// 如果没有找到 import 声明，创建一个新的
+			if foundImportDecl == nil {
+				foundImportDecl = &dst.GenDecl{
+					Tok:   token.IMPORT,
+					Specs: []dst.Spec{},
+				}
+				compactF.Decls = append([]dst.Decl{foundImportDecl}, compactF.Decls...)
+			}
+
+			// 添加导入语句
+			foundImportDecl.Specs = append(foundImportDecl.Specs, importSpec)
+		}
 		for _, decl := range f.Decls {
-			// 查找函数声明
-			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
-				if funcDecl.Name.Name == util.Title(strings.TrimSuffix(file.Handler, "Handler")) {
-					handlerFunc = funcDecl
+			if fd, ok := decl.(*dst.FuncDecl); ok {
+				compactF.Decls = append(compactF.Decls, fd)
+			}
+
+			if gd, ok := decl.(*dst.GenDecl); ok {
+				if gd.Tok == token.TYPE || gd.Tok == token.VAR || gd.Tok == token.CONST {
+					compactF.Decls = append(compactF.Decls, gd)
 				}
 			}
 		}
-		// 将文件内容追加到compactFile
-		if handlerFunc != nil {
-			compactF.Decls = append(compactF.Decls, handlerFunc)
-		}
-		// 将 import 语句添加到 compactFile 中
-		for _, i := range f.Imports {
-			unquote, err := strconv.Unquote(i.Path.Value)
-			if err != nil {
-				return err
-			}
-			if i.Name != nil && i.Name.Name != "" {
-				astutil.AddNamedImport(compactFset, compactF, i.Name.Name, unquote)
-			} else {
-				astutil.AddImport(compactFset, compactF, unquote)
-			}
-		}
+		// 格式化并写入文件
 		buf := bytes.NewBuffer(nil)
-		if err := goformat.Node(buf, compactFset, compactF); err != nil {
+		if err := decorator.Fprint(buf, compactF); err != nil {
 			return err
 		}
-		if err = os.WriteFile(compactFile, buf.Bytes(), 0o644); err != nil {
+		formatted, err := goformat.Source(buf.Bytes())
+		if err != nil {
+			return err
+		}
+		if err = os.WriteFile(compactFile, formatted, 0o644); err != nil {
 			return err
 		}
 	}

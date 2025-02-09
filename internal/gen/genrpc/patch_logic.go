@@ -16,11 +16,22 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
 	"github.com/jzero-io/jzero/config"
-	"github.com/jzero-io/jzero/internal/gen/genapi"
 )
 
-func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Proto) ([]genapi.LogicFile, error) {
-	var logicFiles []genapi.LogicFile
+type LogicFile struct {
+	Package          string
+	Service          string
+	Rpc              string
+	Path             string
+	DescFilepath     string
+	RequestTypeName  string
+	ResponseTypeName string
+	ClientStream     bool
+	ServerStream     bool
+}
+
+func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Proto) ([]LogicFile, error) {
+	var logicFiles []LogicFile
 	for _, service := range protoSpec.Service {
 		for _, rpc := range service.RPC {
 			namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, rpc.Name+"Logic")
@@ -34,12 +45,12 @@ func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Pr
 				fp = filepath.Join(config.C.Wd(), "internal", "logic", strings.ToLower(logicDir), namingFormat+".go")
 			}
 
-			f := genapi.LogicFile{
+			f := LogicFile{
 				Path:             fp,
 				DescFilepath:     descFilepath,
 				Package:          protoSpec.PbPackage,
-				Handler:          rpc.Name,
-				Group:            service.Name,
+				Rpc:              rpc.Name,
+				Service:          service.Name,
 				ClientStream:     rpc.StreamsRequest,
 				ServerStream:     rpc.StreamsReturns,
 				ResponseTypeName: rpc.ReturnsType,
@@ -52,7 +63,7 @@ func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Pr
 	return logicFiles, nil
 }
 
-func (jr *JzeroRpc) changeLogicTypes(file genapi.LogicFile) error {
+func (jr *JzeroRpc) changeLogicTypes(file LogicFile) error {
 	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
 	fp := file.Path[:len(file.Path)-8]
 	// patch
@@ -69,7 +80,7 @@ func (jr *JzeroRpc) changeLogicTypes(file genapi.LogicFile) error {
 
 	ast.Inspect(f, func(node ast.Node) bool {
 		if fn, ok := node.(*ast.FuncDecl); ok && fn.Recv != nil {
-			if fn.Name.Name == util.Title(file.Handler) {
+			if fn.Name.Name == util.Title(file.Rpc) {
 				// custom request and response
 				if !file.ClientStream && !file.ServerStream {
 					fn.Type.Params.List = []*ast.Field{
@@ -97,7 +108,7 @@ func (jr *JzeroRpc) changeLogicTypes(file genapi.LogicFile) error {
 						},
 						{
 							Names: []*ast.Ident{ast.NewIdent("stream")},
-							Type:  ast.NewIdent(fmt.Sprintf("%s.%s_%sServer", file.Package, util.Title(file.Group), util.Title(file.Handler))),
+							Type:  ast.NewIdent(fmt.Sprintf("%s.%s_%sServer", file.Package, util.Title(file.Service), util.Title(file.Rpc))),
 						},
 					}
 					fn.Type.Results.List = []*ast.Field{
@@ -112,7 +123,7 @@ func (jr *JzeroRpc) changeLogicTypes(file genapi.LogicFile) error {
 					fn.Type.Params.List = []*ast.Field{
 						{
 							Names: []*ast.Ident{ast.NewIdent("stream")},
-							Type:  ast.NewIdent(fmt.Sprintf("%s.%s_%sServer", file.Package, util.Title(file.Group), util.Title(file.Handler))),
+							Type:  ast.NewIdent(fmt.Sprintf("%s.%s_%sServer", file.Package, util.Title(file.Service), util.Title(file.Rpc))),
 						},
 					}
 

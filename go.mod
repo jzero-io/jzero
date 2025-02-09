@@ -5,6 +5,7 @@ go 1.22.10
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/a8m/envsubst v1.4.2
+	github.com/dave/dst v0.27.3
 	github.com/go-git/go-git/v5 v5.13.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.25.1
 	github.com/hashicorp/go-version v1.7.0
