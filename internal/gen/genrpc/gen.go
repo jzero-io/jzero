@@ -96,7 +96,7 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 	default:
-		// 否则生成代码的proto 文件为全量 proto 文件
+		// 否则生成代码的 proto 文件为全量 proto 文件
 		genCodeProtoFiles = jr.ProtoFiles
 		jr.GenCodeProtoSpecMap = jr.ProtoSpecMap
 	}
@@ -125,6 +125,10 @@ func (jr *JzeroRpc) Gen() error {
 				delete(jr.GenCodeProtoSpecMap, saf)
 			}
 		}
+	}
+
+	if len(jr.GenCodeProtoFiles) == 0 {
+		return nil
 	}
 
 	fmt.Printf("%s to generate proto code. \n", color.WithColor("Start", color.FgGreen))
@@ -282,7 +286,7 @@ func (jr *JzeroRpc) Gen() error {
 		}
 		pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(jr.ProtoSpecMap[v].GoPackage, "./")))
 	}
-	if len(jr.ProtoFiles) > 0 {
+	if len(jr.GenCodeProtoFiles) > 0 {
 		fmt.Println(color.WithColor("Done", color.FgGreen))
 	}
 
