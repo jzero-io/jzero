@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	conf "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/generator"
@@ -17,6 +18,7 @@ import (
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/new"
 	"github.com/jzero-io/jzero/pkg/desc"
+	"github.com/jzero-io/jzero/pkg/osx"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -100,14 +102,51 @@ func (d DirContext) SetPbDir(pbDir, grpcDir string) {
 	panic("implement me")
 }
 
-func Generate(genModule bool) error {
+func Generate(genModule bool) (err error) {
 	g := generator.NewGenerator(config.C.Gen.Style, false)
 
-	baseProtoDir := filepath.Join("desc", "proto")
+	var files []string
 
-	fps, err := desc.GetProtoFilepath(baseProtoDir)
-	if err != nil {
-		return err
+	switch {
+	case len(config.C.Gen.Zrpcclient.Desc) > 0:
+		for _, v := range config.C.Gen.Zrpcclient.Desc {
+			if !osx.IsDir(v) {
+				if filepath.Ext(v) == ".proto" {
+					files = append(files, v)
+				}
+			} else {
+				specifiedProtoFiles, err := desc.GetProtoFilepath(v)
+				if err != nil {
+					return err
+				}
+				files = append(files, specifiedProtoFiles...)
+			}
+		}
+	default:
+		files, err = desc.GetProtoFilepath(config.C.ProtoDir())
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, v := range config.C.Gen.Zrpcclient.DescIgnore {
+		if !osx.IsDir(v) {
+			if filepath.Ext(v) == ".proto" {
+				files = lo.Reject(files, func(item string, _ int) bool {
+					return item == v
+				})
+			}
+		} else {
+			specifiedProtoFiles, err := desc.GetProtoFilepath(v)
+			if err != nil {
+				return err
+			}
+			for _, saf := range specifiedProtoFiles {
+				files = lo.Reject(files, func(item string, _ int) bool {
+					return item == saf
+				})
+			}
+		}
 	}
 
 	wd, err := os.Getwd()
@@ -116,7 +155,7 @@ func Generate(genModule bool) error {
 	}
 
 	var services []string
-	for _, fp := range fps {
+	for _, fp := range files {
 		parser := rpcparser.NewDefaultProtoParser()
 		parse, err := parser.Parse(fp, true)
 		if err != nil {
@@ -144,7 +183,7 @@ func Generate(genModule bool) error {
 		if err != nil {
 			return err
 		}
-		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s --go_out=%s --go-grpc_out=%s %s", baseProtoDir, filepath.Join(baseProtoDir, "third_party"), pbDir, pbDir, fp), wd)
+		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s --go_out=%s --go-grpc_out=%s %s", config.C.ProtoDir(), filepath.Join(config.C.ProtoDir(), "third_party"), pbDir, pbDir, fp), wd)
 		if err != nil {
 			return errors.Errorf("err: [%v], resp: [%s]", err, resp)
 		}

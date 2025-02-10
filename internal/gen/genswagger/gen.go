@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -15,9 +16,10 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/pkg/desc"
+	"github.com/jzero-io/jzero/pkg/osx"
 )
 
-func Gen() error {
+func Gen() (err error) {
 	if pathx.FileExists(config.C.ApiDir()) {
 		_ = os.MkdirAll(config.C.Gen.Swagger.Output, 0o755)
 
@@ -25,10 +27,48 @@ func Gen() error {
 			_ = os.MkdirAll(config.C.Gen.Swagger.Output, 0o755)
 		}
 
-		// gen swagger by desc/api
-		files, err := desc.FindRouteApiFiles(config.C.ApiDir())
-		if err != nil {
-			return err
+		var files []string
+
+		switch {
+		case len(config.C.Gen.Swagger.Desc) > 0:
+			for _, v := range config.C.Gen.Swagger.Desc {
+				if !osx.IsDir(v) {
+					if filepath.Ext(v) == ".api" {
+						files = append(files, v)
+					}
+				} else {
+					specifiedApiFiles, err := desc.FindApiFiles(v)
+					if err != nil {
+						return err
+					}
+					files = append(files, specifiedApiFiles...)
+				}
+			}
+		default:
+			files, err = desc.FindRouteApiFiles(config.C.ApiDir())
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, v := range config.C.Gen.Swagger.DescIgnore {
+			if !osx.IsDir(v) {
+				if filepath.Ext(v) == ".api" {
+					files = lo.Reject(files, func(item string, _ int) bool {
+						return item == v
+					})
+				}
+			} else {
+				specifiedApiFiles, err := desc.FindApiFiles(v)
+				if err != nil {
+					return err
+				}
+				for _, saf := range specifiedApiFiles {
+					files = lo.Reject(files, func(item string, _ int) bool {
+						return item == saf
+					})
+				}
+			}
 		}
 
 		var eg errgroup.Group
@@ -62,12 +102,52 @@ func Gen() error {
 
 	if pathx.FileExists(config.C.ProtoDir()) {
 		_ = os.MkdirAll(config.C.Gen.Swagger.Output, 0o755)
-		protoFilepath, err := desc.GetProtoFilepath(config.C.ProtoDir())
-		if err != nil {
-			return err
+
+		var files []string
+
+		switch {
+		case len(config.C.Gen.Swagger.Desc) > 0:
+			for _, v := range config.C.Gen.Swagger.Desc {
+				if !osx.IsDir(v) {
+					if filepath.Ext(v) == ".proto" {
+						files = append(files, v)
+					}
+				} else {
+					specifiedProtoFiles, err := desc.GetProtoFilepath(v)
+					if err != nil {
+						return err
+					}
+					files = append(files, specifiedProtoFiles...)
+				}
+			}
+		default:
+			files, err = desc.GetProtoFilepath(config.C.ProtoDir())
+			if err != nil {
+				return err
+			}
 		}
 
-		for _, path := range protoFilepath {
+		for _, v := range config.C.Gen.Swagger.DescIgnore {
+			if !osx.IsDir(v) {
+				if filepath.Ext(v) == ".proto" {
+					files = lo.Reject(files, func(item string, _ int) bool {
+						return item == v
+					})
+				}
+			} else {
+				specifiedProtoFiles, err := desc.GetProtoFilepath(v)
+				if err != nil {
+					return err
+				}
+				for _, saf := range specifiedProtoFiles {
+					files = lo.Reject(files, func(item string, _ int) bool {
+						return item == saf
+					})
+				}
+			}
+		}
+
+		for _, path := range files {
 			command := fmt.Sprintf("protoc -I%s -I%s %s --openapiv2_out=%s",
 				config.C.ProtoDir(),
 				filepath.Join(config.C.ProtoDir(), "third_party"),

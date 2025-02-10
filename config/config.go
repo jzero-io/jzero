@@ -103,34 +103,42 @@ type GenConfig struct {
 type GenSdkConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
-	Scope        string `mapstructure:"scope"`
-	WrapResponse bool   `mapstructure:"wrap-response"`
-	Output       string `mapstructure:"output"`
-	Language     string `mapstructure:"language"`
-	GoVersion    string `mapstructure:"goVersion"`
-	GoModule     string `mapstructure:"goModule"`
-	GoPackage    string `mapstructure:"goPackage"`
-	Mono         bool   `mapstructure:"mono"`
+	Desc         []string `mapstructure:"desc"`
+	DescIgnore   []string `mapstructure:"desc-ignore"`
+	Scope        string   `mapstructure:"scope"`
+	WrapResponse bool     `mapstructure:"wrap-response"`
+	Output       string   `mapstructure:"output"`
+	Language     string   `mapstructure:"language"`
+	GoVersion    string   `mapstructure:"goVersion"`
+	GoModule     string   `mapstructure:"goModule"`
+	GoPackage    string   `mapstructure:"goPackage"`
+	Mono         bool     `mapstructure:"mono"`
 }
 
 type GenSwaggerConfig struct {
-	Output string `mapstructure:"output"`
+	Desc       []string `mapstructure:"desc"`
+	DescIgnore []string `mapstructure:"desc-ignore"`
+	Output     string   `mapstructure:"output"`
 }
 
 type GenZrpcclientConfig struct {
-	Hooks     HooksConfig `mapstructure:"hooks"`
-	PbDir     string      `mapstructure:"pb-dir"`
-	ClientDir string      `mapstructure:"client-dir"`
-	Scope     string      `mapstructure:"scope"`
-	Output    string      `mapstructure:"output"`
-	GoVersion string      `mapstructure:"goVersion"`
-	GoModule  string      `mapstructure:"goModule"`
-	GoPackage string      `mapstructure:"goPackage"`
+	Hooks      HooksConfig `mapstructure:"hooks"`
+	Desc       []string    `mapstructure:"desc"`
+	DescIgnore []string    `mapstructure:"desc-ignore"`
+	PbDir      string      `mapstructure:"pb-dir"`
+	ClientDir  string      `mapstructure:"client-dir"`
+	Scope      string      `mapstructure:"scope"`
+	Output     string      `mapstructure:"output"`
+	GoVersion  string      `mapstructure:"goVersion"`
+	GoModule   string      `mapstructure:"goModule"`
+	GoPackage  string      `mapstructure:"goPackage"`
 }
 
 type GenDocsConfig struct {
-	Output string `mapstructure:"output"`
-	Format string `mapstructure:"format"`
+	Desc       []string `mapstructure:"desc"`
+	DescIgnore []string `mapstructure:"desc-ignore"`
+	Output     string   `mapstructure:"output"`
+	Format     string   `mapstructure:"format"`
 }
 
 type GenCrudConfig struct {

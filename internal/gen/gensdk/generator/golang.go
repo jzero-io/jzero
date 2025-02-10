@@ -11,6 +11,7 @@ import (
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	apiparser "github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
@@ -24,6 +25,7 @@ import (
 	"github.com/jzero-io/jzero/internal/gen/gensdk/vars"
 	"github.com/jzero-io/jzero/internal/new"
 	jzerodesc "github.com/jzero-io/jzero/pkg/desc"
+	"github.com/jzero-io/jzero/pkg/osx"
 	"github.com/jzero-io/jzero/pkg/templatex"
 )
 
@@ -53,10 +55,50 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	var apiSpecs []*spec.ApiSpec
 
 	if pathx.FileExists(gconfig.C.ApiDir()) {
-		files, err := jzerodesc.FindApiFiles(gconfig.C.ApiDir())
-		if err != nil {
-			return nil, err
+		var files []string
+
+		switch {
+		case len(gconfig.C.Gen.Sdk.Desc) > 0:
+			for _, v := range gconfig.C.Gen.Sdk.Desc {
+				if !osx.IsDir(v) {
+					if filepath.Ext(v) == ".api" {
+						files = append(files, v)
+					}
+				} else {
+					specifiedApiFiles, err := jzerodesc.FindApiFiles(v)
+					if err != nil {
+						return nil, err
+					}
+					files = append(files, specifiedApiFiles...)
+				}
+			}
+		default:
+			files, err = jzerodesc.FindRouteApiFiles(gconfig.C.ApiDir())
+			if err != nil {
+				return nil, err
+			}
 		}
+
+		for _, v := range gconfig.C.Gen.Sdk.DescIgnore {
+			if !osx.IsDir(v) {
+				if filepath.Ext(v) == ".api" {
+					files = lo.Reject(files, func(item string, _ int) bool {
+						return item == v
+					})
+				}
+			} else {
+				specifiedApiFiles, err := jzerodesc.FindApiFiles(v)
+				if err != nil {
+					return nil, err
+				}
+				for _, saf := range specifiedApiFiles {
+					files = lo.Reject(files, func(item string, _ int) bool {
+						return item == saf
+					})
+				}
+			}
+		}
+
 		for _, v := range files {
 			apiSpec, err := apiparser.Parse(v)
 			if err != nil {
@@ -69,9 +111,46 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	var protoFiles []string
 
 	if pathx.FileExists(gconfig.C.ProtoDir()) {
-		protoFiles, err = jzerodesc.GetProtoFilepath(gconfig.C.ProtoDir())
-		if err != nil {
-			return nil, err
+		switch {
+		case len(gconfig.C.Gen.Sdk.Desc) > 0:
+			for _, v := range gconfig.C.Gen.Sdk.Desc {
+				if !osx.IsDir(v) {
+					if filepath.Ext(v) == ".proto" {
+						protoFiles = append(protoFiles, v)
+					}
+				} else {
+					specifiedProtoFiles, err := jzerodesc.GetProtoFilepath(v)
+					if err != nil {
+						return nil, err
+					}
+					protoFiles = append(protoFiles, specifiedProtoFiles...)
+				}
+			}
+		default:
+			protoFiles, err = jzerodesc.GetProtoFilepath(gconfig.C.ProtoDir())
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		for _, v := range gconfig.C.Gen.Sdk.DescIgnore {
+			if !osx.IsDir(v) {
+				if filepath.Ext(v) == ".proto" {
+					protoFiles = lo.Reject(protoFiles, func(item string, _ int) bool {
+						return item == v
+					})
+				}
+			} else {
+				specifiedProtoFiles, err := jzerodesc.GetProtoFilepath(v)
+				if err != nil {
+					return nil, err
+				}
+				for _, saf := range specifiedProtoFiles {
+					protoFiles = lo.Reject(protoFiles, func(item string, _ int) bool {
+						return item == saf
+					})
+				}
+			}
 		}
 	}
 
