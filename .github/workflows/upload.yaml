@@ -94,7 +94,7 @@ jobs:
           jzero gen swagger
           jzero gen zrpcclient
           go mod tidy && go mod download
-          go build
+          go build && rm -rf simplerpc-goctl
           git add .
           git diff-index --quiet HEAD || git commit -m "chore(simplerpc-goctl): update simplerpc-goctl"
           git push -f
