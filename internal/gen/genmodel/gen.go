@@ -113,7 +113,7 @@ func (jm *JzeroModel) Gen() error {
 		for _, v := range config.C.Gen.Desc {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".sql" {
-					genCodeSqlFiles = append(genCodeSqlFiles, v)
+					genCodeSqlFiles = append(genCodeSqlFiles, filepath.Clean(v))
 				}
 			} else {
 				specifiedSqlFiles, err := jzerodesc.FindSqlFiles(v)

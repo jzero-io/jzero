@@ -97,7 +97,7 @@ func (ja *JzeroApi) Gen() error {
 				}
 				genCodeApiFiles = append(genCodeApiFiles, specifiedApiFiles...)
 				for _, saf := range specifiedApiFiles {
-					ja.GenCodeApiSpecMap[saf] = ja.ApiSpecMap[saf]
+					ja.GenCodeApiSpecMap[filepath.Clean(saf)] = ja.ApiSpecMap[filepath.Clean(saf)]
 				}
 			}
 		}

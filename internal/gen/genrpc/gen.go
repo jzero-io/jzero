@@ -82,7 +82,7 @@ func (jr *JzeroRpc) Gen() error {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".proto" {
 					genCodeProtoFiles = append(genCodeProtoFiles, filepath.Join(strings.Split(filepath.ToSlash(v), "/")...))
-					jr.GenCodeProtoSpecMap[v] = jr.ProtoSpecMap[v]
+					jr.GenCodeProtoSpecMap[filepath.Clean(v)] = jr.ProtoSpecMap[filepath.Clean(v)]
 				}
 			} else {
 				specifiedProtoFiles, err := jzerodesc.GetProtoFilepath(v)
@@ -91,7 +91,7 @@ func (jr *JzeroRpc) Gen() error {
 				}
 				genCodeProtoFiles = append(genCodeProtoFiles, specifiedProtoFiles...)
 				for _, saf := range specifiedProtoFiles {
-					jr.GenCodeProtoSpecMap[saf] = jr.ProtoSpecMap[saf]
+					jr.GenCodeProtoSpecMap[filepath.Clean(saf)] = jr.ProtoSpecMap[filepath.Clean(saf)]
 				}
 			}
 		}
