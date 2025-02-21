@@ -3,7 +3,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
     var err error
 
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-	sb.Where(sb.EQ(strings.Split(strings.ReplaceAll("{{.originalField}}", " ", ""), "=")[0], {{.lowerStartCamelField}}))
+	condition.SelectByWhereRawSql(sb, "{{.originalField}}", "{{.lowerStartCamelField}}")
     sb.Limit(1)
 
     sql, args := sb.Build()
@@ -29,7 +29,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}WithCac
 	var resp {{.upperStartCamelObject}}
 	err := m.cachedConn.QueryRowIndexCtx(ctx, &resp, {{.cacheKeyVariable}}, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
 		sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-		sb.Where(sb.EQ(strings.Split(strings.ReplaceAll("{{.originalField}}", " ", ""), "=")[0], {{.lowerStartCamelField}}))
+		condition.SelectByWhereRawSql(sb, "{{.originalField}}", "{{.lowerStartCamelField}}")
 		sb.Limit(1)
         sql, args := sb.Build()
         var err error
@@ -51,5 +51,5 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}WithCac
 		return nil, ErrNotFound
 	default:
 		return nil, err
-	}{{else}}return m.FindOneBy{{.upperField}}(ctx, session, {{ $length := len .lowerStartCamelField }}{{ printf "%.*s" $length .in }}){{end}}
+	}{{else}}return m.FindOneBy{{.upperField}}(ctx, session, {{.lowerStartCamelField}}){{end}}
 }
