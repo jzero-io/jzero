@@ -72,6 +72,8 @@ func (jm *JzeroModel) Gen() error {
 			return err
 		}
 
+		fmt.Printf("%s to generate ddl from %s\n", color.WithColor("Start", color.FgGreen), config.C.Gen.ModelMysqlDatasourceUrl)
+
 		writeTables, err := jm.GenDDL(sqlConn, tables)
 		if err != nil {
 			return err
