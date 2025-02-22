@@ -3,7 +3,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
     var err error
 
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-	condition.SelectByWhereRawSql(sb, "{{.originalField}}", "{{.lowerStartCamelField}}")
+	condition.SelectByWhereRawSql(sb, "{{.originalField}}", {{.lowerStartCamelField}})
     sb.Limit(1)
 
     sql, args := sb.Build()
@@ -29,7 +29,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}WithCac
 	var resp {{.upperStartCamelObject}}
 	err := m.cachedConn.QueryRowIndexCtx(ctx, &resp, {{.cacheKeyVariable}}, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
 		sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-		condition.SelectByWhereRawSql(sb, "{{.originalField}}", "{{.lowerStartCamelField}}")
+		condition.SelectByWhereRawSql(sb, "{{.originalField}}", {{.lowerStartCamelField}})
 		sb.Limit(1)
         sql, args := sb.Build()
         var err error
