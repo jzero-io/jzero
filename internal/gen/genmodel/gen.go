@@ -89,8 +89,7 @@ func (jm *JzeroModel) Gen() error {
 		}
 	}
 
-	sqlDir := filepath.Join("desc", "sql")
-	if !pathx.FileExists(sqlDir) {
+	if !pathx.FileExists(config.C.SqlDir()) {
 		return nil
 	}
 
@@ -100,14 +99,14 @@ func (jm *JzeroModel) Gen() error {
 	)
 	genCodeSqlSpecMap := make(map[string][]*parser.Table)
 
-	allFiles, err = jzerodesc.FindSqlFiles(sqlDir)
+	allFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
 	if err != nil {
 		return err
 	}
 
 	switch {
 	case config.C.Gen.GitChange && len(config.C.Gen.Desc) == 0 && !config.C.Gen.ModelMysqlDatasource:
-		m, _, err := gitstatus.ChangedFiles("desc", ".sql")
+		m, _, err := gitstatus.ChangedFiles(config.C.SqlDir(), ".sql")
 		if err == nil {
 			genCodeSqlFiles = append(genCodeSqlFiles, m...)
 		}
@@ -126,7 +125,7 @@ func (jm *JzeroModel) Gen() error {
 			}
 		}
 	default:
-		genCodeSqlFiles, err = jzerodesc.FindSqlFiles(sqlDir)
+		genCodeSqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
 		if err != nil {
 			return err
 		}

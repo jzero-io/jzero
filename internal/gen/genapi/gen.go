@@ -37,22 +37,20 @@ type JzeroApi struct {
 }
 
 func (ja *JzeroApi) Gen() error {
-	apiDirName := filepath.Join("desc", "api")
-
-	if !pathx.FileExists(apiDirName) {
+	if !pathx.FileExists(config.C.ApiDir()) {
 		return nil
 	}
 
 	fmt.Printf("%s to generate api code.\n", color.WithColor("Start", color.FgGreen))
 
 	// format api dir
-	command := fmt.Sprintf("goctl api format --dir %s", apiDirName)
+	command := fmt.Sprintf("goctl api format --dir %s", config.C.ApiDir())
 	_, err := execx.Run(command, config.C.Wd())
 	if err != nil {
 		return err
 	}
 
-	apiFiles, err := desc.FindApiFiles(apiDirName)
+	apiFiles, err := desc.FindApiFiles(config.C.ApiDir())
 	if err != nil {
 		return err
 	}
