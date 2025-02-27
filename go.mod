@@ -1,10 +1,11 @@
 module github.com/jzero-io/jzero
 
 go 1.22.10
+toolchain go1.24.0
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/a8m/envsubst v1.4.2
+	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
 	github.com/go-git/go-git/v5 v5.13.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.1
