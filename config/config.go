@@ -36,6 +36,9 @@ type Config struct {
 
 	// serverless command
 	Serverless ServerlessConfig `mapstructure:"serverless"`
+
+	// migrate command
+	Migrate MigrateConfig `mapstructure:"migrate"`
 }
 
 type NewConfig struct {
@@ -205,6 +208,11 @@ type ServerlessConfig struct {
 
 type ServerlessDeleteConfig struct {
 	Plugin []string `mapstructure:"plugin"`
+}
+
+type MigrateConfig struct {
+	Source   string `mapstructure:"source"`
+	Database string `mapstructure:"database"`
 }
 
 type HooksConfig struct {
