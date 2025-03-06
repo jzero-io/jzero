@@ -4,3 +4,4 @@ dist
 node_modules
 docs/package-lock.json
 /jzero
+/testdata
