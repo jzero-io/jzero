@@ -118,7 +118,12 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 			fileBytes = embeded.ReadTemplateFile(filepath.Join(dirname, file.Name()))
 		}
 
-		stylePath := filepath.Join(filepath.Dir(rel), filename)
+		// parse template name
+		templatePath := filepath.Join(filepath.Dir(rel), filename)
+		stylePathBytes, err := templatex.ParseTemplate(jn.TemplateData, []byte(templatePath))
+		if err != nil {
+			stylePathBytes = []byte(templatePath)
+		}
 
 		// specify
 		if filename == "go.mod" && jn.nc.Mono {
@@ -126,7 +131,7 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 		}
 
 		gsf = append(gsf, &GeneratedFile{
-			Path:    filepath.Join(jn.nc.Output, stylePath),
+			Path:    filepath.Join(jn.nc.Output, string(stylePathBytes)),
 			Content: *bytes.NewBuffer(fileBytes),
 			// Because this is a special directory for jzero
 			// It is deleted to support generating all server code under the premise of only desc directory
