@@ -115,8 +115,8 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 		}
 
 		var fileBytes []byte
-		if filepath.Ext(file.Name()) == ".tpl" {
-			// tpl suffix means it is a template, do not parse if anymore
+		if strings.HasSuffix(file.Name(), ".tpl.tpl") {
+			// .tpl.tpl suffix means it is a template, do not parse if anymore
 			fileBytes = embeded.ReadTemplateFile(filepath.Join(dirname, file.Name()))
 		} else {
 			fileBytes, err = templatex.ParseTemplate(jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
