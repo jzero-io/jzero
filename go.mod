@@ -1,6 +1,7 @@
 module github.com/jzero-io/jzero
 
 go 1.22.10
+toolchain go1.23.7
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
@@ -27,7 +28,7 @@ require (
 	github.com/zeromicro/go-zero v1.8.1
 	github.com/zeromicro/go-zero/tools/goctl v1.8.1
 	golang.org/x/mod v0.23.0
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.12.0
 	golang.org/x/tools v0.30.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250204164813-702378808489
 	google.golang.org/protobuf v1.36.5
