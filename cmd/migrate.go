@@ -7,12 +7,12 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/jzero-io/jzero/internal/migrate/migrategoto"
-	"github.com/jzero-io/jzero/internal/migrate/migrateversion"
+	"github.com/spf13/cobra"
 
 	"github.com/jzero-io/jzero/internal/migrate/migratedown"
+	"github.com/jzero-io/jzero/internal/migrate/migrategoto"
 	"github.com/jzero-io/jzero/internal/migrate/migrateup"
-	"github.com/spf13/cobra"
+	"github.com/jzero-io/jzero/internal/migrate/migrateversion"
 )
 
 // migrateCmd represents the migrate command
