@@ -9,7 +9,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -86,19 +88,30 @@ var newCmd = &cobra.Command{
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 				defer cancel()
 
-				// clone to local
-				if _, err := git.PlainCloneContext(ctx, fp, false, &git.CloneOptions{
-					SingleBranch:  true,
-					URL:           config.C.New.Remote,
-					Depth:         0,
-					ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
-					Auth: &http.BasicAuth{
-						Username: config.C.New.RemoteAuthUsername, // 远程仓库用户名
-						Password: config.C.New.RemoteAuthPassword, // 远程仓库密码(token)
-					},
-				}); err != nil {
-					return err
+				if strings.HasPrefix(config.C.New.Remote, "git@") {
+					// SSH 协议
+					commandContext := exec.CommandContext(ctx, "git", "clone", "--depth", "1", "--branch", config.C.New.Branch, config.C.New.Remote, fp)
+					if resp, err := commandContext.CombinedOutput(); err != nil {
+						return errors.New(string(resp))
+					}
+				} else {
+					// HTTP 协议
+					auth := &http.BasicAuth{
+						Username: config.C.New.RemoteAuthUsername,
+						Password: config.C.New.RemoteAuthPassword,
+					}
+					// clone to local
+					if _, err := git.PlainCloneContext(ctx, fp, false, &git.CloneOptions{
+						SingleBranch:  true,
+						URL:           config.C.New.Remote,
+						Depth:         0,
+						ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
+						Auth:          auth,
+					}); err != nil {
+						return err
+					}
 				}
+
 				_ = os.RemoveAll(filepath.Join(fp, ".git"))
 			}
 			fmt.Println(color.WithColor("Done", color.FgGreen))
