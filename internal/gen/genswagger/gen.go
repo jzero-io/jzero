@@ -84,7 +84,7 @@ func Gen() (err error) {
 				if goPackage, ok := parse.Info.Properties["go_package"]; ok {
 					apiFile = fmt.Sprintf("%s.swagger.json", strings.ReplaceAll(goPackage, "/", "-"))
 				}
-				cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http", "-api", cv, "-dir", config.C.Gen.Swagger.Output)
+				cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http,https", "-api", cv, "-dir", config.C.Gen.Swagger.Output)
 				resp, err := cmd.CombinedOutput()
 				if err != nil {
 					return errors.Wrap(err, strings.TrimRight(string(resp), "\r\n"))
