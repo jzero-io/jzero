@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/jzero-io/jzero-contrib/filex"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
@@ -70,7 +71,7 @@ func (ja *JzeroApi) Gen() error {
 	var genCodeApiFiles []string
 
 	switch {
-	case config.C.Gen.GitChange && len(config.C.Gen.Desc) == 0:
+	case config.C.Gen.GitChange && filex.DirExists(filepath.Join(config.C.Wd(), ".git")) && len(config.C.Gen.Desc) == 0:
 		// 从 git status 获取变动的文件生成
 		m, _, err := gitstatus.ChangedFiles(config.C.ApiDir(), ".api")
 		if err == nil {

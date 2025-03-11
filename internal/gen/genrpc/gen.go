@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero-contrib/filex"
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -67,7 +68,7 @@ func (jr *JzeroRpc) Gen() error {
 	jr.GenCodeProtoSpecMap = make(map[string]rpcparser.Proto, len(protoFiles))
 
 	switch {
-	case config.C.Gen.GitChange && len(config.C.Gen.Desc) == 0:
+	case config.C.Gen.GitChange && filex.DirExists(filepath.Join(config.C.Wd(), ".git")) && len(config.C.Gen.Desc) == 0:
 		m, _, err := gitstatus.ChangedFiles(config.C.ProtoDir(), ".proto")
 		if err == nil {
 			genCodeProtoFiles = append(genCodeProtoFiles, m...)

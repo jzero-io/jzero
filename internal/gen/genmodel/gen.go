@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/jzero-io/jzero-contrib/filex"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
@@ -105,7 +106,7 @@ func (jm *JzeroModel) Gen() error {
 	}
 
 	switch {
-	case config.C.Gen.GitChange && len(config.C.Gen.Desc) == 0 && !config.C.Gen.ModelMysqlDatasource:
+	case config.C.Gen.GitChange && filex.DirExists(filepath.Join(config.C.Wd(), ".git")) && len(config.C.Gen.Desc) == 0 && !config.C.Gen.ModelMysqlDatasource:
 		m, _, err := gitstatus.ChangedFiles(config.C.SqlDir(), ".sql")
 		if err == nil {
 			genCodeSqlFiles = append(genCodeSqlFiles, m...)
