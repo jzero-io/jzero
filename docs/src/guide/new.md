@@ -268,7 +268,7 @@ go run main.go
 
 ⚠️ 如果仓库需要鉴权, 请设置 remote-auth-username 和 remote-auth-password flag
 
-建议设置环境变量 `JZERO_REMOTE_AUTH_USERNAME` 和 `JZERO_REMOTE_AUTH_PASSWORD`
+HTTP 协议建议设置环境变量 `JZERO_REMOTE_AUTH_USERNAME` 和 `JZERO_REMOTE_AUTH_PASSWORD`
 
 避免暴露敏感信息
 :::
@@ -281,15 +281,20 @@ go run main.go
 
 ```bash
 jzero new your_project --remote https://gitlab.xxx.com/xx/your_repo.git --branch xxx
-# 如需要权限
+# 如需要权限, 使用 http 协议
 jzero new your_project --remote https://gitlab.xxx.com/xx/your_repo.git --branch xxx --remote-auth-username xxx --remote-auth-password xxx
+
+# 使用 ssh 协议
+jzero new your_project --remote git@gitlab.xxx.com:xx/your_repo.git --branch xxx
 ```
 
 @tab Docker
 
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --remote https://gitlab.xxx.com/xx/your_repo.git --branch xxx
-# 如需要权限
+# 如需要权限, 使用 http 协议
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --remote https://gitlab.xxx.com/xx/your_repo.git --branch xxx --remote-auth-username xxx --remote-auth-password xxx
+# 使用 ssh 协议
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --remote git@gitlab.xxx.com:xx/your_repo.git --branch xxx
 ```
 :::
