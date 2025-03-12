@@ -9,6 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -84,7 +85,12 @@ func Gen() (err error) {
 				if goPackage, ok := parse.Info.Properties["go_package"]; ok {
 					apiFile = fmt.Sprintf("%s.swagger.json", strings.ReplaceAll(goPackage, "/", "-"))
 				}
-				cmd := exec.Command("goctl", "api", "plugin", "-plugin", "goctl-swagger=swagger -filename "+apiFile+" --schemes http,https", "-api", cv, "-dir", config.C.Gen.Swagger.Output)
+				cmd := exec.Command("goctl", "api", "plugin", "-plugin", "jzero-swagger=swagger -filename "+apiFile+" --schemes http,https", "-api", cv, "-dir", config.C.Gen.Swagger.Output)
+				if config.C.Gen.Route2Code || config.C.Gen.Swagger.Route2Code {
+					cmd = exec.Command("goctl", "api", "plugin", "-plugin", "jzero-swagger=swagger -filename "+apiFile+" --schemes http,https --route2code", "-api", cv, "-dir", config.C.Gen.Swagger.Output)
+				}
+
+				logx.Debug(cmd.String())
 				resp, err := cmd.CombinedOutput()
 				if err != nil {
 					return errors.Wrap(err, strings.TrimRight(string(resp), "\r\n"))

@@ -122,6 +122,7 @@ type GenSwaggerConfig struct {
 	Desc       []string `mapstructure:"desc"`
 	DescIgnore []string `mapstructure:"desc-ignore"`
 	Output     string   `mapstructure:"output"`
+	Route2Code bool     `mapstructure:"route2code"`
 }
 
 type GenZrpcclientConfig struct {

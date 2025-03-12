@@ -298,6 +298,7 @@ func init() {
 		genCmd.AddCommand(genSwaggerCmd)
 
 		genSwaggerCmd.Flags().StringP("output", "o", filepath.Join("desc", "swagger"), "set swagger output dir")
+		genSwaggerCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
 	}
 
 	{
