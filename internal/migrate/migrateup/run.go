@@ -21,7 +21,19 @@ func Run(args []string) error {
 		if cast.ToInt(args[0]) < 0 {
 			return errors.New("step must be greater than 0")
 		}
-		return m.Steps(cast.ToInt(args[0]))
+		if err = m.Steps(cast.ToInt(args[0])); err != nil {
+			if errors.Is(err, migrate.ErrNoChange) {
+				return nil
+			}
+		}
+		return err
 	}
-	return m.Up()
+
+	if err = m.Up(); err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			return nil
+		}
+	}
+
+	return err
 }
