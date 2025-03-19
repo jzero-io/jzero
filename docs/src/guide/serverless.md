@@ -29,6 +29,9 @@ cd ./plugins/your_plugin
 jzero gen
 
 go mod tidy
+
+# 回到根目录
+cd ...
 ```
 
 ## 编译带有插件的项目
