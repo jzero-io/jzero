@@ -5,7 +5,6 @@ package middleware
 import (
 	"fmt"
 	"context"
-	"net/http"
     "regexp"
 
 	"github.com/zeromicro/go-zero/gateway"
@@ -20,25 +19,10 @@ var (
 )
 
 func RegisterGen(zrpc *zrpc.RpcServer, gw *gateway.Server) {
-	gw.Use(func(next http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-            {{range $v := .HttpMiddlewares}}
-                if matchRoute("{{$v.Name}}", fmt.Sprintf("%s:%s",r.Method,r.URL.Path)) {
-                    next = {{$v.Name | FirstUpper | ToCamel}}Middleware(next)
-                }
-            {{end}}
-			next(w, r)
-		}
-	})
-
-    {{range $v := .ZrpcMiddlewares}}
-        zrpc.AddUnaryInterceptors(func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
-            if matchRoute("{{$v.Name}}", info.FullMethod) {
-                return {{$v.Name | FirstUpper | ToCamel}}Middleware(ctx, req, info, handler)
-            }
-            return handler(ctx, req)
-        })
-    {{end}}
+	 {{range $v := .HttpMiddlewares}}gw.Use({{$v.Name | FirstUpper}}Middleware)
+     {{end}}
+     {{range $v := .ZrpcMiddlewares}}zrpc.AddUnaryInterceptors({{$v.Name | FirstUpper}}Middleware)
+        zrpc.AddStreamInterceptors({{$v.Name | FirstUpper}}StreamMiddleware){{end}}
 }
 
 // Define and compile routes
@@ -60,11 +44,11 @@ func loadRoutes(middleware string, patterns ...string) {
 	routesMap[middleware] = routes
 }
 
-// matchRoute checks if a path matches any compiled route.
-func matchRoute(middleware,path string) bool {
-	if routes, ok := routesMap[middleware]; ok {
-		for _, route := range routes {
-			if route.MatchString(path) {
+// MatchRoute checks if a route matches any compiled route.
+func MatchRoute(middleware, route string) bool {
+	if routesReg, ok := routesMap[middleware]; ok {
+		for _, rr := range routesReg {
+			if rr.MatchString(route) {
 				return true
 			}
 		}

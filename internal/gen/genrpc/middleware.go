@@ -11,6 +11,7 @@ import (
 	"github.com/jhump/protoreflect/desc/protoparse"
 	jzeroapi "github.com/jzero-io/desc/proto/jzero/api"
 	"github.com/rinchsan/gosimports"
+	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -68,6 +69,38 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 				methodUrls = append(methodUrls, jzerodesc.GetRpcMethodUrl(method))
 				fullMethods = append(fullMethods, fmt.Sprintf("/%s.%s/%s", fd.GetPackage(), service.GetName(), method.GetName()))
 
+				httpGroupExt := proto.GetExtension(service.GetOptions(), jzeroapi.E_HttpGroup)
+				switch rule := httpGroupExt.(type) {
+				case *jzeroapi.HttpRule:
+					if rule != nil {
+						split := strings.Split(strings.ReplaceAll(rule.Middleware, " ", ""), ",")
+						for _, m := range split {
+							if urls, ok := httpMapMiddlewares.Get(m); ok {
+								urls = append(urls.([]string), methodUrls...)
+								httpMapMiddlewares.Set(m, urls)
+							} else {
+								httpMapMiddlewares.Set(m, methodUrls)
+							}
+						}
+					}
+				}
+
+				zrpcGroupExt := proto.GetExtension(service.GetOptions(), jzeroapi.E_ZrpcGroup)
+				switch rule := zrpcGroupExt.(type) {
+				case *jzeroapi.ZrpcRule:
+					if rule != nil {
+						split := strings.Split(strings.ReplaceAll(rule.Middleware, " ", ""), ",")
+						for _, m := range split {
+							if fms, ok := zrpcMapMiddlewares.Get(m); ok {
+								fms = append(fms.([]string), fullMethods...)
+								zrpcMapMiddlewares.Set(m, fms)
+							} else {
+								zrpcMapMiddlewares.Set(m, fullMethods)
+							}
+						}
+					}
+				}
+
 				httpExt := proto.GetExtension(method.GetOptions(), jzeroapi.E_Http)
 				switch rule := httpExt.(type) {
 				case *jzeroapi.HttpRule:
@@ -83,6 +116,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 						}
 					}
 				}
+
 				zrpcExt := proto.GetExtension(method.GetOptions(), jzeroapi.E_Zrpc)
 				switch rule := zrpcExt.(type) {
 				case *jzeroapi.ZrpcRule:
@@ -95,37 +129,6 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 							} else {
 								zrpcMapMiddlewares.Set(m, []string{fmt.Sprintf("/%s.%s/%s", fd.GetPackage(), service.GetName(), method.GetName())})
 							}
-						}
-					}
-				}
-			}
-			httpGroupExt := proto.GetExtension(service.GetOptions(), jzeroapi.E_HttpGroup)
-			switch rule := httpGroupExt.(type) {
-			case *jzeroapi.HttpRule:
-				if rule != nil {
-					split := strings.Split(strings.ReplaceAll(rule.Middleware, " ", ""), ",")
-					for _, m := range split {
-						if urls, ok := httpMapMiddlewares.Get(m); ok {
-							urls = append(urls.([]string), methodUrls...)
-							httpMapMiddlewares.Set(m, urls)
-						} else {
-							httpMapMiddlewares.Set(m, methodUrls)
-						}
-					}
-				}
-			}
-
-			zrpcGroupExt := proto.GetExtension(service.GetOptions(), jzeroapi.E_ZrpcGroup)
-			switch rule := zrpcGroupExt.(type) {
-			case *jzeroapi.ZrpcRule:
-				if rule != nil {
-					split := strings.Split(strings.ReplaceAll(rule.Middleware, " ", ""), ",")
-					for _, m := range split {
-						if fms, ok := zrpcMapMiddlewares.Get(m); ok {
-							fms = append(fms.([]string), fullMethods...)
-							zrpcMapMiddlewares.Set(m, fms)
-						} else {
-							zrpcMapMiddlewares.Set(m, fullMethods)
 						}
 					}
 				}
@@ -146,7 +149,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 	for _, v := range httpMiddlewares {
 		template, err := templatex.ParseTemplate(map[string]any{
 			"Name": v.Name,
-		}, embeded.ReadTemplateFile(filepath.Join("plugins", "api", "middleware_http.go.tpl")))
+		}, embeded.ReadTemplateFile(filepath.Join("plugins", "rpc", "middleware_http.go.tpl")))
 		if err != nil {
 			return err
 		}
@@ -170,7 +173,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 	for _, v := range zrpcMiddlewares {
 		template, err := templatex.ParseTemplate(map[string]any{
 			"Name": v.Name,
-		}, embeded.ReadTemplateFile(filepath.Join("plugins", "api", "middleware_zrpc.go.tpl")))
+		}, embeded.ReadTemplateFile(filepath.Join("plugins", "rpc", "middleware_zrpc.go.tpl")))
 		if err != nil {
 			return err
 		}
@@ -194,7 +197,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 	template, err := templatex.ParseTemplate(map[string]any{
 		"HttpMiddlewares": httpMiddlewares,
 		"ZrpcMiddlewares": zrpcMiddlewares,
-	}, embeded.ReadTemplateFile(filepath.Join("plugins", "api", "middleware_gen.go.tpl")))
+	}, embeded.ReadTemplateFile(filepath.Join("plugins", "rpc", "middleware_gen.go.tpl")))
 	if err != nil {
 		return err
 	}
@@ -221,6 +224,7 @@ func processMiddlewares(middlewareMap *orderedmap.OrderedMap) []JzeroProtoApiMid
 
 	for _, m := range middlewareMap.Keys() {
 		v, _ := middlewareMap.Get(m)
+		v = lo.Uniq(v.([]string))
 		result = append(result, JzeroProtoApiMiddleware{Name: m, Routes: v.([]string)})
 	}
 	return result
