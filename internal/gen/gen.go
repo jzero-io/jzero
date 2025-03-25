@@ -19,7 +19,7 @@ import (
 	"github.com/jzero-io/jzero/pkg/mod"
 )
 
-func Run() error {
+func Run(isNew bool) error {
 	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), config.C.Wd())
 
 	var module string
@@ -42,6 +42,7 @@ func Run() error {
 
 	jzeroModel := genmodel.JzeroModel{
 		Module: module,
+		IsNew:  isNew,
 	}
 	err = jzeroModel.Gen()
 	if err != nil {

@@ -131,7 +131,7 @@ func (jr *JzeroRpc) Gen() error {
 	}
 
 	fmt.Printf("%s to generate proto code. \n", color.WithColor("Start", color.FgGreen))
-	if err := jr.patchSvc(); err != nil {
+	if err = jr.patchSvc(); err != nil {
 		return err
 	}
 
@@ -246,7 +246,7 @@ func (jr *JzeroRpc) Gen() error {
 		if config.C.Gen.ChangeLogicTypes {
 			if lo.Contains(genCodeProtoFiles, v) {
 				for _, file := range allLogicFiles {
-					if err := jr.changeLogicTypes(file); err != nil {
+					if err = jr.changeLogicTypes(file); err != nil {
 						console.Warning("[warning]: change logic types %s meet error %v", file.Path, err)
 						continue
 					}

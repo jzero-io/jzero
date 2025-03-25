@@ -25,6 +25,7 @@ import (
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
+	"github.com/jzero-io/jzero/internal/gen"
 	"github.com/jzero-io/jzero/internal/new"
 	"github.com/jzero-io/jzero/pkg/mod"
 )
@@ -42,6 +43,9 @@ var newCmd = &cobra.Command{
 				return errors.Errorf("%s already exists", config.C.New.Output)
 			}
 		}
+
+		fmt.Printf("%s project %s in %s dir\n", color.WithColor("Creating", color.FgGreen), config.C.New.Output, config.C.New.Output)
+
 		if config.C.New.Module == "" {
 			config.C.New.Module = args[0]
 		}
@@ -128,6 +132,37 @@ var newCmd = &cobra.Command{
 			embeded.Home = filepath.Join(home, ".jzero", "templates", Version)
 		}
 		return new.Run(args[0], base)
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		dir, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		if err = os.Chdir(config.C.New.Output); err != nil {
+			return err
+		}
+		defer func() {
+			if err = os.Chdir(dir); err != nil {
+				cobra.CheckErr(err)
+			}
+		}()
+
+		// special dir for jzero
+		if !filex.DirExists("desc") {
+			return nil
+		}
+		fmt.Printf("%s desc dir in %s, auto generate code\n", color.WithColor("Detected", color.FgGreen), config.C.New.Output)
+
+		initConfig()
+		// for gen persistent flags
+		if config.C.Gen.Style == "" {
+			config.C.Gen.Style = "gozero"
+		}
+		if config.C.Gen.Home == "" {
+			config.C.Gen.Home = filepath.Join(config.C.Wd(), ".template")
+		}
+
+		return gen.Run(true)
 	},
 	Args: cobra.ExactArgs(1),
 }
