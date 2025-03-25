@@ -25,11 +25,10 @@ jobs:
         run: |
           go install
           jzero check
-          go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
 
       - name: format go
         run: |
-          gorgeous -d ./... 
+         jzero format --git-change=false
 
       - uses: actions/checkout@v4
       - name: golangci-lint

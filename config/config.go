@@ -39,6 +39,9 @@ type Config struct {
 
 	// migrate command
 	Migrate MigrateConfig `mapstructure:"migrate"`
+
+	// format command
+	Format FormatConfig `mapstructure:"format"`
 }
 
 type NewConfig struct {
@@ -214,6 +217,10 @@ type ServerlessDeleteConfig struct {
 type MigrateConfig struct {
 	Source   string `mapstructure:"source"`
 	Database string `mapstructure:"database"`
+}
+
+type FormatConfig struct {
+	GitChange bool `mapstructure:"git-change"`
 }
 
 type HooksConfig struct {
