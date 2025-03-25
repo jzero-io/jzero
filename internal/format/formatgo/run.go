@@ -1,25 +1,34 @@
 package formatgo
 
 import (
+	"bufio"
+	"os"
+	"regexp"
 	"strings"
+
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/mr"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
+	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+	"github.com/zeromicro/go-zero/tools/goctl/util/env"
 
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/pkg"
 	"github.com/jzero-io/jzero/pkg/gitstatus"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
-	"github.com/zeromicro/go-zero/tools/goctl/util/env"
 )
 
 /*
 	Use gofumpt to format go code
 */
 
+var rxCodeGenerated = regexp.MustCompile(`^// Code generated .* DO NOT EDIT\.$`)
+
 func Run() error {
 	check()
 
 	files := getFormatFiles()
+
+	files = filterFiles(files)
 
 	return execFormat(files)
 }
@@ -29,12 +38,28 @@ func getFormatFiles() []string {
 		files, _, err := gitstatus.ChangedFiles(".", ".go")
 		if err == nil {
 			return files
-		} else {
-			return []string{"."}
 		}
+		return []string{"."}
 	} else {
 		return []string{"."}
 	}
+}
+
+func filterFiles(files []string) []string {
+	var result []string
+
+	mr.ForEach(func(source chan<- string) {
+		for _, v := range files {
+			source <- v
+		}
+	}, func(item string) {
+		line, _ := readFirstLine(item)
+		if !rxCodeGenerated.MatchString(line) {
+			result = append(result, item)
+		}
+	})
+
+	return result
 }
 
 func execFormat(files []string) error {
@@ -48,6 +73,21 @@ func execFormat(files []string) error {
 		}
 	}
 	return nil
+}
+
+func readFirstLine(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	if scanner.Scan() {
+		return scanner.Text(), nil
+	}
+
+	return "", scanner.Err()
 }
 
 func check() {
