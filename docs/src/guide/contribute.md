@@ -33,8 +33,7 @@ git checkout -b feat/patch-1
 ### 4. format the code what you changes
 
 ```shell
-go install github.com/fsgo/go_fmt/cmd/gorgeous@latest
-gorgeous ./...
+jzero format
 ```
 
 ### 5. lint codes
