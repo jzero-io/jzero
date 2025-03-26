@@ -24,6 +24,10 @@ func Run() error {
 	opt.BindFlags()
 
 	opt.Files = files
+
+	if len(opt.Files) == 0 {
+		return nil
+	}
 	return gf.Execute(opt)
 }
 
