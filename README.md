@@ -98,7 +98,7 @@ go run main.go server
 
 [贡献](https://docs.jzero.io/guide/contribute.html)
 
-[![Contribution Leaderboard](https://leaderboard-cat-bros.vercel.app/svg?repo=jzero-io/jzero&chart=list)](https://leaderboard-cat-bros.vercel.app/svg?repo=jzero-io/jzero&chart=list)
+[![Contribution Leaderboard](https://leaderboard.openomy.app/svg?repo=jzero-io/jzero&chart=list)](https://leaderboard.openomy.app/svg?repo=jzero-io/jzero&chart=list)
 
 ## 致谢
 
