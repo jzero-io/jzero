@@ -98,11 +98,7 @@ go run main.go server
 
 [贡献](https://docs.jzero.io/guide/contribute.html)
 
-<div>
-  <a href="https://github.com/jzero-io/jzero/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=jzero-io/jzero" />
-  </a>
-</div>
+[![Contribution Leaderboard](https://leaderboard-cat-bros.vercel.app/svg?repo=jzero-io/jzero&chart=list)](https://leaderboard-cat-bros.vercel.app/svg?repo=jzero-io/jzero&chart=list)
 
 ## 致谢
 
