@@ -87,7 +87,7 @@ func Gen() (err error) {
 				}
 				cmd := exec.Command("goctl", "api", "plugin", "-plugin", "jzero-swagger=swagger -filename "+apiFile+" --schemes http,https", "-api", cv, "-dir", config.C.Gen.Swagger.Output)
 				if config.C.Gen.Route2Code || config.C.Gen.Swagger.Route2Code {
-					cmd = exec.Command("goctl", "api", "plugin", "-plugin", "jzero-swagger=swagger -filename "+apiFile+" --schemes http,https --route2code", "-api", cv, "-dir", config.C.Gen.Swagger.Output)
+					cmd = exec.Command("goctl", "api", "plugin", "-plugin", "jzero-swagger=swagger -filename "+apiFile+" --schemes http,https "+" --route2code ", "-api", cv, "-dir", config.C.Gen.Swagger.Output)
 				}
 
 				logx.Debug(cmd.String())
