@@ -93,6 +93,14 @@ func Run(ic config.IvmConfig) error {
 		Module: moduleStruct.Path,
 	}
 	ivmInit.jzeroRpc = jzeroRpc
+
+	if config.C.Gen.Style == "" {
+		config.C.Gen.Style = "gozero"
+	}
+	if config.C.Gen.Home == "" {
+		config.C.Gen.Home = filepath.Join(config.C.Wd(), ".template")
+	}
+
 	err = ivmInit.gen()
 	if err != nil {
 		return err
