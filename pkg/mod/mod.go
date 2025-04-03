@@ -75,7 +75,7 @@ func GetGoMods(workDir string) ([]ModuleStruct, error) {
 	command.Dir = workDir
 	data, err := command.CombinedOutput()
 	if err != nil {
-		return nil, err
+		return nil, errors.New(string(data))
 	}
 
 	var ms []ModuleStruct
