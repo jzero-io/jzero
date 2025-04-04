@@ -21,6 +21,10 @@ func GetPlugins() ([]Plugin, error) {
 			plugins = append(plugins, Plugin{
 				Path: filepath.ToSlash(filepath.Join("plugins", p.Name())),
 			})
+		} else if p.Type() == os.ModeSymlink {
+			plugins = append(plugins, Plugin{
+				Path: filepath.ToSlash(filepath.Join("plugins", p.Name())),
+			})
 		}
 	}
 	return plugins, nil
