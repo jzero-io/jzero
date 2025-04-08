@@ -19,6 +19,10 @@ func Run() error {
 
 	files = filterFiles(files)
 
+	return FormatFiles(files)
+}
+
+func FormatFiles(files []string) error {
 	gf := gofmtapi.NewFormatter()
 	opt := gofmtapi.NewOptions()
 	opt.BindFlags()

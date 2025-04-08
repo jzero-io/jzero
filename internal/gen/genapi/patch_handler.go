@@ -101,7 +101,7 @@ func (ja *JzeroApi) patchHandler(file HandlerFile) error {
 	}
 
 	buf := bytes.NewBuffer(nil)
-	if err := goformat.Node(buf, fset, f); err != nil {
+	if err = goformat.Node(buf, fset, f); err != nil {
 		return err
 	}
 
