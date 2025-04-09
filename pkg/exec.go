@@ -10,7 +10,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/vars"
 )
 
-func Run(arg, dir string) error {
+func Run(arg, dir string, env ...string) error {
 	goos := runtime.GOOS
 	var cmd *exec.Cmd
 	switch goos {
@@ -21,8 +21,13 @@ func Run(arg, dir string) error {
 	default:
 		return fmt.Errorf("unexpected os: %v", goos)
 	}
+
 	if len(dir) > 0 {
 		cmd.Dir = dir
+	}
+
+	if len(env) > 0 {
+		cmd.Env = append(os.Environ(), env...)
 	}
 
 	stdout, err := cmd.StdoutPipe()

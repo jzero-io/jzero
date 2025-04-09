@@ -16,11 +16,13 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jzero-io/jzero/config"
+	"github.com/jzero-io/jzero/pkg"
 )
 
 var (
@@ -33,6 +35,9 @@ var rootCmd = &cobra.Command{
 	Use: "jzero",
 	Short: `Used to create project by templates and generate server/client code by proto and api file.
 `,
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		return runHooks(cmd, "Before", "global", config.C.Hooks.Before)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if parseBool, err := strconv.ParseBool(cmd.Flags().Lookup("version").Value.String()); err == nil && parseBool {
 			getVersion()
@@ -41,6 +46,9 @@ var rootCmd = &cobra.Command{
 		if err := cmd.Help(); err != nil {
 			cobra.CheckErr(err)
 		}
+	},
+	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+		return runHooks(cmd, "After", "global", config.C.Hooks.After)
 	},
 }
 
@@ -113,6 +121,28 @@ func initConfig() {
 	}
 }
 
+func runHooks(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error {
+	if os.Getenv("JZERO_HOOK_TRIGGERED") == "true" {
+		return nil
+	}
+
+	if len(hooks) > 0 {
+		fmt.Printf("%s\n", color.WithColor(fmt.Sprintf("Start %s %s hooks", hookAction, hooksName), color.FgGreen))
+	}
+	for _, v := range hooks {
+		fmt.Printf("%s command %s\n", color.WithColor("Run", color.FgGreen), v)
+		err := pkg.Run(v, config.C.Wd(), "JZERO_HOOK_TRIGGERED=true")
+		if err != nil {
+			return err
+		}
+	}
+	if len(hooks) > 0 {
+		fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
+	}
+
+	return nil
+}
+
 func traverseCommands(prefix string, cmd *cobra.Command) error {
 	err := config.SetConfig(prefix, cmd.Flags())
 	if err != nil {
@@ -124,6 +154,17 @@ func traverseCommands(prefix string, cmd *cobra.Command) error {
 		if prefix == "" {
 			newPrefix = subCommand.Use
 		}
+
+		beforeHooks := viper.GetStringSlice(fmt.Sprintf("%s.hooks.before", newPrefix))
+		afterHooks := viper.GetStringSlice(fmt.Sprintf("%s.hooks.after", newPrefix))
+
+		subCommand.PreRunE = func(cmd *cobra.Command, args []string) error {
+			return runHooks(cmd, "Before", newPrefix, beforeHooks)
+		}
+		subCommand.PostRunE = func(cmd *cobra.Command, args []string) error {
+			return runHooks(cmd, "After", newPrefix, afterHooks)
+		}
+
 		err = traverseCommands(newPrefix, subCommand)
 		if err != nil {
 			return err

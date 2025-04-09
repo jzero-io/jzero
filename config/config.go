@@ -17,6 +17,8 @@ type Config struct {
 	// global flags
 	Debug bool `mapstructure:"debug"`
 
+	Hooks HooksConfig `mapstructure:"hooks"`
+
 	DebugSleepTime int `mapstructure:"debug-sleep-time"`
 
 	// new command
