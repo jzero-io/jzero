@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero-contrib/modx"
 	"github.com/jzero-io/jzero-contrib/templatex"
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
@@ -73,7 +72,7 @@ func Run() error {
 	}
 
 	for i := 0; i < len(remainingPlugins); i++ {
-		pluginGoMod, err := modx.GetGoMod(filepath.Join(wd, remainingPlugins[i].Path))
+		pluginGoMod, err := mod.GetGoMod(filepath.Join(wd, remainingPlugins[i].Path))
 		if err != nil {
 			return err
 		}
