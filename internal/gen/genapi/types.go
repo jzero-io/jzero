@@ -192,6 +192,10 @@ func (ja *JzeroApi) changeLogicTypes(f *ast.File, fset *token.FileSet, file Logi
 			if genDecl, ok := node.(*ast.GenDecl); ok && genDecl.Tok == token.TYPE {
 				for _, ss := range genDecl.Specs {
 					if typeSpec, ok := ss.(*ast.TypeSpec); ok {
+						// Only proceed if the struct name matches our methodFunc
+						if strings.ToUpper(typeSpec.Name.Name) != strings.ToUpper(methodFunc) {
+							continue
+						}
 						var (
 							structType *ast.StructType
 							ok         bool
