@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/config"
@@ -41,8 +42,19 @@ func GenSdk(genModule bool) error {
 		if pathx.FileExists(filepath.Join(config.C.Gen.Sdk.Output, v.Path)) && v.Skip {
 			continue
 		}
-		if err = os.WriteFile(filepath.Join(config.C.Gen.Sdk.Output, v.Path), v.Content.Bytes(), 0o644); err != nil {
-			return err
+
+		if filepath.Ext(v.Path) == ".go" {
+			formated, err := gosimports.Process("", v.Content.Bytes(), nil)
+			if err != nil {
+				return err
+			}
+			if err = os.WriteFile(filepath.Join(config.C.Gen.Sdk.Output, v.Path), formated, 0o644); err != nil {
+				return err
+			}
+		} else {
+			if err = os.WriteFile(filepath.Join(config.C.Gen.Sdk.Output, v.Path), v.Content.Bytes(), 0o644); err != nil {
+				return err
+			}
 		}
 	}
 
