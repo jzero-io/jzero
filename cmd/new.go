@@ -44,7 +44,7 @@ var newCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("%s project %s in %s dir\n", color.WithColor("Creating", color.FgGreen), config.C.New.Output, config.C.New.Output)
+		fmt.Printf("%s project %s in %s dir\n", color.WithColor("Creating", color.FgGreen), args[0], config.C.New.Output)
 
 		if config.C.New.Module == "" {
 			config.C.New.Module = args[0]
