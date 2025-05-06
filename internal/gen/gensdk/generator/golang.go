@@ -6,6 +6,7 @@ import (
 	goformat "go/format"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/jhump/protoreflect/desc"
@@ -196,7 +197,10 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 	files = append(files, directClientFiles...)
 
 	for _, scope := range getScopes(rhis) {
-		scopeClientFiles, err := g.genScopeClients(scope, getScopeResources(rhis[vars.Scope(scope)]))
+		// 对 resource 进行排序
+		resources := getScopeResources(rhis[vars.Scope(scope)])
+		sort.Strings(resources)
+		scopeClientFiles, err := g.genScopeClients(scope, resources)
 		if err != nil {
 			return nil, err
 		}
