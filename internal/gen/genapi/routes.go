@@ -94,11 +94,36 @@ func (ja *JzeroApi) genRoute2Code() ([]byte, error) {
 		}
 	}
 
+	// 先按 group 分组排序
 	slices.SortFunc(routes, func(a, b Route) int {
-		if a.Path < b.Path {
+		if a.Group < b.Group {
 			return -1
-		} else if a.Path > b.Path {
+		} else if a.Group > b.Group {
 			return 1
+		}
+		return 0
+	})
+
+	// 再按 path 排序
+	slices.SortStableFunc(routes, func(a, b Route) int {
+		if a.Group == b.Group {
+			if a.Path < b.Path {
+				return -1
+			} else if a.Path > b.Path {
+				return 1
+			}
+		}
+		return 0
+	})
+
+	// 最后按 method 排序
+	slices.SortStableFunc(routes, func(a, b Route) int {
+		if a.Group == b.Group && a.Path == b.Path {
+			if a.Method < b.Method {
+				return -1
+			} else if a.Method > b.Method {
+				return 1
+			}
 		}
 		return 0
 	})
