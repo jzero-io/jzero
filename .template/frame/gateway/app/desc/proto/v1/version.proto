@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package versionpb;
+
+import "google/api/annotations.proto";
+import "grpc-gateway/protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "./pb/versionpb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        version: "v1";
+    };
+};
+
+message GetRequest {}
+
+message GetResponse {
+    string version = 1;
+    string  goVersion = 2;
+    string commit = 3;
+    string string = 4;
+}
+
+service Version {
+    rpc Say(GetRequest) returns(GetResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/version"
+        };
+    };
+}

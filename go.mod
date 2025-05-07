@@ -12,6 +12,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.1
 	github.com/hashicorp/go-version v1.7.0
 	github.com/iancoleman/orderedmap v0.3.0
+	github.com/jaronnie/genius v0.5.2
 	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v0.0.1
 	github.com/jzero-io/jzero-contrib v0.21.4
@@ -25,8 +26,8 @@ require (
 	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
-	github.com/zeromicro/go-zero v1.8.1
-	github.com/zeromicro/go-zero/tools/goctl v1.8.1
+	github.com/zeromicro/go-zero v1.8.3
+	github.com/zeromicro/go-zero/tools/goctl v1.8.3
 	golang.org/x/mod v0.23.0
 	golang.org/x/sync v0.11.0
 	golang.org/x/tools v0.30.0
@@ -51,7 +52,7 @@ require (
 	github.com/cyphar/filepath-securejoin v0.3.6 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/eddieowens/opts v0.1.0 // indirect
-	github.com/emicklei/proto v1.14.0 // indirect
+	github.com/emicklei/proto v1.14.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
@@ -83,10 +84,11 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
+	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus/client_golang v1.21.0 // indirect
+	github.com/prometheus/client_golang v1.21.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect

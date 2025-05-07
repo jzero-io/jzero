@@ -1,9 +1,5 @@
 syntax = "v1"
 
-info (
-	go_package: "version"
-)
-
 type GetRequest {}
 
 type GetResponse {
@@ -14,7 +10,7 @@ type GetResponse {
 }
 
 @server(
-    prefix: /api{{ if has "serverless" .Features }}/{{ .APP }}{{end}}/v1
+    prefix: /api/v1/{{ if has "serverless" .Features }}/{{ .APP }}{{end}}
     group: version
 )
 service {{ .APP | ToCamel }} {

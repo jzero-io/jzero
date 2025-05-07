@@ -22,6 +22,14 @@
 
 中文 | [ENGLISH](README-EN.md)
 
+## 重要‼️
+
+如果升级了最新版本的 goctl, goctl version >= 1.8.3
+
+```shell
+goctl env -w GOCTL_EXPERIMENTAL=off
+```
+
 ## 介绍
 
 通过模板创建项目，并基于 proto/api/sql 文件生成 Server/Client/Model 代码。

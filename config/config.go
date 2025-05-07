@@ -6,8 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/go-version"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 )
 
 // C global command flags
@@ -128,6 +131,7 @@ type GenSwaggerConfig struct {
 	DescIgnore []string `mapstructure:"desc-ignore"`
 	Output     string   `mapstructure:"output"`
 	Route2Code bool     `mapstructure:"route2code"`
+	Merge      bool     `mapstructure:"merge"`
 }
 
 type GenZrpcclientConfig struct {
@@ -245,6 +249,31 @@ func (c *Config) ApiDir() string {
 
 func (c *Config) SqlDir() string {
 	return filepath.Join("desc", "sql")
+}
+
+func (c *Config) SwaggerDir() string {
+	return filepath.Join("desc", "swagger")
+}
+
+func (c *Config) GoctlVersion() *version.Version {
+	goctlVersionResp, err := execx.Run("goctl -v", "")
+	if err != nil {
+		panic(err)
+	}
+
+	logx.Debugf("goctl version: %s", goctlVersionResp)
+	versionInfo := strings.Split(goctlVersionResp, " ")
+	var goctlVersion *version.Version
+	if len(versionInfo) >= 3 {
+		goctlVersion, err = version.NewVersion(versionInfo[2])
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		panic("unknown goctl version")
+	}
+
+	return goctlVersion
 }
 
 func SetConfig(command string, flagSet *pflag.FlagSet) error {

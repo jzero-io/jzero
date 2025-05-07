@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
@@ -46,7 +47,7 @@ func GenSdk(genModule bool) error {
 		if filepath.Ext(v.Path) == ".go" {
 			formated, err := gosimports.Process("", v.Content.Bytes(), nil)
 			if err != nil {
-				return err
+				return errors.Errorf("format go file %s %s meet error: %v", v.Path, v.Content.Bytes(), err)
 			}
 			if err = os.WriteFile(filepath.Join(config.C.Gen.Sdk.Output, v.Path), formated, 0o644); err != nil {
 				return err

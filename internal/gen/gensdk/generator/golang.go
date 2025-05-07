@@ -13,9 +13,10 @@ import (
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
-	apiparser "github.com/zeromicro/go-zero/tools/goctl/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
+	apiparser "github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
@@ -101,9 +102,9 @@ func (g *Golang) Gen() ([]*GeneratedFile, error) {
 		}
 
 		for _, v := range files {
-			apiSpec, err := apiparser.Parse(v)
+			apiSpec, err := apiparser.Parse(v, nil)
 			if err != nil {
-				return nil, err
+				return nil, errors.Errorf("failed to parse api spec '%s': %v", v, err)
 			}
 			apiSpecs = append(apiSpecs, apiSpec)
 		}
@@ -394,9 +395,10 @@ var (
 				return nil, err
 			}
 
+			logx.Debugf("get types Go Bytes: %v", string(typesGoBytes))
 			source, err := goformat.Source(typesGoBytes)
 			if err != nil {
-				return nil, err
+				return nil, errors.Errorf("go format %s", typesGoBytes)
 			}
 			typesGoFiles = append(typesGoFiles, &GeneratedFile{
 				Path:    filepath.Join("model", strings.ToLower(gconfig.C.Gen.Sdk.Scope), goPackage, "types.go"),
