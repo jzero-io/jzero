@@ -136,6 +136,7 @@ func (ja *JzeroApi) Gen() error {
 	}
 
 	if len(ja.GenCodeApiFiles) == 0 {
+		fmt.Printf("%s", color.WithColor("Done\n", color.FgGreen))
 		return nil
 	}
 

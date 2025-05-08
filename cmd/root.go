@@ -6,9 +6,11 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strconv"
 	"time"
 
@@ -122,7 +124,7 @@ func initConfig() {
 }
 
 func runHooks(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error {
-	if os.Getenv("JZERO_HOOK_TRIGGERED") == "true" {
+	if os.Getenv("JZERO_HOOK_TRIGGERED") == "true" || os.Getenv("JZERO_FORKED") == "true" {
 		return nil
 	}
 
@@ -138,6 +140,45 @@ func runHooks(cmd *cobra.Command, hookAction, hooksName string, hooks []string) 
 	}
 	if len(hooks) > 0 {
 		fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
+	}
+
+	// fork 一个子进程来运行后续的指令
+	if len(hooks) > 0 && hookAction == "Before" {
+		logx.Debugf("Before hooks executed, forking a new process to continue")
+
+		// 获取当前可执行文件路径
+		executable, err := os.Executable()
+		if err != nil {
+			return fmt.Errorf("failed to get executable path: %v", err)
+		}
+		// 准备命令行参数
+		args := os.Args[1:]
+
+		// 设置环境变量，防止无限递归
+		env := append(os.Environ(), "JZERO_FORKED=true")
+
+		// 创建新进程
+		fork := exec.Command(executable, args...)
+		fork.Env = env
+		fork.Stdin = os.Stdin
+		fork.Stdout = os.Stdout
+		fork.Stderr = os.Stderr
+
+		// 启动新进程
+		if err := fork.Start(); err != nil {
+			return fmt.Errorf("failed to start forked process: %v", err)
+		}
+		// 等待新进程完成
+		if err := fork.Wait(); err != nil {
+			var exitErr *exec.ExitError
+			if errors.As(err, &exitErr) {
+				// 使用与子进程相同的退出码
+				os.Exit(exitErr.ExitCode())
+			}
+			return fmt.Errorf("forked process failed: %v", err)
+		}
+		// 子进程成功完成，退出当前进程
+		os.Exit(0)
 	}
 
 	return nil
