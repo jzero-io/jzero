@@ -188,6 +188,22 @@ func Gen() (err error) {
 									}
 								}
 							}
+
+							// 处理 security
+							/*
+								"security": [
+								          {
+								            "apiKey": []
+								          }
+								        ],
+							*/
+							if g.Get(fmt.Sprintf("paths.%s.%s.security", pmk, pmmk)) == nil {
+								_ = g.Set(fmt.Sprintf("paths.%s.%s.security", pmk, pmmk), []map[string][]any{
+									{
+										"apiKey": []any{},
+									},
+								})
+							}
 						}
 					}
 
