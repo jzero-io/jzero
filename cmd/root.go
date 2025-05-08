@@ -124,13 +124,18 @@ func initConfig() {
 }
 
 func runHooks(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error {
-	if os.Getenv("JZERO_HOOK_TRIGGERED") == "true" || os.Getenv("JZERO_FORKED") == "true" {
+	if os.Getenv("JZERO_HOOK_TRIGGERED") == "true" {
+		return nil
+	}
+
+	if os.Getenv("JZERO_FORKED") == "true" && hooksName == "global" && hookAction == "Before" {
 		return nil
 	}
 
 	if len(hooks) > 0 {
 		fmt.Printf("%s\n", color.WithColor(fmt.Sprintf("Start %s %s hooks", hookAction, hooksName), color.FgGreen))
 	}
+
 	for _, v := range hooks {
 		fmt.Printf("%s command %s\n", color.WithColor("Run", color.FgGreen), v)
 		err := pkg.Run(v, config.C.Wd(), "JZERO_HOOK_TRIGGERED=true")
@@ -138,12 +143,13 @@ func runHooks(cmd *cobra.Command, hookAction, hooksName string, hooks []string) 
 			return err
 		}
 	}
+
 	if len(hooks) > 0 {
 		fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
 	}
 
 	// fork 一个子进程来运行后续的指令
-	if len(hooks) > 0 && hookAction == "Before" {
+	if len(hooks) > 0 && hookAction == "Before" && hooksName == "global" {
 		logx.Debugf("Before hooks executed, forking a new process to continue")
 
 		// 获取当前可执行文件路径
