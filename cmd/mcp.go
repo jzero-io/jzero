@@ -15,7 +15,7 @@ var mcpCmd = &cobra.Command{
 	Use:   "mcp",
 	Short: "mcp server for jzero",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return mcp.Run()
+		return mcp.Run(rootCmd)
 	},
 }
 

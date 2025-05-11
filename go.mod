@@ -1,9 +1,12 @@
 module github.com/jzero-io/jzero
 
-go 1.24
+go 1.24.1
+
+toolchain go1.24.3
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
+	github.com/PlusLemon/mcp-cobra v0.0.0-20250425063415-e12d5b446b38
 	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
 	github.com/fsgo/go_fmt v0.6.3
@@ -63,7 +66,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.9.2 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -76,6 +78,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
+	github.com/mark3labs/mcp-go v0.22.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
@@ -100,6 +103,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
+	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/zeromicro/antlr v0.0.1 // indirect
 	github.com/zeromicro/ddl-parser v1.0.5 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect

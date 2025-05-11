@@ -36,18 +36,33 @@ var newCmd = &cobra.Command{
 	Short:        `Used to create project from templates`,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var projectName string
+		if len(args) > 0 {
+			projectName = args[0]
+		} else {
+			projectName = config.C.New.Name
+		}
+
 		if config.C.New.Output == "" {
-			config.C.New.Output = args[0]
+			if len(args) > 0 {
+				config.C.New.Output = args[0]
+			} else {
+				config.C.New.Output = config.C.New.Name
+			}
 
 			if pathx.FileExists(config.C.New.Output) {
 				return errors.Errorf("%s already exists", config.C.New.Output)
 			}
 		}
 
-		fmt.Printf("%s project %s in %s dir\n", color.WithColor("Creating", color.FgGreen), args[0], config.C.New.Output)
+		fmt.Printf("%s project %s in %s dir\n", color.WithColor("Creating", color.FgGreen), projectName, config.C.New.Output)
 
 		if config.C.New.Module == "" {
-			config.C.New.Module = args[0]
+			if len(args) > 0 {
+				config.C.New.Module = args[0]
+			} else {
+				config.C.New.Module = config.C.New.Name
+			}
 		}
 		// 在 go.mod 项目下但是项目本身没有 go.mod 文件
 		if config.C.New.Mono {
@@ -131,7 +146,7 @@ var newCmd = &cobra.Command{
 		if !pathx.FileExists(embeded.Home) {
 			embeded.Home = filepath.Join(home, ".jzero", "templates", Version)
 		}
-		return new.Run(args[0], base)
+		return new.Run(projectName, base)
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
 		dir, err := os.Getwd()
@@ -164,11 +179,11 @@ var newCmd = &cobra.Command{
 
 		return gen.Run(true)
 	},
-	Args: cobra.ExactArgs(1),
 }
 
 func init() {
 	rootCmd.AddCommand(newCmd)
+	newCmd.Flags().StringP("name", "", "", "set project name")
 	newCmd.Flags().StringP("module", "m", "", "set go module")
 	newCmd.Flags().StringP("output", "o", "", "set output dir")
 	newCmd.Flags().StringP("home", "", "", "use the specified template.")

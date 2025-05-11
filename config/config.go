@@ -50,6 +50,7 @@ type Config struct {
 }
 
 type NewConfig struct {
+	Name               string   `mapstructure:"name"`                 // 新建项目名称
 	Home               string   `mapstructure:"home"`                 // 新建项目使用的模板文件目录
 	Module             string   `mapstructure:"module"`               // 新建的项目的 go module
 	Mono               bool     `mapstructure:"mono"`                 // 是否是 mono 项目(即在一个mod项目之下, 但该项目本身无 go.mod 文件)
@@ -232,6 +233,11 @@ type FormatConfig struct {
 type HooksConfig struct {
 	Before []string `mapstructure:"before"`
 	After  []string `mapstructure:"after"`
+}
+
+func (c *Config) HomeDir() string {
+	homeDir, _ := os.UserHomeDir()
+	return homeDir
 }
 
 func (c *Config) Wd() string {
