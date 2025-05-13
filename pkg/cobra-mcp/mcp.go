@@ -88,9 +88,7 @@ func (s *MCPServer) handleToolCall(cmd *cobra.Command) func(ctx context.Context,
 		os.Stdout = w
 
 		var fullArgs []string
-		for _, part := range getFullCommandPath(cmd) {
-			fullArgs = append(fullArgs, part)
-		}
+		fullArgs = append(fullArgs, getFullCommandPath(cmd)...)
 
 		for key, val := range request.Params.Arguments {
 			if key == "args" {
@@ -110,9 +108,9 @@ func (s *MCPServer) handleToolCall(cmd *cobra.Command) func(ctx context.Context,
 
 		err := s.rootCmd.Execute()
 
-		w.Close()
+		_ = w.Close()
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		_, _ = io.Copy(&buf, r)
 		os.Stdout = originalStdout
 		if err != nil {
 			return mcp.NewToolResultText(err.Error()), nil
