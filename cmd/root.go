@@ -30,6 +30,7 @@ import (
 var (
 	CfgFile    string
 	CfgEnvFile string
+	WorkingDir string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -67,6 +68,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.Flags().BoolP("version", "v", false, "show version")
+	rootCmd.PersistentFlags().StringVarP(&WorkingDir, "working-dir", "w", "", "set working directory")
 	rootCmd.PersistentFlags().StringVarP(&CfgFile, "config", "f", ".jzero.yaml", "set config file")
 	rootCmd.PersistentFlags().StringVarP(&CfgEnvFile, "config-env", "", ".jzero.env.yaml", "set config env file")
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "debug mode")
@@ -124,6 +126,14 @@ func initConfig() {
 }
 
 func runHooks(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error {
+	if hookAction == "Before" && hooksName == "global" {
+		if WorkingDir != "" {
+			if err := os.Chdir(WorkingDir); err != nil {
+				cobra.CheckErr(err)
+			}
+		}
+	}
+
 	if os.Getenv("JZERO_HOOK_TRIGGERED") == "true" {
 		return nil
 	}

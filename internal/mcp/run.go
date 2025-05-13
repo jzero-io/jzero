@@ -6,8 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/PlusLemon/mcp-cobra/mcp"
 	"github.com/spf13/cobra"
+
+	mcp "github.com/jzero-io/jzero/pkg/cobra-mcp"
 )
 
 func Run(rootCmd *cobra.Command) error {

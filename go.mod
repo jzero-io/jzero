@@ -6,7 +6,6 @@ toolchain go1.24.3
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/PlusLemon/mcp-cobra v0.0.0-20250425063415-e12d5b446b38
 	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
 	github.com/fsgo/go_fmt v0.6.3
@@ -19,6 +18,7 @@ require (
 	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v1.1.0
 	github.com/jzero-io/jzero-contrib v0.23.0
+	github.com/mark3labs/mcp-go v0.22.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1
@@ -78,7 +78,6 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
-	github.com/mark3labs/mcp-go v0.22.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
