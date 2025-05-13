@@ -185,7 +185,7 @@ func init() {
 	rootCmd.AddCommand(newCmd)
 	newCmd.Flags().StringP("name", "", "", "set project name")
 	newCmd.Flags().StringP("module", "m", "", "set go module")
-	newCmd.Flags().StringP("output", "o", "", "set output dir")
+	newCmd.Flags().StringP("output", "o", "", "set output dir with project name")
 	newCmd.Flags().StringP("home", "", "", "use the specified template.")
 	newCmd.Flags().StringP("frame", "", "", "set frame")
 	newCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")

@@ -44,29 +44,29 @@ func NewMCPServer(rootCmd *cobra.Command) *MCPServer {
 
 		flags := getAllFlagDefs(leaf)
 		for _, f := range flags {
-			var propertieOptions []mcp.PropertyOption
+			var propertiesOptions []mcp.PropertyOption
 			if f.DefValue == "" {
-				propertieOptions = append(propertieOptions, mcp.Required())
+				propertiesOptions = append(propertiesOptions, mcp.Required())
 			}
-			propertieOptions = append(propertieOptions, mcp.Description(f.Usage))
+			propertiesOptions = append(propertiesOptions, mcp.Description(f.Usage))
 			switch f.Value.Type() {
 			case "string":
-				propertieOptions = append(propertieOptions, mcp.DefaultString(f.DefValue))
-				toolOptions = append(toolOptions, mcp.WithString(f.Name, propertieOptions...))
+				propertiesOptions = append(propertiesOptions, mcp.DefaultString(f.DefValue))
+				toolOptions = append(toolOptions, mcp.WithString(f.Name, propertiesOptions...))
 			case "int":
 				defaultValue, _ := strconv.ParseFloat(f.DefValue, 64)
-				propertieOptions = append(propertieOptions, mcp.DefaultNumber(defaultValue))
-				toolOptions = append(toolOptions, mcp.WithNumber(f.Name, propertieOptions...))
+				propertiesOptions = append(propertiesOptions, mcp.DefaultNumber(defaultValue))
+				toolOptions = append(toolOptions, mcp.WithNumber(f.Name, propertiesOptions...))
 			case "bool":
 				defaultValue, _ := strconv.ParseBool(f.DefValue)
-				propertieOptions = append(propertieOptions, mcp.DefaultBool(defaultValue))
-				toolOptions = append(toolOptions, mcp.WithBoolean(f.Name, propertieOptions...))
+				propertiesOptions = append(propertiesOptions, mcp.DefaultBool(defaultValue))
+				toolOptions = append(toolOptions, mcp.WithBoolean(f.Name, propertiesOptions...))
 			case "float32", "float64":
 				defaultValue, _ := strconv.ParseFloat(f.DefValue, 64)
-				propertieOptions = append(propertieOptions, mcp.DefaultNumber(defaultValue))
-				toolOptions = append(toolOptions, mcp.WithNumber(f.Name, propertieOptions...))
+				propertiesOptions = append(propertiesOptions, mcp.DefaultNumber(defaultValue))
+				toolOptions = append(toolOptions, mcp.WithNumber(f.Name, propertiesOptions...))
 			default:
-				toolOptions = append(toolOptions, mcp.WithString(f.Name, propertieOptions...))
+				toolOptions = append(toolOptions, mcp.WithString(f.Name, propertiesOptions...))
 			}
 		}
 		tool := mcp.NewTool(toolName, toolOptions...)
@@ -127,6 +127,7 @@ func getLeafCommands(cmd *cobra.Command) []*cobra.Command {
 	if len(cmd.Commands()) == 0 {
 		leaves = append(leaves, cmd)
 	} else {
+		leaves = append(leaves, cmd)
 		for _, sub := range cmd.Commands() {
 			leaves = append(leaves, getLeafCommands(sub)...)
 		}

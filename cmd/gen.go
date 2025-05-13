@@ -30,7 +30,7 @@ import (
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
 	Use:   "gen",
-	Short: `Used to generate server/client code`,
+	Short: `Used to generate server code with api, proto, sql desc file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		home, _ := os.UserHomeDir()
 		config.C.Gen.Home, _ = homedir.Expand(config.C.Gen.Home)
