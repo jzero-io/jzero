@@ -18,7 +18,7 @@ require (
 	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v1.1.0
 	github.com/jzero-io/jzero-contrib v0.23.0
-	github.com/mark3labs/mcp-go v0.22.0
+	github.com/mark3labs/mcp-go v0.27.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1
