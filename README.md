@@ -19,6 +19,7 @@
 * 基于 jzero 的[后台管理系统](https://github.com/jzero-io/jzero-admin), [演示地址1-部署在vercel](https://admin.jzero.io), [演示地址2-部署在阿里云函数计算](https://jzero-admin.jaronnie.com)
 * 基于 jzero 的 [serverless](https://docs.jzero.io/guide/serverless.html) 特性, 实现多模块解藕, 在编译阶段实现第三方模块的自动依赖注入
 * [动态配置特性](https://docs.jzero.io/guide/config/dynamic_conf.html), 可动态修改服务端配置, 无需重启服务端
+* 支持 jzero mcp server
 
 中文 | [ENGLISH](README-EN.md)
 
