@@ -24,8 +24,6 @@ type Config struct {
 
 	DebugSleepTime int `mapstructure:"debug-sleep-time"`
 
-	WorkingDir string `mapstructure:"working-dir"`
-
 	// new command
 	New NewConfig `mapstructure:"new"`
 

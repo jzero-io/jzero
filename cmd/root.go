@@ -83,6 +83,12 @@ func initConfig() {
 		}
 	}
 
+	if WorkingDir != "" {
+		if err := os.Chdir(WorkingDir); err != nil {
+			cobra.CheckErr(err)
+		}
+	}
+
 	if pathx.FileExists(CfgFile) {
 		viper.SetConfigFile(CfgFile)
 		// If a config file is found, read it in.
@@ -126,14 +132,6 @@ func initConfig() {
 }
 
 func runHooks(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error {
-	if hookAction == "Before" && hooksName == "global" {
-		if WorkingDir != "" {
-			if err := os.Chdir(WorkingDir); err != nil {
-				cobra.CheckErr(err)
-			}
-		}
-	}
-
 	if os.Getenv("JZERO_HOOK_TRIGGERED") == "true" {
 		return nil
 	}
