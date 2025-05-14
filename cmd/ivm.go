@@ -6,8 +6,6 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package cmd
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -72,8 +70,6 @@ var ivmAddApiCmd = &cobra.Command{
 }
 
 func init() {
-	wd, _ := os.Getwd()
-
 	{
 		rootCmd.AddCommand(ivmCmd)
 		ivmCmd.PersistentFlags().StringP("version", "v", "v1", "jzero ivm version")
@@ -83,7 +79,7 @@ func init() {
 		ivmCmd.AddCommand(ivmInitCmd)
 
 		ivmInitCmd.Flags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
-		ivmInitCmd.PersistentFlags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
+		ivmInitCmd.PersistentFlags().StringP("home", "", ".template", "set template home")
 		ivmInitCmd.Flags().BoolP("change-logic-types", "", true, "if api file or proto change, e.g. Request or Response type, change handler and logic file content types but not file")
 	}
 

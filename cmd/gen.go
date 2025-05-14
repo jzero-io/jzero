@@ -156,13 +156,11 @@ var genCrudCmd = &cobra.Command{
 }
 
 func init() {
-	wd, _ := os.Getwd()
-
 	{
 		rootCmd.AddCommand(genCmd)
 
 		genCmd.PersistentFlags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
-		genCmd.PersistentFlags().StringP("home", "", filepath.Join(wd, ".template"), "set template home")
+		genCmd.PersistentFlags().StringP("home", "", ".template", "set template home")
 		genCmd.PersistentFlags().StringSliceP("desc", "", []string{}, "set desc path")
 		genCmd.PersistentFlags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
 
