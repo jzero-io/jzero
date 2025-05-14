@@ -39,6 +39,7 @@ var formatCmd = &cobra.Command{
 
 		return nil
 	},
+	SilenceUsage: true,
 }
 
 // formatGoCmd represents the format go code command
@@ -51,6 +52,7 @@ var formatGoCmd = &cobra.Command{
 		}
 		return nil
 	},
+	SilenceUsage: true,
 }
 
 var formatApiCmd = &cobra.Command{
@@ -59,6 +61,7 @@ var formatApiCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("format api called")
 	},
+	SilenceUsage: true,
 }
 
 var formatProtoCmd = &cobra.Command{
@@ -67,6 +70,7 @@ var formatProtoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("format proto called")
 	},
+	SilenceUsage: true,
 }
 
 var formatSqlCmd = &cobra.Command{
@@ -75,11 +79,13 @@ var formatSqlCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("format sql called")
 	},
+	SilenceUsage: true,
 }
 
 func init() {
 	rootCmd.AddCommand(formatCmd)
 	formatCmd.PersistentFlags().BoolP("git-change", "", true, "just format git changed files")
+	formatCmd.PersistentFlags().BoolP("display-diff", "d", false, "display diffs instead of rewriting files")
 
 	formatCmd.AddCommand(formatGoCmd)
 	formatCmd.AddCommand(formatApiCmd)

@@ -27,6 +27,7 @@ func FormatFiles(files []string) error {
 	opt := gofmtapi.NewOptions()
 	opt.BindFlags()
 
+	opt.DisplayDiff = config.C.Format.DisplayDiff
 	opt.Files = files
 
 	if len(opt.Files) == 0 {

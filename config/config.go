@@ -227,7 +227,8 @@ type MigrateConfig struct {
 }
 
 type FormatConfig struct {
-	GitChange bool `mapstructure:"git-change"`
+	GitChange   bool `mapstructure:"git-change"`
+	DisplayDiff bool `mapstructure:"display-diff"`
 }
 
 type HooksConfig struct {
