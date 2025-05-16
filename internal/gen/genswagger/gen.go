@@ -170,7 +170,7 @@ func Gen() (err error) {
 
 							// 处理 tags
 							tags := cast.ToStringSlice(g.Get(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk)))
-							if len(tags) == 1 && tags[0] == "" {
+							if len(tags) == 0 || (len(tags) == 1 && tags[0] == "") {
 								if goPackage != "" {
 									_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{goPackage})
 								} else {
