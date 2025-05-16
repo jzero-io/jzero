@@ -35,6 +35,7 @@ jobs:
           cd examples
           rm -rf simpleapi
           jzero new simpleapi
+          go install github.com/zeromicro/go-zero/tools/goctl@v1.8.4-alpha
           cd simpleapi && jzero gen
           jzero gen swagger
           jzero gen sdk
