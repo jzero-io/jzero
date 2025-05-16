@@ -11,7 +11,6 @@ type GetResponse {
 
 @server(
     prefix: /api/v1{{ if has "serverless" .Features }}/{{ .APP }}{{end}}
-    group: version
 )
 service {{ .APP | ToCamel }} {
     @handler Get
