@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/hashicorp/go-version"
 	"github.com/spf13/pflag"
@@ -262,23 +263,27 @@ func (c *Config) SwaggerDir() string {
 	return filepath.Join("desc", "swagger")
 }
 
-func (c *Config) GoctlVersion() *version.Version {
-	goctlVersionResp, err := execx.Run("goctl -v", "")
-	if err != nil {
-		panic(err)
-	}
+var (
+	once         sync.Once
+	goctlVersion *version.Version
+)
 
-	logx.Debugf("goctl version: %s", goctlVersionResp)
-	versionInfo := strings.Split(goctlVersionResp, " ")
-	var goctlVersion *version.Version
-	if len(versionInfo) >= 3 {
-		goctlVersion, err = version.NewVersion(versionInfo[2])
+func (c *Config) GoctlVersion() *version.Version {
+	once.Do(func() {
+		goctlVersionResp, err := execx.Run("goctl -v", "")
 		if err != nil {
 			panic(err)
 		}
-	} else {
-		panic("unknown goctl version")
-	}
+
+		logx.Debugf("goctl version: %s", goctlVersionResp)
+		versionInfo := strings.Split(goctlVersionResp, " ")
+		if len(versionInfo) >= 3 {
+			goctlVersion, err = version.NewVersion(versionInfo[2])
+			if err != nil {
+				panic(err)
+			}
+		}
+	})
 
 	return goctlVersion
 }
