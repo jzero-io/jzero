@@ -139,8 +139,8 @@ github.com/jhump/protoreflect v1.17.0 h1:qOEr613fac2lOuTgWN4tPAtLL7fUSbuJL5X5Xum
 github.com/jhump/protoreflect v1.17.0/go.mod h1:h9+vUUL38jiBzck8ck+6G/aeMX8Z4QUY/NiJPwPNi+8=
 github.com/jzero-io/desc v1.1.0 h1:V6PvGnYWxfR24iroaJ8R/jlChiBBQ2hJdxhHKkSvAQY=
 github.com/jzero-io/desc v1.1.0/go.mod h1:gav1fZ49+rsEjT/5MUNp6ueyNFuX0lDKGyzIM6NrB+E=
-github.com/jzero-io/jzero-contrib v0.23.0 h1:6OSu9uTQwHGEA3rWpBCZav0Nti3nn5OMtVyg+N7XrBA=
-github.com/jzero-io/jzero-contrib v0.23.0/go.mod h1:6z4UVcs4J54RD8C+4+zVfUuFDRdIARd3ldNnHELinuw=
+github.com/jzero-io/jzero-contrib v0.24.0 h1:tWq3TZ1yPwdYiix5OYU04jjK+jFkXfNeKIVz5K6BAz0=
+github.com/jzero-io/jzero-contrib v0.24.0/go.mod h1:hyJGPVxPfAEABZL1rpoWviGtKMs/rJY3zwQqrvTXE2g=
 github.com/kevinburke/ssh_config v1.2.0 h1:x584FjTGwHzMwvHx18PXxbBVzfnxogHaAReU4gf13a4=
 github.com/kevinburke/ssh_config v1.2.0/go.mod h1:CT57kijsi8u/K/BOFA39wgDQJ9CxiF4nAY/ojJ6r6mM=
 github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zttxdo=
