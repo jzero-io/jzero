@@ -165,7 +165,7 @@ func init() {
 		genCmd.Flags().StringSliceP("model-mysql-datasource-table", "", []string{"*"}, "goctl model mysql datasource table")
 		genCmd.Flags().BoolP("model-mysql-cache", "", false, "goctl model mysql cache")
 		genCmd.Flags().StringP("model-mysql-cache-prefix", "", "", "goctl model mysql cache prefix")
-		genCmd.Flags().BoolP("gen-mysql-create-table-ddl", "", false, "is generate mysql create table ddl, only datasource mode takes effective")
+		genCmd.Flags().BoolP("mysql-create-table-ddl", "", false, "is generate mysql create table ddl, only datasource mode takes effective")
 		genCmd.Flags().BoolP("rpc-client", "", false, "is generate rpc client code by goctl")
 	}
 

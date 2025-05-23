@@ -84,7 +84,7 @@ func (jm *JzeroModel) Gen() error {
 		if err != nil {
 			return err
 		}
-		if !config.C.Gen.GenMysqlCreateTableDDL {
+		if !config.C.Gen.MysqlCreateTableDDL {
 			defer func() {
 				for _, v := range writeTables {
 					if err = os.Remove(v); err != nil {
