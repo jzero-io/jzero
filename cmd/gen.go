@@ -19,7 +19,6 @@ import (
 	"github.com/jzero-io/jzero/config"
 	"github.com/jzero-io/jzero/embeded"
 	"github.com/jzero-io/jzero/internal/gen"
-	"github.com/jzero-io/jzero/internal/gen/gencrud"
 	"github.com/jzero-io/jzero/internal/gen/gendocs"
 	"github.com/jzero-io/jzero/internal/gen/gensdk"
 	"github.com/jzero-io/jzero/internal/gen/genswagger"
@@ -144,17 +143,6 @@ var genDocsCmd = &cobra.Command{
 	Aliases: []string{"doc"},
 }
 
-// genCrudCmd represents the gen crud command
-var genCrudCmd = &cobra.Command{
-	Use:   "crud",
-	Short: "jzero gen crud",
-	Long:  `jzero gen crud`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return gencrud.Run()
-	},
-	Aliases: []string{"curd"},
-}
-
 func init() {
 	{
 		rootCmd.AddCommand(genCmd)
@@ -219,9 +207,5 @@ func init() {
 		genZRpcClientCmd.Flags().StringP("goModule", "", "", "set go module name")
 		genZRpcClientCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")
 		genZRpcClientCmd.Flags().StringP("goPackage", "", "", "set package name")
-	}
-
-	{
-		genCmd.AddCommand(genCrudCmd)
 	}
 }
