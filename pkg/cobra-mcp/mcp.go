@@ -90,7 +90,7 @@ func (s *MCPServer) handleToolCall(cmd *cobra.Command) func(ctx context.Context,
 		var fullArgs []string
 		fullArgs = append(fullArgs, getFullCommandPath(cmd)...)
 
-		for key, val := range request.Params.Arguments {
+		for key, val := range request.GetArguments() {
 			if key == "args" {
 				continue
 			}
@@ -98,7 +98,7 @@ func (s *MCPServer) handleToolCall(cmd *cobra.Command) func(ctx context.Context,
 			fullArgs = append(fullArgs, fmt.Sprintf("%v", val))
 		}
 
-		if args, ok := request.Params.Arguments["args"].([]any); ok {
+		if args, ok := request.GetArguments()["args"].([]any); ok {
 			for _, arg := range args {
 				fullArgs = append(fullArgs, fmt.Sprintf("%v", arg))
 			}
