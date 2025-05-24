@@ -7,9 +7,12 @@ func new{{.upperStartCamelObject}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx
     if o.CachedConn != nil {
     	cachedConn = *o.CachedConn
     }
+
+    initVars()
+
 	return &default{{.upperStartCamelObject}}Model{
 		cachedConn: cachedConn,
 		conn: conn,
-		table:      {{.table}},
+		table:      condition.Table({{.table}}),
 	}
 }

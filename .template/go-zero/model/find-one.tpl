@@ -1,6 +1,6 @@
 func (m *default{{.upperStartCamelObject}}Model) FindOne(ctx context.Context, session sqlx.Session, {{.lowerStartCamelPrimaryKey}} {{.dataType}}) (*{{.upperStartCamelObject}}, error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-	sb.Where(sb.EQ("{{.originalPrimaryKey}}", {{.lowerStartCamelPrimaryKey}}))
+	sb.Where(sb.EQ(condition.Field("{{.originalPrimaryKey}}"), {{.lowerStartCamelPrimaryKey}}))
 	sb.Limit(1)
 	sql, args := sb.Build()
 	var resp {{.upperStartCamelObject}}
@@ -25,7 +25,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneWithCache(ctx context.Co
 	var resp {{.upperStartCamelObject}}
 	err := m.cachedConn.QueryRowCtx(ctx, &resp, {{.cacheKeyVariable}}, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
 	    sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-	    sb.Where(sb.EQ("{{.originalPrimaryKey}}", {{.lowerStartCamelPrimaryKey}}))
+	    sb.Where(sb.EQ(condition.Field("{{.originalPrimaryKey}}"), {{.lowerStartCamelPrimaryKey}}))
         sql, args := sb.Build()
         if session != nil {
 		    return session.QueryRowCtx(ctx, v, sql, args...)
