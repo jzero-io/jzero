@@ -64,7 +64,7 @@ func (jm *JzeroModel) GenDDL(sqlConn sqlx.SqlConn, tables []string) ([]string, e
 	for _, t := range tables {
 		ct := t
 		eg.Go(func() error {
-			ddl, err := getTableDDL(sqlConn, ct)
+			ddl, err := getTableDDL(sqlConn, config.C.Gen.ModelDriver, ct)
 			if err != nil {
 				return err
 			}

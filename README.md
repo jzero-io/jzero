@@ -21,6 +21,7 @@
 * 基于 jzero 的 [serverless](https://docs.jzero.io/guide/serverless.html) 插件特性, 实现多模块解耦, 在编译阶段实现第三方模块的自动依赖注入
 * [动态配置特性](https://docs.jzero.io/guide/config/dynamic_conf.html), 可动态修改服务端配置, 无需重启服务端
 * 实现了 jzero mcp server, 可在 mcp client 使用 jzero mcp
+* 同一套代码动态能适配多数据库类型
 
 ![](http://oss.jaronnie.com/image-20250514114027747.png)
 

@@ -83,9 +83,8 @@ type GenConfig struct {
 	// git flags
 	GitChange bool `mapstructure:"git-change"`
 
-	// model flags
-	ModelMysqlStrict bool `mapstructure:"model-mysql-strict"`
-
+	// model flags, MarkDeprecated
+	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`
 	ModelMysqlIgnoreColumns   []string `mapstructure:"model-mysql-ignore-columns"`
 	ModelMysqlDDLDatabase     string   `mapstructure:"model-mysql-ddl-database"`
 	ModelMysqlDatasource      bool     `mapstructure:"model-mysql-datasource"`
@@ -93,7 +92,19 @@ type GenConfig struct {
 	ModelMysqlDatasourceTable []string `mapstructure:"model-mysql-datasource-table"`
 	ModelMysqlCache           bool     `mapstructure:"model-mysql-cache"`
 	ModelMysqlCachePrefix     string   `mapstructure:"model-mysql-cache-prefix"`
-	MysqlCreateTableDDL       bool     `mapstructure:"mysql-create-table-ddl"`
+	ModelMysqlCreateTableDDL  bool     `mapstructure:"model-mysql-create-table-ddl"`
+
+	// common model
+	ModelDriver          string   `mapstructure:"model-driver"`
+	ModelStrict          bool     `mapstructure:"model-strict"`
+	ModelIgnoreColumns   []string `mapstructure:"model-ignore-columns"`
+	ModelDDLDatabase     string   `mapstructure:"model-ddl-database"`
+	ModelDatasource      bool     `mapstructure:"model-datasource"`
+	ModelDatasourceUrl   string   `mapstructure:"model-datasource-url"`
+	ModelDatasourceTable []string `mapstructure:"model-datasource-table"`
+	ModelCache           bool     `mapstructure:"model-cache"`
+	ModelCachePrefix     string   `mapstructure:"model-cache-prefix"`
+	ModelCreateTableDDL  bool     `mapstructure:"model-create-table-ddl"`
 
 	// rpc flags
 	RpcClient bool `mapstructure:"rpc-client"`
