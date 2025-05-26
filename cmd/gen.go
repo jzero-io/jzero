@@ -37,6 +37,7 @@ var genCmd = &cobra.Command{
 			config.C.Gen.Home = filepath.Join(home, ".jzero", "templates", Version)
 		}
 		embeded.Home = config.C.Gen.Home
+
 		return gen.Run(false)
 	},
 	SilenceUsage: true,

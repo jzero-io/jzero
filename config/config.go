@@ -83,19 +83,9 @@ type GenConfig struct {
 	// git flags
 	GitChange bool `mapstructure:"git-change"`
 
-	// model flags, MarkDeprecated
-	ModelMysqlStrict          bool     `mapstructure:"model-mysql-strict"`
-	ModelMysqlIgnoreColumns   []string `mapstructure:"model-mysql-ignore-columns"`
-	ModelMysqlDDLDatabase     string   `mapstructure:"model-mysql-ddl-database"`
-	ModelMysqlDatasource      bool     `mapstructure:"model-mysql-datasource"`
-	ModelMysqlDatasourceUrl   string   `mapstructure:"model-mysql-datasource-url"`
-	ModelMysqlDatasourceTable []string `mapstructure:"model-mysql-datasource-table"`
-	ModelMysqlCache           bool     `mapstructure:"model-mysql-cache"`
-	ModelMysqlCachePrefix     string   `mapstructure:"model-mysql-cache-prefix"`
-	ModelMysqlCreateTableDDL  bool     `mapstructure:"model-mysql-create-table-ddl"`
+	// model flag
+	ModelDriver string `mapstructure:"model-driver"`
 
-	// common model
-	ModelDriver          string   `mapstructure:"model-driver"`
 	ModelStrict          bool     `mapstructure:"model-strict"`
 	ModelIgnoreColumns   []string `mapstructure:"model-ignore-columns"`
 	ModelDDLDatabase     string   `mapstructure:"model-ddl-database"`
