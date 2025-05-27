@@ -20,10 +20,8 @@
 * 基于 jzero 的[后台管理系统](https://github.com/jzero-io/jzero-admin), [演示地址1-部署在vercel](https://admin.jzero.io), [演示地址2-部署在阿里云函数计算](https://jzero-admin.jaronnie.com)
 * 基于 jzero 的 [serverless](https://docs.jzero.io/guide/serverless.html) 插件特性, 实现多模块解耦, 在编译阶段实现第三方模块的自动依赖注入
 * [动态配置特性](https://docs.jzero.io/guide/config/dynamic_conf.html), 可动态修改服务端配置, 无需重启服务端
-* 实现了 jzero mcp server, 可在 mcp client 使用 jzero mcp
+* 实现了 jzero mcp server, 可在 mcp client 对话框中调用 jzero 工具生成代码
 * 同一套代码动态能适配多数据库类型
-
-![](http://oss.jaronnie.com/image-20250514114027747.png)
 
 中文 | [ENGLISH](README-EN.md)
 
@@ -94,6 +92,12 @@ go run main.go server
 项目实战请参阅:
 * api 框架: https://docs.jzero.io/project/api.html
 * gateway 框架: https://docs.jzero.io/project/gateway.html
+
+## 相关项目
+* jzero-contrib(jzero 扩展库, go-zero 用户可直接使用): https://github.com/jzero-io/jzero-contrib
+* jzero-admin(基于 jzero 的后台管理系统): https://github.com/jzero-io/jzero-admin
+* jzero-action(jzero github action): https://github.com/jzero-io/jzero-action
+* sqlbuilder-zero(二次修改 go-zero model 模板): https://github.com/jzero-io/sqlbuilder-zero
 
 ## 路线图
 
