@@ -28,25 +28,26 @@ jzero 会将 sql 文件自动生成在 desc/sql 目录下, 并以 table 命名, 
 ```yaml
 gen:
   # 是否生成带缓存的数据库代码
-  model-mysql-cache: true
+  model-cache: true
   # Ignore columns while creating or updating rows, 默认为 create_at,created_at,create_time,update_at,updated_at,update_time
-  model-mysql-ignore-columns: []
+  model-ignore-columns: []
 ```
 
 ### 基于远程 mysql 地址
 
 ```yaml
 gen:
+  model-driver: mysql
   # 是否生成带缓存的数据库代码
-  model-mysql-cache: true
+  model-cache: true
   # 是否使用远程 mysql 数据源生成代码
-  model-mysql-datasource: true
+  model-datasource: true
   # Ignore columns while creating or updating rows, 默认为 create_at,created_at,create_time,update_at,updated_at,update_time
-  model-mysql-ignore-columns: []
+  model-ignore-columns: []
   # mysql 数据源配置
-  model-mysql-datasource-url: "remote:b3YJ2d9fIE0TlMNeqMRf@tcp(192.168.135.180:3306)/ntls"
+  model-datasource-url: "remote:b3YJ2d9fIE0TlMNeqMRf@tcp(192.168.135.180:3306)/ntls"
   # 使用哪些 table, 默认为 *(所有)
-  model-mysql-datasource-table:
+  model-datasource-table:
     - manage_user
 ```
 
