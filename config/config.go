@@ -67,6 +67,7 @@ type NewConfig struct {
 }
 
 type GenConfig struct {
+	// Hooks
 	Hooks HooksConfig `mapstructure:"hooks"`
 
 	// global flags
@@ -75,10 +76,10 @@ type GenConfig struct {
 	Style string `mapstructure:"style"`
 
 	// code style flags
-	ChangeLogicTypes bool `mapstructure:"change-logic-types"`
+	RpcStylePatch bool `mapstructure:"rpc-style-patch"`
 
-	RpcStylePatch   bool `mapstructure:"rpc-style-patch"`
-	RegenApiHandler bool `mapstructure:"regen-api-handler"`
+	ChangeLogicTypes bool `mapstructure:"change-logic-types"`
+	RegenApiHandler  bool `mapstructure:"regen-api-handler"`
 
 	// git flags
 	GitChange bool `mapstructure:"git-change"`
@@ -88,7 +89,7 @@ type GenConfig struct {
 
 	ModelStrict          bool     `mapstructure:"model-strict"`
 	ModelIgnoreColumns   []string `mapstructure:"model-ignore-columns"`
-	ModelDDLDatabase     string   `mapstructure:"model-ddl-database"`
+	ModelScheme          string   `mapstructure:"model-scheme"`
 	ModelDatasource      bool     `mapstructure:"model-datasource"`
 	ModelDatasourceUrl   string   `mapstructure:"model-datasource-url"`
 	ModelDatasourceTable []string `mapstructure:"model-datasource-table"`
@@ -96,22 +97,19 @@ type GenConfig struct {
 	ModelCachePrefix     string   `mapstructure:"model-cache-prefix"`
 	ModelCreateTableDDL  bool     `mapstructure:"model-create-table-ddl"`
 
-	// rpc flags
-	RpcClient bool `mapstructure:"rpc-client"`
-
 	// gen code flags
 	Desc []string `mapstructure:"desc"`
 
 	DescIgnore []string `mapstructure:"desc-ignore"`
-
-	// other
 	Route2Code bool
+	RpcClient  bool `mapstructure:"rpc-client"`
 
-	Sdk        GenSdkConfig        `mapstructure:"sdk"`
+	// Sub command
+	Sdk GenSdkConfig `mapstructure:"sdk"`
+
 	Swagger    GenSwaggerConfig    `mapstructure:"swagger"`
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`
 	Docs       GenDocsConfig       `mapstructure:"docs"`
-	Crud       GenCrudConfig       `mapstructure:"crud"`
 }
 
 type GenSdkConfig struct {
@@ -155,10 +153,6 @@ type GenDocsConfig struct {
 	DescIgnore []string `mapstructure:"desc-ignore"`
 	Output     string   `mapstructure:"output"`
 	Format     string   `mapstructure:"format"`
-}
-
-type GenCrudConfig struct {
-	// todo: add flag
 }
 
 type IvmConfig struct {

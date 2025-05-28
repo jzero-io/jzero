@@ -1,13 +1,8 @@
 package genmodel
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"go/ast"
-	goformat "go/format"
-	goparser "go/parser"
-	"go/token"
 	"os"
 	"os/exec"
 	"path"
@@ -24,7 +19,6 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/postgres"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/tools/goctl/model/sql/parser"
-	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
 	"golang.org/x/sync/errgroup"
@@ -233,48 +227,34 @@ func (jm *JzeroModel) Gen() error {
 		bf := filepath.Base(f)
 		modelDir := filepath.Join("internal", "model", strings.ToLower(bf[0:len(bf)-len(path.Ext(bf))]))
 
-		var ddlDatabase string
-		if config.C.Gen.ModelDatasource {
+		var scheme string
+		if config.C.Gen.ModelDatasource && config.C.Gen.ModelDriver == "mysql" {
 			meta, err := dsn.ParseDSN(config.C.Gen.ModelDriver, config.C.Gen.ModelDatasourceUrl)
 			if err != nil {
 				return err
 			}
-			ddlDatabase = meta[dsn.DBName]
+			scheme = meta[dsn.DBName]
 		}
-		if config.C.Gen.ModelDDLDatabase != "" {
-			ddlDatabase = config.C.Gen.ModelDDLDatabase
+		if config.C.Gen.ModelScheme != "" {
+			scheme = config.C.Gen.ModelScheme
 		}
 
 		if config.C.Gen.ModelDriver == "postgres" {
-			cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", config.C.Gen.ModelDatasourceUrl, "-t", strings.TrimSuffix(filepath.Base(f), ".sql"), "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+			if scheme == "" {
+				scheme = "public"
+			}
+			cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", config.C.Gen.ModelDatasourceUrl, "--scheme", scheme, "-t", strings.TrimSuffix(filepath.Base(f), ".sql"), "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 			logx.Debug(cmd.String())
 			resp, err := cmd.CombinedOutput()
 			if err != nil {
 				return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
 			}
 		} else {
-			cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", ddlDatabase, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+			cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", scheme, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 			logx.Debug(cmd.String())
 			resp, err := cmd.CombinedOutput()
 			if err != nil {
 				return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
-			}
-		}
-
-		if config.C.Gen.ModelCachePrefix != "" && config.C.Gen.ModelCache {
-			for _, tp := range tableParsers {
-				namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, tp.Name.Source())
-				if err != nil {
-					return err
-				}
-				file := namingFormat + "model_gen.go"
-				if config.C.Gen.Style == "go_zero" {
-					file = namingFormat + "_model_gen.go"
-				}
-				err = jm.addModelCachePrefix(filepath.Join(modelDir, file))
-				if err != nil {
-					return err
-				}
 			}
 		}
 	}
@@ -286,41 +266,6 @@ func (jm *JzeroModel) Gen() error {
 
 	fmt.Println(color.WithColor("Done", color.FgGreen))
 
-	return nil
-}
-
-func (jm *JzeroModel) addModelCachePrefix(fp string) error {
-	fset := token.NewFileSet()
-	f, err := goparser.ParseFile(fset, fp, nil, goparser.ParseComments)
-	if err != nil {
-		return err
-	}
-
-	ast.Inspect(f, func(node ast.Node) bool {
-		if genDecl, ok := node.(*ast.GenDecl); ok {
-			for _, spec := range genDecl.Specs {
-				if valueSpec, ok := spec.(*ast.ValueSpec); ok {
-					for i, name := range valueSpec.Names {
-						if strings.HasPrefix(name.Name, "cache") && strings.HasSuffix(name.Name, "Prefix") {
-							value := valueSpec.Values[i]
-							if basicLit, ok := value.(*ast.BasicLit); ok {
-								basicLit.Value = fmt.Sprintf(`"%s%s"`, config.C.Gen.ModelCachePrefix, strings.ReplaceAll(basicLit.Value, "\"", ""))
-							}
-						}
-					}
-				}
-			}
-		}
-		return true
-	})
-	buf := bytes.NewBuffer(nil)
-	if err := goformat.Node(buf, fset, f); err != nil {
-		return err
-	}
-
-	if err := os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
-		return err
-	}
 	return nil
 }
 
