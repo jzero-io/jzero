@@ -23,7 +23,7 @@ jzero 依赖于 golang 环境, 推荐使用 go1.23 版本
 ```bash
 # 设置国内代理
 go env -w GOPROXY=https://goproxy.cn,direct
-go install github.com/jzero-io/jzero@latest
+go install github.com/jzero-io/jzero/cmd/jzero@latest
 
 # 获取 jzero 版本信息
 jzero version

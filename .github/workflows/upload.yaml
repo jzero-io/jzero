@@ -24,6 +24,7 @@ jobs:
 
       - name: Install Jzero and Grum
         run: |
+          cd cmd/jzero
           go install
           jzero check
           go install github.com/jaronnie/grum@latest

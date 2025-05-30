@@ -6,35 +6,44 @@
 [![GitHub release](https://img.shields.io/github/release/jzero-io/jzero.svg?style=flat-square)](https://github.com/jzero-io/jzero/releases/latest)
 [![GitHub package version](https://img.shields.io/github/v/release/jzero-io/jzero?include_prereleases&sort=semver&label=Docker%20Image%20version)](https://github.com/jzero-io/jzero/pkgs/container/jzero)
 [![GitHub package version](https://img.shields.io/github/v/release/jzero-io/jzero-action?include_prereleases&sort=semver&label=Jzero%20Action%20Version)](https://github.com/marketplace/actions/jzero-action)
+[![Endpoint Badge](https://img.shields.io/endpoint?url=https%3A%2F%2Fvercel.jaronnie.com%2Fapi%2Fv1%2Fshields%2Fgithub%2Fjzero-io%2Fjzero%2Fpkgs%2Fcontainer%2Fjzero%2Fdownloads&label=image%20pulls)](https://vercel.jaronnie.com/api/v1/shields/github/jzero-io/jzero/pkgs/container/jzero/downloads)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/jzero-io/jzero)
 
 <p align="center">
 <img align="center" width="150px" src="https://oss.jaronnie.com/jzero.jpg">
 </p>
 
+![Static Badge](https://img.shields.io/badge/Latest_New_Feature-blue?style=for-the-badge)
+
+* Deploy jzero applications on [Vercel](https://vercel.com), [Template repository branch](https://github.com/jzero-io/templates/tree/api-vercel), [Code example](https://github.com/jaronnie/go-serverless-vercel)
+* Generate code based on git changes, greatly improving development experience for large projects
+* [Admin management system](https://github.com/jzero-io/jzero-admin) based on jzero, [Demo 1 - deployed on Vercel](https://admin.jzero.io), [Demo 2 - deployed on Alibaba Cloud Function Compute](https://jzero-admin.jaronnie.com)
+* [Serverless](https://docs.jzero.io/guide/serverless.html) plugin feature based on jzero, achieving multi-module decoupling and automatic dependency injection of third-party modules at compile time
+* [Dynamic configuration feature](https://docs.jzero.io/guide/config/dynamic_conf.html), allowing dynamic modification of server configuration without restarting the server
+* Implemented jzero mcp server, allowing jzero tools to be called in mcp client dialogs to generate code
+* The same codebase can dynamically adapt to multiple database types
+
 [中文](README.md) | ENGLISH
 
 ## Introduction
 
-Create a project through a template and generate Server/Client/Model code based on proto/api/sql files.
+Create projects through templates and generate Server/Client/Model code based on proto/api/sql files.
 
 It has the following features:
-
-* Based on the [go-zero](https://go-zero.dev) framework but not limited to the go-zero framework. In theory, it can access any framework based on template features
-
-* Optimize the existing pain points of the go-zero framework and expand new features, fully compatible with the go-zero framework
-
-* Generate code through minimalist instructions based on configuration files
-
+* Based on the [go-zero](https://go-zero.dev) framework but not limited to the go-zero framework. In theory, it can integrate with any framework based on template features
+* Optimize existing pain points of the go-zero framework and extend new features, fully compatible with the go-zero framework
+* Generate code through minimalist commands based on configuration files
+* Generate code based on git changes only for modified files, greatly improving code generation efficiency for large projects
 * Maintain commonly used development templates and generate projects that meet enterprise-level code specifications with one click
+* All supporting toolchains are cross-platform, supporting Windows/Mac/Linux
 
-For more details please see: https://docs.jzero.io/en. The English documentation is incomplete and is still being supplemented
+For more details please see: https://docs.jzero.io
 
-## Install
+## Download
 
 ```shell
-go install github.com/jzero-io/jzero@latest
-# check tools
+go install github.com/jzero-io/jzero/cmd/jzero@latest
+# Check tools and download
 jzero check
 ```
 
@@ -44,21 +53,21 @@ jzero check
 docker pull ghcr.io/jzero-io/jzero:latest
 ```
 
-## Quick start
+## Quick Start
 
 ```shell
-# new project
+# Create new project
 jzero new your_project
-# generate server code
+# Generate server code
 cd your_project
 jzero gen
-# download dependencies
+# Download dependencies
 go mod tidy
-# generate swagger json
+# Generate swagger json
 jzero gen swagger
-# generate http sdk
+# Generate http client sdk
 jzero gen sdk
-# run server
+# Run server
 go run main.go server
 ```
 
@@ -68,35 +77,34 @@ go run main.go server
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project
 cd your_project
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
-# download dependencies
+# Download dependencies
 go mod tidy
-# generate swagger json
+# Generate swagger json
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
-# generate http sdk
+# Generate http client sdk
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen sdk
-# 运行服务端
+# Run server
 go run main.go server
 ```
 
-For more examples code please see: https://github.com/jzero-io/examples
+For more example code please see: https://github.com/jzero-io/examples
 
-Project Practice please see:
-* api frame: https://docs.jzero.io/project/api.html
-* gateway frame: https://docs.jzero.io/project/gateway.html
+Project practice please see:
+* api framework: https://docs.jzero.io/project/api.html
+* gateway framework: https://docs.jzero.io/project/gateway.html
+
+## Related Projects
+* jzero-admin (Admin management system based on jzero): https://github.com/jzero-io/jzero-admin
 
 ## Roadmap
 
-please see: https://docs.jzero.io/roadmap/base.html
+Please see: https://docs.jzero.io/roadmap/base.html
 
 ## Contributors
 
-[CONTRIBUTING](CONTRIBUTING.md)
+[Contributing](https://docs.jzero.io/guide/contribute.html)
 
-<div>
-  <a href="https://github.com/jzero-io/jzero/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=jzero-io/jzero" />
-  </a>
-</div>
+[![Contribution Leaderboard](https://openomy.app/svg?repo=jzero-io/jzero&chart=list)](https://openomy.app/github/jzero-io/jzero)
 
 ## Acknowledgements
 
@@ -113,7 +121,11 @@ This project is supported by JetBrains Open Source development License.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=jzero-io/jzero&type=Date)](https://star-history.com/#jzero-io/jzero&Date)
 
-## Contact me
+## Disclaimer
+
+This project is for learning and communication purposes only. Please do not use it for illegal purposes. The author is not responsible for any consequences arising from the use of this project.
+
+## Contact
 
 <p align="center">
 <img align="left" width="250px" height="250px" src="https://oss.jaronnie.com/weixin2.jpg">

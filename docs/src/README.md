@@ -30,7 +30,7 @@ jzero 具备以下特点:
 
 ```bash
 # 安装 jzero
-go install github.com/jzero-io/jzero@latest
+go install github.com/jzero-io/jzero/cmd/jzero@latest
 # 一键安装所需的工具
 jzero check
 # 一键创建项目

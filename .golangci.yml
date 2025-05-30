@@ -1,21 +1,21 @@
+version: "2"
 run:
-  go: '1.24'
+  modules-download-mode: readonly
 linters:
+  default: none
   enable:
     - thelper
-    - gofumpt
     - tparallel
     - unconvert
+    - unused
     - wastedassign
-    - tagliatelle
-
-linters-settings:
-  gofumpt:
-    # Module path which contains the source code being formatted.
-    # Default: ""
-    module-path: github.com/jzero-io/jzero
-    # Choose whether to use the extra rules.
-    # Default: false
-    extra-rules: true
-  staticcheck:
-    checks: [ "-SA1019" ]
+    - whitespace
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/jzero-io/jzero

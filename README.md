@@ -42,7 +42,7 @@
 ## 下载
 
 ```shell
-go install github.com/jzero-io/jzero@latest
+go install github.com/jzero-io/jzero/cmd/jzero@latest
 # 检查工具并下载
 jzero check
 ```
@@ -94,10 +94,7 @@ go run main.go server
 * gateway 框架: https://docs.jzero.io/project/gateway.html
 
 ## 相关项目
-* jzero-contrib(jzero 扩展库, go-zero 用户可直接使用): https://github.com/jzero-io/jzero-contrib
 * jzero-admin(基于 jzero 的后台管理系统): https://github.com/jzero-io/jzero-admin
-* jzero-action(jzero github action): https://github.com/jzero-io/jzero-action
-* sqlbuilder-zero(二次修改 go-zero model 模板): https://github.com/jzero-io/sqlbuilder-zero
 
 ## 路线图
 
