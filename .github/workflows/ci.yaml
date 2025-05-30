@@ -23,12 +23,13 @@ jobs:
 
       - name: Install Tool
         run: |
+          cd cmd/jzero
           go install
           jzero check
 
       - name: format go
         run: |
-         jzero format --git-change=false
+         jzero format -d --git-change=false 
 
       - uses: actions/checkout@v4
       - name: golangci-lint

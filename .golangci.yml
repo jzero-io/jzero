@@ -1,5 +1,5 @@
-run:
-  go: '1.24'
+version: "2"
+
 linters:
   enable:
     - thelper
@@ -9,13 +9,12 @@ linters:
     - wastedassign
     - tagliatelle
 
-linters-settings:
-  gofumpt:
-    # Module path which contains the source code being formatted.
-    # Default: ""
-    module-path: github.com/jzero-io/jzero
-    # Choose whether to use the extra rules.
-    # Default: false
-    extra-rules: true
-  staticcheck:
-    checks: [ "-SA1019" ]
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/jzero-io/jzero
