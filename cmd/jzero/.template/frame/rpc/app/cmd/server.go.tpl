@@ -52,6 +52,8 @@ func run(svcCtx *svc.ServiceContext) {
 	group.Add(svcCtx.Custom)
 
 	printBanner(c)
+	printVersion()
+
     logx.Infof("Starting rpc server at %s...", c.Zrpc.ListenOn)
     group.Start()
 }
@@ -59,7 +61,6 @@ func run(svcCtx *svc.ServiceContext) {
 func printBanner(c config.Config) {
 	figure.NewColorFigure(c.Banner.Text, c.Banner.FontName, c.Banner.Color, true).Print()
 }
-
 
 func init() {
 	rootCmd.AddCommand(serverCmd)

@@ -63,6 +63,8 @@ func run(svcCtx *svc.ServiceContext) {
 	group.Add(svcCtx.Custom)
 
 	printBanner(c)
+	printVersion()
+
     logx.Infof("Starting rest server at %s:%d...", c.Rest.Host, c.Rest.Port)
     group.Start()
 }

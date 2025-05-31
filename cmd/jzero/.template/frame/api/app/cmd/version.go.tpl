@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"runtime"
 	"time"
 
@@ -21,35 +22,40 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "{{ .APP }} version",
 	Long:  `{{ .APP }} version`,
-	RunE:  getVersion,
+	Run: func(cmd *cobra.Command, args []string) {
+        printVersion()
+    },
 }
 
-func getVersion(_ *cobra.Command, _ []string) error {
+func printVersion() {
 	var versionBuffer bytes.Buffer
 
-	if Version != "" {
-		versionBuffer.WriteString(fmt.Sprintf("{{ .APP }} version %s %s/%s\n", Version, runtime.GOOS, runtime.GOARCH))
-	} else {
-		versionBuffer.WriteString(fmt.Sprintf("{{ .APP }} version %s %s/%s\n", "unknown", runtime.GOOS, runtime.GOARCH))
+	if Version == "" {
+		Version = "unknown"
 	}
+	versionBuffer.WriteString(fmt.Sprintf("ntls version %s %s/%s\n", Version, runtime.GOOS, runtime.GOARCH))
 
 	versionBuffer.WriteString(fmt.Sprintf("Go version %s\n", runtime.Version()))
-	if Commit != "" {
-		versionBuffer.WriteString(fmt.Sprintf("Git commit %s\n", Commit))
-	} else {
-		versionBuffer.WriteString(fmt.Sprintf("Git commit %s\n", "unknown"))
+
+	if Commit == "" {
+		Commit = "unknown"
 	}
+	versionBuffer.WriteString(fmt.Sprintf("Git commit %s\n", Commit))
 
 	if Date != "" {
-		versionBuffer.WriteString(fmt.Sprintf("Build date %s\n", cast.ToTimeInDefaultLocation(Date, time.Local)))
+		Date = cast.ToString(cast.ToTimeInDefaultLocation(Date, time.Local))
 	} else {
-		versionBuffer.WriteString(fmt.Sprintf("Build date %s\n", "unknown"))
+		Date = "unknown"
 	}
+	versionBuffer.WriteString(fmt.Sprintf("Build date: %s\n", Date))
 
 	fmt.Print(versionBuffer.String())
-	return nil
 }
 
 func init() {
+	_ = os.Setenv("VERSION", Version)
+	_ = os.Setenv("COMMIT", Commit)
+	_ = os.Setenv("DATE", Date)
+
 	rootCmd.AddCommand(versionCmd)
 }
