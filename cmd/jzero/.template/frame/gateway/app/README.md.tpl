@@ -40,4 +40,4 @@ docker buildx build --platform linux/{{ .GoArch }} --progress=plain -t {{ .APP }
 
 ## Documents
 
-https://jzero.jaronnie.com
+https://docs.jzero.io

@@ -22,8 +22,6 @@ jzero gen
 jzero gen swagger
 ```
 
-you can see generated swagger json in `desc/swagger`
-
 ## Build docker image
 
 ```shell
