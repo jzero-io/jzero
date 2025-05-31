@@ -10,11 +10,6 @@ export const zhNavbar = navbar([
     icon: "octicon:repo-16"
   },
   {
-    link: "https://github.com/jzero-io/jzero-contrib",
-    text: "jzero 扩展库",
-    icon: "material-symbols:send-time-extension"
-  },
-  {
     link: "https://github.com/jzero-io/examples",
     text: "代码示例",
     icon: "vscode-icons:file-type-go"

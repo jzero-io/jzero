@@ -14,9 +14,8 @@ require (
 	github.com/jaronnie/genius v0.5.2
 	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v1.1.0
-	github.com/jzero-io/jzero v0.38.0-beta3.0.20250530071618-8d53b45ee1e9
-	github.com/jzero-io/jzero-contrib v0.25.2
-	github.com/mark3labs/mcp-go v0.30.1
+	github.com/jzero-io/jzero v0.39.0-beta
+	github.com/mark3labs/mcp-go v0.31.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1

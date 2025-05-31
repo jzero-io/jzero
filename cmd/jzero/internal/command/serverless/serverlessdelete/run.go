@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero-contrib/templatex"
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"golang.org/x/mod/modfile"
@@ -13,6 +12,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/plugin"
 )
 

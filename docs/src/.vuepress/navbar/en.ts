@@ -10,11 +10,6 @@ export const enNavbar = navbar([
     icon: "octicon:repo-16"
   },
   {
-    link: "https://github.com/jzero-io/jzero-contrib",
-    text: "extensions",
-    icon: "material-symbols:send-time-extension"
-  },
-  {
     link: "https://github.com/jzero-io/examples",
     text: "code example",
     icon: "vscode-icons:file-type-go"

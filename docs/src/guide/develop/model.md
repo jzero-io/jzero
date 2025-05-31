@@ -141,7 +141,7 @@ import (
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_user"
 
 	"github.com/eddieowens/opts"
-	"github.com/jzero-io/jzero-contrib/modelx"
+	"github.com/jzero-io/jzero/core/stores/modelx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -188,7 +188,7 @@ if _, err = l.svcCtx.Model.ManageUser.Insert(l.ctx, nil, &manage_user.ManageUser
 
 ## 如何使用 condition 查询
 
-> condition 源码 [condition](https://github.com/jzero-io/jzero-contrib/tree/main/condition)
+> condition 源码 [condition](https://github.com/jzero-io/jzero/tree/main/core/stores/condition)
 
 ## 构建 []condition
 
@@ -202,8 +202,8 @@ import (
 
 	"github.com/jzero-io/jzero-admin/server/internal/svc"
 	types "github.com/jzero-io/jzero-admin/server/internal/types/manage/user"
-	"github.com/jzero-io/jzero-contrib/condition"
-	"github.com/jzero-io/jzero-contrib/nullx"
+	"github.com/jzero-io/jzero/core/stores/condition"
+	"github.com/guregu/null/v5"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -268,8 +268,8 @@ func (l *List) List(req *types.ListRequest) (resp *types.ListResponse, err error
 			Username:   user.Username,
 			UserGender: user.Gender,
 			NickName:   user.Nickname,
-			UserPhone:  nullx.NewString(user.Phone).ValueOrZero(),
-			UserEmail:  nullx.NewString(user.Email).ValueOrZero(),
+			UserPhone:  null.NewString(user.Phone.String, user.Phone.Valid).ValueOrZero(),
+			UserEmail:  null.NewString(user.Email.String, user.Email.Valid).ValueOrZero(),
 			Status:     user.Status,
 			CreateTime: user.CreateTime.Format(time.DateTime),
 			UpdateTime: user.UpdateTime.Format(time.DateTime),
@@ -301,9 +301,9 @@ import (
 
 	"github.com/jzero-io/jzero-admin/server/internal/svc"
 	types "github.com/jzero-io/jzero-admin/server/internal/types/manage/user"
-	"github.com/jzero-io/jzero-contrib/condition"
-	"github.com/jzero-io/jzero-contrib/nullx"
+	"github.com/jzero-io/jzero/core/stores/condition"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/guregu/null/v5"
 )
 
 type List struct {
@@ -341,8 +341,8 @@ func (l *List) List(req *types.ListRequest) (resp *types.ListResponse, err error
 			Username:   user.Username,
 			UserGender: user.Gender,
 			NickName:   user.Nickname,
-			UserPhone:  nullx.NewString(user.Phone).ValueOrZero(),
-			UserEmail:  nullx.NewString(user.Email).ValueOrZero(),
+			UserPhone:  null.NewString(user.Phone.String, user.Phone.Valid).ValueOrZero(),
+			UserEmail:  nullx.NewString(user.Email.String, user.Email.Valid).ValueOrZero(),
 			Status:     user.Status,
 			CreateTime: user.CreateTime.Format(time.DateTime),
 			UpdateTime: user.UpdateTime.Format(time.DateTime),

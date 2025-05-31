@@ -4,7 +4,7 @@ import (
     "os"
 
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
-	"github.com/jzero-io/jzero-contrib/dynamic_conf"
+	"github.com/jzero-io/jzero/core/configcenter/subscriber"
 	"github.com/spf13/cobra"
     "github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
@@ -22,11 +22,9 @@ var serverCmd = &cobra.Command{
 	Short: "{{ .APP }} server",
 	Long:  "{{ .APP }} server",
 	Run: func(cmd *cobra.Command, args []string) {
-		ss, err := dynamic_conf.NewFsNotify(cfgFile)
-		logx.Must(err)
 		cc := configurator.MustNewConfigCenter[config.Config](configurator.Config{
 			Type: "yaml",
-		}, ss)
+		}, subscriber.MustNewFsnotifySubscriber(cfgFile, subscriber.WithUseEnv(true)))
 		c, err := cc.GetConfig()
 		logx.Must(err)
 

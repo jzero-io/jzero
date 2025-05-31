@@ -1,7 +1,7 @@
 package custom
 
 import (
-	"github.com/jzero-io/jzero-contrib/swaggerv2"
+	"github.com/jzero-io/jzero/core/swaggerv2"
 	"github.com/zeromicro/go-zero/rest"
 )
 
