@@ -9,8 +9,8 @@ on:
       - '**.md'
 
 jobs:
-  golangci:
-    name: ci
+  upload:
+    name: upload
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

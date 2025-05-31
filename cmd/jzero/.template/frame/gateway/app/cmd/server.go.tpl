@@ -41,7 +41,7 @@ var serverCmd = &cobra.Command{
         }
 
     	// write pb to local
-        c.Gateway.Upstreams[0].ProtoSets, err = embedx.WriteToLocalTemp(pb.Embed, embedx.WithFileMatchFunc(func(path string) bool {
+        c.Gateway.Upstreams[0].ProtoSets, err = embedx.WriteToLocal(pb.Embed, embedx.WithFileMatchFunc(func(path string) bool {
 			return filepath.Ext(path) == ".pb"
 		}))
         logx.Must(err)
