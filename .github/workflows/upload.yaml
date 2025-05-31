@@ -40,6 +40,7 @@ jobs:
           cd simpleapi && jzero gen
           jzero gen swagger
           jzero gen sdk
+          jzero format
           go mod tidy && go mod download
           go run main.go version
           git config user.name "dependabot[bot]"
@@ -56,6 +57,7 @@ jobs:
           jzero gen swagger
           jzero gen sdk
           jzero gen zrpcclient
+          jzero format
           go mod tidy && go mod download
           go run main.go version
           git add .
@@ -69,6 +71,7 @@ jobs:
           cd simplerpc && jzero gen
           jzero gen swagger
           jzero gen zrpcclient
+          jzero format
           go mod tidy && go mod download
           go run main.go version
           git add .
@@ -81,6 +84,7 @@ jobs:
           jzero new simpleapi-serverless --frame api --features serverless
           cd simpleapi-serverless && jzero gen
           jzero gen swagger
+          jzero format
           go mod tidy && go mod download
           go run main.go version
           git add .
@@ -95,6 +99,7 @@ jobs:
           cd simplerpc-goctl && jzero gen
           jzero gen swagger
           jzero gen zrpcclient
+          jzero format
           go mod tidy && go mod download
           go build && rm -rf simplerpc-goctl
           git add .

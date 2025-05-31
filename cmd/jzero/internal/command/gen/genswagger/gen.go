@@ -126,6 +126,9 @@ func Gen() (err error) {
 					_ = g.Set("host", "")
 				}
 
+				// 处理 x-date
+				_ = g.Set("x-date", "")
+
 				// 处理 securityDefinitions 值
 				if g.Get("securityDefinitions") == nil {
 					_ = g.Set("securityDefinitions", map[string]any{
