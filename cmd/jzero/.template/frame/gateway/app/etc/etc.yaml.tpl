@@ -12,4 +12,7 @@ gateway:
       name: {{ .APP }}.gw
 
 log:
-  encoding: plain
+    serviceName: {{ .APP }}
+    encoding: plain
+    level: info
+    mode: console

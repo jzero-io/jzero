@@ -4,4 +4,7 @@ zrpc:
     name: {{ .APP }}.rpc
 
 log:
+    serviceName: {{ .APP }}
     encoding: plain
+    level: info
+    mode: console

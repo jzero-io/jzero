@@ -4,4 +4,7 @@ rest:
     port: 8001
 
 log:
+    serviceName: {{ .APP }}
     encoding: plain
+    level: info
+    mode: console

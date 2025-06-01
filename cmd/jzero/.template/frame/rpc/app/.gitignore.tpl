@@ -19,6 +19,7 @@
 
 # Go workspace file
 go.work
+go.work.sum
 
 # idea
 .idea
@@ -28,9 +29,3 @@ go.work
 
 # logs
 logs
-
-# goreleaser output
-dist
-
-# unix sock
-*.sock

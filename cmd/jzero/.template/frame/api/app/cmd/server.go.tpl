@@ -1,8 +1,6 @@
 package cmd
 
 import (
-    "os"
-
 	"github.com/spf13/cobra"
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
 	"github.com/jzero-io/jzero/core/configcenter/subscriber"
@@ -31,12 +29,7 @@ var serverCmd = &cobra.Command{
 		logx.Must(err)
 
         // set up logger
-        if err := logx.SetUp(c.Log.LogConf); err != nil {
-            logx.Must(err)
-        }
-        if c.Log.LogConf.Mode != "console" {
-            logx.AddWriter(logx.NewWriter(os.Stdout))
-        }
+        logx.Must(logx.SetUp(c.Log.LogConf))
 
         svcCtx := svc.NewServiceContext(cc)
         run(svcCtx)

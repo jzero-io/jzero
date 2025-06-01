@@ -1,7 +1,6 @@
 package cmd
 
 import (
-    "os"
     "path/filepath"
 
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
@@ -33,12 +32,7 @@ var serverCmd = &cobra.Command{
 		logx.Must(err)
 
         // set up logger
-    	if err = logx.SetUp(c.Log.LogConf); err != nil {
-    		logx.Must(err)
-    	}
-    	if c.Log.LogConf.Mode != "console" {
-            logx.AddWriter(logx.NewWriter(os.Stdout))
-        }
+    	logx.Must(logx.SetUp(c.Log.LogConf))
 
     	// write pb to local
         c.Gateway.Upstreams[0].ProtoSets, err = embedx.WriteToLocal(pb.Embed, embedx.WithFileMatchFunc(func(path string) bool {
