@@ -1,8 +1,13 @@
 syntax = "v1"
 
-type GetRequest {}
+info (
+    go_package: "version"
+    version: "v1"
+)
 
-type GetResponse {
+type VersionRequest {}
+
+type VersionResponse {
     Version string `json:"version"`
     GoVersion string `json:"goVersion"`
     Commit string `json:"commit"`
@@ -11,8 +16,9 @@ type GetResponse {
 
 @server(
     prefix: /api/v1{{ if has "serverless" .Features }}/{{ .APP }}{{end}}
+    group: version
 )
 service {{ .APP | ToCamel }} {
-    @handler Get
-    get /version (GetRequest) returns (GetResponse)
+    @handler Version
+    get /version (VersionRequest) returns (VersionResponse)
 }

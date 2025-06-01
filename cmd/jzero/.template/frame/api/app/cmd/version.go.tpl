@@ -33,7 +33,7 @@ func printVersion() {
 	if Version == "" {
 		Version = "unknown"
 	}
-	versionBuffer.WriteString(fmt.Sprintf("ntls version %s %s/%s\n", Version, runtime.GOOS, runtime.GOARCH))
+	versionBuffer.WriteString(fmt.Sprintf("{{ .APP }} version %s %s/%s\n", Version, runtime.GOOS, runtime.GOARCH))
 
 	versionBuffer.WriteString(fmt.Sprintf("Go version %s\n", runtime.Version()))
 

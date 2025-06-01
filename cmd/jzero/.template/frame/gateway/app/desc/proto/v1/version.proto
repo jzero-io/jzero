@@ -13,17 +13,17 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     };
 };
 
-message GetRequest {}
+message VersionRequest {}
 
-message GetResponse {
+message VersionResponse {
     string version = 1;
-    string  goVersion = 2;
+    string goVersion = 2;
     string commit = 3;
-    string string = 4;
+    string date = 4;
 }
 
 service Version {
-    rpc Say(GetRequest) returns(GetResponse) {
+    rpc Version(VersionRequest) returns(VersionResponse) {
         option (google.api.http) = {
             get: "/api/v1/version"
         };
