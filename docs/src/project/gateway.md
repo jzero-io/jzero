@@ -20,7 +20,6 @@ gateway 项目包含以下技术栈:
 ```shell
 jzero new simplegateway --frame gateway
 cd simplegateway
-jzero gen
 go mod tidy
 ```
 

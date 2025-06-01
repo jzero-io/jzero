@@ -32,17 +32,15 @@ jzero has the following features:
 # Install jzero  
 go install github.com/jzero-io/jzero/cmd/jzero@latest  
 # One-click installation of required tools  
-jzero check  
-# One-click project creation  
-jzero new your_project  
-cd your_project  
-# One-click code generation  
-jzero gen  
-# Generate swagger  
-jzero gen swagger  
+jzero check
+# Create a project
+jzero new your_project
+cd your_project
 # Download dependencies  
 go mod tidy  
-# Start the server  
+# Generate swagger  
+jzero gen swagger  
+# Start the server
 go run main.go server  
 # Access swagger UI  
 http://localhost:8001/swagger  
@@ -54,13 +52,11 @@ http://localhost:8001/swagger
 # Create a project
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project  
 cd your_project
-# Generate code
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
-# Generate swagger
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 # Download dependencies
 go mod tidy
-# Start the project
+# Generate swagger
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
+# Start the server
 go run main.go server
 # Access swagger UI
 http://localhost:8001/swagger  

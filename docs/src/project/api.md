@@ -19,7 +19,6 @@ api 项目包含以下技术栈:
 ```shell
 jzero new simpleapi --frame api
 cd simpleapi
-jzero gen
 go mod tidy
 ```
 

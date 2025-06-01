@@ -146,18 +146,17 @@ var newCmd = &cobra.Command{
 		if !pathx.FileExists(embeded.Home) {
 			embeded.Home = filepath.Join(home, ".jzero", "templates", version.Version)
 		}
-		return Run(projectName, base)
-	},
-	PostRunE: func(cmd *cobra.Command, args []string) error {
-		dir, err := os.Getwd()
-		if err != nil {
+		if err := Run(projectName, base); err != nil {
 			return err
 		}
-		if err = os.Chdir(config.C.New.Output); err != nil {
+
+		// 执行 gen
+		if err := os.Chdir(config.C.New.Output); err != nil {
 			return err
 		}
 		defer func() {
-			if err = os.Chdir(dir); err != nil {
+			dir, _ := os.Getwd()
+			if err := os.Chdir(dir); err != nil {
 				cobra.CheckErr(err)
 			}
 		}()
@@ -168,7 +167,7 @@ var newCmd = &cobra.Command{
 		}
 		fmt.Printf("%s desc dir in %s, auto generate code\n", color.WithColor("Detected", color.FgGreen), config.C.New.Output)
 
-		if err = config.TraverseCommands("", cmd.Root()); err != nil {
+		if err := config.TraverseCommands("", cmd.Root()); err != nil {
 			return err
 		}
 

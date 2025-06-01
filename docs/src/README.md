@@ -36,12 +36,10 @@ jzero check
 # 一键创建项目
 jzero new your_project
 cd your_project
-# 一键生成代码
-jzero gen
-# 生成 swagger
-jzero gen swagger
 # 下载依赖
 go mod tidy
+# 生成 swagger
+jzero gen swagger
 # 启动服务端程序
 go run main.go server
 # 访问 swagger ui
@@ -54,12 +52,10 @@ http://localhost:8001/swagger
 # 创建项目
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project
 cd your_project 
-# 生成代码
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
-# 生成 swagger
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 # 下载依赖
 go mod tidy
+# 生成 swagger
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 # 启动项目
 go run main.go server
 # 访问 swagger ui

@@ -29,6 +29,7 @@ jobs:
           jzero check
           go install github.com/jaronnie/grum@latest
           go install github.com/jzero-io/gorename@latest
+          go install github.com/zeromicro/go-zero/tools/goctl@v1.8.4-alpha
 
       - name: upload examples
         run: |
@@ -36,8 +37,7 @@ jobs:
           cd examples
           rm -rf simpleapi
           jzero new simpleapi
-          go install github.com/zeromicro/go-zero/tools/goctl@v1.8.4-alpha
-          cd simpleapi && jzero gen
+          cd simpleapi
           jzero gen swagger
           jzero gen sdk
           jzero format
@@ -53,7 +53,7 @@ jobs:
           
           rm -rf simplegateway
           jzero new simplegateway --frame gateway
-          cd simplegateway && jzero gen
+          cd simplegateway
           jzero gen swagger
           jzero gen sdk
           jzero gen zrpcclient
@@ -68,7 +68,7 @@ jobs:
           
           rm -rf simplerpc
           jzero new simplerpc --frame rpc
-          cd simplerpc && jzero gen
+          cd simplerpc
           jzero gen swagger
           jzero gen zrpcclient
           jzero format
@@ -82,7 +82,7 @@ jobs:
 
           rm -rf simpleapi-serverless
           jzero new simpleapi-serverless --frame api --features serverless
-          cd simpleapi-serverless && jzero gen
+          cd simpleapi-serverless
           jzero gen swagger
           jzero format
           go mod tidy && go mod download
@@ -96,7 +96,7 @@ jobs:
           # 测试第三方仓库(https://github.com/jzero-io/templates)模板
           rm -rf simplerpc-goctl
           jzero new simplerpc-goctl --branch rpc-goctl
-          cd simplerpc-goctl && jzero gen
+          cd simplerpc-goctl
           jzero gen swagger
           jzero gen zrpcclient
           jzero format

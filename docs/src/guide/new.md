@@ -36,12 +36,10 @@ jzero 是一个强大的项目创建工具，支持多种场景下的项目创�
 ```bash
 jzero new your_project --frame api
 cd your_project
-# 生成代码
-jzero gen
-# 生成 swagger
-jzero gen swagger
 # 下载依赖
 go mod tidy
+# 生成 swagger
+jzero gen swagger
 # 启动服务端程序
 go run main.go server
 # 访问 swagger ui
@@ -53,12 +51,10 @@ http://localhost:8001/swagger
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --frame api
 cd your_project
-# 生成代码
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
-# 生成 swagger
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 # 下载依赖
 go mod tidy
+# 生成 swagger
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 # 启动项目
 go run main.go server
 # 访问 swagger ui
@@ -74,8 +70,7 @@ http://localhost:8001/swagger
 
 ```bash
 jzero new your_project --frame rpc
-# 生成代码
-jzero gen
+cd your_project
 # 下载依赖
 go mod tidy
 # 启动项目
@@ -87,8 +82,6 @@ go run main.go server
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --frame rpc
 cd your_project
-# 生成代码
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
 # 下载依赖
 go mod tidy
 # 启动项目
@@ -107,12 +100,10 @@ go run main.go server
 
 ```bash
 jzero new your_project --frame gateway
-# 生成代码
-jzero gen
-# 生成 swagger
-jzero gen swagger
 # 下载依赖
 go mod tidy
+# 生成 swagger
+jzero gen swagger
 # 启动项目
 go run main.go server
 # 访问 swagger ui
@@ -124,12 +115,10 @@ http://localhost:8001/swagger
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --frame gateway
 cd your_project
-# 生成代码
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
-# 生成 swagger
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 # 下载依赖
 go mod tidy
+# 生成 swagger
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 # 启动项目
 go run main.go server
 # 访问 swagger ui
@@ -182,8 +171,6 @@ jzero new your_project --home your_template_path
 ```bash
 jzero new your_project --branch api-goctl
 cd your_project
-# 生成代码
-jzero gen
 # 下载依赖
 go mod tidy
 # 启动项目
@@ -195,8 +182,6 @@ go run main.go
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --branch api-goctl
 cd your_project
-# 生成代码
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
 # 下载依赖
 go mod tidy
 # 启动项目
@@ -213,8 +198,6 @@ go run main.go
 ```bash
 jzero new your_project --branch rpc-goctl
 cd your_project
-# 生成代码
-jzero gen
 # 下载依赖
 go mod tidy
 # 启动项目
@@ -226,8 +209,6 @@ go run main.go
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --branch rpc-goctl
 cd your_project
-# 生成代码
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
 # 下载依赖
 go mod tidy
 # 启动项目

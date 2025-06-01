@@ -1,7 +1,5 @@
 # jzero
 
-**解放你的双手有更多的时间去玩游戏**
-
 [![Build Status](https://img.shields.io/github/actions/workflow/status/jzero-io/jzero/ci.yaml?branch=main&label=jzero-ci&logo=github&style=flat-square)](https://github.com/jzero-io/jzero/actions?query=workflow%3Ajzero-ci)
 [![GitHub release](https://img.shields.io/github/release/jzero-io/jzero.svg?style=flat-square)](https://github.com/jzero-io/jzero/releases/latest)
 [![GitHub package version](https://img.shields.io/github/v/release/jzero-io/jzero?include_prereleases&sort=semver&label=Docker%20Image%20version)](https://github.com/jzero-io/jzero/pkgs/container/jzero)
@@ -58,9 +56,7 @@ docker pull ghcr.io/jzero-io/jzero:latest
 ```shell
 # 新建项目
 jzero new your_project
-# 生成服务端代码
 cd your_project
-jzero gen
 # 下载依赖
 go mod tidy
 # 生成 swagger json
@@ -76,7 +72,6 @@ go run main.go server
 ```shell
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project
 cd your_project
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
 # 下载依赖
 go mod tidy
 # 生成 swagger json
@@ -95,10 +90,6 @@ go run main.go server
 
 ## 相关项目
 * jzero-admin(基于 jzero 的后台管理系统): https://github.com/jzero-io/jzero-admin
-
-## 路线图
-
-请参阅: https://docs.jzero.io/roadmap/base.html
 
 ## 贡献者
 
