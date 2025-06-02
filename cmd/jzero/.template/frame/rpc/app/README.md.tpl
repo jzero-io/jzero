@@ -16,12 +16,6 @@ jzero check
 jzero gen
 ```
 
-### Generate swagger code
-
-```shell
-jzero gen swagger
-```
-
 ## Build docker image
 
 ```shell

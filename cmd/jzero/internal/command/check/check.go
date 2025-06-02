@@ -63,18 +63,6 @@ var checkCmd = &cobra.Command{
 			log.Warning("[jzero-env] warning: env check failed, protoc-gen-openapiv2 is not installed")
 		}
 
-		// protoc validator
-		log.Info("\n[jzero-env]: looking up protoc-gen-validate")
-		_, err = env.LookPath("protoc-gen-validate")
-		if err != nil {
-			_ = golang.Install("github.com/jzero-io/protoc-gen-validate@latest")
-		}
-		if _, err = env.LookPath("protoc-gen-validate"); err == nil {
-			log.Success(`[jzero-env]: "protoc-gen-validate" is installed`)
-		} else {
-			log.Warning("[jzero-env] warning: env check failed, protoc-gen-validate is not installed")
-		}
-
 		// protoc-gen-doc
 		log.Info("\n[jzero-env]: looking up protoc-gen-doc")
 		_, err = env.LookPath("protoc-gen-doc")

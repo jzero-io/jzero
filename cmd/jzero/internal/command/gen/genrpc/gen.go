@@ -207,19 +207,6 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 
-		if lo.Contains(genCodeProtoFiles, v) {
-			command := fmt.Sprintf("protoc %s -I%s -I%s --validate_out=%s",
-				v,
-				config.C.ProtoDir(),
-				filepath.Join(config.C.ProtoDir(), "third_party"),
-				"lang=go:internal",
-			)
-			_, err = execx.Run(command, config.C.Wd())
-			if err != nil {
-				return err
-			}
-		}
-
 		for _, file := range allServerFiles {
 			if filepath.Clean(file.DescFilepath) == filepath.Clean(v) {
 				if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {

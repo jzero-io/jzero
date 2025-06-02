@@ -169,33 +169,25 @@ service namespace {
 
 ## proto 字段校验
 
-基于 [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate) 进行二次开发, 支持了自定义错误信息
-
-插件地址: [protoc-gen-validate](https://github.com/jzero-io/protoc-gen-validate)
-
-```shell
-go install github.com/jzero-io/protoc-gen-validate@latest
-```
-
-[确保 validate.proto 文件内容](https://github.com/jzero-io/protoc-gen-validate/blob/main/validate/validate.proto)
-
-:::tip
-需要自定义错误信息时, 在原始校验规则后加上 _message 即可
-:::
+see: [protovalidate](https://buf.build/docs/protovalidate/)
 
 ```protobuf
 syntax = "proto3";
 
-package hellopb;
+package versionpb;
 
-import "validate/validate.proto";
-option go_package = "./pb/hellopb";
+import "buf/validate/validate.proto";
 
-message SayHelloRequest {
-  string message = 1 [(validate.rules).string = {
-    max_len: 10,
-    max_len_message: "最大长度为 10"  // 自定义错误信息
-  }];
+option go_package = "./pb/versionpb";
+
+message VersionRequest {
+  int32 id = 1 [
+    (buf.validate.field).cel = {
+      id: "id.length"
+      message: "id must be greater than 0 and less than 100000"
+      expression: "this > 0 && this < 100000"
+    }
+  ];
 }
 ```
 

@@ -3,21 +3,37 @@ package middleware
 import (
 	"context"
 
+	"buf.build/go/protovalidate"
+	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 )
 
-type Validator interface {
-	ValidateAll() error
+type Validator struct {
+	v protovalidate.Validator
 }
 
-func ValidatorMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	if r, ok := req.(Validator); ok {
-		if err := r.ValidateAll(); err != nil {
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-	}
+func NewValidator() *Validator {
+	v, err := protovalidate.New()
+	logx.Must(err)
+	return &Validator{v: v}
+}
 
-	return handler(ctx, req)
+func (v *Validator) UnaryServerMiddleware() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		switch req.(type) {
+		case proto.Message:
+			if err := v.v.Validate(req.(proto.Message)); err != nil {
+				var valErr *protovalidate.ValidationError
+				if ok := errors.As(err, &valErr); ok && len(valErr.ToProto().GetViolations()) > 0 {
+					return nil, status.Error(codes.InvalidArgument, valErr.ToProto().GetViolations()[0].GetMessage())
+				}
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+		return handler(ctx, req)
+	}
 }

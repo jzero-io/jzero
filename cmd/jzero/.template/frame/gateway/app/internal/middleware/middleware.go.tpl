@@ -7,7 +7,7 @@ import (
 )
 
 func Register(z *zrpc.RpcServer, gw *gateway.Server) {
-	z.AddUnaryInterceptors(ValidatorMiddleware)
+	z.AddUnaryInterceptors(NewValidator().UnaryServerMiddleware())
 	z.AddUnaryInterceptors(WithValueMiddleware)
 
     httpx.SetErrorHandler(ErrorMiddleware)

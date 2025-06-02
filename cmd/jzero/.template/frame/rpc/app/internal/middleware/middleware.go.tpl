@@ -5,5 +5,5 @@ import (
 )
 
 func Register(z *zrpc.RpcServer) {
-	z.AddUnaryInterceptors(ValidatorMiddleware)
+	z.AddUnaryInterceptors(NewValidator().UnaryServerMiddleware())
 }

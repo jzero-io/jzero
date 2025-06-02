@@ -33,6 +33,7 @@ jobs:
 
       - name: upload examples
         run: |
+          rm -rf examples
           GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum clone https://github.com/jzero-io/examples
           cd examples
           rm -rf simpleapi
