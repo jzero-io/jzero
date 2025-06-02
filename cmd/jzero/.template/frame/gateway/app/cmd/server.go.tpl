@@ -6,7 +6,6 @@ import (
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
 	"github.com/jzero-io/jzero/core/configcenter/subscriber"
 	"github.com/common-nighthawk/go-figure"
-	"github.com/jzero-io/jzero/core/embedx"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
@@ -35,7 +34,7 @@ var serverCmd = &cobra.Command{
     	logx.Must(logx.SetUp(c.Log.LogConf))
 
     	// write pb to local
-        c.Gateway.Upstreams[0].ProtoSets, err = embedx.WriteToLocal(pb.Embed, embedx.WithFileMatchFunc(func(path string) bool {
+        c.Gateway.Upstreams[0].ProtoSets, err = pb.WriteToLocal(pb.Embed, pb.WithFileMatchFunc(func(path string) bool {
 			return filepath.Ext(path) == ".pb"
 		}))
         logx.Must(err)
