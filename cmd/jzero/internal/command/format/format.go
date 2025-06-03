@@ -13,8 +13,8 @@ import (
 // formatCmd represents the format command
 var formatCmd = &cobra.Command{
 	Use:   "format",
-	Short: "jzero code format tool",
-	Long:  `used to format code. e.g. go/api/proto/sql`,
+	Short: "code format tool",
+	Long:  `used to format code`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := formatgo.Run(); err != nil {
 			return err

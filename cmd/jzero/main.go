@@ -63,7 +63,7 @@ func main() {
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use: "jzero",
-	Short: `Used to create project by templates and generate server/client code by proto and api file.
+	Short: `Used to create project by templates and generate server/client code by api/proto/sql file.
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return hooks.Run(cmd, "Before", "global", config.C.Hooks.Before)

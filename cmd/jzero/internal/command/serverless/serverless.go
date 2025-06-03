@@ -16,8 +16,7 @@ import (
 // serverlessCmd represents the serverless command
 var serverlessCmd = &cobra.Command{
 	Use:   "serverless",
-	Short: "jzero serverless",
-	Long:  `jzero serverless.`,
+	Short: "build serverless functions",
 }
 
 var serverlessBuildCmd = &cobra.Command{

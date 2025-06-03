@@ -18,7 +18,7 @@ import (
 // migrateCmd represents the migrate command
 var migrateCmd = &cobra.Command{
 	Use:   "migrate",
-	Short: "jzero migrate",
+	Short: "migrate model by desc/sql_migration",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println(cmd.UsageString())
 		return nil
