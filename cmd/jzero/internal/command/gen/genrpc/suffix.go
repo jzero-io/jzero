@@ -179,7 +179,6 @@ func (jr *JzeroRpc) removeLogicSuffix(fp string) error {
 		return true
 	})
 
-	// Write the modified AST back to the file
 	buf := bytes.NewBuffer(nil)
 	if err := goformat.Node(buf, fset, f); err != nil {
 		return err

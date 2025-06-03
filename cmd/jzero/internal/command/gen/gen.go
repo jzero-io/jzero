@@ -152,9 +152,6 @@ func GetCommand() *cobra.Command {
 		genCmd.PersistentFlags().StringSliceP("desc", "", []string{}, "set desc path")
 		genCmd.PersistentFlags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
 
-		genCmd.Flags().BoolP("change-logic-types", "", false, "if api file or proto change, e.g. Request or Response type, change logic file content types but not file")
-		genCmd.Flags().BoolP("regen-api-handler", "", false, "")
-		genCmd.Flags().BoolP("rpc-style-patch", "", false, "")
 		genCmd.Flags().BoolP("git-change", "", false, "set is git change, if changes then generate code")
 		genCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
 		genCmd.Flags().BoolP("rpc-client", "", false, "is generate rpc client code by goctl")

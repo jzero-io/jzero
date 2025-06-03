@@ -40,10 +40,6 @@ func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Pr
 			}
 
 			fp := filepath.Join(config.C.Wd(), "internal", "logic", strings.ToLower(service.Name), namingFormat+".go")
-			if config.C.Gen.RpcStylePatch {
-				logicDir, _ := format.FileNamingFormat(config.C.Gen.Style, service.Name)
-				fp = filepath.Join(config.C.Wd(), "internal", "logic", strings.ToLower(logicDir), namingFormat+".go")
-			}
 
 			f := LogicFile{
 				Path:             fp,
@@ -138,7 +134,6 @@ func (jr *JzeroRpc) changeLogicTypes(file LogicFile) error {
 		return true
 	})
 
-	// Write the modified AST back to the file
 	buf := bytes.NewBuffer(nil)
 	if err := goformat.Node(buf, fset, f); err != nil {
 		return err

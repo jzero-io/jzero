@@ -7,18 +7,27 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/a8m/envsubst"
 	"github.com/hashicorp/go-version"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"gopkg.in/yaml.v3"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
 )
 
 // C global command flags
 var C Config
+
+var (
+	CfgFile    string
+	CfgEnvFile string
+)
 
 type Config struct {
 	// global flags
@@ -64,6 +73,7 @@ type NewConfig struct {
 	RemoteAuthUsername string   `mapstructure:"remote-auth-username"` // 远程仓库的认证用户名
 	RemoteAuthPassword string   `mapstructure:"remote-auth-password"` // 远程仓库的认证密码
 	Frame              string   `mapstructure:"frame"`                // 使用 jzero 内置的框架
+	Style              string   `mapstructure:"style"`                // 代码风格
 	Branch             string   `mapstructure:"branch"`               // 使用远程模板仓库的某个分支
 	Local              string   `mapstructure:"local"`                // 使用本地模板与 branch 对应
 	Features           []string `mapstructure:"features"`             // 新建项目使用哪些特性, 灵活构建模板
@@ -73,19 +83,18 @@ type GenConfig struct {
 	// Hooks
 	Hooks HooksConfig `mapstructure:"hooks"`
 
-	// global flags
+	// gen global flags
 	Home string `mapstructure:"home"`
 
-	Style string `mapstructure:"style"`
+	Style      string   `mapstructure:"style"`
+	Desc       []string `mapstructure:"desc"`
+	DescIgnore []string `mapstructure:"desc-ignore"`
 
-	// code style flags
-	RpcStylePatch bool `mapstructure:"rpc-style-patch"`
-
-	ChangeLogicTypes bool `mapstructure:"change-logic-types"`
-	RegenApiHandler  bool `mapstructure:"regen-api-handler"`
-
-	// git flags
+	// gen self flags
 	GitChange bool `mapstructure:"git-change"`
+
+	Route2Code bool
+	RpcClient  bool `mapstructure:"rpc-client"`
 
 	// model flag
 	ModelDriver string `mapstructure:"model-driver"`
@@ -99,13 +108,6 @@ type GenConfig struct {
 	ModelCache           bool     `mapstructure:"model-cache"`
 	ModelCachePrefix     string   `mapstructure:"model-cache-prefix"`
 	ModelCreateTableDDL  bool     `mapstructure:"model-create-table-ddl"`
-
-	// gen code flags
-	Desc []string `mapstructure:"desc"`
-
-	DescIgnore []string `mapstructure:"desc-ignore"`
-	Route2Code bool
-	RpcClient  bool `mapstructure:"rpc-client"`
 
 	// Sub command
 	Sdk GenSdkConfig `mapstructure:"sdk"`
@@ -314,6 +316,37 @@ func TraverseCommands(prefix string, cmd *cobra.Command) error {
 		}
 	}
 
+	return nil
+}
+
+func InitConfig(rootCmd *cobra.Command) error {
+	if pathx.FileExists(CfgFile) {
+		viper.SetConfigFile(CfgFile)
+		// If a config file is found, read it in.
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
+	}
+
+	if pathx.FileExists(CfgEnvFile) {
+		data, err := envsubst.ReadFile(CfgEnvFile)
+		if err != nil {
+			return err
+		}
+		var env map[string]any
+		err = yaml.Unmarshal(data, &env)
+		if err != nil {
+			return err
+		}
+
+		for k, v := range env {
+			_ = os.Setenv(k, cast.ToString(v))
+		}
+	}
+
+	if err := TraverseCommands("", rootCmd); err != nil {
+		return err
+	}
 	return nil
 }
 

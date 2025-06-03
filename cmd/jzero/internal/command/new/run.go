@@ -2,8 +2,10 @@ package new
 
 import (
 	"bytes"
+	"encoding/base64"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -14,6 +16,14 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
+
+var (
+	base64Matcher = regexp.MustCompile(`^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{4})$`)
+)
+
+func IsBase64(base64 string) bool {
+	return base64Matcher.MatchString(base64)
+}
 
 type TemplateData struct {
 	Module string
@@ -50,6 +60,7 @@ func Run(appName, base string) error {
 	} else {
 		return err
 	}
+	templateData["Style"] = config.C.New.Style
 
 	jn := JzeroNew{
 		TemplateData: templateData,
@@ -108,7 +119,15 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 			}
 			gsf = append(gsf, files...)
 		}
-		filename := strings.TrimSuffix(file.Name(), ".tpl")
+
+		filename := file.Name()
+		if IsBase64(filename) {
+			filenameBytes, _ := base64.StdEncoding.DecodeString(filename)
+			filename = string(filenameBytes)
+		}
+
+		filename = strings.TrimSuffix(filename, ".tpl")
+
 		rel, err := filepath.Rel(jn.base, filepath.Join(dirname, filename))
 		if err != nil {
 			return nil, err

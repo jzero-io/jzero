@@ -37,24 +37,6 @@ type JzeroModel struct {
 }
 
 func (jm *JzeroModel) Gen() error {
-	var goctlHome string
-
-	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "model")) {
-		tempDir, err := os.MkdirTemp(os.TempDir(), "")
-		if err != nil {
-			return err
-		}
-		defer os.RemoveAll(tempDir)
-		err = embeded.WriteTemplateDir(filepath.Join("go-zero", "model"), filepath.Join(tempDir, "model"))
-		if err != nil {
-			return err
-		}
-		goctlHome = tempDir
-	} else {
-		goctlHome = filepath.Join(config.C.Gen.Home, "go-zero")
-	}
-	logx.Debugf("goctl_home = %s", goctlHome)
-
 	var (
 		allTables     []string
 		err           error
@@ -106,6 +88,24 @@ func (jm *JzeroModel) Gen() error {
 	if !pathx.FileExists(config.C.SqlDir()) {
 		return nil
 	}
+
+	var goctlHome string
+
+	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "model")) {
+		tempDir, err := os.MkdirTemp(os.TempDir(), "")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tempDir)
+		err = embeded.WriteTemplateDir(filepath.Join("go-zero", "model"), filepath.Join(tempDir, "model"))
+		if err != nil {
+			return err
+		}
+		goctlHome = tempDir
+	} else {
+		goctlHome = filepath.Join(config.C.Gen.Home, "go-zero")
+	}
+	logx.Debugf("goctl_home = %s", goctlHome)
 
 	var (
 		allFiles        []string

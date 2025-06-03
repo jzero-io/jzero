@@ -15,7 +15,6 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"golang.org/x/tools/go/ast/astutil"
 
-	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
@@ -187,134 +186,132 @@ func (ja *JzeroApi) changeLogicTypes(f *ast.File, fset *token.FileSet, file Logi
 	})
 
 	// change handler type struct
-	if config.C.Gen.RegenApiHandler {
-		ast.Inspect(f, func(node ast.Node) bool {
-			if genDecl, ok := node.(*ast.GenDecl); ok && genDecl.Tok == token.TYPE {
-				for _, ss := range genDecl.Specs {
-					if typeSpec, ok := ss.(*ast.TypeSpec); ok {
-						// Only proceed if the struct name matches our methodFunc
-						if strings.ToUpper(typeSpec.Name.Name) != strings.ToUpper(methodFunc) {
-							continue
-						}
-						var (
-							structType *ast.StructType
-							ok         bool
-							names      []string
-						)
-						if structType, ok = typeSpec.Type.(*ast.StructType); ok {
-							for _, field := range structType.Fields.List {
-								for _, name := range field.Names {
-									names = append(names, name.Name)
-								}
+	ast.Inspect(f, func(node ast.Node) bool {
+		if genDecl, ok := node.(*ast.GenDecl); ok && genDecl.Tok == token.TYPE {
+			for _, ss := range genDecl.Specs {
+				if typeSpec, ok := ss.(*ast.TypeSpec); ok {
+					// Only proceed if the struct name matches our methodFunc
+					if strings.ToUpper(typeSpec.Name.Name) != strings.ToUpper(methodFunc) {
+						continue
+					}
+					var (
+						structType *ast.StructType
+						ok         bool
+						names      []string
+					)
+					if structType, ok = typeSpec.Type.(*ast.StructType); ok {
+						for _, field := range structType.Fields.List {
+							for _, name := range field.Names {
+								names = append(names, name.Name)
 							}
 						}
-						if structType != nil && !lo.Contains(names, "r") {
-							newField := &ast.Field{
-								Names: []*ast.Ident{ast.NewIdent("r")},
-								Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
-							}
-							structType.Fields.List = append(structType.Fields.List, newField)
+					}
+					if structType != nil && !lo.Contains(names, "r") {
+						newField := &ast.Field{
+							Names: []*ast.Ident{ast.NewIdent("r")},
+							Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
 						}
+						structType.Fields.List = append(structType.Fields.List, newField)
+					}
 
-						if structType != nil && responseType == nil && !lo.Contains(names, "w") {
-							newField := &ast.Field{
-								Names: []*ast.Ident{ast.NewIdent("w")},
-								Type:  ast.NewIdent("http.ResponseWriter"),
-							}
-							structType.Fields.List = append(structType.Fields.List, newField)
-						} else if structType != nil && responseType != nil && lo.Contains(names, "w") {
-							for i, v := range structType.Fields.List {
-								if len(v.Names) > 0 {
-									if v.Names[0].Name == "w" {
-										// 删除这个元素
-										structType.Fields.List = append(structType.Fields.List[:i], structType.Fields.List[i+1:]...)
-									}
+					if structType != nil && responseType == nil && !lo.Contains(names, "w") {
+						newField := &ast.Field{
+							Names: []*ast.Ident{ast.NewIdent("w")},
+							Type:  ast.NewIdent("http.ResponseWriter"),
+						}
+						structType.Fields.List = append(structType.Fields.List, newField)
+					} else if structType != nil && responseType != nil && lo.Contains(names, "w") {
+						for i, v := range structType.Fields.List {
+							if len(v.Names) > 0 {
+								if v.Names[0].Name == "w" {
+									// 删除这个元素
+									structType.Fields.List = append(structType.Fields.List[:i], structType.Fields.List[i+1:]...)
 								}
 							}
 						}
 					}
 				}
 			}
-			return true
-		})
+		}
+		return true
+	})
 
-		// change New type struct params
-		ast.Inspect(f, func(n ast.Node) bool {
-			if fn, ok := n.(*ast.FuncDecl); ok && fn.Name.Name == fmt.Sprintf("New%s", methodFunc) {
-				var paramNames []string
-				for _, param := range fn.Type.Params.List {
-					for _, name := range param.Names {
-						paramNames = append(paramNames, name.Name)
-					}
+	// change New type struct params
+	ast.Inspect(f, func(n ast.Node) bool {
+		if fn, ok := n.(*ast.FuncDecl); ok && fn.Name.Name == fmt.Sprintf("New%s", methodFunc) {
+			var paramNames []string
+			for _, param := range fn.Type.Params.List {
+				for _, name := range param.Names {
+					paramNames = append(paramNames, name.Name)
 				}
-				if !lo.Contains(paramNames, "r") {
-					fn.Type.Params.List = append(fn.Type.Params.List, &ast.Field{
-						Names: []*ast.Ident{ast.NewIdent("r")},
-						Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
-					})
-				}
+			}
+			if !lo.Contains(paramNames, "r") {
+				fn.Type.Params.List = append(fn.Type.Params.List, &ast.Field{
+					Names: []*ast.Ident{ast.NewIdent("r")},
+					Type:  &ast.StarExpr{X: ast.NewIdent("http.Request")},
+				})
+			}
 
-				if responseType == nil && !lo.Contains(paramNames, "w") {
-					fn.Type.Params.List = append(fn.Type.Params.List, &ast.Field{
-						Names: []*ast.Ident{ast.NewIdent("w")},
-						Type:  ast.NewIdent("http.ResponseWriter"),
-					})
-				} else if responseType != nil && lo.Contains(paramNames, "w") {
-					for i, v := range fn.Type.Params.List {
-						if len(v.Names) > 0 {
-							if v.Names[0].Name == "w" {
-								fn.Type.Params.List = append(fn.Type.Params.List[:i], fn.Type.Params.List[i+1:]...)
-							}
+			if responseType == nil && !lo.Contains(paramNames, "w") {
+				fn.Type.Params.List = append(fn.Type.Params.List, &ast.Field{
+					Names: []*ast.Ident{ast.NewIdent("w")},
+					Type:  ast.NewIdent("http.ResponseWriter"),
+				})
+			} else if responseType != nil && lo.Contains(paramNames, "w") {
+				for i, v := range fn.Type.Params.List {
+					if len(v.Names) > 0 {
+						if v.Names[0].Name == "w" {
+							fn.Type.Params.List = append(fn.Type.Params.List[:i], fn.Type.Params.List[i+1:]...)
 						}
 					}
 				}
+			}
 
-				for _, body := range fn.Body.List {
-					if returnStmt, ok := body.(*ast.ReturnStmt); ok {
-						for _, result := range returnStmt.Results {
-							if unaryExpr, ok := result.(*ast.UnaryExpr); ok {
-								if compositeLit, ok := unaryExpr.X.(*ast.CompositeLit); ok {
-									if _, ok = compositeLit.Type.(*ast.Ident); ok {
-										hasR := false
-										hasW := false
+			for _, body := range fn.Body.List {
+				if returnStmt, ok := body.(*ast.ReturnStmt); ok {
+					for _, result := range returnStmt.Results {
+						if unaryExpr, ok := result.(*ast.UnaryExpr); ok {
+							if compositeLit, ok := unaryExpr.X.(*ast.CompositeLit); ok {
+								if _, ok = compositeLit.Type.(*ast.Ident); ok {
+									hasR := false
+									hasW := false
 
-										for _, elt := range compositeLit.Elts {
-											if kv, ok := elt.(*ast.KeyValueExpr); ok {
+									for _, elt := range compositeLit.Elts {
+										if kv, ok := elt.(*ast.KeyValueExpr); ok {
+											if key, ok := kv.Key.(*ast.Ident); ok {
+												if key.Name == "r" {
+													hasR = true
+												}
+												if key.Name == "w" {
+													hasW = true
+												}
+											}
+										}
+									}
+
+									if !hasR {
+										// Add new field
+										newField := &ast.KeyValueExpr{
+											Key:   ast.NewIdent("r"),
+											Value: ast.NewIdent("r"), // or any default value you want
+										}
+										compositeLit.Elts = append(compositeLit.Elts, newField)
+									}
+
+									if responseType == nil && !hasW {
+										// Add new field
+										newField := &ast.KeyValueExpr{
+											Key:   ast.NewIdent("w"),
+											Value: ast.NewIdent("w"), // or any default value you want
+										}
+										compositeLit.Elts = append(compositeLit.Elts, newField)
+									} else if responseType != nil && hasW {
+										for i, v := range compositeLit.Elts {
+											if kv, ok := v.(*ast.KeyValueExpr); ok {
 												if key, ok := kv.Key.(*ast.Ident); ok {
-													if key.Name == "r" {
-														hasR = true
-													}
 													if key.Name == "w" {
-														hasW = true
-													}
-												}
-											}
-										}
-
-										if !hasR {
-											// Add new field
-											newField := &ast.KeyValueExpr{
-												Key:   ast.NewIdent("r"),
-												Value: ast.NewIdent("r"), // or any default value you want
-											}
-											compositeLit.Elts = append(compositeLit.Elts, newField)
-										}
-
-										if responseType == nil && !hasW {
-											// Add new field
-											newField := &ast.KeyValueExpr{
-												Key:   ast.NewIdent("w"),
-												Value: ast.NewIdent("w"), // or any default value you want
-											}
-											compositeLit.Elts = append(compositeLit.Elts, newField)
-										} else if responseType != nil && hasW {
-											for i, v := range compositeLit.Elts {
-												if kv, ok := v.(*ast.KeyValueExpr); ok {
-													if key, ok := kv.Key.(*ast.Ident); ok {
-														if key.Name == "w" {
-															// 删除这个元素
-															compositeLit.Elts = append(compositeLit.Elts[:i], compositeLit.Elts[i+1:]...)
-														}
+														// 删除这个元素
+														compositeLit.Elts = append(compositeLit.Elts[:i], compositeLit.Elts[i+1:]...)
 													}
 												}
 											}
@@ -326,11 +323,11 @@ func (ja *JzeroApi) changeLogicTypes(f *ast.File, fset *token.FileSet, file Logi
 					}
 				}
 			}
-			return true
-		})
+		}
+		return true
+	})
 
-		// check `net/http` import
-		astutil.AddImport(fset, f, "net/http")
-	}
+	// check `net/http` import
+	astutil.AddImport(fset, f, "net/http")
 	return nil
 }

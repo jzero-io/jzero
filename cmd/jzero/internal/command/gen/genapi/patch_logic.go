@@ -98,11 +98,9 @@ func (ja *JzeroApi) patchLogic(file LogicFile) error {
 	}
 
 	// change logic types
-	if config.C.Gen.ChangeLogicTypes {
-		if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
-			if err := ja.changeLogicTypes(f, fset, file); err != nil {
-				console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
-			}
+	if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
+		if err = ja.changeLogicTypes(f, fset, file); err != nil {
+			console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
 		}
 	}
 

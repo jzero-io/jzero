@@ -7,18 +7,12 @@ package main
 
 import (
 	"embed"
-	"log"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/a8m/envsubst"
-	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-	"gopkg.in/yaml.v3"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/check"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/completion"
@@ -39,8 +33,6 @@ import (
 )
 
 var (
-	CfgFile    string
-	CfgEnvFile string
 	WorkingDir string
 )
 
@@ -104,8 +96,8 @@ func init() {
 
 	rootCmd.Flags().BoolP("version", "v", false, "show version")
 	rootCmd.PersistentFlags().StringVarP(&WorkingDir, "working-dir", "w", "", "set working directory")
-	rootCmd.PersistentFlags().StringVarP(&CfgFile, "config", "f", ".jzero.yaml", "set config file")
-	rootCmd.PersistentFlags().StringVarP(&CfgEnvFile, "config-env", "", ".jzero.env.yaml", "set config env file")
+	rootCmd.PersistentFlags().StringVarP(&config.CfgFile, "config", "f", ".jzero.yaml", "set config file")
+	rootCmd.PersistentFlags().StringVarP(&config.CfgEnvFile, "config-env", "", ".jzero.env.yaml", "set config env file")
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "debug mode")
 	rootCmd.PersistentFlags().IntP("debug-sleep-time", "", 0, "debug sleep time")
 
@@ -137,34 +129,7 @@ func InitConfig() {
 		}
 	}
 
-	if pathx.FileExists(CfgFile) {
-		viper.SetConfigFile(CfgFile)
-		// If a config file is found, read it in.
-		if err := viper.ReadInConfig(); err != nil {
-			cobra.CheckErr(err)
-		}
-	}
-
-	if pathx.FileExists(CfgEnvFile) {
-		data, err := envsubst.ReadFile(CfgEnvFile)
-		if err != nil {
-			log.Fatalf("envsubst error: %v", err)
-		}
-		var env map[string]any
-		err = yaml.Unmarshal(data, &env)
-		if err != nil {
-			log.Fatalf("yaml unmarshal error: %v", err)
-		}
-
-		for k, v := range env {
-			_ = os.Setenv(k, cast.ToString(v))
-		}
-	}
-
-	if err := config.TraverseCommands("", rootCmd); err != nil {
-		panic(err)
-	}
-
+	cobra.CheckErr(config.InitConfig(rootCmd))
 	if config.C.Debug {
 		logx.MustSetup(logx.LogConf{Encoding: "plain"})
 		logx.SetLevel(logx.DebugLevel)

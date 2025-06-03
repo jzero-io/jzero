@@ -173,13 +173,11 @@ func (ja *JzeroApi) generateApiCode() error {
 	for _, file := range ja.GenCodeApiFiles {
 		if parse, ok := ja.GenCodeApiSpecMap[file]; ok {
 			for _, group := range parse.Service.Groups {
-				if config.C.Gen.RegenApiHandler {
-					dirFile, err := os.ReadDir(filepath.Join(config.C.Wd(), "internal", "handler", group.GetAnnotation("group")))
-					if err == nil {
-						for _, v := range dirFile {
-							if !v.IsDir() {
-								_ = os.Remove(filepath.Join(config.C.Wd(), "internal", "handler", group.GetAnnotation("group"), v.Name()))
-							}
+				dirFile, err := os.ReadDir(filepath.Join(config.C.Wd(), "internal", "handler", group.GetAnnotation("group")))
+				if err == nil {
+					for _, v := range dirFile {
+						if !v.IsDir() {
+							_ = os.Remove(filepath.Join(config.C.Wd(), "internal", "handler", group.GetAnnotation("group"), v.Name()))
 						}
 					}
 				}
@@ -233,10 +231,6 @@ func (ja *JzeroApi) generateApiCode() error {
 		if s, ok := allRoutesGoBodyMap.Load(v); ok {
 			allRoutesGoBody += cast.ToString(s) + "\n"
 		}
-	}
-
-	if err := ja.patchSvc(); err != nil {
-		return err
 	}
 
 	for _, v := range ja.GenCodeApiFiles {

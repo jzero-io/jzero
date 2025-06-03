@@ -150,7 +150,7 @@ var newCmd = &cobra.Command{
 			return err
 		}
 
-		// 执行 gen
+		// change dir to project
 		if err := os.Chdir(config.C.New.Output); err != nil {
 			return err
 		}
@@ -167,7 +167,7 @@ var newCmd = &cobra.Command{
 		}
 		fmt.Printf("%s desc dir in %s, auto generate code\n", color.WithColor("Detected", color.FgGreen), config.C.New.Output)
 
-		if err := config.TraverseCommands("", cmd.Root()); err != nil {
+		if err := config.InitConfig(cmd.Root()); err != nil {
 			return err
 		}
 
@@ -189,6 +189,7 @@ func GetCommand() *cobra.Command {
 	newCmd.Flags().StringP("output", "o", "", "set output dir with project name")
 	newCmd.Flags().StringP("home", "", "", "use the specified template.")
 	newCmd.Flags().StringP("frame", "", "", "set frame")
+	newCmd.Flags().StringP("style", "", "gozero", "set style")
 	newCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().StringP("remote-auth-username", "", "", "remote templates repo auth username")
 	newCmd.Flags().StringP("remote-auth-password", "", "", "remote templates repo auth password")

@@ -12,7 +12,6 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
-	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
@@ -144,9 +143,6 @@ func (jr *JzeroRpc) Gen() error {
 	}
 
 	fmt.Printf("%s to generate proto code. \n", color.WithColor("Start", color.FgGreen))
-	if err = jr.patchSvc(); err != nil {
-		return err
-	}
 
 	for _, v := range jr.ProtoFiles {
 		allLogicFiles, err := jr.GetAllLogicFiles(v, jr.ProtoSpecMap[v])
@@ -157,19 +153,6 @@ func (jr *JzeroRpc) Gen() error {
 		allServerFiles, err := jr.GetAllServerFiles(v, jr.ProtoSpecMap[v])
 		if err != nil {
 			return err
-		}
-
-		if config.C.Gen.RpcStylePatch {
-			if lo.Contains(genCodeProtoFiles, v) {
-				for _, s := range jr.ProtoSpecMap[v].Service {
-					// rename logic dir and server dir
-					dirName, _ := format.FileNamingFormat("gozero", s.Name)
-					fixDirName, _ := format.FileNamingFormat(config.C.Gen.Style, s.Name)
-
-					_ = os.Rename(filepath.Join("internal", "logic", strings.ToLower(fixDirName)), filepath.Join("internal", "logic", dirName))
-					_ = os.Rename(filepath.Join("internal", "server", strings.ToLower(fixDirName)), filepath.Join("internal", "server", dirName))
-				}
-			}
 		}
 
 		if lo.Contains(genCodeProtoFiles, v) {
@@ -194,19 +177,6 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 
-		if config.C.Gen.RpcStylePatch {
-			if lo.Contains(genCodeProtoFiles, v) {
-				for _, s := range jr.ProtoSpecMap[v].Service {
-					// rename logic dir and server dir
-					dirName, _ := format.FileNamingFormat("gozero", s.Name)
-					fixDirName, _ := format.FileNamingFormat(config.C.Gen.Style, s.Name)
-
-					_ = os.Rename(filepath.Join("internal", "logic", strings.ToLower(dirName)), filepath.Join("internal", "logic", fixDirName))
-					_ = os.Rename(filepath.Join("internal", "server", strings.ToLower(dirName)), filepath.Join("internal", "server", fixDirName))
-				}
-			}
-		}
-
 		for _, file := range allServerFiles {
 			if filepath.Clean(file.DescFilepath) == filepath.Clean(v) {
 				if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
@@ -226,30 +196,11 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 
-		if config.C.Gen.RpcStylePatch {
-			if lo.Contains(genCodeProtoFiles, v) {
-				for _, file := range allServerFiles {
-					err = jr.rpcStylePatchServer(file)
-					if err != nil {
-						return err
-					}
-				}
-				for _, file := range allLogicFiles {
-					err = jr.rpcStylePatchLogic(file)
-					if err != nil {
-						return err
-					}
-				}
-			}
-		}
-
-		if config.C.Gen.ChangeLogicTypes {
-			if lo.Contains(genCodeProtoFiles, v) {
-				for _, file := range allLogicFiles {
-					if err = jr.changeLogicTypes(file); err != nil {
-						console.Warning("[warning]: change logic types %s meet error %v", file.Path, err)
-						continue
-					}
+		if lo.Contains(genCodeProtoFiles, v) {
+			for _, file := range allLogicFiles {
+				if err = jr.changeLogicTypes(file); err != nil {
+					console.Warning("[warning]: change logic types %s meet error %v", file.Path, err)
+					continue
 				}
 			}
 		}
@@ -274,13 +225,7 @@ func (jr *JzeroRpc) Gen() error {
 		}
 
 		for _, s := range jr.ProtoSpecMap[v].Service {
-			if config.C.Gen.RpcStylePatch {
-				serverDir, _ := format.FileNamingFormat(config.C.Gen.Style, s.Name)
-				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, strings.ToLower(s.Name), jr.Module, strings.ToLower(serverDir)))
-			} else {
-				serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, strings.ToLower(s.Name), jr.Module, strings.ToLower(s.Name)))
-			}
-
+			serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, strings.ToLower(s.Name), jr.Module, strings.ToLower(s.Name)))
 			registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%s(ctx))", filepath.Base(jr.ProtoSpecMap[v].GoPackage), stringx.FirstUpper(s.Name), strings.ToLower(s.Name), stringx.FirstUpper(stringx.ToCamel(s.Name))))
 		}
 		pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(jr.ProtoSpecMap[v].GoPackage, "./")))

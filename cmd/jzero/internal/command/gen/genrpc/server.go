@@ -48,10 +48,6 @@ func (jr *JzeroRpc) GetAllServerFiles(descFilepath string, protoSpec rpcparser.P
 			return nil, err
 		}
 		fp := filepath.Join(config.C.Wd(), "internal", "server", strings.ToLower(service.Name), namingFormat+".go")
-		if config.C.Gen.RpcStylePatch {
-			serverDir, _ := format.FileNamingFormat(config.C.Gen.Style, service.Name)
-			fp = filepath.Join(config.C.Wd(), "internal", "server", strings.ToLower(serverDir), namingFormat+".go")
-		}
 
 		f := ServerFile{
 			DescFilepath: descFilepath,
