@@ -210,47 +210,57 @@ func (jm *JzeroModel) Gen() error {
 	}
 
 	fmt.Printf("%s to generate model code from sql files.\n", color.WithColor("Start", color.FgGreen))
+
+	var eg errgroup.Group
+	eg.SetLimit(len(genCodeSqlFiles))
 	for _, f := range genCodeSqlFiles {
-		fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), f)
-		tableParsers := genCodeSqlSpecMap[f]
+		eg.Go(func() error {
+			fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), f)
+			tableParsers := genCodeSqlSpecMap[f]
 
-		for _, tp := range tableParsers {
-			genCodeTables = append(genCodeTables, tp.Name.Source())
-		}
+			for _, tp := range tableParsers {
+				genCodeTables = append(genCodeTables, tp.Name.Source())
+			}
 
-		bf := filepath.Base(f)
-		modelDir := filepath.Join("internal", "model", strings.ToLower(bf[0:len(bf)-len(path.Ext(bf))]))
+			bf := filepath.Base(f)
+			modelDir := filepath.Join("internal", "model", strings.ToLower(bf[0:len(bf)-len(path.Ext(bf))]))
 
-		var scheme string
-		if config.C.Gen.ModelDatasource && config.C.Gen.ModelDriver == "mysql" {
-			meta, err := dsn.ParseDSN(config.C.Gen.ModelDriver, config.C.Gen.ModelDatasourceUrl)
-			if err != nil {
-				return err
+			var scheme string
+			if config.C.Gen.ModelDatasource && config.C.Gen.ModelDriver == "mysql" {
+				meta, err := dsn.ParseDSN(config.C.Gen.ModelDriver, config.C.Gen.ModelDatasourceUrl)
+				if err != nil {
+					return err
+				}
+				scheme = meta[dsn.Database]
 			}
-			scheme = meta[dsn.Database]
-		}
-		if config.C.Gen.ModelScheme != "" {
-			scheme = config.C.Gen.ModelScheme
-		}
+			if config.C.Gen.ModelScheme != "" {
+				scheme = config.C.Gen.ModelScheme
+			}
 
-		if config.C.Gen.ModelDriver == "postgres" {
-			if scheme == "" {
-				scheme = "public"
+			if config.C.Gen.ModelDriver == "postgres" {
+				if scheme == "" {
+					scheme = "public"
+				}
+				cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", config.C.Gen.ModelDatasourceUrl, "--scheme", scheme, "-t", strings.TrimSuffix(filepath.Base(f), ".sql"), "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+				logx.Debug(cmd.String())
+				resp, err := cmd.CombinedOutput()
+				if err != nil {
+					return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
+				}
+			} else {
+				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", scheme, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+				logx.Debug(cmd.String())
+				resp, err := cmd.CombinedOutput()
+				if err != nil {
+					return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
+				}
 			}
-			cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", config.C.Gen.ModelDatasourceUrl, "--scheme", scheme, "-t", strings.TrimSuffix(filepath.Base(f), ".sql"), "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
-			logx.Debug(cmd.String())
-			resp, err := cmd.CombinedOutput()
-			if err != nil {
-				return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
-			}
-		} else {
-			cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", scheme, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
-			logx.Debug(cmd.String())
-			resp, err := cmd.CombinedOutput()
-			if err != nil {
-				return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
-			}
-		}
+			return nil
+		})
+	}
+
+	if err = eg.Wait(); err != nil {
+		return err
 	}
 
 	err = jm.GenRegister(allTables)

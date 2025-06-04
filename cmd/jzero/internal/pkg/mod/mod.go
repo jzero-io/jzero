@@ -38,7 +38,6 @@ func GetGoVersion() (string, error) {
 }
 
 // GetGoMod is used to determine whether workDir is a go module project through command `go list -json -m`
-// GetGoMod is used to determine whether workDir is a go module project through command `go list -json -m`
 func GetGoMod(workDir string) (*ModuleStruct, error) {
 	ms, err := GetGoMods(workDir)
 	if err != nil {
@@ -77,7 +76,16 @@ func GetGoMods(workDir string) ([]ModuleStruct, error) {
 	command.Dir = workDir
 	data, err := command.CombinedOutput()
 	if err != nil {
-		return nil, errors.New(string(data))
+		if strings.Contains(string(data), "go mod tidy") {
+			if _, err = execx.Run("go mod tidy", workDir); err != nil {
+				return nil, err
+			}
+			command = exec.Command("go", "list", "-json", "-m")
+			command.Dir = workDir
+			if data, err = command.CombinedOutput(); err != nil {
+				return nil, errors.New(string(data))
+			}
+		}
 	}
 
 	var ms []ModuleStruct
