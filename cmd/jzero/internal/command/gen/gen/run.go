@@ -6,6 +6,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -14,12 +15,21 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genapi"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genmodel"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genrpc"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 )
 
-func Run(isNew bool) error {
+func Run() error {
+	home, _ := os.UserHomeDir()
+	config.C.Gen.Home, _ = homedir.Expand(config.C.Gen.Home)
+	if !pathx.FileExists(config.C.Gen.Home) {
+		config.C.Gen.Home = filepath.Join(home, ".jzero", "templates", version.Version)
+	}
+	embeded.Home = config.C.Gen.Home
+
 	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), config.C.Wd())
 
 	var module string
@@ -42,7 +52,6 @@ func Run(isNew bool) error {
 
 	jzeroModel := genmodel.JzeroModel{
 		Module: module,
-		IsNew:  isNew,
 	}
 	err = jzeroModel.Gen()
 	if err != nil {
