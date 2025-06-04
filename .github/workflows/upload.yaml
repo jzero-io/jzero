@@ -39,6 +39,7 @@ jobs:
           rm -rf simpleapi
           jzero new simpleapi
           cd simpleapi
+          go mod tidy
           jzero gen swagger
           jzero gen sdk
           jzero format --git-change=false
@@ -55,6 +56,7 @@ jobs:
           rm -rf simplegateway
           jzero new simplegateway --frame gateway
           cd simplegateway
+          go mod tidy
           jzero gen swagger
           jzero gen sdk
           jzero gen zrpcclient
@@ -70,6 +72,7 @@ jobs:
           rm -rf simplerpc
           jzero new simplerpc --frame rpc
           cd simplerpc
+          go mod tidy
           jzero gen swagger
           jzero gen zrpcclient
           jzero format --git-change=false
@@ -84,6 +87,7 @@ jobs:
           rm -rf simpleapi-serverless
           jzero new simpleapi-serverless --frame api --features serverless
           cd simpleapi-serverless
+          go mod tidy
           jzero gen swagger
           jzero format --git-change=false
           go mod tidy && go mod download
