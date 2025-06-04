@@ -11,10 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
-	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gen"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gendocs"
@@ -32,14 +30,7 @@ var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: `Used to generate server code with api, proto, sql desc file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		home, _ := os.UserHomeDir()
-		config.C.Gen.Home, _ = homedir.Expand(config.C.Gen.Home)
-		if !pathx.FileExists(config.C.Gen.Home) {
-			config.C.Gen.Home = filepath.Join(home, ".jzero", "templates", version.Version)
-		}
-		embeded.Home = config.C.Gen.Home
-
-		return gen.Run(false)
+		return gen.Run()
 	},
 	SilenceUsage: true,
 }

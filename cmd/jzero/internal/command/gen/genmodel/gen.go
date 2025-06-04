@@ -33,7 +33,6 @@ import (
 
 type JzeroModel struct {
 	Module string
-	IsNew  bool
 }
 
 func (jm *JzeroModel) Gen() error {
@@ -49,11 +48,6 @@ func (jm *JzeroModel) Gen() error {
 	}
 
 	if config.C.Gen.ModelDatasource {
-		if jm.IsNew {
-			fmt.Printf("%s you are using mysql datesource to generate model code, please manual execute jzero gen command\n", color.WithColor("Detected", color.FgRed))
-			return nil
-		}
-
 		switch config.C.Gen.ModelDriver {
 		case "mysql":
 			sqlConn = sqlx.NewMysql(config.C.Gen.ModelDatasourceUrl)

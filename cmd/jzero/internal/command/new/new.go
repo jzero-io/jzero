@@ -179,7 +179,7 @@ var newCmd = &cobra.Command{
 			config.C.Gen.Home = filepath.Join(config.C.Wd(), ".template")
 		}
 
-		return gen.Run(true)
+		return gen.Run()
 	},
 }
 
