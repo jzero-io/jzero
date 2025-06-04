@@ -3,6 +3,7 @@ module github.com/jzero-io/jzero/cmd/jzero
 go 1.24.3
 
 require (
+	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
 	github.com/fsgo/go_fmt v0.6.3
@@ -14,14 +15,13 @@ require (
 	github.com/jaronnie/genius v0.5.2
 	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v1.1.0
-	github.com/jzero-io/jzero v0.39.0-beta
 	github.com/mark3labs/mcp-go v0.31.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/rinchsan/gosimports v0.3.8
 	github.com/samber/lo v1.50.0
-	github.com/spf13/cast v1.8.0
+	github.com/spf13/cast v1.9.2
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.20.1
@@ -41,7 +41,6 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
-	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/antlr/antlr4/runtime/Go/antlr v0.0.0-20210521184019-c5ad59b459ec // indirect
@@ -52,7 +51,6 @@ require (
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/eddieowens/opts v0.1.0 // indirect
 	github.com/emicklei/proto v1.14.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fatih/color v1.18.0 // indirect

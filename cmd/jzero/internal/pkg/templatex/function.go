@@ -3,7 +3,17 @@ package templatex
 import (
 	"github.com/hashicorp/go-version"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
+
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/stringx"
 )
+
+var registerFuncMap = map[string]any{
+	"FirstUpper":     stringx.FirstUpper,
+	"FirstLower":     stringx.FirstLower,
+	"ToCamel":        stringx.ToCamel,
+	"FormatStyle":    FormatStyle,
+	"VersionCompare": VersionCompare,
+}
 
 func FormatStyle(style string, name string) string {
 	namingFormat, err := format.FileNamingFormat(style, name)

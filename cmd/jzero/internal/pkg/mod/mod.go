@@ -3,11 +3,13 @@ package mod
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 )
 
@@ -77,6 +79,7 @@ func GetGoMods(workDir string) ([]ModuleStruct, error) {
 	data, err := command.CombinedOutput()
 	if err != nil {
 		if strings.Contains(string(data), "go mod tidy") {
+			fmt.Printf("%s go mod tidy. Please wait...\n", color.WithColor("Running", color.FgGreen))
 			if _, err = execx.Run("go mod tidy", workDir); err != nil {
 				return nil, err
 			}
