@@ -14,6 +14,12 @@ func (o Operator) String() string {
 	return string(o)
 }
 
+type Field string
+
+func (f Field) String() string {
+	return string(f)
+}
+
 const (
 	Equal            Operator = "="
 	NotEqual         Operator = "!="
@@ -45,12 +51,12 @@ type Condition struct {
 	Or bool
 
 	OrOperators  []Operator
-	OrFields     []string
+	OrFields     []Field
 	OrValues     []any
 	OrValuesFunc func() []any
 
 	// Field for default and condition
-	Field string
+	Field Field
 
 	Operator Operator
 	Value    any
@@ -74,42 +80,42 @@ func New(conditions ...Condition) []Condition {
 	return conditions
 }
 
-func buildExpr(cond *sqlbuilder.Cond, field string, operator Operator, value any) string {
+func buildExpr(cond *sqlbuilder.Cond, field Field, operator Operator, value any) string {
 	switch operator {
 	case Equal:
-		return cond.Equal(field, value)
+		return cond.Equal(string(field), value)
 	case NotEqual:
-		return cond.NotEqual(field, value)
+		return cond.NotEqual(string(field), value)
 	case GreaterThan:
-		return cond.GreaterThan(field, value)
+		return cond.GreaterThan(string(field), value)
 	case LessThan:
-		return cond.LessThan(field, value)
+		return cond.LessThan(string(field), value)
 	case GreaterEqualThan:
-		return cond.GreaterEqualThan(field, value)
+		return cond.GreaterEqualThan(string(field), value)
 	case LessEqualThan:
-		return cond.LessEqualThan(field, value)
+		return cond.LessEqualThan(string(field), value)
 	case In:
 		if len(ToSlice(value)) == 0 {
 			// if value is empty, force placeholder nil to avoid sql error
-			return cond.In(field, nil)
+			return cond.In(string(field), nil)
 		}
-		return cond.In(field, ToSlice(value)...)
+		return cond.In(string(field), ToSlice(value)...)
 	case NotIn:
 		if len(ToSlice(value)) == 0 {
 			// if value is empty, force placeholder nil to avoid sql error
-			return cond.NotIn(field, nil)
+			return cond.NotIn(string(field), nil)
 		}
-		return cond.NotIn(field, ToSlice(value)...)
+		return cond.NotIn(string(field), ToSlice(value)...)
 	case Like:
-		return cond.Like(field, value)
+		return cond.Like(string(field), value)
 	case NotLike:
-		return cond.NotLike(field, value)
+		return cond.NotLike(string(field), value)
 	case Between:
 		v := ToSlice(value)
-		return cond.Between(field, v[0], v[1])
+		return cond.Between(string(field), v[0], v[1])
 	case NotBetween:
 		v := ToSlice(value)
-		return cond.NotBetween(field, v[0], v[1])
+		return cond.NotBetween(string(field), v[0], v[1])
 	}
 	return ""
 }

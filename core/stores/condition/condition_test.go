@@ -19,7 +19,7 @@ func TestSelectWithCondition(t *testing.T) {
 		Value:    "jaronnie",
 	}, Condition{
 		Or:          true,
-		OrFields:    []string{"age", "height"},
+		OrFields:    []Field{"age", "height"},
 		OrOperators: []Operator{Between, Between},
 		OrValues:    values,
 	})
@@ -44,7 +44,7 @@ func TestUpdateWithCondition(t *testing.T) {
 		Value:    "jaronnie",
 	}, Condition{
 		Or:          true,
-		OrFields:    []string{"age", "height"},
+		OrFields:    []Field{"age", "height"},
 		OrOperators: []Operator{Between, Between},
 		OrValues:    values,
 	})
@@ -85,7 +85,7 @@ func TestDeleteWithCondition(t *testing.T) {
 		},
 	}, Condition{
 		Or:          true,
-		OrFields:    []string{"age", "height"},
+		OrFields:    []Field{"age", "height"},
 		OrOperators: []Operator{Between, Between},
 		OrValues:    values,
 		OrValuesFunc: func() []any {
@@ -125,7 +125,7 @@ func TestWhereClause(t *testing.T) {
 		},
 	}, Condition{
 		Or:          true,
-		OrFields:    []string{"age", "height"},
+		OrFields:    []Field{"age", "height"},
 		OrOperators: []Operator{Between, Between},
 		OrValues:    values,
 		OrValuesFunc: func() []any {

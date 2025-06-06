@@ -96,15 +96,15 @@ func RemoveIgnoreColumns(strings []string, strs ...string) []string {
 	return out
 }
 
-func Table(table string) string {
-	return format(table)
+func AdaptTable(table string) string {
+	return adapt(table)
 }
 
-func Field(field string) string {
-	return format(field)
+func AdaptField(field string) string {
+	return adapt(field)
 }
 
-func format(str string) string {
+func adapt(str string) string {
 	switch sqlbuilder.DefaultFlavor {
 	case sqlbuilder.PostgreSQL:
 		str = Unquote(str)

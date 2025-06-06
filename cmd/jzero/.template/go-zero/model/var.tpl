@@ -6,6 +6,12 @@ var (
 {{if .withCache}}{{.cacheKeys}}{{end}}
 )
 
+type Field string
+const (
+{{range $index, $v := .data.Fields}}{{$v.Name.ToCamel}} Field = "{{$v.NameOriginal}}"
+{{end}}
+)
+
 func initVars() {
         {{.lowerStartCamelObject}}FieldNames = condition.RawFieldNames(&{{.upperStartCamelObject}}{})
         {{.lowerStartCamelObject}}Rows = strings.Join({{.lowerStartCamelObject}}FieldNames, ",")
