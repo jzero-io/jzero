@@ -4,7 +4,7 @@ func (m *default{{.upperStartCamelObject}}Model) formatPrimary(primary any) stri
 
 func (m *default{{.upperStartCamelObject}}Model) queryPrimary(ctx context.Context, conn sqlx.SqlConn, v, primary any) error {
     sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-    sb.Where(sb.EQ(condition.Field("{{.originalPrimaryField}}"), primary))
+    sb.Where(sb.EQ(condition.AdaptField("{{.originalPrimaryField}}"), primary))
     sql, args := sb.Build()
 	return conn.QueryRowCtx(ctx, v, sql, args...)
 }

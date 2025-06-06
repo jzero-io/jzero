@@ -6,9 +6,8 @@ var (
 {{if .withCache}}{{.cacheKeys}}{{end}}
 )
 
-type Field string
 const (
-{{range $index, $v := .data.Fields}}{{$v.Name.ToCamel}} Field = "{{$v.NameOriginal}}"
+{{range $index, $v := .data.Fields}}{{$v.Name.ToCamel}} condition.Field = "{{$v.NameOriginal}}"
 {{end}}
 )
 

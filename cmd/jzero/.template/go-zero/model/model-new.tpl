@@ -13,6 +13,6 @@ func new{{.upperStartCamelObject}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx
 	return &default{{.upperStartCamelObject}}Model{
 		cachedConn: cachedConn,
 		conn: conn,
-		table:      condition.Table({{.table}}),
+		table:      condition.AdaptTable({{.table}}),
 	}
 }

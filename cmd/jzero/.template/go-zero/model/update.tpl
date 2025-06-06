@@ -6,7 +6,7 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, ses
         assigns = append(assigns, sb.Assign(s, nil))
     }
     sb.Set(assigns...)
-    sb.Where(sb.EQ(condition.Field("{{.originalPrimaryKey}}"), nil))
+    sb.Where(sb.EQ(condition.AdaptField("{{.originalPrimaryKey}}"), nil))
     statement, _ := sb.Build()
 
     var err error
@@ -32,7 +32,7 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateWithCache(ctx context.Con
            assigns = append(assigns, sb.Assign(s, nil))
         }
         sb.Set(assigns...)
-        sb.Where(sb.EQ(condition.Field("{{.originalPrimaryKey}}"), nil))
+        sb.Where(sb.EQ(condition.AdaptField("{{.originalPrimaryKey}}"), nil))
         statement, _ := sb.Build()
         if session != nil{
             return session.ExecCtx(ctx, statement, {{.expressionValues}})
