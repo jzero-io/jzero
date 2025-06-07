@@ -101,9 +101,9 @@ type GenConfig struct {
 
 	ModelStrict          bool     `mapstructure:"model-strict"`
 	ModelIgnoreColumns   []string `mapstructure:"model-ignore-columns"`
-	ModelScheme          string   `mapstructure:"model-scheme"`
+	ModelSchema          string   `mapstructure:"model-schema"`
 	ModelDatasource      bool     `mapstructure:"model-datasource"`
-	ModelDatasourceUrl   string   `mapstructure:"model-datasource-url"`
+	ModelDatasourceUrl   []string `mapstructure:"model-datasource-url"`
 	ModelDatasourceTable []string `mapstructure:"model-datasource-table"`
 	ModelCache           bool     `mapstructure:"model-cache"`
 	ModelCachePrefix     string   `mapstructure:"model-cache-prefix"`

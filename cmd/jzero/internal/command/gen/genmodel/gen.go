@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
-	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/postgres"
@@ -35,12 +33,17 @@ type JzeroModel struct {
 	Module string
 }
 
+type Conn struct {
+	Scheme  string
+	SqlConn sqlx.SqlConn
+}
+
 func (jm *JzeroModel) Gen() error {
 	var (
 		allTables     []string
 		err           error
 		genCodeTables []string
-		sqlConn       sqlx.SqlConn
+		conns         []Conn
 	)
 
 	if config.C.Gen.ModelDriver == "postgres" && !config.C.Gen.ModelDatasource {
@@ -50,21 +53,39 @@ func (jm *JzeroModel) Gen() error {
 	if config.C.Gen.ModelDatasource {
 		switch config.C.Gen.ModelDriver {
 		case "mysql":
-			sqlConn = sqlx.NewMysql(config.C.Gen.ModelDatasourceUrl)
+			for _, v := range config.C.Gen.ModelDatasourceUrl {
+				meta, err := dsn.ParseDSN(config.C.Gen.ModelDriver, v)
+				if err != nil {
+					return err
+				}
+				conns = append(conns, Conn{
+					Scheme:  meta[dsn.Database],
+					SqlConn: sqlx.NewMysql(v),
+				})
+			}
 		case "postgres":
-			sqlConn = postgres.New(config.C.Gen.ModelDatasourceUrl)
+			for _, v := range config.C.Gen.ModelDatasourceUrl {
+				meta, err := dsn.ParseDSN(config.C.Gen.ModelDriver, v)
+				if err != nil {
+					return err
+				}
+				conns = append(conns, Conn{
+					Scheme:  meta[dsn.Database],
+					SqlConn: postgres.New(v),
+				})
+			}
 		default:
 			return errors.Errorf("model driver %s not support", config.C.Gen.ModelDriver)
 		}
 
-		tables, err := getAllTables(sqlConn, config.C.Gen.ModelDriver)
+		tables, err := getAllTables(conns, config.C.Gen.ModelDriver)
 		if err != nil {
 			return err
 		}
 
 		fmt.Printf("%s to generate ddl from %s\n", color.WithColor("Start", color.FgGreen), config.C.Gen.ModelDatasourceUrl)
 
-		writeTables, err := jm.GenDDL(sqlConn, tables)
+		writeTables, err := jm.GenDDL(conns, tables)
 		if err != nil {
 			return err
 		}
@@ -164,19 +185,7 @@ func (jm *JzeroModel) Gen() error {
 
 	if len(genCodeSqlFiles) != 0 {
 		if config.C.Gen.ModelDatasource {
-			tables, err := getAllTables(sqlConn, config.C.Gen.ModelDriver)
-			if err != nil {
-				return err
-			}
-			if len(config.C.Gen.ModelDatasourceTable) != 0 && config.C.Gen.ModelDatasourceTable[0] != "*" {
-				for _, v := range tables {
-					if lo.Contains(config.C.Gen.ModelDatasourceTable, cast.ToString(v)) {
-						allTables = append(allTables, v)
-					}
-				}
-			} else if len(config.C.Gen.ModelDatasourceTable) != 0 && config.C.Gen.ModelDatasourceTable[0] == "*" {
-				allTables = tables
-			}
+			allTables = config.C.Gen.ModelDatasourceTable
 			for _, f := range allFiles {
 				genCodeSqlSpecMap[f] = []*parser.Table{
 					{
@@ -195,8 +204,15 @@ func (jm *JzeroModel) Gen() error {
 					mu.Lock()
 					defer mu.Unlock()
 					genCodeSqlSpecMap[f] = tableParsers
+
+					bf := strings.TrimSuffix(filepath.Base(f), ".sql")
+
 					for _, tp := range tableParsers {
-						allTables = append(allTables, tp.Name.Source())
+						if strings.Contains(bf, ".") {
+							allTables = append(allTables, strings.Split(bf, ".")[0]+"."+tp.Name.Source())
+						} else {
+							allTables = append(allTables, tp.Name.Source())
+						}
 					}
 					return nil
 				})
@@ -222,33 +238,69 @@ func (jm *JzeroModel) Gen() error {
 				genCodeTables = append(genCodeTables, tp.Name.Source())
 			}
 
-			bf := filepath.Base(f)
-			modelDir := filepath.Join("internal", "model", strings.ToLower(bf[0:len(bf)-len(path.Ext(bf))]))
+			bf := strings.TrimSuffix(filepath.Base(f), ".sql")
 
-			var scheme string
-			if config.C.Gen.ModelDatasource && config.C.Gen.ModelDriver == "mysql" {
-				meta, err := dsn.ParseDSN(config.C.Gen.ModelDriver, config.C.Gen.ModelDatasourceUrl)
-				if err != nil {
-					return err
-				}
-				scheme = meta[dsn.Database]
-			}
-			if config.C.Gen.ModelScheme != "" {
-				scheme = config.C.Gen.ModelScheme
+			var (
+				modelDir string
+				schema   = config.C.Gen.ModelSchema
+			)
+			if strings.Contains(bf, ".") {
+				split := strings.Split(bf, ".")
+				modelDir = filepath.Join("internal", "model", split[0], strings.ToLower(split[1]))
+			} else {
+				modelDir = filepath.Join("internal", "model", strings.ToLower(bf))
 			}
 
 			if config.C.Gen.ModelDriver == "postgres" {
-				if scheme == "" {
-					scheme = "public"
+				if schema == "" {
+					schema = "public"
 				}
-				cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", config.C.Gen.ModelDatasourceUrl, "--scheme", scheme, "-t", strings.TrimSuffix(filepath.Base(f), ".sql"), "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+			} else if config.C.Gen.ModelDriver == "mysql" {
+				if strings.Contains(bf, ".") {
+					schema = strings.Split(bf, ".")[0]
+				} else {
+					if schema == "" {
+						if len(config.C.Gen.ModelDatasourceUrl) >= 1 {
+							meta, err := dsn.ParseDSN("mysql", config.C.Gen.ModelDatasourceUrl[0])
+							if err != nil {
+								return err
+							}
+							schema = meta[dsn.Database]
+						}
+					}
+				}
+			}
+
+			if config.C.Gen.ModelDriver == "postgres" {
+				var datasourceUrl string
+				if strings.Contains(bf, ".") {
+					for _, v := range config.C.Gen.ModelDatasourceUrl {
+						meta, err := dsn.ParseDSN("postgres", v)
+						if err != nil {
+							return err
+						}
+						if meta[dsn.Database] == strings.Split(bf, ".")[0] {
+							datasourceUrl = v
+							break
+						}
+					}
+				} else {
+					datasourceUrl = config.C.Gen.ModelDatasourceUrl[0]
+				}
+
+				cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", datasourceUrl, "--schema", schema, "-t", func() string {
+					if strings.Contains(bf, ".") {
+						return strings.Split(bf, ".")[1]
+					}
+					return bf
+				}(), "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 				logx.Debug(cmd.String())
 				resp, err := cmd.CombinedOutput()
 				if err != nil {
 					return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
 				}
 			} else {
-				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", scheme, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", schema, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 				logx.Debug(cmd.String())
 				resp, err := cmd.CombinedOutput()
 				if err != nil {
@@ -273,22 +325,37 @@ func (jm *JzeroModel) Gen() error {
 	return nil
 }
 
-func getAllTables(sqlConn sqlx.SqlConn, driver string) ([]string, error) {
-	var tables []string
+func getAllTables(conns []Conn, driver string) ([]string, error) {
+	var allTables []string
 
 	switch driver {
 	case "mysql":
-		err := sqlConn.QueryRowsCtx(context.Background(), &tables, "show tables")
-		if err != nil {
-			return nil, err
+		for _, conn := range conns {
+			var tables []string
+			err := conn.SqlConn.QueryRowsCtx(context.Background(), &tables, "show tables")
+			if err != nil {
+				return nil, err
+			}
+			for _, v := range tables {
+				allTables = append(allTables, conn.Scheme+"."+v)
+			}
 		}
 	case "postgres":
-		err := sqlConn.QueryRowsCtx(context.Background(), &tables, "select tablename from pg_tables where schemaname = 'public'")
-		if err != nil {
-			return nil, err
+		if config.C.Gen.ModelSchema == "" {
+			config.C.Gen.ModelSchema = "public"
+		}
+		for _, conn := range conns {
+			var tables []string
+			err := conn.SqlConn.QueryRowsCtx(context.Background(), &tables, fmt.Sprintf("select tablename from pg_tables where schemaname = '%s'", config.C.Gen.ModelSchema))
+			if err != nil {
+				return nil, err
+			}
+			for _, v := range tables {
+				allTables = append(allTables, conn.Scheme+"."+v)
+			}
 		}
 	}
-	return tables, nil
+	return allTables, nil
 }
 
 type ShowCreateTableResult struct {
@@ -301,6 +368,7 @@ func getTableDDL(sqlConn sqlx.SqlConn, driver, table string) (string, error) {
 	}
 
 	var showCreateTableResult ShowCreateTableResult
+
 	err := sqlConn.QueryRowCtx(context.Background(), &showCreateTableResult, "show create table "+table)
 	if err != nil {
 		return "", err

@@ -11,6 +11,12 @@ import (
 	{{end}}
 )
 
+{{range $k,$v := .MutiModels}} type {{$k | FirstUpper | ToCamel}}Model struct {
+    {{range $vv := $v}}{{$vv | FirstUpper | ToCamel}} {{$vv}}.{{$vv | FirstUpper |ToCamel}}Model
+    {{end}}
+}
+{{end}}
+
 type Model struct {
     {{range $v := .TablePackages}}{{$v | FirstUpper | ToCamel}} {{$v}}.{{$v | FirstUpper |ToCamel}}Model
     {{end}}
@@ -22,3 +28,11 @@ func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
          {{end}}
 	}
 }
+
+{{range $k,$v := .MutiModels}} func New{{$k | FirstUpper | ToCamel}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) {{$k | FirstUpper | ToCamel}}Model {
+	return {{$k | FirstUpper | ToCamel}}Model{
+        {{range $vv := $v}}{{$vv | FirstUpper | ToCamel}}: {{$vv}}.New{{ $vv | FirstUpper | ToCamel }}Model(conn, op...),
+        {{end}}
+	}
+}
+{{end}}
