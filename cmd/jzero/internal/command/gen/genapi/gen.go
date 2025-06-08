@@ -22,7 +22,6 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
@@ -56,8 +55,6 @@ func (ja *JzeroApi) Gen() error {
 		return nil
 	}
 
-	fmt.Printf("%s to generate api code\n", color.WithColor("Start", color.FgGreen))
-
 	// format api dir
 	command := fmt.Sprintf("goctl api format --dir %s", config.C.ApiDir())
 	_, err := execx.Run(command, config.C.Wd())
@@ -85,7 +82,7 @@ func (ja *JzeroApi) Gen() error {
 	var genCodeApiFiles []string
 
 	switch {
-	case config.C.Gen.GitChange && filex.DirExists(filepath.Join(config.C.Wd(), ".git")) && len(config.C.Gen.Desc) == 0:
+	case config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0:
 		// 从 git status 获取变动的文件生成
 		m, _, err := gitstatus.ChangedFiles(config.C.ApiDir(), ".api")
 		if err == nil {
@@ -150,9 +147,10 @@ func (ja *JzeroApi) Gen() error {
 	}
 
 	if len(ja.GenCodeApiFiles) == 0 {
-		fmt.Printf("%s", color.WithColor("Done\n", color.FgGreen))
 		return nil
 	}
+
+	fmt.Printf("%s to generate api code\n", color.WithColor("Start", color.FgGreen))
 
 	err = ja.generateApiCode()
 	if err != nil {

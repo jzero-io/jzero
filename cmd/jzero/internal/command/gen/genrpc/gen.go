@@ -17,7 +17,6 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/stringx"
@@ -80,7 +79,7 @@ func (jr *JzeroRpc) Gen() error {
 	jr.GenCodeProtoSpecMap = make(map[string]rpcparser.Proto, len(protoFiles))
 
 	switch {
-	case config.C.Gen.GitChange && filex.DirExists(filepath.Join(config.C.Wd(), ".git")) && len(config.C.Gen.Desc) == 0:
+	case config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0:
 		m, _, err := gitstatus.ChangedFiles(config.C.ProtoDir(), ".proto")
 		if err == nil {
 			genCodeProtoFiles = append(genCodeProtoFiles, m...)

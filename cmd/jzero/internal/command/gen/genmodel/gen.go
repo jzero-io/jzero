@@ -24,7 +24,6 @@ import (
 	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/dsn"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 )
@@ -134,7 +133,7 @@ func (jm *JzeroModel) Gen() error {
 	}
 
 	switch {
-	case config.C.Gen.GitChange && filex.DirExists(filepath.Join(config.C.Wd(), ".git")) && len(config.C.Gen.Desc) == 0 && !config.C.Gen.ModelDatasource:
+	case config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0 && !config.C.Gen.ModelDatasource:
 		m, _, err := gitstatus.ChangedFiles(config.C.SqlDir(), ".sql")
 		if err == nil {
 			genCodeSqlFiles = append(genCodeSqlFiles, m...)
