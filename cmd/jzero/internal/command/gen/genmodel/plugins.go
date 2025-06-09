@@ -119,7 +119,7 @@ func (jm *JzeroModel) GenDDL(conns []Conn, tables []string) ([]string, error) {
 		if strings.Contains(v, ".") {
 			vWithScheme = v
 		} else {
-			vWithScheme = fmt.Sprintf("%s.%s", conns[0].Scheme, v)
+			vWithScheme = fmt.Sprintf("%s.%s", conns[0].Schema, v)
 		}
 		if s, ok := tableDDLMap.Load(vWithScheme); ok {
 			if len(config.C.Gen.ModelDatasourceTable) != 0 && config.C.Gen.ModelDatasourceTable[0] != "*" {

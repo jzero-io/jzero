@@ -33,7 +33,7 @@ type JzeroModel struct {
 }
 
 type Conn struct {
-	Scheme  string
+	Schema  string
 	SqlConn sqlx.SqlConn
 }
 
@@ -58,7 +58,7 @@ func (jm *JzeroModel) Gen() error {
 					return err
 				}
 				conns = append(conns, Conn{
-					Scheme:  meta[dsn.Database],
+					Schema:  meta[dsn.Database],
 					SqlConn: sqlx.NewMysql(v),
 				})
 			}
@@ -69,7 +69,7 @@ func (jm *JzeroModel) Gen() error {
 					return err
 				}
 				conns = append(conns, Conn{
-					Scheme:  meta[dsn.Database],
+					Schema:  meta[dsn.Database],
 					SqlConn: postgres.New(v),
 				})
 			}
@@ -336,7 +336,7 @@ func getAllTables(conns []Conn, driver string) ([]string, error) {
 				return nil, err
 			}
 			for _, v := range tables {
-				allTables = append(allTables, conn.Scheme+"."+v)
+				allTables = append(allTables, conn.Schema+"."+v)
 			}
 		}
 	case "postgres":
@@ -350,7 +350,7 @@ func getAllTables(conns []Conn, driver string) ([]string, error) {
 				return nil, err
 			}
 			for _, v := range tables {
-				allTables = append(allTables, conn.Scheme+"."+v)
+				allTables = append(allTables, conn.Schema+"."+v)
 			}
 		}
 	}
