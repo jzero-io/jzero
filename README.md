@@ -26,7 +26,7 @@
 
 ## 介绍
 
-通过模板创建项目，并基于 proto/api/sql 文件生成 Server/Client/Model 代码。
+通过模板创建项目，并基于 [proto](https://docs.jzero.io/guide/develop/proto.html)/[api](https://docs.jzero.io/guide/develop/api.html)/[sql](https://docs.jzero.io/guide/develop/model.html) 文件生成 Server/Client/Model 代码。
 
 具备以下特点:
 * 基于 [go-zero](https://go-zero.dev) 框架但不局限于 go-zero 框架, 基于模板特性支持任意框架
