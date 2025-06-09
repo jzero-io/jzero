@@ -7,7 +7,8 @@ order: 4
 jzero 根据可描述语言生成代码:
 * desc/api: api 可描述语言, 生成 http 服务端/客户端代码. [使用文档](develop/api.md)
 * desc/proto: proto 可描述语言, 生成 grpc 服务端/客户端代码. [使用文档](develop/proto.md)
-* desc/sql: sql 文件, 生成数据库代码. [使用文档](develop/model.md)
+* desc/sql: sql 可描述语言, 生成数据库代码. [使用文档](develop/model.md)
+* model datasource: 通过远程数据源生成数据库代码. [使用文档](develop/model.md)
 
 ## 生成代码
 
