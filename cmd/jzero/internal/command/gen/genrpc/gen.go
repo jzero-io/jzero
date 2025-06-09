@@ -141,7 +141,7 @@ func (jr *JzeroRpc) Gen() error {
 		return nil
 	}
 
-	fmt.Printf("%s to generate proto code. \n", color.WithColor("Start", color.FgGreen))
+	fmt.Printf("%s to generate rpc code from proto files. \n", color.WithColor("Start", color.FgGreen))
 
 	for _, v := range jr.ProtoFiles {
 		allLogicFiles, err := jr.GetAllLogicFiles(v, jr.ProtoSpecMap[v])

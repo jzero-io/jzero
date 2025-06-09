@@ -204,7 +204,7 @@ func (ja *JzeroApi) compactLogic(f *dst.File, fset *token.FileSet, file LogicFil
 	if err != nil {
 		return err
 	}
-	compactFile := filepath.Join(filepath.Dir(file.Path), namingFormat+".go")
+	compactFile := filepath.Join(filepath.Dir(file.Path), namingFormat+"_compact.go")
 	if !pathx.FileExists(compactFile) {
 		_ = os.WriteFile(compactFile, []byte(fmt.Sprintf(`package %s`, f.Name.Name)), 0o644)
 	}

@@ -150,7 +150,7 @@ func (ja *JzeroApi) Gen() error {
 		return nil
 	}
 
-	fmt.Printf("%s to generate api code\n", color.WithColor("Start", color.FgGreen))
+	fmt.Printf("%s to generate api code from api files\n", color.WithColor("Start", color.FgGreen))
 
 	err = ja.generateApiCode()
 	if err != nil {
