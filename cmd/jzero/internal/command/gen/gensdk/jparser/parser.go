@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/jhump/protoreflect/desc"
+	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
@@ -16,11 +17,10 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gensdk/jparser/api"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gensdk/jparser/gateway"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gensdk/vars"
-	gconfig "github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/stringx"
 )
 
-func Parse(config *config.Config, fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) (vars.ScopeResourceHTTPInterfaceMap, error) {
+func Parse(config *config.Config, fds []*desc.FileDescriptor, apiSpecs []*spec.ApiSpec) (vars.ResourceHTTPInterfaceMap, error) {
 	interfaces, err := genHTTPInterfaces(config, fds, apiSpecs)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,6 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 					httpInterface.Response.FullName = BuildProtoResponseFullName(httpInterface.Response.Package, stringx.FirstUpper(method.GetOutputType().GetName()))
 				}
 				httpInterface.MethodName = method.GetName()
-				httpInterface.Scope = vars.Scope(gconfig.C.Gen.Sdk.Scope)
 				httpInterface.Resource = vars.Resource(service.GetName())
 
 				pathParams, err := gateway.PathParam(httpInterface.URL)
@@ -109,17 +108,17 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 			for _, route := range group.Routes {
 				path, _ := url.JoinPath(group.Annotation.Properties["prefix"], route.Path)
 
-				resource := vars.Resource(stringx.ToCamel(group.Annotation.Properties["group"]))
+				resource := vars.Resource(group.Annotation.Properties["group"])
 				if resource == "" {
 					resource = "api"
 				}
 				httpInterface := vars.HTTPInterface{
-					Scope:      vars.Scope(gconfig.C.Gen.Sdk.Scope),
-					Resource:   resource,
-					Method:     strings.ToUpper(route.Method),
-					URL:        path,
-					MethodName: strings.TrimSuffix(route.Handler, "Handler"),
-					Comments:   route.AtDoc.Text,
+					Resource:    resource,
+					Method:      strings.ToUpper(route.Method),
+					URL:         path,
+					MethodName:  strings.TrimSuffix(route.Handler, "Handler"),
+					Comments:    route.AtDoc.Text,
+					WrapCodeMsg: cast.ToBool(apiSpec.Info.Properties["wrapCodeMsg"]),
 				}
 				if route.RequestType != nil {
 					httpInterface.Request = &vars.Request{
@@ -194,19 +193,13 @@ func BuildApiResponseFullName(apiSpec *spec.ApiSpec, t spec.Type, splitApiTypesD
 	}
 }
 
-func convertToMap(interfaces []*vars.HTTPInterface) vars.ScopeResourceHTTPInterfaceMap {
-	scopeResourceHTTPInterfaceMap := make(vars.ScopeResourceHTTPInterfaceMap)
-
-	for _, inf := range interfaces {
-		scope := inf.Scope
-		resource := inf.Resource
-
-		if _, ok := scopeResourceHTTPInterfaceMap[scope]; !ok {
-			scopeResourceHTTPInterfaceMap[scope] = make(map[vars.Resource][]*vars.HTTPInterface)
+func convertToMap(interfaces []*vars.HTTPInterface) vars.ResourceHTTPInterfaceMap {
+	rhis := make(vars.ResourceHTTPInterfaceMap)
+	for _, httpInterface := range interfaces {
+		if _, ok := rhis[httpInterface.Resource]; !ok {
+			rhis[httpInterface.Resource] = make([]*vars.HTTPInterface, 0)
 		}
-
-		scopeResourceHTTPInterfaceMap[scope][resource] = append(scopeResourceHTTPInterfaceMap[scope][resource], inf)
+		rhis[httpInterface.Resource] = append(rhis[httpInterface.Resource], httpInterface)
 	}
-
-	return scopeResourceHTTPInterfaceMap
+	return rhis
 }

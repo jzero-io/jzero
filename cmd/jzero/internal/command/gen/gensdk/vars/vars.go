@@ -6,13 +6,10 @@ type (
 	Resource string
 
 	ResourceHTTPInterfaceMap = map[Resource][]*HTTPInterface
-
-	ScopeResourceHTTPInterfaceMap map[Scope]ResourceHTTPInterfaceMap
 )
 
 // HTTPInterface parse grpc http options, go-zero api file
 type HTTPInterface struct {
-	Scope    Scope
 	Resource Resource
 
 	Method     string
@@ -34,7 +31,8 @@ type HTTPInterface struct {
 
 	IsStreamClient bool
 	IsStreamServer bool
-	IsSpecified    bool
+
+	WrapCodeMsg bool
 }
 
 type Request struct {

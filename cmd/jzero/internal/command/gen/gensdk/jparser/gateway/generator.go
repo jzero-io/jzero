@@ -67,7 +67,7 @@ func CreateQueryParams(method *desc.MethodDescriptor) []*vars.QueryParam {
 			if field.UnwrapField().Kind() == protoreflect.MessageKind {
 				q := &vars.QueryParam{
 					// Field:  field,
-					GoName: stringx.FirstUpper(fmt.Sprintf("%s.", field.GetName())),
+					GoName: stringx.ToCamel(fmt.Sprintf("%s.", field.GetName())),
 					Name:   fmt.Sprintf("%s.", field.GetName()),
 				}
 				f(q, field.GetMessageType().GetFields())

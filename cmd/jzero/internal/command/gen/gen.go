@@ -44,16 +44,16 @@ var genZRpcClientCmd = &cobra.Command{
 		cobra.CheckErr(err)
 		mod, err := mod.GetGoMod(wd)
 		cobra.CheckErr(err)
-		if config.C.Gen.Zrpcclient.Scope == "" {
-			config.C.Gen.Zrpcclient.Scope = filepath.Base(mod.Path)
-			config.C.Gen.Zrpcclient.Scope = strings.ReplaceAll(config.C.Gen.Zrpcclient.Scope, "-", "_")
-		}
 
 		var genModule bool
 		if config.C.Gen.Zrpcclient.GoModule == "" {
+			// module 为空, zrpcclient 作为服务端的一个 package
 			config.C.Gen.Zrpcclient.GoModule = filepath.ToSlash(filepath.Join(mod.Path, config.C.Gen.Zrpcclient.Output))
 		} else {
-			genModule = true
+			// module 不为空, 则生成 go.mod 文件
+			if !config.C.Gen.Zrpcclient.Mono {
+				genModule = true
+			}
 		}
 
 		if config.C.Gen.Zrpcclient.GoPackage == "" {
@@ -105,12 +105,6 @@ var genSdkCmd = &cobra.Command{
 
 		if config.C.Gen.Sdk.GoPackage == "" {
 			config.C.Gen.Sdk.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(config.C.Gen.Sdk.GoModule)), "-", "_")
-		}
-
-		if config.C.Gen.Sdk.Scope == "" {
-			config.C.Gen.Sdk.Scope = filepath.Base(mod.Path)
-			// 不支持 -, replace to _
-			config.C.Gen.Sdk.Scope = strings.ReplaceAll(config.C.Gen.Sdk.Scope, "-", "_")
 		}
 
 		homeDir, err := os.UserHomeDir()
@@ -168,8 +162,6 @@ func GetCommand() *cobra.Command {
 		genSdkCmd.Flags().StringP("goModule", "", "", "set go module name")
 		genSdkCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")
 		genSdkCmd.Flags().StringP("goPackage", "", "", "set package name")
-		genSdkCmd.Flags().BoolP("wrap-response", "", true, "wrap response: code, data, message")
-		genSdkCmd.Flags().StringP("scope", "", "", "set scope name")
 		genSdkCmd.Flags().BoolP("mono", "", false, "mono sdk project under go mod project")
 	}
 
@@ -192,12 +184,10 @@ func GetCommand() *cobra.Command {
 		genCmd.AddCommand(genZRpcClientCmd)
 
 		genZRpcClientCmd.Flags().StringP("output", "o", "zrpcclient-go", "generate rpcclient code")
-		genZRpcClientCmd.Flags().StringP("pb-dir", "", "", "set output pb dir ")
-		genZRpcClientCmd.Flags().StringP("client-dir", "", "", "set output client dir ")
-		genZRpcClientCmd.Flags().StringP("scope", "", "", "set scope name")
 		genZRpcClientCmd.Flags().StringP("goModule", "", "", "set go module name")
 		genZRpcClientCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")
 		genZRpcClientCmd.Flags().StringP("goPackage", "", "", "set package name")
+		genZRpcClientCmd.Flags().BoolP("mono", "", false, "mono zrpcclient project under go mod project")
 	}
 
 	return genCmd
