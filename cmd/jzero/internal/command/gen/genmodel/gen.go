@@ -292,14 +292,14 @@ func (jm *JzeroModel) Gen() error {
 						return strings.Split(bf, ".")[1]
 					}
 					return bf
-				}(), "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+				}(), "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 				logx.Debug(cmd.String())
 				resp, err := cmd.CombinedOutput()
 				if err != nil {
 					return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
 				}
 			} else {
-				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", schema, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", config.C.Gen.ModelCache), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", schema, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 				logx.Debug(cmd.String())
 				resp, err := cmd.CombinedOutput()
 				if err != nil {
@@ -373,4 +373,17 @@ func getTableDDL(sqlConn sqlx.SqlConn, driver, table string) (string, error) {
 		return "", err
 	}
 	return showCreateTableResult.DDL, nil
+}
+
+func getIsCacheTable(t string) bool {
+	if config.C.Gen.ModelCache && len(config.C.Gen.ModelCacheTable) == 1 && config.C.Gen.ModelCacheTable[0] == "*" {
+		return true
+	}
+
+	for _, v := range config.C.Gen.ModelCacheTable {
+		if v == t {
+			return true
+		}
+	}
+	return false
 }

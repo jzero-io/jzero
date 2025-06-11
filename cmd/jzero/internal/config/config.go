@@ -106,6 +106,7 @@ type GenConfig struct {
 	ModelDatasourceUrl   []string `mapstructure:"model-datasource-url"`
 	ModelDatasourceTable []string `mapstructure:"model-datasource-table"`
 	ModelCache           bool     `mapstructure:"model-cache"`
+	ModelCacheTable      []string `mapstructure:"model-cache-table"`
 	ModelCachePrefix     string   `mapstructure:"model-cache-prefix"`
 	ModelCreateTableDDL  bool     `mapstructure:"model-create-table-ddl"`
 

@@ -1,2 +1,1 @@
 FindOneBy{{.upperField}}(ctx context.Context, session sqlx.Session, {{.in}}) (*{{.upperStartCamelObject}}, error)
-FindOneBy{{.upperField}}WithCache(ctx context.Context, session sqlx.Session, {{.in}}) (*{{.upperStartCamelObject}}, error)
