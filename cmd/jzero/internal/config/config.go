@@ -77,6 +77,7 @@ type NewConfig struct {
 	Branch             string   `mapstructure:"branch"`               // 使用远程模板仓库的某个分支
 	Local              string   `mapstructure:"local"`                // 使用本地模板与 branch 对应
 	Features           []string `mapstructure:"features"`             // 新建项目使用哪些特性, 灵活构建模板
+	Ignore             []string `mapstructure:"ignore"`               // 忽略哪些文件或目录
 }
 
 type GenConfig struct {

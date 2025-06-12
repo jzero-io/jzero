@@ -198,6 +198,7 @@ func GetCommand() *cobra.Command {
 	newCmd.Flags().StringP("local", "", "", "use local template")
 	newCmd.Flags().StringSliceP("features", "", []string{}, "select features")
 	newCmd.Flags().BoolP("mono", "", false, "mono project under go mod project")
+	newCmd.Flags().StringSliceP("ignore", "", []string{}, "select ignore")
 
 	return newCmd
 }
