@@ -88,6 +88,8 @@ func GetGoMods(workDir string) ([]ModuleStruct, error) {
 			if data, err = command.CombinedOutput(); err != nil {
 				return nil, errors.New(string(data))
 			}
+		} else {
+			return nil, errors.New(string(data))
 		}
 	}
 
