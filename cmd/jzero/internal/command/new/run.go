@@ -10,6 +10,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
+	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
@@ -140,7 +141,7 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 		} else {
 			fileBytes, err = templatex.ParseTemplate(jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
 			if err != nil {
-				fileBytes = embeded.ReadTemplateFile(filepath.Join(dirname, file.Name()))
+				return nil, err
 			}
 		}
 
@@ -148,7 +149,7 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 		templatePath := filepath.Join(filepath.Dir(rel), filename)
 		stylePathBytes, err := templatex.ParseTemplate(jn.TemplateData, []byte(templatePath))
 		if err != nil {
-			stylePathBytes = []byte(templatePath)
+			return nil, err
 		}
 
 		// specify
@@ -159,10 +160,13 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 		gsf = append(gsf, &GeneratedFile{
 			Path:    filepath.Join(jn.nc.Output, string(stylePathBytes)),
 			Content: *bytes.NewBuffer(fileBytes),
-			// Because this is a special directory for jzero
-			// It is deleted to support generating all server code under the premise of only desc directory
-			// Or if this file has been existed, just ignore write
-			Skip: pathx.FileExists(filepath.Join(jn.nc.Output, "desc")) && strings.HasPrefix(rel, "desc"),
+			Skip: func() bool {
+				var ignore []string
+				for _, v := range jn.nc.Ignore {
+					ignore = append(ignore, filepath.ToSlash(v))
+				}
+				return lo.Contains(ignore, rel)
+			}(),
 		})
 	}
 	return gsf, nil
