@@ -34,15 +34,10 @@ func (cs *clientset) Direct() restc.Client {
 
 {{end}}
 
-func NewClientset(target string,ops ...restc.Opt) (Clientset, error) {
-	restClient, err := restc.NewClient(target, ops...)
-	if err != nil {
-		return nil, err
-	}
-
+func NewClientset(cli restc.Client) (Clientset, error) {
     cs := clientset{
-		direct: restClient,
-		{{range $v := .Resources}}{{$v | ToCamel | FirstLower}}: {{$v | ToCamel | lower}}.New{{$v | ToCamel | FirstUpper}}(restClient),
+		direct: cli,
+		{{range $v := .Resources}}{{$v | ToCamel | FirstLower}}: {{$v | ToCamel | lower}}.New{{$v | ToCamel | FirstUpper}}(cli),
 		{{end}}
 	}
 
