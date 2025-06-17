@@ -63,21 +63,22 @@ type Config struct {
 }
 
 type NewConfig struct {
-	Name               string   `mapstructure:"name"`                 // 新建项目名称
-	Home               string   `mapstructure:"home"`                 // 新建项目使用的模板文件目录
-	Module             string   `mapstructure:"module"`               // 新建的项目的 go module
-	Mono               bool     `mapstructure:"mono"`                 // 是否是 mono 项目(即在一个mod项目之下, 但该项目本身无 go.mod 文件)
-	Output             string   `mapstructure:"output"`               // 输出到的目录
-	Remote             string   `mapstructure:"remote"`               // 远程仓库地址
-	Cache              bool     `mapstructure:"cache"`                // 当使用远程仓库时是否使用缓存
-	RemoteAuthUsername string   `mapstructure:"remote-auth-username"` // 远程仓库的认证用户名
-	RemoteAuthPassword string   `mapstructure:"remote-auth-password"` // 远程仓库的认证密码
-	Frame              string   `mapstructure:"frame"`                // 使用 jzero 内置的框架
-	Style              string   `mapstructure:"style"`                // 代码风格
-	Branch             string   `mapstructure:"branch"`               // 使用远程模板仓库的某个分支
-	Local              string   `mapstructure:"local"`                // 使用本地模板与 branch 对应
-	Features           []string `mapstructure:"features"`             // 新建项目使用哪些特性, 灵活构建模板
-	Ignore             []string `mapstructure:"ignore"`               // 忽略哪些文件或目录
+	Name                 string   `mapstructure:"name"`                  // 新建项目名称
+	Home                 string   `mapstructure:"home"`                  // 新建项目使用的模板文件目录
+	Module               string   `mapstructure:"module"`                // 新建的项目的 go module
+	Mono                 bool     `mapstructure:"mono"`                  // 是否是 mono 项目(即在一个mod项目之下, 但该项目本身无 go.mod 文件)
+	Output               string   `mapstructure:"output"`                // 输出到的目录
+	Remote               string   `mapstructure:"remote"`                // 远程仓库地址
+	Cache                bool     `mapstructure:"cache"`                 // 当使用远程仓库时是否使用缓存
+	RemoteAuthUsername   string   `mapstructure:"remote-auth-username"`  // 远程仓库的认证用户名
+	RemoteAuthPassword   string   `mapstructure:"remote-auth-password"`  // 远程仓库的认证密码
+	Frame                string   `mapstructure:"frame"`                 // 使用 jzero 内置的框架
+	Style                string   `mapstructure:"style"`                 // 代码风格
+	Branch               string   `mapstructure:"branch"`                // 使用远程模板仓库的某个分支
+	Local                string   `mapstructure:"local"`                 // 使用本地模板与 branch 对应
+	Features             []string `mapstructure:"features"`              // 新建项目使用哪些特性, 灵活构建模板
+	Ignore               []string `mapstructure:"ignore"`                // 忽略哪些文件或目录
+	ExecutableExtensions []string `mapstructure:"executable-extensions"` // 可执行文件的后缀
 }
 
 type GenConfig struct {

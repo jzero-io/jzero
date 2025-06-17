@@ -105,6 +105,10 @@ func checkWrite(path string, bytes []byte) error {
 		}
 	}
 
+	// 增加可执行权限
+	if lo.Contains(config.C.New.ExecutableExtensions, filepath.Ext(path)) {
+		return os.WriteFile(path, bytesFormat, 0o744)
+	}
 	return os.WriteFile(path, bytesFormat, 0o644)
 }
 

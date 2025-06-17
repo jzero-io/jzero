@@ -199,6 +199,7 @@ func GetCommand() *cobra.Command {
 	newCmd.Flags().StringSliceP("features", "", []string{}, "select features")
 	newCmd.Flags().BoolP("mono", "", false, "mono project under go mod project")
 	newCmd.Flags().StringSliceP("ignore", "", []string{}, "select ignore")
+	newCmd.Flags().StringSliceP("executable-extensions", "", []string{".sh"}, "select executable extensions")
 
 	return newCmd
 }
