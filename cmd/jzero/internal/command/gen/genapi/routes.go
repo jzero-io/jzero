@@ -39,13 +39,19 @@ func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {
 					case *ast.CallExpr:
 						if sel, ok := n.Fun.(*ast.SelectorExpr); ok {
 							if _, ok := sel.X.(*ast.Ident); ok {
-								if sel.Sel.Name == util.Title(strings.TrimSuffix(route.Handler, "Handler"))+"Handler" {
-									sel.Sel.Name = util.Title(strings.TrimSuffix(route.Handler, "Handler"))
+								if util.Title(sel.Sel.Name) == util.Title(strings.TrimSuffix(route.Handler, "Handler"))+"Handler" {
+									sel.Sel.Name = strings.TrimSuffix(route.Handler, "Handler")
+									if g.GetAnnotation("group") != "" {
+										sel.Sel.Name = util.Title(strings.TrimSuffix(route.Handler, "Handler"))
+									}
 								}
 							}
 						} else if indent, ok := n.Fun.(*ast.Ident); ok {
-							if indent.Name == util.Title(strings.TrimSuffix(route.Handler, "Handler"))+"Handler" {
-								indent.Name = util.Title(strings.TrimSuffix(route.Handler, "Handler"))
+							if util.Title(indent.Name) == util.Title(strings.TrimSuffix(route.Handler, "Handler"))+"Handler" {
+								indent.Name = strings.TrimSuffix(route.Handler, "Handler")
+								if g.GetAnnotation("group") != "" {
+									indent.Name = util.Title(strings.TrimSuffix(route.Handler, "Handler"))
+								}
 							}
 						}
 					}
