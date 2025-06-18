@@ -18,6 +18,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/pkg/errors"
+	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -73,6 +74,7 @@ var newCmd = &cobra.Command{
 			}
 			config.C.New.Module = filepath.ToSlash(filepath.Join(parentPackage, config.C.New.Output))
 		}
+		gosimports.LocalPrefix = config.C.New.Module
 
 		home, _ := os.UserHomeDir()
 

@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/moby/patternmatcher"
+	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/mod/modfile"
@@ -135,7 +136,11 @@ func rewriteGo(mod *modfile.File, fileBytes []byte) ([]byte, error) {
 	if err := goformat.Node(buf, fset, f); err != nil {
 		return nil, err
 	}
-	return buf.Bytes(), nil
+	process, err := gosimports.Process("", buf.Bytes(), nil)
+	if err != nil {
+		return nil, err
+	}
+	return process, nil
 }
 
 // rewrite go.mod file

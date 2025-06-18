@@ -3,12 +3,12 @@ package genapi
 import (
 	"fmt"
 	"go/ast"
-	goformat "go/format"
 	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
@@ -48,11 +48,11 @@ var (
 			}
 
 			_ = os.MkdirAll(filepath.Join("internal", "types", goPackage), 0o755)
-			source, err := goformat.Source(typesGoBytes)
+			process, err := gosimports.Process("", typesGoBytes, nil)
 			if err != nil {
 				return err
 			}
-			if err = os.WriteFile(filepath.Join("internal", "types", goPackage, "types.go"), source, 0o644); err != nil {
+			if err = os.WriteFile(filepath.Join("internal", "types", goPackage, "types.go"), process, 0o644); err != nil {
 				return err
 			}
 		} else {
@@ -92,11 +92,11 @@ var (
 	if err != nil {
 		return err
 	}
-	source, err := goformat.Source(typesGoBytes)
+	process, err := gosimports.Process("", typesGoBytes, nil)
 	if err != nil {
 		return err
 	}
-	if err = os.WriteFile(filepath.Join("internal", "types", "types.go"), source, 0o644); err != nil {
+	if err = os.WriteFile(filepath.Join("internal", "types", "types.go"), process, 0o644); err != nil {
 		return err
 	}
 	return nil

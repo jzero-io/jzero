@@ -86,7 +86,8 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	formatBytes, err := gosimports.Process("", pluginsGoBytes, &gosimports.Options{Comments: true})
+	gosimports.LocalPrefix = goMod.Path
+	formatBytes, err := gosimports.Process("", pluginsGoBytes, nil)
 	if err != nil {
 		return err
 	}

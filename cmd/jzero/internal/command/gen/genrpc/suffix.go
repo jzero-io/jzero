@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 )
@@ -90,8 +91,12 @@ func (jr *JzeroRpc) removeServerSuffix(fp string) error {
 	if err := goformat.Node(buf, fset, f); err != nil {
 		return err
 	}
+	process, err := gosimports.Process("", buf.Bytes(), nil)
+	if err != nil {
+		return err
+	}
 
-	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+	if err = os.WriteFile(fp, process, 0o644); err != nil {
 		return err
 	}
 
@@ -183,8 +188,11 @@ func (jr *JzeroRpc) removeLogicSuffix(fp string) error {
 	if err := goformat.Node(buf, fset, f); err != nil {
 		return err
 	}
-
-	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
+	process, err := gosimports.Process("", buf.Bytes(), nil)
+	if err != nil {
+		return err
+	}
+	if err = os.WriteFile(fp, process, 0o644); err != nil {
 		return err
 	}
 

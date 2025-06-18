@@ -151,7 +151,7 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 			}
 		}
 
-		templateFileFormat, err := gosimports.Process("", templateFile, &gosimports.Options{FormatOnly: true, Comments: true})
+		templateFileFormat, err := gosimports.Process("", templateFile, nil)
 		if err != nil {
 			continue
 		}

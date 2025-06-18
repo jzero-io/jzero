@@ -99,7 +99,7 @@ func checkWrite(path string, bytes []byte) error {
 
 	bytesFormat := bytes
 	if filepath.Ext(path) == ".go" {
-		bytesFormat, err = gosimports.Process("", bytes, &gosimports.Options{FormatOnly: true, Comments: true})
+		bytesFormat, err = gosimports.Process("", bytes, nil)
 		if err != nil {
 			return errors.Wrapf(err, "format %s", path)
 		}

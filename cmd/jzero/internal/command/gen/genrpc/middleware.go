@@ -153,10 +153,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 		if err != nil {
 			return err
 		}
-		process, err := gosimports.Process("", template, &gosimports.Options{
-			Comments:   true,
-			FormatOnly: true,
-		})
+		process, err := gosimports.Process("", template, nil)
 		if err != nil {
 			return err
 		}
@@ -177,10 +174,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 			return err
 		}
 
-		process, err := gosimports.Process("", template, &gosimports.Options{
-			Comments:   true,
-			FormatOnly: true,
-		})
+		process, err := gosimports.Process("", template, nil)
 		if err != nil {
 			return err
 		}
@@ -201,10 +195,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 		return err
 	}
 
-	process, err := gosimports.Process("", template, &gosimports.Options{
-		Comments:   true,
-		FormatOnly: true,
-	})
+	process, err := gosimports.Process("", template, nil)
 	if err != nil {
 		return err
 	}

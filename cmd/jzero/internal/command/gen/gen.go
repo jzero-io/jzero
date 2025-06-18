@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
 
@@ -55,6 +56,7 @@ var genZRpcClientCmd = &cobra.Command{
 				genModule = true
 			}
 		}
+		gosimports.LocalPrefix = config.C.Gen.Zrpcclient.GoModule
 
 		if config.C.Gen.Zrpcclient.GoPackage == "" {
 			config.C.Gen.Zrpcclient.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(config.C.Gen.Zrpcclient.GoModule)), "-", "_")
@@ -102,6 +104,7 @@ var genSdkCmd = &cobra.Command{
 				genModule = true
 			}
 		}
+		gosimports.LocalPrefix = config.C.Gen.Sdk.GoModule
 
 		if config.C.Gen.Sdk.GoPackage == "" {
 			config.C.Gen.Sdk.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(config.C.Gen.Sdk.GoModule)), "-", "_")

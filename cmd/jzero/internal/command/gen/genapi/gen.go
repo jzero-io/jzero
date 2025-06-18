@@ -2,13 +2,13 @@ package genapi
 
 import (
 	"fmt"
-	goformat "go/format"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/pkg/errors"
+	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/color"
@@ -285,11 +285,11 @@ func (ja *JzeroApi) generateApiCode() error {
 	if err != nil {
 		return err
 	}
-	source, err := goformat.Source(template)
+	process, err := gosimports.Process("", template, nil)
 	if err != nil {
 		return err
 	}
-	if err = os.WriteFile(filepath.Join("internal", "handler", "routes.go"), source, 0o644); err != nil {
+	if err = os.WriteFile(filepath.Join("internal", "handler", "routes.go"), process, 0o644); err != nil {
 		return err
 	}
 

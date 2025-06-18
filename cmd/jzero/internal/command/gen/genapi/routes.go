@@ -3,7 +3,6 @@ package genapi
 import (
 	"bytes"
 	"go/ast"
-	goformat "go/format"
 	goparser "go/parser"
 	"go/printer"
 	"go/token"
@@ -11,6 +10,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	zeroconfig "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
@@ -140,9 +140,9 @@ func (ja *JzeroApi) genRoute2Code() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	source, err := goformat.Source(template)
+	process, err := gosimports.Process("", template, nil)
 	if err != nil {
 		return nil, err
 	}
-	return source, nil
+	return process, nil
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/dave/dst"
 	"github.com/dave/dst/decorator"
 	"github.com/pkg/errors"
+	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
@@ -119,7 +120,12 @@ func (ja *JzeroApi) patchLogic(file LogicFile) error {
 		return err
 	}
 
-	if err = os.WriteFile(file.Path, buf.Bytes(), 0o644); err != nil {
+	process, err := gosimports.Process("", buf.Bytes(), nil)
+	if err != nil {
+		return err
+	}
+
+	if err = os.WriteFile(file.Path, process, 0o644); err != nil {
 		return err
 	}
 
@@ -284,7 +290,11 @@ func (ja *JzeroApi) compactLogic(f *dst.File, fset *token.FileSet, file LogicFil
 		if err != nil {
 			return err
 		}
-		if err = os.WriteFile(compactFile, formatted, 0o644); err != nil {
+		process, err := gosimports.Process("", formatted, nil)
+		if err != nil {
+			return err
+		}
+		if err = os.WriteFile(compactFile, process, 0o644); err != nil {
 			return err
 		}
 	}

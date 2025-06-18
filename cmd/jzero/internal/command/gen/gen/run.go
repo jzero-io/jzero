@@ -8,6 +8,7 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
+	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -38,6 +39,7 @@ func Run() error {
 		return errors.Wrapf(err, "get go module struct error")
 	}
 	module = moduleStruct.Path
+	gosimports.LocalPrefix = module
 
 	if !pathx.FileExists("go.mod") {
 		module, err = mod.GetParentPackage(config.C.Wd())

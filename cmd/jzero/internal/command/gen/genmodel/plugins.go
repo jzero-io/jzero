@@ -59,10 +59,7 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 		return err
 	}
 
-	format, err := gosimports.Process("", template, &gosimports.Options{
-		Comments:   true,
-		FormatOnly: true,
-	})
+	format, err := gosimports.Process("", template, nil)
 	if err != nil {
 		return err
 	}

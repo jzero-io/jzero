@@ -14,6 +14,7 @@ import (
 
 	"github.com/dave/dst"
 	"github.com/dave/dst/decorator"
+	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
@@ -107,8 +108,12 @@ func (ja *JzeroApi) patchHandler(file HandlerFile) error {
 	if err = goformat.Node(buf, fset, f); err != nil {
 		return err
 	}
+	process, err := gosimports.Process("", buf.Bytes(), nil)
+	if err != nil {
+		return err
+	}
 
-	if err := os.WriteFile(file.Path, buf.Bytes(), 0o644); err != nil {
+	if err := os.WriteFile(file.Path, process, 0o644); err != nil {
 		return err
 	}
 
@@ -246,11 +251,11 @@ func (ja *JzeroApi) compactHandler(f *dst.File, fset *token.FileSet, file Handle
 		if err := decorator.Fprint(buf, compactF); err != nil {
 			return err
 		}
-		formatted, err := goformat.Source(buf.Bytes())
+		process, err := gosimports.Process("", buf.Bytes(), nil)
 		if err != nil {
 			return err
 		}
-		if err = os.WriteFile(compactFile, formatted, 0o644); err != nil {
+		if err = os.WriteFile(compactFile, process, 0o644); err != nil {
 			return err
 		}
 	}

@@ -3,7 +3,6 @@ package generator
 import (
 	"bytes"
 	"fmt"
-	goformat "go/format"
 	"os"
 	"path/filepath"
 	"sort"
@@ -12,6 +11,7 @@ import (
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/pkg/errors"
+	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/gogen"
@@ -321,9 +321,9 @@ var (
 			}
 
 			logx.Debugf("get types Go Bytes: %v", string(typesGoBytes))
-			source, err := goformat.Source(typesGoBytes)
+			source, err := gosimports.Process("", typesGoBytes, nil)
 			if err != nil {
-				return nil, errors.Errorf("go format %s", typesGoBytes)
+				return nil, err
 			}
 			typesGoFiles = append(typesGoFiles, &GeneratedFile{
 				Path:    filepath.Join("model", goPackage, "types.go"),
@@ -367,13 +367,13 @@ var (
 		if err != nil {
 			return nil, err
 		}
-		source, err := goformat.Source(typesGoBytes)
+		process, err := gosimports.Process("", typesGoBytes, nil)
 		if err != nil {
 			return nil, err
 		}
 		typesGoFiles = append(typesGoFiles, &GeneratedFile{
 			Path:    filepath.Join("model", "types", "types.go"),
-			Content: *bytes.NewBuffer(source),
+			Content: *bytes.NewBuffer(process),
 		})
 	}
 
