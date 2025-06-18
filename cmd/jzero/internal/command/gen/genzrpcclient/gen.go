@@ -187,7 +187,7 @@ func Generate(genModule bool) (err error) {
 	}
 
 	// gen clientset and options
-	template, err := templatex.ParseTemplate(map[string]any{
+	template, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "clientset.go.tpl")), map[string]any{
 		"Module":   config.C.Gen.Zrpcclient.GoModule,
 		"Package":  config.C.Gen.Zrpcclient.GoPackage,
 		"Services": services,
@@ -215,7 +215,7 @@ func Generate(genModule bool) (err error) {
 		if config.C.Gen.Zrpcclient.GoVersion != "" {
 			data["GoVersion"] = config.C.Gen.Zrpcclient.GoVersion
 		}
-		template, err = templatex.ParseTemplate(data, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl"))))
+		template, err = templatex.ParseTemplate(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl")), data, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl"))))
 		if err != nil {
 			return err
 		}

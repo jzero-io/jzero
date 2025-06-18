@@ -40,7 +40,7 @@ func Run() error {
 		handlers = append(handlers, method)
 	}
 
-	template, err := templatex.ParseTemplate(map[string]any{
+	template, err := templatex.ParseTemplate(filepath.Join("ivm", "add", "template.api.tpl"), map[string]any{
 		"Handlers":   handlers,
 		"Service":    service,
 		"Group":      config.C.Ivm.Add.Api.Group,

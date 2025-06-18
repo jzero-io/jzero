@@ -74,7 +74,7 @@ func Run() error {
 		}
 		plugins[i].Module = pluginGoMod.Path
 	}
-	pluginsGoBytes, err := templatex.ParseTemplate(map[string]any{
+	pluginsGoBytes, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("plugins", "api", "serverless_plugins.go.tpl")), map[string]any{
 		"Plugins": plugins,
 		"Module":  goMod.Path,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("plugins", "api", "serverless_plugins.go.tpl"))))

@@ -143,7 +143,7 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 			// .tpl.tpl suffix means it is a template, do not parse if anymore
 			fileBytes = embeded.ReadTemplateFile(filepath.Join(dirname, file.Name()))
 		} else {
-			fileBytes, err = templatex.ParseTemplate(jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
+			fileBytes, err = templatex.ParseTemplate(filepath.Join(dirname, file.Name()), jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
 			if err != nil {
 				return nil, err
 			}
@@ -151,7 +151,7 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 
 		// parse template name
 		templatePath := filepath.Join(filepath.Dir(rel), filename)
-		stylePathBytes, err := templatex.ParseTemplate(jn.TemplateData, []byte(templatePath))
+		stylePathBytes, err := templatex.ParseTemplate(templatePath, jn.TemplateData, []byte(templatePath))
 		if err != nil {
 			return nil, err
 		}

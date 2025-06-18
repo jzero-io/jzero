@@ -65,7 +65,7 @@ func GetCommand() *cobra.Command {
 		templateBuildCmd.Flags().StringP("name", "n", "", "template name")
 		_ = templateBuildCmd.MarkFlagRequired("name")
 		templateBuildCmd.Flags().StringP("output", "o", "", "output directory")
-		templateBuildCmd.Flags().StringSliceP("ignore", "i", templatebuild.IgnoreDirs, "dir list for ignored files")
+		templateBuildCmd.Flags().StringSliceP("ignore", "i", []string{".git", ".idea", ".vscode", ".DS_Store", "node_modules"}, "dir list for ignored files")
 	}
 
 	{

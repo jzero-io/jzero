@@ -47,7 +47,7 @@ func Run() error {
 		versionSuffix = "_" + config.C.Ivm.Version
 	}
 
-	template, err := templatex.ParseTemplate(map[string]any{
+	template, err := templatex.ParseTemplate(filepath.Join("ivm", "add", "template.proto.tpl"), map[string]any{
 		"Package":    config.C.Ivm.Add.Proto.Name,
 		"Methods":    methods,
 		"Services":   config.C.Ivm.Add.Proto.Services,

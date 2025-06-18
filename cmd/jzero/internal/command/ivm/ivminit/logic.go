@@ -84,29 +84,29 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 
 		var templateFile []byte
 		if !file.ClientStream && !file.ServerStream {
-			templateLogicBody, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-body.tpl")))
+			templateLogicBody, err := templatex.ParseTemplate(filepath.Join("ivm", "init", "logic-body.tpl"), templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-body.tpl")))
 			if err != nil {
 				return err
 			}
 
-			templateFile, err = templatex.ParseTemplate(map[string]any{
+			templateFile, err = templatex.ParseTemplate("inner__TEMPLATE_BODY__", map[string]any{
 				"Body": string(templateLogicBody),
 			}, []byte(fileContent))
 			if err != nil {
 				return err
 			}
 		} else if file.ClientStream && file.ServerStream {
-			templateLogicBody, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-server-stream-body.tpl")))
+			templateLogicBody, err := templatex.ParseTemplate(filepath.Join("ivm", "init", "logic-client-server-stream-body.tpl"), templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-server-stream-body.tpl")))
 			if err != nil {
 				return err
 			}
 
-			templateLogicAdaptor, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-server-stream-adaptor.tpl")))
+			templateLogicAdaptor, err := templatex.ParseTemplate(filepath.Join("ivm", "init", "logic-client-server-stream-adaptor.tpl"), templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-server-stream-adaptor.tpl")))
 			if err != nil {
 				return err
 			}
 
-			templateFile, err = templatex.ParseTemplate(map[string]any{
+			templateFile, err = templatex.ParseTemplate("inner__TEMPLATE_ADAPTOR__", map[string]any{
 				"Body":    string(templateLogicBody),
 				"Adaptor": string(templateLogicAdaptor),
 			}, []byte(fileContent))
@@ -114,17 +114,17 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 				return err
 			}
 		} else if file.ClientStream && !file.ServerStream {
-			templateLogicBody, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-stream-body.tpl")))
+			templateLogicBody, err := templatex.ParseTemplate(filepath.Join("ivm", "init", "logic-client-stream-body.tpl"), templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-stream-body.tpl")))
 			if err != nil {
 				return err
 			}
 
-			templateLogicAdaptor, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-stream-adaptor.tpl")))
+			templateLogicAdaptor, err := templatex.ParseTemplate(filepath.Join("ivm", "init", "logic-client-stream-adaptor.tpl"), templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-client-stream-adaptor.tpl")))
 			if err != nil {
 				return err
 			}
 
-			templateFile, err = templatex.ParseTemplate(map[string]any{
+			templateFile, err = templatex.ParseTemplate("inner__TEMPLATE_BODY__", map[string]any{
 				"Body":    string(templateLogicBody),
 				"Adaptor": string(templateLogicAdaptor),
 			}, []byte(fileContent))
@@ -132,17 +132,17 @@ func (ivm *IvmInit) updateProtoLogic(fp, oldFp string) error {
 				return err
 			}
 		} else if file.ServerStream && !file.ClientStream {
-			templateLogicBody, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-server-stream-body.tpl")))
+			templateLogicBody, err := templatex.ParseTemplate(filepath.Join("ivm", "init", "logic-server-stream-body.tpl"), templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-server-stream-body.tpl")))
 			if err != nil {
 				return err
 			}
 
-			templateLogicAdaptor, err := templatex.ParseTemplate(templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-server-stream-adaptor.tpl")))
+			templateLogicAdaptor, err := templatex.ParseTemplate(filepath.Join("ivm", "init", "logic-server-stream-adaptor.tpl"), templateValue, embeded.ReadTemplateFile(filepath.Join("ivm", "init", "logic-server-stream-adaptor.tpl")))
 			if err != nil {
 				return err
 			}
 
-			templateFile, err = templatex.ParseTemplate(map[string]any{
+			templateFile, err = templatex.ParseTemplate("inner__TEMPLATE_BODY__", map[string]any{
 				"Body":    string(templateLogicBody),
 				"Adaptor": string(templateLogicAdaptor),
 			}, []byte(fileContent))

@@ -277,7 +277,7 @@ func (ja *JzeroApi) generateApiCode() error {
 		}
 	}
 
-	template, err := templatex.ParseTemplate(map[string]any{
+	template, err := templatex.ParseTemplate(filepath.Join("plugins", "api", "routes.go.tpl"), map[string]any{
 		"Routes":         allRoutesGoBody,
 		"Module":         ja.Module,
 		"HandlerImports": lo.Uniq(handlerImports),

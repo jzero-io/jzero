@@ -7,7 +7,7 @@ import (
 )
 
 func TestFormatStyle(t *testing.T) {
-	template, err := ParseTemplate(map[string]any{
+	template, err := ParseTemplate("test", map[string]any{
 		"Style": "go_zero",
 	}, []byte(`{{FormatStyle .Style "service_context.go.tpl"}}`))
 	if err != nil {
@@ -17,7 +17,7 @@ func TestFormatStyle(t *testing.T) {
 }
 
 func TestVersionCompare(t *testing.T) {
-	template, err := ParseTemplate(map[string]any{
+	template, err := ParseTemplate("test", map[string]any{
 		"GoVersion": "1.24",
 	}, []byte(`{{if (VersionCompare .GoVersion ">=" "1.24")}}true{{end}}`))
 	if err != nil {

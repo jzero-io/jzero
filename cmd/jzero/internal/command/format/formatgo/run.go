@@ -33,6 +33,10 @@ func FormatFiles(files []string) error {
 	if len(opt.Files) == 0 {
 		return nil
 	}
+	// 执行一遍有点问题待解决
+	if err := gf.Execute(opt); err != nil {
+		return err
+	}
 	return gf.Execute(opt)
 }
 

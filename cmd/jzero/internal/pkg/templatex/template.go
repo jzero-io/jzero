@@ -8,9 +8,9 @@ import (
 )
 
 // ParseTemplate template
-func ParseTemplate(data any, tplT []byte) ([]byte, error) {
+func ParseTemplate(name string, data any, tplT []byte) ([]byte, error) {
 	var err error
-	t := template.New("production").Funcs(sprig.TxtFuncMap())
+	t := template.New(name).Funcs(sprig.TxtFuncMap())
 	t.Funcs(registerFuncMap)
 
 	t, err = t.Parse(string(tplT))

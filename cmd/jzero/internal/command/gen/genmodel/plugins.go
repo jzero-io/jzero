@@ -49,7 +49,7 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 		}
 	}
 
-	template, err := templatex.ParseTemplate(map[string]any{
+	template, err := templatex.ParseTemplate(filepath.Join("plugins", "model", "model.go.tpl"), map[string]any{
 		"Imports":       imports,
 		"TablePackages": tablePackages,
 		"MutiModels":    mutiModels,

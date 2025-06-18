@@ -7,8 +7,6 @@ import (
 	"github.com/moby/patternmatcher"
 )
 
-var IgnoreDirs = []string{".git", ".idea", ".vscode", ".DS_Store", "node_modules"}
-
 func filter(dir, name string, matcher *patternmatcher.PatternMatcher) bool {
 	pwd, err := os.Getwd()
 	if err != nil {
