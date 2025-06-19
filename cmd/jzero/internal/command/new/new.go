@@ -27,6 +27,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 )
@@ -181,7 +182,14 @@ var newCmd = &cobra.Command{
 			config.C.Gen.Home = filepath.Join(config.C.Wd(), ".template")
 		}
 
-		return gen.Run()
+		// run gen before hooks
+		if err := hooks.Run(cmd, "Before", "gen", config.C.Gen.Hooks.Before); err != nil {
+			return err
+		}
+		if err := gen.Run(); err != nil {
+			return err
+		}
+		return hooks.Run(cmd, "After", "gen", config.C.Gen.Hooks.After)
 	},
 }
 
