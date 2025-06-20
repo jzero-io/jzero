@@ -1,24 +1,5 @@
+{{if .withCache}}
 func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, session sqlx.Session, {{if .containsIndexCache}}newData{{else}}data{{end}} *{{.upperStartCamelObject}}) error {
-	sb := sqlbuilder.Update(m.table)
-	split := strings.Split({{.lowerStartCamelObject}}RowsExpectAutoSet, ",")
-	var assigns []string
-    for _, s := range split {
-        assigns = append(assigns, sb.Assign(s, nil))
-    }
-    sb.Set(assigns...)
-    sb.Where(sb.EQ(condition.AdaptField("{{.originalPrimaryKey}}"), nil))
-    statement, _ := sb.Build()
-
-    var err error
-    if session != nil{
-        _, err = session.ExecCtx(ctx, statement, {{.expressionValues}})
-    }else{
-        _, err = m.conn.ExecCtx(ctx, statement, {{.expressionValues}})
-    }
-	return err
-}
-
-func (m *default{{.upperStartCamelObject}}Model) UpdateWithCache(ctx context.Context, session sqlx.Session, {{if .containsIndexCache}}newData{{else}}data{{end}} *{{.upperStartCamelObject}}) error {
 	{{if .withCache}}{{if .containsIndexCache}}data, err := m.FindOne(ctx, session, newData.{{.upperStartCamelPrimaryKey}})
 	if err != nil{
 		return err
@@ -41,3 +22,24 @@ func (m *default{{.upperStartCamelObject}}Model) UpdateWithCache(ctx context.Con
 	}, {{.keyValues}})
 	return err{{else}}return m.Update(ctx, session, {{if .containsIndexCache}}newData{{else}}data{{end}}){{end}}
 }
+{{else}}
+func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, session sqlx.Session, {{if .containsIndexCache}}newData{{else}}data{{end}} *{{.upperStartCamelObject}}) error {
+	sb := sqlbuilder.Update(m.table)
+	split := strings.Split({{.lowerStartCamelObject}}RowsExpectAutoSet, ",")
+	var assigns []string
+    for _, s := range split {
+        assigns = append(assigns, sb.Assign(s, nil))
+    }
+    sb.Set(assigns...)
+    sb.Where(sb.EQ(condition.AdaptField("{{.originalPrimaryKey}}"), nil))
+    statement, _ := sb.Build()
+
+    var err error
+    if session != nil{
+        _, err = session.ExecCtx(ctx, statement, {{.expressionValues}})
+    }else{
+        _, err = m.conn.ExecCtx(ctx, statement, {{.expressionValues}})
+    }
+	return err
+}
+{{end}}
