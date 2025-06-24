@@ -30,6 +30,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
 // newCmd represents the new command
@@ -38,12 +39,22 @@ var newCmd = &cobra.Command{
 	Short:        `Used to create project from templates`,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var projectName string
+		var app string
 		if len(args) > 0 {
-			projectName = args[0]
+			app = args[0]
 		} else {
-			projectName = config.C.New.Name
+			app = config.C.New.Name
 		}
+
+		// parse output template
+		// TODO: add parse .jzero.yaml template feature
+		output, err := templatex.ParseTemplate("new command output", map[string]any{
+			"APP": app,
+		}, []byte(config.C.New.Output))
+		if err != nil {
+			return err
+		}
+		config.C.New.Output = string(output)
 
 		if config.C.New.Output == "" {
 			if len(args) > 0 {
@@ -57,7 +68,7 @@ var newCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("%s project %s in %s dir\n", color.WithColor("Creating", color.FgGreen), projectName, config.C.New.Output)
+		fmt.Printf("%s project %s in %s dir\n", color.WithColor("Creating", color.FgGreen), app, config.C.New.Output)
 
 		if config.C.New.Module == "" {
 			if len(args) > 0 {
@@ -149,7 +160,7 @@ var newCmd = &cobra.Command{
 		if !pathx.FileExists(embeded.Home) {
 			embeded.Home = filepath.Join(home, ".jzero", "templates", version.Version)
 		}
-		if err := Run(projectName, base); err != nil {
+		if err := Run(app, base); err != nil {
 			return err
 		}
 
