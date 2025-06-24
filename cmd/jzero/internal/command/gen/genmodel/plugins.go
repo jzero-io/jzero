@@ -12,6 +12,7 @@ import (
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/sync/errgroup"
 
@@ -21,6 +22,8 @@ import (
 )
 
 func (jm *JzeroModel) GenRegister(tables []string) error {
+	logx.Debugf("get register tables: %v", tables)
+
 	slices.Sort(tables)
 
 	var imports []string
@@ -34,8 +37,9 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 			t = filepath.Join(strings.Split(t, ".")...)
 			isMutiModel = true
 		}
-		mf := filepath.Join("internal", "model", t)
+		mf := filepath.Join("internal", "model", strings.ToLower(t))
 		if !pathx.FileExists(mf) {
+			logx.Debugf("%s table generated code not exists, skip", t)
 			continue
 		}
 
@@ -48,6 +52,10 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 			tablePackages = append(tablePackages, strings.ToLower(t))
 		}
 	}
+
+	logx.Debugf("get register imports: %v", imports)
+	logx.Debugf("get register table packages: %v", tablePackages)
+	logx.Debugf("get register muti models: %v", mutiModels)
 
 	template, err := templatex.ParseTemplate(filepath.Join("plugins", "model", "model.go.tpl"), map[string]any{
 		"Imports":       imports,
