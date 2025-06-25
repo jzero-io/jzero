@@ -30,7 +30,6 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
 // newCmd represents the new command
@@ -45,16 +44,6 @@ var newCmd = &cobra.Command{
 		} else {
 			app = config.C.New.Name
 		}
-
-		// parse output template
-		// TODO: add parse .jzero.yaml template feature
-		output, err := templatex.ParseTemplate("new command output", map[string]any{
-			"APP": app,
-		}, []byte(config.C.New.Output))
-		if err != nil {
-			return err
-		}
-		config.C.New.Output = string(output)
 
 		if config.C.New.Output == "" {
 			if len(args) > 0 {

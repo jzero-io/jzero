@@ -33,6 +33,9 @@ type Config struct {
 	// global flags
 	Debug bool `mapstructure:"debug"`
 
+	// Register tpl val
+	RegisterTplVal []string `mapstructure:"register-tpl-val"`
+
 	Hooks HooksConfig `mapstructure:"hooks"`
 
 	DebugSleepTime int `mapstructure:"debug-sleep-time"`
@@ -332,14 +335,24 @@ func InitConfig(rootCmd *cobra.Command) error {
 		if err != nil {
 			return err
 		}
-		var env map[string]any
-		err = yaml.Unmarshal(data, &env)
+		var envMap map[string]any
+		err = yaml.Unmarshal(data, &envMap)
 		if err != nil {
 			return err
 		}
 
-		for k, v := range env {
-			_ = os.Setenv(k, cast.ToString(v))
+		logx.Debugf("get jzero env: %v", envMap)
+
+		for k, v := range envMap {
+			if vs, ok := v.([]any); ok {
+				var envs []string
+				for _, e := range vs {
+					envs = append(envs, cast.ToString(e))
+				}
+				_ = os.Setenv(k, strings.Join(envs, ","))
+			} else {
+				_ = os.Setenv(k, cast.ToString(v))
+			}
 		}
 	}
 

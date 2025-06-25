@@ -98,6 +98,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&WorkingDir, "working-dir", "w", "", "set working directory")
 	rootCmd.PersistentFlags().StringVarP(&config.CfgFile, "config", "f", ".jzero.yaml", "set config file")
 	rootCmd.PersistentFlags().StringVarP(&config.CfgEnvFile, "config-env", "", ".jzero.env.yaml", "set config env file")
+	rootCmd.PersistentFlags().StringSliceP("register-tpl-val", "", []string{}, "register tpl value, e.g. --register-tpl-val key=value")
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "debug mode")
 	rootCmd.PersistentFlags().IntP("debug-sleep-time", "", 0, "debug sleep time")
 
@@ -129,6 +130,7 @@ func InitConfig() {
 		}
 	}
 
+	time.Sleep(time.Second * 15)
 	cobra.CheckErr(config.InitConfig(rootCmd))
 	if config.C.Debug {
 		logx.MustSetup(logx.LogConf{Encoding: "plain"})
