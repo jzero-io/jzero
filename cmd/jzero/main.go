@@ -130,7 +130,6 @@ func InitConfig() {
 		}
 	}
 
-	time.Sleep(time.Second * 15)
 	cobra.CheckErr(config.InitConfig(rootCmd))
 	if config.C.Debug {
 		logx.MustSetup(logx.LogConf{Encoding: "plain"})
