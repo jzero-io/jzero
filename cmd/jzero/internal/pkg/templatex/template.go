@@ -6,7 +6,6 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/zeromicro/go-zero/core/logx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 )
@@ -25,8 +24,6 @@ func ParseTemplate(name string, data map[string]any, tplT []byte) ([]byte, error
 	t.Funcs(registerFuncMap)
 
 	buf := new(bytes.Buffer)
-
-	logx.Debugf("get register tpl val: %v", config.C.RegisterTplVal)
 
 	for _, v := range config.C.RegisterTplVal {
 		split := strings.Split(v, "=")

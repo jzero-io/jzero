@@ -324,6 +324,9 @@ func TraverseCommands(prefix string, cmd *cobra.Command) error {
 }
 
 func InitConfig(rootCmd *cobra.Command) error {
+	C = Config{}
+	unsetEnvVarsWithPrefix("JZERO_")
+
 	if pathx.FileExists(CfgFile) {
 		viper.SetConfigFile(CfgFile)
 		// If a config file is found, read it in.
@@ -385,4 +388,18 @@ func SetConfig(command string, flagSet *pflag.FlagSet) error {
 		return err
 	}
 	return nil
+}
+
+func unsetEnvVarsWithPrefix(prefix string) {
+	for _, env := range os.Environ() {
+		pair := strings.SplitN(env, "=", 2)
+		if len(pair) < 1 {
+			continue
+		}
+		key := pair[0]
+
+		if strings.HasPrefix(key, prefix) {
+			_ = os.Unsetenv(key)
+		}
+	}
 }
