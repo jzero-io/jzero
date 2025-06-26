@@ -81,6 +81,7 @@ type NewConfig struct {
 	Local                string   `mapstructure:"local"`                 // 使用本地模板与 branch 对应
 	Features             []string `mapstructure:"features"`              // 新建项目使用哪些特性, 灵活构建模板
 	Ignore               []string `mapstructure:"ignore"`                // 忽略哪些文件或目录
+	IgnoreExtra          []string `mapstructure:"ignore-extra"`          // 忽略哪些额外的文件或目录
 	ExecutableExtensions []string `mapstructure:"executable-extensions"` // 可执行文件的后缀
 }
 
