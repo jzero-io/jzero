@@ -153,6 +153,10 @@ var newCmd = &cobra.Command{
 			return err
 		}
 
+		if !config.C.New.Gen {
+			return nil
+		}
+
 		// change dir to project
 		if err := os.Chdir(config.C.New.Output); err != nil {
 			return err
@@ -208,6 +212,7 @@ func GetCommand() *cobra.Command {
 	newCmd.Flags().StringP("local", "", "", "use local template")
 	newCmd.Flags().StringSliceP("features", "", []string{}, "select features")
 	newCmd.Flags().BoolP("mono", "", false, "mono project under go mod project")
+	newCmd.Flags().BoolP("gen", "", true, "gen code after new project")
 	newCmd.Flags().StringSliceP("ignore", "", []string{}, "select ignore")
 	newCmd.Flags().StringSliceP("ignore-extra", "", []string{}, "select ignore extra")
 	newCmd.Flags().StringSliceP("executable-extensions", "", []string{".sh"}, "select executable extensions")

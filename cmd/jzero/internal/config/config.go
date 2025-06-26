@@ -73,6 +73,7 @@ type NewConfig struct {
 	Output               string   `mapstructure:"output"`                // 输出到的目录
 	Remote               string   `mapstructure:"remote"`                // 远程仓库地址
 	Cache                bool     `mapstructure:"cache"`                 // 当使用远程仓库时是否使用缓存
+	Gen                  bool     `mapstructure:"gen"`                   // 新建项目后是否自动执行 gen 命令
 	RemoteAuthUsername   string   `mapstructure:"remote-auth-username"`  // 远程仓库的认证用户名
 	RemoteAuthPassword   string   `mapstructure:"remote-auth-password"`  // 远程仓库的认证密码
 	Frame                string   `mapstructure:"frame"`                 // 使用 jzero 内置的框架
