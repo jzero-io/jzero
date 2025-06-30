@@ -23,3 +23,7 @@ func RegisterZrpc(c config.Config, ctx *svc.ServiceContext) *zrpc.RpcServer {
 
 	return s
 }
+
+func RegisterZrpcServer(grpcServer *grpc.Server, ctx *svc.ServiceContext) {
+    {{ if .RegisterServers }}{{ .RegisterServers }}{{ end }}
+}
