@@ -323,10 +323,12 @@ func TraverseCommands(prefix string, cmd *cobra.Command) error {
 	return nil
 }
 
-func InitConfig(rootCmd *cobra.Command) error {
+func ResetConfig() {
 	C = Config{}
-	unsetEnvVarsWithPrefix("JZERO_")
+	unsetEnvVarsWithPrefix("JZERO")
+}
 
+func InitConfig(rootCmd *cobra.Command) error {
 	if pathx.FileExists(CfgFile) {
 		viper.SetConfigFile(CfgFile)
 		// If a config file is found, read it in.
@@ -397,6 +399,10 @@ func unsetEnvVarsWithPrefix(prefix string) {
 			continue
 		}
 		key := pair[0]
+
+		if key == "JZERO_HOOK_TRIGGERED" {
+			continue
+		}
 
 		if strings.HasPrefix(key, prefix) {
 			_ = os.Unsetenv(key)

@@ -174,6 +174,7 @@ var newCmd = &cobra.Command{
 		}
 		fmt.Printf("%s desc dir in %s, auto generate code\n", color.WithColor("Detected", color.FgGreen), config.C.New.Output)
 
+		config.ResetConfig()
 		if err := config.InitConfig(cmd.Root()); err != nil {
 			return err
 		}
