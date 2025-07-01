@@ -100,8 +100,9 @@ type GenConfig struct {
 	// gen self flags
 	GitChange bool `mapstructure:"git-change"`
 
-	Route2Code bool
-	RpcClient  bool `mapstructure:"rpc-client"`
+	Route2Code   bool
+	RpcClient    bool     `mapstructure:"rpc-client"`
+	ProtoInclude []string `mapstructure:"proto-include"`
 
 	// model flag
 	ModelDriver string `mapstructure:"model-driver"`
