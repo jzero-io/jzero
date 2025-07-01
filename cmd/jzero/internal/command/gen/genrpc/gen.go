@@ -168,6 +168,10 @@ func (jr *JzeroRpc) Gen() error {
 				filepath.Join(embeded.Home, "go-zero"),
 				config.C.Gen.Style)
 
+			if len(config.C.Gen.ProtoInclude) > 0 {
+				command += fmt.Sprintf("-I%s ", strings.Join(config.C.Gen.ProtoInclude, " -I"))
+			}
+
 			logx.Debug(command)
 
 			_, err = execx.Run(command, config.C.Wd())
@@ -216,6 +220,10 @@ func (jr *JzeroRpc) Gen() error {
 					getProtoDescriptorPath(v),
 					v,
 				)
+				if len(config.C.Gen.ProtoInclude) > 0 {
+					protocCommand += fmt.Sprintf(" -I%s", strings.Join(config.C.Gen.ProtoInclude, " -I"))
+				}
+				logx.Debug(protocCommand)
 				_, err = execx.Run(protocCommand, config.C.Wd())
 				if err != nil {
 					return err

@@ -46,6 +46,9 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 	}
 
 	protoParser.ImportPaths = []string{filepath.Join("desc", "proto"), filepath.Join("desc", "proto", "third_party")}
+	if len(config.C.Gen.ProtoInclude) > 0 {
+		protoParser.ImportPaths = append(protoParser.ImportPaths, config.C.Gen.ProtoInclude...)
+	}
 	protoParser.IncludeSourceCodeInfo = true
 	fds, err = protoParser.ParseFiles(files...)
 	if err != nil {
