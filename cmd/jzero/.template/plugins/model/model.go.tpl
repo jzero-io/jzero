@@ -6,6 +6,8 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/jzero-io/jzero/core/stores/modelx"
     "github.com/eddieowens/opts"
+    "github.com/pkg/errors"
+    "github.com/zeromicro/go-zero/core/logx"
 
 	{{range $v := .Imports}}"{{$v}}"
 	{{end}}
@@ -23,7 +25,11 @@ type Model struct {
 }
 
 func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
-	return Model{
+	{{if .WithCache}}o := opts.DefaultApply(op...)
+    if o.CachedConn == nil || len(o.CacheConf) == 0 {
+        logx.Must(errors.New("Using model cache but not configured, please check the configuration"))
+    }
+    {{end}}return Model{
          {{range $v := .TablePackages}}{{$v | FirstUpper | ToCamel}}: {{$v}}.New{{ $v | FirstUpper | ToCamel }}Model(conn, op...),
          {{end}}
 	}

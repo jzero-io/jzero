@@ -61,7 +61,7 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 		"Imports":       imports,
 		"TablePackages": tablePackages,
 		"MutiModels":    mutiModels,
-		"withCache":     config.C.Gen.ModelCache,
+		"WithCache":     config.C.Gen.ModelCache,
 	}, embeded.ReadTemplateFile(filepath.Join("plugins", "model", "model.go.tpl")))
 	if err != nil {
 		return err
