@@ -104,7 +104,9 @@ Please see: https://docs.jzero.io/roadmap/base.html
 
 [Contributing](https://docs.jzero.io/guide/contribute.html)
 
-[![Contribution Leaderboard](https://openomy.app/svg?repo=jzero-io/jzero&chart=list)](https://openomy.app/github/jzero-io/jzero)
+<a href="https://openomy.app/github/jzero-io/jzero" target="_blank" style="display: block; width: 100%;" align="center">
+  <img src="https://openomy.app/svg?repo=jzero-io/jzero&chart=bubble&latestMonth=3" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />
+</a>
 
 ## Acknowledgements
 
