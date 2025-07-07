@@ -1,12 +1,13 @@
 package middleware
 
 import (
+    "context"
 	"net/http"
 
 	"google.golang.org/grpc/status"
 )
 
-func ErrorMiddleware(err error) (int, any) {
+func ErrorMiddleware(_ context.Context, err error) (int, any) {
 	code := http.StatusInternalServerError
 	message := err.Error()
 

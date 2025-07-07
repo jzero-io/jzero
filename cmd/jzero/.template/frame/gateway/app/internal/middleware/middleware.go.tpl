@@ -10,6 +10,6 @@ func Register(z *zrpc.RpcServer, gw *gateway.Server) {
 	z.AddUnaryInterceptors(NewValidator().UnaryServerMiddleware())
 	z.AddUnaryInterceptors(WithValueMiddleware)
 
-    httpx.SetErrorHandler(ErrorMiddleware)
+    httpx.SetErrorHandlerCtx(ErrorMiddleware)
     gw.Use(ResponseMiddleware)
 }

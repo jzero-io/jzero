@@ -13,6 +13,6 @@ func New() Middleware {
 
 func Register(server *rest.Server) {
 	httpx.SetOkHandler(ResponseMiddleware)
-	httpx.SetErrorHandler(ErrorMiddleware)
+	httpx.SetErrorHandlerCtx(ErrorMiddleware)
 	httpx.SetValidator(NewValidator())
 }

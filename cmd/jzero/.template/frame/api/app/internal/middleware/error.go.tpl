@@ -1,10 +1,11 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 )
 
-func ErrorMiddleware(err error) (int, any) {
+func ErrorMiddleware(_ context.Context, err error) (int, any) {
 	return http.StatusOK, Body{
 		Data:    nil,
 		Code:    http.StatusInternalServerError,
