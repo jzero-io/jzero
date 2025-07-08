@@ -6,7 +6,8 @@ import (
 	"regexp"
 
 	"github.com/fsgo/go_fmt/gofmtapi"
-	"github.com/zeromicro/go-zero/core/mr"
+	"github.com/zeromicro/go-zero/core/logx"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
@@ -33,10 +34,7 @@ func FormatFiles(files []string) error {
 	if len(opt.Files) == 0 {
 		return nil
 	}
-	// 执行一遍有点问题待解决
-	if err := gf.Execute(opt); err != nil {
-		return err
-	}
+	logx.Debugf("format files: %v", opt.Files)
 	return gf.Execute(opt)
 }
 
@@ -54,16 +52,20 @@ func getFormatFiles() []string {
 func filterFiles(files []string) []string {
 	var result []string
 
-	mr.ForEach(func(source chan<- string) {
-		for _, v := range files {
-			source <- v
-		}
-	}, func(item string) {
-		line, _ := readFirstLine(item)
-		if !rxCodeGenerated.MatchString(line) {
-			result = append(result, item)
-		}
-	})
+	var eg errgroup.Group
+	eg.SetLimit(len(files))
+	for _, v := range files {
+		eg.Go(func() error {
+			line, _ := readFirstLine(v)
+			if !rxCodeGenerated.MatchString(line) {
+				result = append(result, v)
+			}
+			return nil
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil
+	}
 
 	return result
 }
