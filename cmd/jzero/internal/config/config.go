@@ -305,14 +305,30 @@ func TraverseCommands(prefix string, cmd *cobra.Command) error {
 			newPrefix = subCommand.Use
 		}
 
-		beforeHooks := viper.GetStringSlice(fmt.Sprintf("%s.hooks.before", newPrefix))
-		afterHooks := viper.GetStringSlice(fmt.Sprintf("%s.hooks.after", newPrefix))
+		beforeHooks := viper.Get(fmt.Sprintf("%s.hooks.before", newPrefix))
+		afterHooks := viper.Get(fmt.Sprintf("%s.hooks.after", newPrefix))
 
 		subCommand.PreRunE = func(cmd *cobra.Command, args []string) error {
-			return hooks.Run(cmd, "Before", newPrefix, beforeHooks)
+			if beforeHooks != nil {
+				if h, ok := beforeHooks.(string); ok {
+					return hooks.Run(cmd, "Before", newPrefix, strings.Split(h, ","))
+				}
+				if _, ok := beforeHooks.([]any); ok {
+					return hooks.Run(cmd, "Before", newPrefix, viper.GetStringSlice(fmt.Sprintf("%s.hooks.before", newPrefix)))
+				}
+			}
+			return nil
 		}
 		subCommand.PostRunE = func(cmd *cobra.Command, args []string) error {
-			return hooks.Run(cmd, "After", newPrefix, afterHooks)
+			if afterHooks != nil {
+				if h, ok := afterHooks.(string); ok {
+					return hooks.Run(cmd, "After", newPrefix, strings.Split(h, ","))
+				}
+				if _, ok := afterHooks.([]string); ok {
+					return hooks.Run(cmd, "After", newPrefix, viper.GetStringSlice(fmt.Sprintf("%s.hooks.after", newPrefix)))
+				}
+			}
+			return nil
 		}
 
 		err = TraverseCommands(newPrefix, subCommand)
