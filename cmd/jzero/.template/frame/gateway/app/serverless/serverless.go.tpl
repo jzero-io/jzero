@@ -3,23 +3,24 @@
 import (
 	"path/filepath"
 
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/jzero-io/jzero/core/configcenter/subscriber"
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/rest"
+	"google.golang.org/grpc"
 
 	"{{ .Module }}/internal/config"
 	"{{ .Module }}/internal/global"
-    "{{ .Module }}/internal/handler"
-    "{{ .Module }}/internal/svc"
+	"{{ .Module }}/desc/pb"
+	"{{ .Module }}/internal/server"
+	"{{ .Module }}/internal/svc"
 )
 
 type Serverless struct {
-	SvcCtx        *svc.ServiceContext                                   // 服务上下文
-	HandlerFunc   func(server *rest.Server, svcCtx *svc.ServiceContext) // 服务路由
+	SvcCtx             *svc.ServiceContext // 服务上下文
+	RegisterZrpcServer func(grpcServer *grpc.Server, ctx *svc.ServiceContext)
+	ProtoSets          []string
 }
 
-// New serverless function
 func New() *Serverless {
 	cc := configurator.MustNewConfigCenter[config.Config](configurator.Config{
 		Type: "yaml",
@@ -28,8 +29,13 @@ func New() *Serverless {
 	svcCtx := svc.NewServiceContext(cc)
 	global.ServiceContext = *svcCtx
 
+	// get protoSets
+	protoSets, err := pb.WriteToLocal(pb.Embed)
+	logx.Must(err)
+
 	return &Serverless{
-		SvcCtx:      svcCtx,
-		HandlerFunc: handler.RegisterHandlers,
+		SvcCtx:             svcCtx,
+		RegisterZrpcServer: server.RegisterZrpcServer,
+		ProtoSets:          protoSets,
 	}
 }{{end}}

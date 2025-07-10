@@ -12,6 +12,8 @@ import (
 	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 )
 
 func (jr *JzeroRpc) removeServerSuffix(fp string) error {
@@ -85,6 +87,10 @@ func (jr *JzeroRpc) removeServerSuffix(fp string) error {
 		}
 		return true
 	})
+
+	if err = UpdateImportedModule(f, fset, config.C.Wd(), jr.Module); err != nil {
+		return err
+	}
 
 	// Write the modified AST back to the file
 	buf := bytes.NewBuffer(nil)
@@ -183,6 +189,10 @@ func (jr *JzeroRpc) removeLogicSuffix(fp string) error {
 		}
 		return true
 	})
+
+	if err = UpdateImportedModule(f, fset, config.C.Wd(), jr.Module); err != nil {
+		return err
+	}
 
 	buf := bytes.NewBuffer(nil)
 	if err := goformat.Node(buf, fset, f); err != nil {

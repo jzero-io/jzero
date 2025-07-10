@@ -12,6 +12,7 @@ import (
 	"{{ .Module }}/internal/svc"{{ if .ServerImports }}{{ .ServerImports }}{{ end }}{{ if .PbImports }}{{ .PbImports }}{{ end }}
 )
 
+// RegisterZrpc Deprecated: use RegisterZrpcServer instead.
 func RegisterZrpc(c config.Config, ctx *svc.ServiceContext) *zrpc.RpcServer {
 	s := zrpc.MustNewServer(c.Zrpc.RpcServerConf, func(grpcServer *grpc.Server) {
 	    {{ if .RegisterServers }}{{ .RegisterServers }}{{ end }}

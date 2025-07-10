@@ -62,6 +62,7 @@ func Run(appName, base string) error {
 		return err
 	}
 	templateData["Style"] = config.C.New.Style
+	templateData["Serverless"] = config.C.New.Serverless
 
 	jn := JzeroNew{
 		TemplateData: templateData,

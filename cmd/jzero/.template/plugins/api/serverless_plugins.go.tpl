@@ -9,12 +9,10 @@ import (
 	{{end}}
 )
 
-type CoreSvcCtx = svc.ServiceContext
-
-func LoadPlugins(server *rest.Server, svcCtx CoreSvcCtx) {
+func LoadPlugins(server *rest.Server, svcCtx *svc.ServiceContext) {
 	{{ range $v := .Plugins }}
 	{
-        serverless := {{ $v.Path | base }}.New(svcCtx)
+        serverless := {{ $v.Path | base }}.New()
         serverless.HandlerFunc(server, serverless.SvcCtx)
     }
 	{{end}}

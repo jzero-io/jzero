@@ -4,30 +4,31 @@ import (
 	"os"
 
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
+	"github.com/zeromicro/go-zero/gateway"
+	"github.com/zeromicro/go-zero/zrpc"
 
 	"{{.Module}}/internal/config"
+	"{{.Module}}/internal/global"
 )
 
 type Custom struct {
-	Config configurator.Configurator[config.Config]
+	ZrpcServer *zrpc.RpcServer
+	GatewayServer *gateway.Server
 }
 
-func New(config configurator.Configurator[config.Config]) *Custom {
-	return &Custom{Config: config}
+func New(zrpcServer *zrpc.RpcServer, gatewayServer *gateway.Server) *Custom {
+	return &Custom{
+		ZrpcServer: zrpcServer,
+		GatewayServer: gatewayServer,
+	}
+}
+
+func (c *Custom) Init() {
+    c.AddRoutes(c.GatewayServer)
 }
 
 // Start Please add custom logic here.
 func (c *Custom) Start() {}
 
 // Stop Please add shut down logic here.
-func (c *Custom) Stop() {
-	conf, err := c.Config.GetConfig()
-	if err == nil {
-		// remove temp pb file
-		if len(conf.Gateway.Upstreams) > 0 {
-			for _, p := range conf.Gateway.Upstreams[0].ProtoSets {
-				_ = os.Remove(p)
-			}
-		}
-	}
-}
+func (c *Custom) Stop() {}

@@ -210,7 +210,7 @@ func (jr *JzeroRpc) Gen() error {
 
 		// # gen proto descriptor
 		if lo.Contains(genCodeProtoFiles, v) {
-			if isNeedGenProtoDescriptor(jr.ProtoSpecMap[v]) {
+			if IsNeedGenProtoDescriptor(jr.ProtoSpecMap[v]) {
 				if !pathx.FileExists(getProtoDescriptorPath(v)) {
 					_ = os.MkdirAll(filepath.Dir(getProtoDescriptorPath(v)), 0o755)
 				}
@@ -261,7 +261,7 @@ func getProtoDescriptorPath(protoPath string) string {
 	return filepath.Join("desc", "pb", strings.TrimSuffix(rel, ".proto")+".pb")
 }
 
-func isNeedGenProtoDescriptor(proto rpcparser.Proto) bool {
+func IsNeedGenProtoDescriptor(proto rpcparser.Proto) bool {
 	for _, ps := range proto.Service {
 		for _, rpc := range ps.RPC {
 			for _, option := range rpc.Options {

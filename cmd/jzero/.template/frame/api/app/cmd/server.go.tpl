@@ -1,22 +1,26 @@
 package cmd
 
 import (
+	"net/http"
+
+	"github.com/common-nighthawk/go-figure"
+	"github.com/jzero-io/jzero/core/configcenter/subscriber"
 	"github.com/spf13/cobra"
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
-	"github.com/jzero-io/jzero/core/configcenter/subscriber"
-    "github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/rest"
-	"github.com/common-nighthawk/go-figure"
+	"github.com/zeromicro/go-zero/rest/httpx"
 
 	"{{ .Module }}/internal/config"
+	"{{ .Module }}/internal/custom"
+	"{{ .Module }}/internal/global"
 	"{{ .Module }}/internal/middleware"
 	"{{ .Module }}/internal/handler"
 	"{{ .Module }}/internal/svc"
-	{{ if has "serverless_core" .Features }}"{{ .Module }}/plugins"{{end}}
+	{{ if not .Serverless }}"{{ .Module }}/plugins"{{end}}
 )
 
-// serverCmd represents the server command
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "{{ .APP }} server",
@@ -25,41 +29,44 @@ var serverCmd = &cobra.Command{
 		cc := configurator.MustNewConfigCenter[config.Config](configurator.Config{
 			Type: "yaml",
 		}, subscriber.MustNewFsnotifySubscriber(cfgFile, subscriber.WithUseEnv(true)))
+
 		c, err := cc.GetConfig()
 		logx.Must(err)
 
-        // set up logger
-        logx.Must(logx.SetUp(c.Log.LogConf))
+		// set up logger
+		if err = logx.SetUp(c.Log.LogConf); err != nil {
+			logx.Must(err)
+		}
 
-        svcCtx := svc.NewServiceContext(cc)
-        run(svcCtx)
+		// print banner
+		printBanner(c)
+		// print version
+		printVersion()
+
+		svcCtx := svc.NewServiceContext(cc)
+		svcCtx.Middleware = middleware.NewMiddleware()
+		global.ServiceContext = *svcCtx
+		run(svcCtx)
 	},
 }
 
 func run(svcCtx *svc.ServiceContext) {
-    c := svcCtx.MustGetConfig()
+    server := rest.MustNewServer(svcCtx.MustGetConfig().Rest.RestConf)
 
-	server := rest.MustNewServer(c.Rest.RestConf)
+	ctm := custom.New(server)
+	ctm.Init()
+
+	handler.RegisterHandlers(server, svcCtx)
 	middleware.Register(server)
 
-	// server add api handlers
-	handler.RegisterHandlers(server, svcCtx)
-
-	// server add custom routes
-    svcCtx.Custom.AddRoutes(server)
-
-    {{ if has "serverless_core" .Features }}// load plugins features
-    plugins.LoadPlugins(server, *svcCtx){{end}}
+	{{ if not .Serverless }}// load plugins
+	plugins.LoadPlugins(server, svcCtx){{end}}
 
 	group := service.NewServiceGroup()
 	group.Add(server)
-	group.Add(svcCtx.Custom)
+	group.Add(ctm)
 
-	printBanner(c)
-	printVersion()
-
-    logx.Infof("Starting rest server at %s:%d...", c.Rest.Host, c.Rest.Port)
-    group.Start()
+	group.Start()
 }
 
 func printBanner(c config.Config) {

@@ -1,10 +1,20 @@
 package custom
 
-type Custom struct{}
+import (
+	"github.com/zeromicro/go-zero/zrpc"
+)
 
-func New() *Custom {
-	return &Custom{}
+type Custom struct{
+    ZrpcServer *zrpc.RpcServer
 }
+
+func New(zrpcServer *zrpc.RpcServer) *Custom {
+	return &Custom{
+		ZrpcServer: zrpcServer,
+	}
+}
+
+func (c *Custom) Init() {}
 
 // Start Please add custom logic here.
 func (c *Custom) Start() {}

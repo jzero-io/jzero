@@ -56,6 +56,9 @@ var newCmd = &cobra.Command{
 				return errors.Errorf("%s already exists", config.C.New.Output)
 			}
 		}
+		if config.C.New.Serverless {
+			config.C.New.Output = filepath.Join("plugins", config.C.New.Output)
+		}
 
 		fmt.Printf("%s project %s in %s dir\n", color.WithColor("Creating", color.FgGreen), app, config.C.New.Output)
 
@@ -211,11 +214,12 @@ func GetCommand() *cobra.Command {
 	newCmd.Flags().StringP("branch", "b", "", "use remote template repo branch")
 	newCmd.Flags().BoolP("cache", "", false, "remote template using cache")
 	newCmd.Flags().StringP("local", "", "", "use local template")
-	newCmd.Flags().StringSliceP("features", "", []string{}, "select features")
+	newCmd.Flags().StringSliceP("features", "", []string{}, "set features")
 	newCmd.Flags().BoolP("mono", "", false, "mono project under go mod project")
+	newCmd.Flags().BoolP("serverless", "", false, "create serverless project")
 	newCmd.Flags().BoolP("gen", "", true, "gen code after new project")
-	newCmd.Flags().StringSliceP("ignore", "", []string{}, "select ignore")
-	newCmd.Flags().StringSliceP("ignore-extra", "", []string{}, "select ignore extra")
+	newCmd.Flags().StringSliceP("ignore", "", []string{}, "set ignore file")
+	newCmd.Flags().StringSliceP("ignore-extra", "", []string{}, "set ignore extra file")
 	newCmd.Flags().StringSliceP("executable-extensions", "", []string{".sh"}, "select executable extensions")
 
 	return newCmd

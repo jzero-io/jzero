@@ -9,9 +9,12 @@ import (
 	"github.com/common-nighthawk/go-figure"
 
 	"{{ .Module }}/internal/config"
+	"{{ .Module }}/internal/custom"
+	"{{ .Module }}/internal/global"
 	"{{ .Module }}/internal/middleware"
 	"{{ .Module }}/internal/server"
 	"{{ .Module }}/internal/svc"
+	{{ if not .Serverless }}"{{ .Module }}/plugins"{{end}}
 )
 
 // serverCmd represents the server command
@@ -29,25 +32,35 @@ var serverCmd = &cobra.Command{
         // set up logger
         logx.Must(logx.SetUp(c.Log.LogConf))
 
+	    printBanner(c)
+	    printVersion()
+
     	svcCtx := svc.NewServiceContext(cc)
+    	global.ServiceContext = *svcCtx
     	run(svcCtx)
 	},
 }
 
 func run(svcCtx *svc.ServiceContext) {
-    c := svcCtx.MustGetConfig()
+	zrpcServer := zrpc.MustNewServer(svcCtx.MustGetConfig().Zrpc.RpcServerConf, func(grpcServer *grpc.Server) {
+        server.RegisterZrpcServer(grpcServer, svcCtx)
+            {{if not .Serverless }}// register plugins
+            plugins.LoadPlugins(grpcServer, svcCtx){{end}}
+        if svcCtx.MustGetConfig().Zrpc.Mode == service.DevMode || svcCtx.MustGetConfig().Zrpc.Mode == service.TestMode {
+        	reflection.Register(grpcServer)
+        }
+    })
 
-	zrpc := server.RegisterZrpc(c, svcCtx)
-    middleware.Register(zrpc)
+	ctm := custom.New(zrpcServer)
+	ctm.Init()
+
+    middleware.Register(zrpcServer)
 
 	group := service.NewServiceGroup()
-	group.Add(zrpc)
-	group.Add(svcCtx.Custom)
+	group.Add(zrpcServer)
+	group.Add(ctm)
 
-	printBanner(c)
-	printVersion()
-
-    logx.Infof("Starting rpc server at %s...", c.Zrpc.ListenOn)
+    logx.Infof("Starting rpc server at %s...", svcCtx.MustGetConfig().Zrpc.ListenOn)
     group.Start()
 }
 
