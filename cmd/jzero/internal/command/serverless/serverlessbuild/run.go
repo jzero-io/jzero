@@ -8,12 +8,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
-	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"golang.org/x/mod/modfile"
 
-	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genrpc"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
-	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
@@ -79,35 +75,9 @@ func Run() error {
 		plugins[i].Module = pluginGoMod.Path
 	}
 
-	// 判断 core 项目类型 api/rpc
-	var projectType string
-	if _, err := os.Stat(filepath.Join("desc", "api")); err == nil {
-		// api 项目
-		projectType = "api"
-	}
-	if _, err := os.Stat(filepath.Join("desc", "proto")); err == nil {
-		// rpc 项目
-		projectType = "rpc"
-
-		// 获取全量 proto 文件
-		protoFiles, err := jzerodesc.GetProtoFilepath(config.C.ProtoDir())
-		if err != nil {
-			return err
-		}
-
-		for _, v := range protoFiles {
-			// parse proto
-			protoParser := rpcparser.NewDefaultProtoParser()
-			var parse rpcparser.Proto
-			parse, err = protoParser.Parse(v, true)
-			if err != nil {
-				return err
-			}
-			if genrpc.IsNeedGenProtoDescriptor(parse) {
-				projectType = "gateway"
-				break
-			}
-		}
+	projectType, err := plugin.GetProjectType()
+	if err != nil {
+		return err
 	}
 
 	pluginsGoBytes, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("plugins", "api", "serverless_plugins.go.tpl")), map[string]any{

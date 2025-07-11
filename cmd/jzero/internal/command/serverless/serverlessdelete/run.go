@@ -79,10 +79,15 @@ func Run() error {
 		remainingPlugins[i].Module = pluginGoMod.Path
 	}
 
+	projectType, err := plugin.GetProjectType()
+	if err != nil {
+		return err
+	}
+
 	pluginsGoBytes, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("plugins", "api", "serverless_plugins.go.tpl")), map[string]any{
 		"Plugins": remainingPlugins,
 		"Module":  goMod.Path,
-	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("plugins", "api", "serverless_plugins.go.tpl"))))
+	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("plugins", projectType, "serverless_plugins.go.tpl"))))
 	if err != nil {
 		return err
 	}
