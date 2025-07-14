@@ -2,6 +2,7 @@ package fuzzy
 
 import (
 	"encoding/json"
+	"html"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -120,6 +121,8 @@ func TestFuzzyDecodeRequest(t *testing.T) {
 }
 
 func TestFuzzyDecodeRequest_EdgeCases(t *testing.T) {
+	EnableXssProtection = true
+
 	tests := []struct {
 		name       string
 		input      []byte
@@ -176,6 +179,29 @@ func TestFuzzyDecodeRequest_EdgeCases(t *testing.T) {
 				})
 				assert.True(t, out.TrueVal)
 				assert.False(t, out.FalseVal)
+			},
+		},
+		{
+			name: "test special string json",
+			input: []byte(`{
+    "serviceCode": "homeConfig",
+    "data": {
+        "layout": "[{\"x\":8,\"y\":0,\"w\":4,\"h\":12,\"i\":\"4\",\"static\":false,\"componentName\":\"HardwareResourceChart\",\"moved\":false},{\"x\":0,\"y\":12,\"w\":8,\"h\":11,\"i\":\"5\",\"static\":false,\"componentName\":\"SystemServices\",\"moved\":false},{\"x\":8,\"y\":12,\"w\":4,\"h\":11,\"i\":\"6\",\"static\":false,\"componentName\":\"SystemBaseInfo\",\"moved\":false},{\"x\":0,\"y\":0,\"w\":8,\"h\":12,\"i\":\"1732005468034\",\"static\":false,\"componentName\":\"NetFlowChart\",\"moved\":false},{\"x\":0,\"y\":23,\"w\":12,\"h\":12,\"i\":\"1732005471937\",\"static\":false,\"componentName\":\"SystemDataStatisticsChart\",\"moved\":false}]"
+    }
+}`),
+			outputType: &struct {
+				ServiceCode string            `json:"serviceCode"`
+				Data        map[string]string `json:"data"`
+			}{},
+			check: func(t *testing.T, output any) {
+				t.Helper()
+				out := output.(*struct {
+					ServiceCode string            `json:"serviceCode"`
+					Data        map[string]string `json:"data"`
+				})
+				assert.Equal(t, "homeConfig", out.ServiceCode)
+				out.Data["layout"] = html.UnescapeString(out.Data["layout"])
+				assert.Equal(t, "[{\"x\":8,\"y\":0,\"w\":4,\"h\":12,\"i\":\"4\",\"static\":false,\"componentName\":\"HardwareResourceChart\",\"moved\":false},{\"x\":0,\"y\":12,\"w\":8,\"h\":11,\"i\":\"5\",\"static\":false,\"componentName\":\"SystemServices\",\"moved\":false},{\"x\":8,\"y\":12,\"w\":4,\"h\":11,\"i\":\"6\",\"static\":false,\"componentName\":\"SystemBaseInfo\",\"moved\":false},{\"x\":0,\"y\":0,\"w\":8,\"h\":12,\"i\":\"1732005468034\",\"static\":false,\"componentName\":\"NetFlowChart\",\"moved\":false},{\"x\":0,\"y\":23,\"w\":12,\"h\":12,\"i\":\"1732005471937\",\"static\":false,\"componentName\":\"SystemDataStatisticsChart\",\"moved\":false}]", out.Data["layout"])
 			},
 		},
 	}

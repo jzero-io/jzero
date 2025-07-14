@@ -1,6 +1,7 @@
 package jparser
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -120,6 +121,15 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 					Comments:    route.AtDoc.Text,
 					WrapCodeMsg: cast.ToBool(apiSpec.Info.Properties["wrapCodeMsg"]),
 				}
+
+				if _, ok := apiSpec.Info.Properties["wrapCodeMsgMapping"]; ok {
+					var wrapCodeMsgMapping vars.WrapCodeMsgMapping
+					_ = json.Unmarshal([]byte(apiSpec.Info.Properties["wrapCodeMsgMapping"]), &wrapCodeMsgMapping)
+					httpInterface.WrapCodeMsgMapping = &wrapCodeMsgMapping
+				} else {
+					httpInterface.WrapCodeMsgMapping = nil
+				}
+
 				if route.RequestType != nil {
 					httpInterface.Request = &vars.Request{
 						Name:         stringx.FirstUpper(route.RequestType.Name()),

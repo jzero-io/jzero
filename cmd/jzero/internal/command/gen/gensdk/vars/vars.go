@@ -32,7 +32,14 @@ type HTTPInterface struct {
 	IsStreamClient bool
 	IsStreamServer bool
 
-	WrapCodeMsg bool
+	WrapCodeMsg        bool
+	WrapCodeMsgMapping *WrapCodeMsgMapping
+}
+
+type WrapCodeMsgMapping struct {
+	Code string
+	Data string
+	Msg  string
 }
 
 type Request struct {

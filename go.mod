@@ -6,8 +6,10 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/a8m/envsubst v1.4.3
 	github.com/alicebob/miniredis/v2 v2.35.0
+	github.com/bitly/go-simplejson v0.5.1
 	github.com/eddieowens/opts v0.1.0
 	github.com/fsnotify/fsnotify v1.9.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/huandu/go-sqlbuilder v1.35.1
 	github.com/jaronnie/genius v0.5.2
 	github.com/json-iterator/go v1.1.12
@@ -18,6 +20,7 @@ require (
 	github.com/spf13/cast v1.9.2
 	github.com/stretchr/testify v1.10.0
 	github.com/zeromicro/go-zero v1.8.4
+	google.golang.org/protobuf v1.36.5
 )
 
 require (
@@ -98,7 +101,6 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240711142825-46eb208f015d // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
 	google.golang.org/grpc v1.65.0 // indirect
-	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

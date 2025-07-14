@@ -3,7 +3,7 @@
 package {{.Package}}
 
 import (
-	"github.com/jzero-io/restc"
+	"github.com/jzero-io/jzero/core/restc"
 
 	{{range $v := .Resources}}{{$v | ToCamel | lower}} "{{$.Module}}/typed/{{$v | lower}}"
 	{{end}}

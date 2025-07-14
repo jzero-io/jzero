@@ -7,7 +7,7 @@ package {{.Resource | base | lower}}
 import (
     "context"
 
-    "github.com/jzero-io/restc"
+    "github.com/jzero-io/jzero/core/restc"
 
     {{range $v := .GoImportPaths | uniq}}"{{$v}}"
     {{end}}
@@ -50,9 +50,14 @@ func New{{.Resource | ToCamel | FirstUpper}}(c restc.Client) {{.Resource | First
 		).
 		{{ if or (eq $v.Method "GET") (eq $v.Method "DELETE") }}{{else}}Body({{if eq $v.Request.Body ""}}nil{{else if eq $v.Request.Body "*"}}param{{else if or (ne $v.Method "GET") (ne $v.Method "DELETE")}}param.{{$v.Request.RealBodyName}}{{else}}nil{{end}}).{{end}}
 		Do(ctx).
-		Into(&resp, &restc.IntoOptions{
-            WrapCodeMsg: {{$v.WrapCodeMsg}},
-		})
+		Into(&resp, {{if $v.WrapCodeMsg}}&restc.IntoOptions{
+			WrapCodeMsg:        true,
+			{{if $v.WrapCodeMsgMapping}}WrapCodeMsgMapping: restc.WrapCodeMsgMapping{
+				Code: "{{$v.WrapCodeMsgMapping.Code}}",
+				Data: "{{$v.WrapCodeMsgMapping.Data}}",
+				Msg:  "{{$v.WrapCodeMsgMapping.Msg}}",
+			},{{end}}
+		}{{else}}nil{{end}})
 
 	if err != nil {
 		return nil, err
