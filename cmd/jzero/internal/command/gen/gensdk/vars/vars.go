@@ -1,8 +1,6 @@
 package vars
 
 type (
-	Scope string
-
 	Resource string
 
 	ResourceHTTPInterfaceMap = map[Resource][]*HTTPInterface

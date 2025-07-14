@@ -17,15 +17,18 @@ var (
     _ = context.Background()
 )
 
-type {{.Resource | FirstUpper| ToCamel}} interface {
-	{{range $k, $v := .HTTPInterfaces}}// {{$v.Method}}:{{$v.URL}} {{.Comments}}
-	{{template "methodDefine" $v}}
-	{{end}}
-}
+type (
+    {{.Resource | FirstUpper| ToCamel}} interface {
+	    {{range $k, $v := .HTTPInterfaces}}// {{$v.MethodName}} {{.Comments}}
+	    // {{$v.Method}}:{{$v.URL}}
+	    {{template "methodDefine" $v}}
+	    {{end}}
+    }
 
-type {{.Resource | ToCamel | FirstLower}}Client struct {
-	client restc.Client
-}
+    {{.Resource | ToCamel | FirstLower}}Client struct {
+    	client restc.Client
+    }
+)
 
 func New{{.Resource | ToCamel | FirstUpper}}(c restc.Client) {{.Resource | FirstUpper| ToCamel}} {
 	return &{{.Resource | ToCamel | FirstLower}}Client{
@@ -35,20 +38,20 @@ func New{{.Resource | ToCamel | FirstUpper}}(c restc.Client) {{.Resource | First
 
 {{range $k, $v := .HTTPInterfaces}}func (x *{{$.Resource | ToCamel | FirstLower}}Client) {{template "methodDefine" $v}} {
 	{{if or $v.IsStreamServer $v.IsStreamClient}}request := x.client.Verb("{{$v.Method}}").
-		SubPath(
+		Path(
 			"{{$v.URL}}",{{range $p := $v.PathParams}}
-			restc.PathParam{Name: "{{$p.Name}}", Value: param.{{$p.GoName}}},{{end}}
+			restc.PathParam{Name: "{{$p.Name}}", Value: in.{{$p.GoName}}},{{end}}
 		)
 	return request, nil{{else}}var resp {{$v.Response.FullName}}
 		err := x.client.Verb("{{$v.Method}}").
 		Path(
 			"{{$v.URL}}",{{range $p := $v.PathParams}}
-			restc.PathParam{Name: "{{$p.Name}}", Value: param.{{$p.GoName}}},{{end}}
+			restc.PathParam{Name: "{{$p.Name}}", Value: in.{{$p.GoName}}},{{end}}
 		).
 		Params({{if eq $v.Request.Body "*"}}{{else}}{{range $q := $v.QueryParams}}
-			restc.QueryParam{Name: "{{$q.Name}}", Value: param.{{$q.GoName}}},{{end}}{{end}}
+			restc.QueryParam{Name: "{{$q.Name}}", Value: in.{{$q.GoName}}},{{end}}{{end}}
 		).
-		{{ if or (eq $v.Method "GET") (eq $v.Method "DELETE") }}{{else}}Body({{if eq $v.Request.Body ""}}nil{{else if eq $v.Request.Body "*"}}param{{else if or (ne $v.Method "GET") (ne $v.Method "DELETE")}}param.{{$v.Request.RealBodyName}}{{else}}nil{{end}}).{{end}}
+		{{ if or (eq $v.Method "GET") (eq $v.Method "DELETE") }}{{else}}Body({{if eq $v.Request.Body ""}}nil{{else if eq $v.Request.Body "*"}}in{{else if or (ne $v.Method "GET") (ne $v.Method "DELETE")}}in.{{$v.Request.RealBodyName}}{{else}}nil{{end}}).{{end}}
 		Do(ctx).
 		Into(&resp, {{if $v.WrapCodeMsg}}&restc.IntoOptions{
 			WrapCodeMsg:        true,

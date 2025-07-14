@@ -81,7 +81,7 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 						Body:         rule.Body,
 						Type:         "proto",
 						Package:      strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./"),
-						FullName:     fmt.Sprintf("param *%s.%s", filepath.Base(strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./")), stringx.FirstUpper(method.GetInputType().GetName())),
+						FullName:     fmt.Sprintf("in *%s.%s", filepath.Base(strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./")), stringx.FirstUpper(method.GetInputType().GetName())),
 					}
 					httpInterface.Response = &vars.Response{
 						Package: strings.TrimPrefix(*service.GetFile().GetFileOptions().GoPackage, "./"),
@@ -136,11 +136,11 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 						RealBodyName: stringx.FirstUpper(route.RequestType.Name()),
 						Package:      "types",
 						Type:         "api",
-						FullName:     fmt.Sprintf("param %s.%s", "types", stringx.FirstUpper(route.RequestType.Name())),
+						FullName:     fmt.Sprintf("in *%s.%s", "types", stringx.FirstUpper(route.RequestType.Name())),
 					}
 					if goPackage, ok := apiSpec.Info.Properties["go_package"]; ok && goPackage != "" {
 						httpInterface.Request.Package = goPackage
-						httpInterface.Request.FullName = fmt.Sprintf("param %s.%s", strings.ToLower(strings.ReplaceAll(apiSpec.Info.Properties["go_package"], "/", "")), stringx.FirstUpper(route.RequestType.Name()))
+						httpInterface.Request.FullName = fmt.Sprintf("in *%s.%s", strings.ToLower(strings.ReplaceAll(apiSpec.Info.Properties["go_package"], "/", "")), stringx.FirstUpper(route.RequestType.Name()))
 					}
 
 					if strings.ToUpper(route.Method) == http.MethodPost || strings.ToUpper(route.Method) == http.MethodPut || strings.ToUpper(route.Method) == http.MethodPatch {
