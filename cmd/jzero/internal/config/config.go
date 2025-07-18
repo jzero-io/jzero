@@ -325,7 +325,7 @@ func TraverseCommands(prefix string, cmd *cobra.Command) error {
 				if h, ok := afterHooks.(string); ok {
 					return hooks.Run(cmd, "After", newPrefix, strings.Split(h, ","))
 				}
-				if _, ok := afterHooks.([]string); ok {
+				if _, ok := afterHooks.([]any); ok {
 					return hooks.Run(cmd, "After", newPrefix, viper.GetStringSlice(fmt.Sprintf("%s.hooks.after", newPrefix)))
 				}
 			}
