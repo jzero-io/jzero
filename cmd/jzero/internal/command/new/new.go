@@ -110,7 +110,7 @@ var newCmd = &cobra.Command{
 			} else {
 				_ = os.RemoveAll(fp)
 				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), fp)
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(config.C.New.RemoteTimeout))
 				defer cancel()
 
 				if strings.HasPrefix(config.C.New.Remote, "git@") {
@@ -209,6 +209,7 @@ func GetCommand() *cobra.Command {
 	newCmd.Flags().StringP("frame", "", "", "set frame")
 	newCmd.Flags().StringP("style", "", "gozero", "set style")
 	newCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
+	newCmd.Flags().IntP("remote-timeout", "", 30, "remote templates repo timeout")
 	newCmd.Flags().StringP("remote-auth-username", "", "", "remote templates repo auth username")
 	newCmd.Flags().StringP("remote-auth-password", "", "", "remote templates repo auth password")
 	newCmd.Flags().StringP("branch", "b", "", "use remote template repo branch")

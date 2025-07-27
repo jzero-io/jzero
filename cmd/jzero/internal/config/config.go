@@ -73,6 +73,7 @@ type NewConfig struct {
 	Serverless           bool     `mapstructure:"serverless"`            // 是否是 serverless 插件
 	Output               string   `mapstructure:"output"`                // 输出到的目录
 	Remote               string   `mapstructure:"remote"`                // 远程仓库地址
+	RemoteTimeout        int      `mapstructure:"remote-timeout"`        // 远程仓库超时时间, 单位秒
 	Cache                bool     `mapstructure:"cache"`                 // 当使用远程仓库时是否使用缓存
 	Gen                  bool     `mapstructure:"gen"`                   // 新建项目后是否自动执行 gen 命令
 	RemoteAuthUsername   string   `mapstructure:"remote-auth-username"`  // 远程仓库的认证用户名
