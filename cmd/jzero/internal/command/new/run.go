@@ -173,7 +173,7 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 				for _, v := range jn.nc.IgnoreExtra {
 					ignore = append(ignore, filepath.ToSlash(v))
 				}
-				return lo.Contains(ignore, rel)
+				return lo.Contains(ignore, filepath.ToSlash(string(stylePathBytes)))
 			}(),
 		})
 	}
