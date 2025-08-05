@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
@@ -108,9 +109,10 @@ func checkWrite(path string, bytes []byte) error {
 
 	// 增加可执行权限
 	if lo.Contains(config.C.New.ExecutableExtensions, filepath.Ext(path)) {
-		return os.WriteFile(path, bytesFormat, 0o744)
+		logx.Debugf("Write executable file: %s", path)
+		return os.WriteFile(path, bytesFormat, 0755)
 	}
-	return os.WriteFile(path, bytesFormat, 0o644)
+	return os.WriteFile(path, bytesFormat, 0644)
 }
 
 func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
