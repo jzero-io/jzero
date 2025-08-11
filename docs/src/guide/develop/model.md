@@ -344,38 +344,39 @@ rest:
     port: 8001
     timeout: 20000
 
-databaseType: "mysql"
-databaseUrl: "root:123456@tcp(127.0.0.1:3306)/jzeroadmin?charset=utf8mb4&parseTime=True&loc=Local"
+sqlx:
+    driverName: "mysql"
+    dataSource: "root:123456@tcp(127.0.0.1:3306)/jzeroadmin?charset=utf8mb4&parseTime=True&loc=Local"
 
 redis:
     host: "127.0.0.1:6379"
     type: "node"
 
-cache:
-    type: "redis"
+cacheType: "redis"
 ```
 
 @tab internal/config/config.go
+
 ```go {4,5,13-19}
 package config
 
 import (
-	"github.com/jzero-io/jzero/core/stores/modelx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest"
 )
 
 type Config struct {
 	// rest 服务配置
-	Rest   RestConf
+	Rest RestConf
 
 	// 数据库配置
-	modelx.ModelConf
+	Sqlx sqlx.SqlConf
 	// 缓存配置
 	// 缓存类型
-	CacheType string          `json:",default=local"`
+	CacheType string `json:",default=local"`
 	// redis 配置
-	Redis     redis.RedisConf `json:",optional"`
+	Redis redis.RedisConf `json:",optional"`
 }
 
 type RestConf struct {
@@ -416,7 +417,7 @@ func NewServiceContext(cc configurator.Configurator[config.Config], route2Code f
 		Config: cc,
 	}
 	svcCtx.SetConfigListener()
-	svcCtx.SqlxConn = modelx.MustSqlConn(svcCtx.MustGetConfig().ModelConf)
+	svcCtx.SqlxConn = sqlx.MustNewConn(svcCtx.MustGetConfig().Sqlx)
 	if svcCtx.MustGetConfig().CacheType == "local" {
 		svcCtx.Cache = cache.NewSyncMap(errors.New("cache not found"))
 	} else {
