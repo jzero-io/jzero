@@ -9,6 +9,7 @@ jzero 根据可描述语言生成代码:
 * desc/proto: proto 可描述语言, 生成 grpc 服务端/客户端代码. [使用文档](develop/proto.md)
 * desc/sql: sql 可描述语言, 生成数据库代码. [使用文档](develop/model.md)
 * model datasource: 通过远程数据源生成数据库代码. [使用文档](develop/model.md)
+* mongo: 通过指定 mongo type 生成 mongo 代码. [使用文档](develop/mongo.md)
 
 ## 生成代码
 

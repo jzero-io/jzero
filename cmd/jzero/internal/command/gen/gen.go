@@ -157,6 +157,15 @@ func GetCommand() *cobra.Command {
 		genCmd.Flags().StringSliceP("model-cache-table", "", []string{"*"}, "goctl model cache tables")
 		genCmd.Flags().StringP("model-cache-prefix", "", "cache", "goctl model cache prefix")
 		genCmd.Flags().BoolP("model-create-table-ddl", "", false, "is generate create table ddl, only datasource mode takes effective")
+
+		// mongo type strings
+		genCmd.Flags().StringSliceP("mongo-type", "", []string{}, "mongo type name")
+		// mongo cache bool
+		genCmd.Flags().BoolP("mongo-cache", "", false, " Generate code with cache prefix [optional]")
+		// mongo cache prefix
+		genCmd.Flags().StringP("mongo-cache-prefix", "", "cache", "mongo cache prefix")
+		// mongo cache type
+		genCmd.Flags().StringSliceP("mongo-cache-type", "", []string{}, "mongo cache type names to enable caching")
 	}
 
 	{

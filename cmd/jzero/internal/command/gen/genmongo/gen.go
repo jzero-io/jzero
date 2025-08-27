@@ -1,0 +1,118 @@
+package genmongo
+
+import (
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/color"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+)
+
+type JzeroMongo struct {
+	Module string
+}
+
+func (jm *JzeroMongo) Gen() error {
+	if len(config.C.Gen.MongoType) == 0 {
+		return nil
+	}
+
+	var goctlHome string
+
+	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "mongo")) {
+		tempDir, err := os.MkdirTemp(os.TempDir(), "")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tempDir)
+		err = embeded.WriteTemplateDir(filepath.Join("go-zero", "mongo"), filepath.Join(tempDir, "mongo"))
+		if err != nil {
+			return err
+		}
+		goctlHome = tempDir
+	} else {
+		goctlHome = filepath.Join(config.C.Gen.Home, "go-zero")
+	}
+	logx.Debugf("goctl_home = %s", goctlHome)
+
+	fmt.Printf("%s to generate mongo model code from types.\n", color.WithColor("Start", color.FgGreen))
+
+	for _, mongoType := range config.C.Gen.MongoType {
+		fmt.Printf("%s mongo type %s\n", color.WithColor("Using", color.FgGreen), mongoType)
+
+		// Support MutiModel with dot notation like "ntls_log.user"
+		var typeName string
+		if strings.Contains(mongoType, ".") {
+			typeName = filepath.Join(strings.Split(mongoType, ".")...)
+		} else {
+			typeName = mongoType
+		}
+
+		modelDir := filepath.Join("internal", "mongo", strings.ToLower(typeName))
+
+		// For MutiModel, only pass the part after the dot to goctl
+		var goctlType string
+		if strings.Contains(mongoType, ".") {
+			goctlType = strings.Split(mongoType, ".")[1] // Only pass the part after the dot
+		} else {
+			goctlType = mongoType
+		}
+
+		args := []string{
+			"model", "mongo",
+			"-t", goctlType,
+			"--dir", modelDir,
+			"--home", goctlHome,
+			"--style", config.C.Gen.Style,
+		}
+
+		// Check if cache should be enabled for this specific mongo type
+		enableCache := config.C.Gen.MongoCache
+		if len(config.C.Gen.MongoCacheType) > 0 {
+			// If MongoCacheType is specified, only enable cache for types in the list
+			enableCache = false
+			for _, cacheType := range config.C.Gen.MongoCacheType {
+				if strings.EqualFold(cacheType, mongoType) {
+					enableCache = true
+					break
+				}
+			}
+		}
+
+		if enableCache {
+			args = append(args, "--cache=true")
+			if config.C.Gen.MongoCachePrefix != "" {
+				args = append(args, "-p", config.C.Gen.MongoCachePrefix)
+			}
+		} else {
+			args = append(args, "--cache=false")
+		}
+
+		// easy 模式
+		args = append(args, fmt.Sprintf("--easy=%v", true))
+
+		cmd := exec.Command("goctl", args...)
+		logx.Debug(cmd.String())
+		resp, err := cmd.CombinedOutput()
+		if err != nil {
+			return errors.Errorf("gen mongo model code meet error. Err: %s:%s", err.Error(), resp)
+		}
+	}
+
+	err := jm.GenRegister(config.C.Gen.MongoType)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(color.WithColor("Done", color.FgGreen))
+
+	return nil
+}

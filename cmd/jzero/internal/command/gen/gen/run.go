@@ -15,6 +15,7 @@ import (
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genapi"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genmodel"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genmongo"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genrpc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
@@ -72,6 +73,14 @@ func Run() error {
 		Module: module,
 	}
 	err = jzeroRpc.Gen()
+	if err != nil {
+		return err
+	}
+
+	jzeroMongo := genmongo.JzeroMongo{
+		Module: module,
+	}
+	err = jzeroMongo.Gen()
 	if err != nil {
 		return err
 	}

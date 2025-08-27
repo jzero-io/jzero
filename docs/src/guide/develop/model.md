@@ -53,6 +53,10 @@ gen:
   model-ignore-columns: ["create_time", "update_time"]
 ```
 
+```shell
+jzero gen
+```
+
 生成的 `internal/model/model.go` 如下:
 
 ```go
@@ -110,6 +114,11 @@ desc/sql
    └── manage_user.sql
    └── manage_user_role.sql
    └── jzeroadmin_log.operate_log.sql
+```
+
+
+```shell
+jzero gen
 ```
 
 生成的 `internal/model/model.go` 如下:
@@ -195,6 +204,11 @@ gen:
     - manage_user_role
 ```
 
+
+```shell
+jzero gen
+```
+
 生成的 `internal/model/model.go` 与 `基于本地 sql ddl 文件` 生成的代码一致
 
 jzero 支持多数据源, 通过在 model-datasource-table 中指定 schema 即可
@@ -229,6 +243,11 @@ gen:
     - jzeroadmin_log.operate_log
 ```
 
+
+```shell
+jzero gen
+```
+
 生成的 `internal/model/model.go` 与 `基于本地 sql ddl 文件` 生成的代码一致
 
 ### postgres
@@ -256,6 +275,11 @@ gen:
     - manage_role_menu
     - manage_user
     - manage_user_role
+```
+
+
+```shell
+jzero gen
 ```
 
 生成的 `internal/model/model.go` 与 mysql driver 一致
@@ -290,6 +314,11 @@ gen:
     - manage_user
     - manage_user_role
     - jzeroadmin_log.operate_log
+```
+
+
+```shell
+jzero gen
 ```
 
 生成的 `internal/model/model.go` 与 mysql driver 一致

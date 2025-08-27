@@ -120,6 +120,13 @@ type GenConfig struct {
 	ModelCachePrefix     string   `mapstructure:"model-cache-prefix"`
 	ModelCreateTableDDL  bool     `mapstructure:"model-create-table-ddl"`
 
+	// mongo flags
+	MongoType []string `mapstructure:"mongo-type"`
+
+	MongoCache       bool     `mapstructure:"mongo-cache"`
+	MongoCachePrefix string   `mapstructure:"mongo-cache-prefix"`
+	MongoCacheType   []string `mapstructure:"mongo-cache-type"`
+
 	// Sub command
 	Sdk GenSdkConfig `mapstructure:"sdk"`
 
