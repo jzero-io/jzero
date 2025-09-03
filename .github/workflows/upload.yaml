@@ -26,10 +26,8 @@ jobs:
         run: |
           cd cmd/jzero
           go install
-          jzero check
           go install github.com/jaronnie/grum@latest
           go install github.com/jzero-io/gorename@latest
-          go install github.com/zeromicro/go-zero/tools/goctl@v1.8.4-alpha
 
       - name: upload examples
         run: |

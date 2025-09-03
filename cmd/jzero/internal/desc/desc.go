@@ -5,14 +5,33 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/go-version"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
+	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
+
+func GetFrameType() string {
+	// Check for rpc frame
+	if _, err := os.Stat("desc/proto"); err == nil {
+		return "rpc"
+	}
+
+	// Check for api frame
+	if _, err := os.Stat("desc/api"); err == nil {
+		apiFiles, err := FindApiFiles("desc/api")
+		if err == nil && len(apiFiles) > 0 {
+			return "api"
+		}
+	}
+
+	return ""
+}
 
 func getProtoDir(protoDirPath string) ([]os.DirEntry, error) {
 	protoDir, err := os.ReadDir(protoDirPath)
@@ -220,4 +239,89 @@ func GetProtoFrameEtcFilename(source, style string) string {
 		return ""
 	}
 	return filename + ".yaml"
+}
+
+// CheckToolVersion checks if the required tool version matches the minimum requirement
+func CheckToolVersion(toolName, minVersionStr string) error {
+	// Get tool version
+	var cmd string
+	switch toolName {
+	case "goctl":
+		cmd = "goctl -v"
+	case "protoc":
+		cmd = "protoc --version"
+	case "protoc-gen-openapiv2":
+		cmd = "protoc-gen-openapiv2 --version"
+	case "protoc-gen-doc":
+		cmd = "protoc-gen-doc --version"
+	default:
+		return errors.Errorf("unsupported tool: %s", toolName)
+	}
+
+	resp, err := execx.Run(cmd, "")
+	if err != nil {
+		return errors.Errorf("failed to get %s version: %v", toolName, err)
+	}
+
+	// Parse version from response
+	var currentVersionStr string
+	parts := strings.Split(resp, " ")
+
+	switch toolName {
+	case "goctl":
+		if len(parts) >= 3 {
+			currentVersionStr = parts[2]
+		}
+	case "protoc":
+		if len(parts) >= 2 {
+			currentVersionStr = strings.TrimSpace(parts[1])
+		}
+	default:
+		if len(parts) >= 1 {
+			currentVersionStr = strings.TrimSpace(parts[0])
+		}
+	}
+
+	if currentVersionStr == "" {
+		return errors.Errorf("failed to parse %s version from: %s", toolName, resp)
+	}
+
+	// Compare versions
+	currentVersion, err := version.NewVersion(currentVersionStr)
+	if err != nil {
+		return errors.Errorf("invalid current version %s for %s: %v", currentVersionStr, toolName, err)
+	}
+
+	minVersion, err := version.NewVersion(minVersionStr)
+	if err != nil {
+		return errors.Errorf("invalid minimum version %s for %s: %v", minVersionStr, toolName, err)
+	}
+
+	if currentVersion.LessThan(minVersion) {
+		return errors.Errorf("%s version %s is less than required version %s", toolName, currentVersionStr, minVersionStr)
+	}
+
+	return nil
+}
+
+// CheckFrameToolVersions checks version compatibility for frame-specific tools
+func CheckFrameToolVersions(frameType string) error {
+	// Common tool version requirements
+	if err := CheckToolVersion("goctl", "1.7.0"); err != nil {
+		return err
+	}
+
+	// Frame-specific tool requirements
+	switch frameType {
+	case "rpc":
+		if err := CheckToolVersion("protoc", "3.19.0"); err != nil {
+			return err
+		}
+		// Note: protoc-gen-openapiv2 and protoc-gen-doc might not have --version flags
+		// so we skip version check for now, just check if they exist
+	case "api":
+		// API frame only needs goctl
+	}
+
+	return nil
 }

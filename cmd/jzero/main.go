@@ -27,6 +27,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/upgrade"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
 	mcppkg "github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mcp"
@@ -44,7 +45,7 @@ var (
 
 // ldflags
 var (
-	Version = "0.50.0"
+	Version = "0.50.1"
 	Commit  string
 	Date    string
 )
@@ -66,6 +67,15 @@ var rootCmd = &cobra.Command{
 	Short: `Used to create project by templates and generate server/client code by api/proto/sql file.
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// Run environment check first
+		if cmd.Name() != check.GetCommand().Use {
+			frameType := desc.GetFrameType()
+			if frameType != "" {
+				if err := check.RunCheck(); err != nil {
+					cobra.CheckErr(err)
+				}
+			}
+		}
 		return hooks.Run(cmd, "Before", "global", config.C.Hooks.Before)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
