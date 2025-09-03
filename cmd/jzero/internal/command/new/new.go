@@ -23,9 +23,11 @@ import (
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
+	"github.com/jzero-io/jzero/cmd/jzero/internal/command/check"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gen"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
@@ -170,6 +172,13 @@ var newCmd = &cobra.Command{
 				cobra.CheckErr(err)
 			}
 		}()
+
+		frameType := desc.GetFrameType()
+		if frameType != "" {
+			if err := check.RunCheck(false); err != nil {
+				return err
+			}
+		}
 
 		// special dir for jzero
 		if !filex.DirExists("desc") {
