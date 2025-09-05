@@ -71,7 +71,7 @@ var rootCmd = &cobra.Command{
 		if cmd.Name() != check.GetCommand().Use {
 			frameType := desc.GetFrameType()
 			if frameType != "" {
-				if err := check.RunCheck(); err != nil {
+				if err := check.RunCheck(false); err != nil {
 					cobra.CheckErr(err)
 				}
 			}

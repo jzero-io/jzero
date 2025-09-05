@@ -175,7 +175,7 @@ var newCmd = &cobra.Command{
 
 		frameType := desc.GetFrameType()
 		if frameType != "" {
-			if err := check.RunCheck(); err != nil {
+			if err := check.RunCheck(false); err != nil {
 				return err
 			}
 		}
