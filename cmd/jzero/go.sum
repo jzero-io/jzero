@@ -78,8 +78,6 @@ github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHk
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsgo/fst v0.0.5 h1:c12J39shorNiS3X9QsK6sg/KUzw8FOA3IoKPb/upj7E=
 github.com/fsgo/fst v0.0.5/go.mod h1:vNB0la0LICDwsMuwD7KR8NNDnslYyH/1x1+fOamXra8=
-github.com/fsgo/go_fmt v0.6.4 h1:knqgIJOZ7l6SW8+fDze0ku6mDCezrPf3sNawUamWcSM=
-github.com/fsgo/go_fmt v0.6.4/go.mod h1:Z0lh/s41Vgh2pUtPqiffKTDjlTQ4yQYifO6crjUDdFM=
 github.com/fsnotify/fsnotify v1.9.0 h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k=
 github.com/fsnotify/fsnotify v1.9.0/go.mod h1:8jBTzvmWwFyi3Pb8djgCCO5IBqzKJ/Jwo8TRcHyHii0=
 github.com/gliderlabs/ssh v0.3.8 h1:a4YXD1V7xMF9g5nTkdfnja3Sxy1PVDCj1Zg4Wb8vY6c=
@@ -153,6 +151,8 @@ github.com/jhump/protoreflect v1.17.0 h1:qOEr613fac2lOuTgWN4tPAtLL7fUSbuJL5X5Xum
 github.com/jhump/protoreflect v1.17.0/go.mod h1:h9+vUUL38jiBzck8ck+6G/aeMX8Z4QUY/NiJPwPNi+8=
 github.com/jzero-io/desc v1.1.0 h1:V6PvGnYWxfR24iroaJ8R/jlChiBBQ2hJdxhHKkSvAQY=
 github.com/jzero-io/desc v1.1.0/go.mod h1:gav1fZ49+rsEjT/5MUNp6ueyNFuX0lDKGyzIM6NrB+E=
+github.com/jzero-io/go_fmt v0.0.0-20250905015347-1a45352494b7 h1:XamNaWUxHlOd7ytrgR1gwR2O0vo02gMKaTroXLXrh0w=
+github.com/jzero-io/go_fmt v0.0.0-20250905015347-1a45352494b7/go.mod h1:Wupl/J9DdDywVAOC5ExsbfkET0aYuNLhZPlpBF8+OnE=
 github.com/kevinburke/ssh_config v1.2.0 h1:x584FjTGwHzMwvHx18PXxbBVzfnxogHaAReU4gf13a4=
 github.com/kevinburke/ssh_config v1.2.0/go.mod h1:CT57kijsi8u/K/BOFA39wgDQJ9CxiF4nAY/ojJ6r6mM=
 github.com/klauspost/compress v1.17.11 h1:In6xLpyWOi1+C7tXUUWv2ot1QvBjxevKAaI6IXrJmUc=

@@ -5,7 +5,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/fsgo/go_fmt/gofmtapi"
+	"github.com/jzero-io/go_fmt/gofmtapi"
 	"github.com/zeromicro/go-zero/core/logx"
 	"golang.org/x/sync/errgroup"
 

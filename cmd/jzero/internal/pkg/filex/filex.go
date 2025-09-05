@@ -1,7 +1,9 @@
 package filex
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,7 +12,7 @@ import (
 // FileExists check file exist
 func FileExists(path string) bool {
 	info, err := os.Stat(path)
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		return false
 	}
 	return !info.IsDir()
@@ -18,7 +20,7 @@ func FileExists(path string) bool {
 
 func DirExists(path string) bool {
 	info, err := os.Stat(path)
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		return false
 	}
 	return info.IsDir()
@@ -33,7 +35,7 @@ func IsYamlFile(path string) bool {
 // EnsureDirExists create dir with check
 func EnsureDirExists(dirPath string) error {
 	info, err := os.Stat(dirPath)
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		err = os.MkdirAll(dirPath, 0o755)
 		if err != nil {
 			return fmt.Errorf("failed to create directory: %w", err)
