@@ -7,19 +7,18 @@ package check
 
 import (
 	"archive/zip"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/downloader"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	"github.com/zeromicro/go-zero/tools/goctl/util/env"
 	"github.com/zeromicro/go-zero/tools/goctl/util/zipx"
-	"github.com/zeromicro/go-zero/tools/goctl/vars"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 )
@@ -110,11 +109,12 @@ func RunCheck() error {
 }
 
 var url = map[string]string{
-	"linux_32":   "https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_32.zip",
-	"linux_64":   "https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip",
-	"darwin":     "https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-osx-x86_64.zip",
-	"windows_32": "https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win32.zip",
-	"windows_64": "https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip",
+	"linux_amd64":   "https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-linux-x86_64.zip",
+	"linux_arm64":   "https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-linux-aarch_64.zip",
+	"darwin_amd64":  "https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-osx-x86_64.zip",
+	"darwin_arm64":  "https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-osx-aarch_64.zip",
+	"windows_amd64": "https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-win64.zip",
+	"windows_arm64": "https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-win64.zip",
 }
 
 const (
@@ -123,19 +123,11 @@ const (
 )
 
 func installProtoc() error {
-	goos := runtime.GOOS
 	tempFile := filepath.Join(os.TempDir(), ZipFileName)
-	bit := 32 << (^uint(0) >> 63)
 	var downloadUrl string
-	switch goos {
-	case vars.OsMac:
-		downloadUrl = url[vars.OsMac]
-	case vars.OsWindows:
-		downloadUrl = url[fmt.Sprintf("%s_%d", vars.OsWindows, bit)]
-	case vars.OsLinux:
-		downloadUrl = url[fmt.Sprintf("%s_%d", vars.OsLinux, bit)]
-	default:
-		return fmt.Errorf("unsupport OS: %q", goos)
+	downloadUrl = url[fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)]
+	if downloadUrl == "" {
+		return errors.Errorf("not support platform %s_%s", runtime.GOOS, runtime.GOARCH)
 	}
 
 	err := downloader.Download(downloadUrl, tempFile)

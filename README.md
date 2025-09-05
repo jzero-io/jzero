@@ -20,7 +20,6 @@
 * [动态配置特性](https://docs.jzero.io/guide/config/dynamic_conf.html), 可动态修改服务端配置, 无需重启服务端
 * 实现了 jzero mcp server, 可在 mcp client 对话框中调用 jzero 工具生成代码
 * 同一套代码动态能适配多数据库类型
-* 基于 go1.24 tool 特性, 固定每个项目中使用的 go 工具版本, 加强项目稳定性
 
 中文 | [ENGLISH](README-EN.md)
 
