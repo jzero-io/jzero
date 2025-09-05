@@ -27,7 +27,7 @@ jobs:
           cache: npm
           cache-dependency-path: docs/pnpm-lock.yaml
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: '1.24.3'
 
