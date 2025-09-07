@@ -6,112 +6,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/eddieowens/opts"
 	"github.com/zeromicro/go-zero/rest"
 
 	"github.com/jzero-io/jzero/core/templatex"
 )
 
-type Opts func(*swaggerConfig)
-
-// SwaggerOpts configures the Doc middlewares.
-type swaggerConfig struct {
-	// SwaggerPath the path to find the spec for
-	SwaggerPath string
-
-	// SwaggerHost for the js that generates the swagger ui site, defaults to: http://petstore.swagger.io/
-	SwaggerHost string
-}
-
-func RegisterRoutes(server *rest.Server, opts ...Opts) {
-	config := &swaggerConfig{
-		SwaggerPath: filepath.Join("desc", "swagger"),
-		SwaggerHost: "https://petstore.swagger.io",
-	}
-	for _, opt := range opts {
-		opt(config)
-	}
-
-	server.AddRoute(rest.Route{
-		Method:  http.MethodGet,
-		Path:    "/swagger/:path",
-		Handler: rawHandler(config),
-	})
-
-	server.AddRoute(rest.Route{
-		Method:  http.MethodGet,
-		Path:    "/swagger",
-		Handler: uiHandler(config),
-	})
-}
-
-func rawHandler(config *swaggerConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var swaggerPath string
-		err := filepath.Walk(config.SwaggerPath, func(path string, info os.FileInfo, err error) error {
-			if info.Name() == filepath.Base(r.URL.Path) {
-				swaggerPath = path
-			}
-			return nil
-		})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-
-		file, err := os.ReadFile(swaggerPath)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		_, _ = w.Write(file)
-	}
-}
-
-func uiHandler(config *swaggerConfig) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-		if strings.HasSuffix(r.URL.Path, "/") {
-			http.Redirect(rw, r, strings.TrimSuffix(r.RequestURI, "/"), 301)
-		}
-
-		swaggerJsonsPath, err := getSwaggerFiles(config.SwaggerPath)
-		if err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
-
-		uiHTML, _ := templatex.ParseTemplate(map[string]any{
-			"SwaggerHost":      config.SwaggerHost,
-			"SwaggerJsonsPath": swaggerJsonsPath,
-		}, []byte(swaggerTemplateV2))
-		_, _ = rw.Write(uiHTML)
-	}
-}
-
-func getSwaggerFiles(dir string) ([]string, error) {
-	var files []string
-
-	protoDir, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, protoFile := range protoDir {
-		if protoFile.IsDir() {
-			filenames, err := getSwaggerFiles(filepath.Join(dir, protoFile.Name()))
-			if err != nil {
-				return nil, err
-			}
-			files = append(files, filenames...)
-		} else {
-			if strings.HasSuffix(protoFile.Name(), ".json") {
-				files = append(files, filepath.Join(protoFile.Name()))
-			}
-		}
-	}
-	return files, nil
-}
-
-const swaggerTemplateV2 = `
+const defaultSwaggerTemplate = `
 	<!-- HTML for static distribution bundle build -->
 <!DOCTYPE html>
 <html lang="en">
@@ -176,3 +77,118 @@ const swaggerTemplateV2 = `
   </script>
   </body>
 </html>`
+
+type Swaggerv2Opts struct {
+	SwaggerPath     string
+	SwaggerHost     string
+	SwaggerTemplate string
+}
+
+func WithSwaggerHost(swaggerHost string) opts.Opt[Swaggerv2Opts] {
+	return func(config *Swaggerv2Opts) {
+		config.SwaggerHost = swaggerHost
+	}
+}
+
+func WithSwaggerPath(swaggerPath string) opts.Opt[Swaggerv2Opts] {
+	return func(config *Swaggerv2Opts) {
+		config.SwaggerPath = swaggerPath
+	}
+}
+
+func WithSwaggerTemplate(swaggerTemplate string) opts.Opt[Swaggerv2Opts] {
+	return func(config *Swaggerv2Opts) {
+		config.SwaggerTemplate = swaggerTemplate
+	}
+}
+
+func (opts Swaggerv2Opts) DefaultOptions() Swaggerv2Opts {
+	return Swaggerv2Opts{
+		SwaggerPath:     filepath.Join("desc", "swagger"),
+		SwaggerHost:     "https://petstore.swagger.io",
+		SwaggerTemplate: defaultSwaggerTemplate,
+	}
+}
+
+func RegisterRoutes(server *rest.Server, op ...opts.Opt[Swaggerv2Opts]) {
+	o := opts.DefaultApply(op...)
+
+	server.AddRoute(rest.Route{
+		Method:  http.MethodGet,
+		Path:    "/swagger/:path",
+		Handler: rawHandler(o),
+	})
+
+	server.AddRoute(rest.Route{
+		Method:  http.MethodGet,
+		Path:    "/swagger",
+		Handler: uiHandler(o),
+	})
+}
+
+func rawHandler(config Swaggerv2Opts) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var swaggerPath string
+		err := filepath.Walk(config.SwaggerPath, func(path string, info os.FileInfo, err error) error {
+			if info.Name() == filepath.Base(r.URL.Path) {
+				swaggerPath = path
+			}
+			return nil
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		file, err := os.ReadFile(swaggerPath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		_, _ = w.Write(file)
+	}
+}
+
+func uiHandler(config Swaggerv2Opts) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.Redirect(rw, r, strings.TrimSuffix(r.RequestURI, "/"), 301)
+		}
+
+		swaggerJsonsPath, err := getSwaggerFiles(config.SwaggerPath)
+		if err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+		}
+
+		uiHTML, _ := templatex.ParseTemplate(map[string]any{
+			"SwaggerHost":      config.SwaggerHost,
+			"SwaggerJsonsPath": swaggerJsonsPath,
+		}, []byte(config.SwaggerTemplate))
+		_, _ = rw.Write(uiHTML)
+	}
+}
+
+func getSwaggerFiles(dir string) ([]string, error) {
+	var files []string
+
+	swaggerDir, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, swaggerFile := range swaggerDir {
+		if swaggerFile.IsDir() {
+			filenames, err := getSwaggerFiles(filepath.Join(dir, swaggerFile.Name()))
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, filenames...)
+		} else {
+			if strings.HasSuffix(swaggerFile.Name(), ".json") {
+				files = append(files, filepath.Join(swaggerFile.Name()))
+			}
+		}
+	}
+	return files, nil
+}
