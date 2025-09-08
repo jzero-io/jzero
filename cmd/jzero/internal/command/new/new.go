@@ -59,6 +59,9 @@ var newCmd = &cobra.Command{
 			}
 		}
 		if config.C.New.Serverless {
+			// serverless 插件的话忽略 ignore
+			config.C.New.Ignore = []string{}
+			config.C.New.IgnoreExtra = []string{}
 			config.C.New.Output = filepath.Join("plugins", config.C.New.Output)
 		}
 
