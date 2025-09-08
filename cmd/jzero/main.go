@@ -30,6 +30,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/plugin"
 	mcppkg "github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mcp"
 )
 
@@ -65,6 +66,10 @@ func main() {
 var rootCmd = &cobra.Command{
 	Use: "jzero",
 	Short: `Used to create project by templates and generate server/client code by api/proto/sql file.
+
+Plugin Support:
+  jzero automatically discovers and loads plugins with the prefix 'jzero-'.
+  For example, if you have 'jzero-ivm' in your PATH, you can run 'jzero ivm'.
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// Run environment check first
@@ -124,6 +129,19 @@ func init() {
 	rootCmd.AddCommand(template.GetCommand())
 	rootCmd.AddCommand(upgrade.GetCommand())
 	rootCmd.AddCommand(version.GetCommand())
+
+	loadPlugins()
+}
+
+func loadPlugins() {
+	pluginCommands, err := plugin.DiscoverPlugins()
+	if err != nil {
+		return
+	}
+	
+	for _, cmd := range pluginCommands {
+		rootCmd.AddCommand(cmd)
+	}
 }
 
 // InitConfig reads in config file and ENV variables if set.
