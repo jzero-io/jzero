@@ -17,7 +17,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.51.0
-	github.com/spf13/cast v1.9.2
+	github.com/spf13/cast v1.10.0
 	github.com/stretchr/testify v1.11.1
 	github.com/zeromicro/go-zero v1.9.0
 	google.golang.org/protobuf v1.36.8
