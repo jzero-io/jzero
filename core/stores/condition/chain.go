@@ -2,7 +2,7 @@ package condition
 
 import (
 	"github.com/eddieowens/opts"
-	"github.com/huandu/go-sqlbuilder"
+	sqlbuilder "github.com/huandu/go-sqlbuilder"
 )
 
 type Chain struct {

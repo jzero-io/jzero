@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/huandu/go-sqlbuilder"
+	sqlbuilder "github.com/huandu/go-sqlbuilder"
 )
 
 func SelectByWhereRawSql(sb *sqlbuilder.SelectBuilder, originalField string, args ...any) {

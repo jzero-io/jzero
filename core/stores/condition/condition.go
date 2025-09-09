@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/huandu/go-sqlbuilder"
+	sqlbuilder "github.com/huandu/go-sqlbuilder"
 	"github.com/spf13/cast"
 )
 

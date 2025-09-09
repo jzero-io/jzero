@@ -3,7 +3,7 @@ package condition
 import (
 	"testing"
 
-	"github.com/huandu/go-sqlbuilder"
+	sqlbuilder "github.com/huandu/go-sqlbuilder"
 	"github.com/stretchr/testify/assert"
 )
 
