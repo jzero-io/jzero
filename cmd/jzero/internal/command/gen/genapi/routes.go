@@ -134,9 +134,9 @@ func (ja *JzeroApi) genRoute2Code() ([]byte, error) {
 		return 0
 	})
 
-	template, err := templatex.ParseTemplate(filepath.Join("plugins", "api", "route2code.go.tpl"), map[string]any{
+	template, err := templatex.ParseTemplate(filepath.Join("api", "route2code.go.tpl"), map[string]any{
 		"Routes": routes,
-	}, embeded.ReadTemplateFile(filepath.Join("plugins", "api", "route2code.go.tpl")))
+	}, embeded.ReadTemplateFile(filepath.Join("api", "route2code.go.tpl")))
 	if err != nil {
 		return nil, err
 	}

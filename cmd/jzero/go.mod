@@ -7,7 +7,7 @@ require (
 	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
 	github.com/go-git/go-git/v5 v5.16.2
-	github.com/golang-migrate/migrate/v4 v4.18.3
+	github.com/golang-migrate/migrate/v4 v4.19.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2
 	github.com/hashicorp/go-version v1.7.0
 	github.com/iancoleman/orderedmap v0.3.0
@@ -15,7 +15,7 @@ require (
 	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v1.1.0
 	github.com/jzero-io/go_fmt v0.0.0-20250905015347-1a45352494b7
-	github.com/mark3labs/mcp-go v0.38.0
+	github.com/mark3labs/mcp-go v0.39.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1

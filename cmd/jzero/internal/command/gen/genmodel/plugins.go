@@ -57,12 +57,20 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 	logx.Debugf("get register table packages: %v", tablePackages)
 	logx.Debugf("get register muti models: %v", mutiModels)
 
-	template, err := templatex.ParseTemplate(filepath.Join("plugins", "model", "model.go.tpl"), map[string]any{
+	template, err := templatex.ParseTemplate(filepath.Join("model", "model.go.tpl"), map[string]any{
 		"Imports":       imports,
 		"TablePackages": tablePackages,
 		"MutiModels":    mutiModels,
 		"withCache":     config.C.Gen.ModelCache,
-	}, embeded.ReadTemplateFile(filepath.Join("plugins", "model", "model.go.tpl")))
+	}, lo.If(
+		// 兼容老版本 model 路径
+		// TODO: wait to remove
+		embeded.ReadTemplateFile(filepath.Join("plugins", "model", "model.go.tpl")) != nil,
+		embeded.ReadTemplateFile(filepath.Join("plugins", "model", "model.go.tpl"))).
+		Else(
+			embeded.ReadTemplateFile(filepath.Join("model", "model.go.tpl")),
+		),
+	)
 	if err != nil {
 		return err
 	}

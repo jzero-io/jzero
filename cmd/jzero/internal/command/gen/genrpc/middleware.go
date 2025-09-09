@@ -150,9 +150,9 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 	fmt.Printf("%s to generate internal/middleware/middleware_gen.go\n", color.WithColor("Start", color.FgGreen))
 
 	for _, v := range httpMiddlewares {
-		template, err := templatex.ParseTemplate(filepath.Join("plugins", "rpc", "middleware_http.go.tpl"), map[string]any{
+		template, err := templatex.ParseTemplate(filepath.Join("rpc", "middleware_http.go.tpl"), map[string]any{
 			"Name": v.Name,
-		}, embeded.ReadTemplateFile(filepath.Join("plugins", "rpc", "middleware_http.go.tpl")))
+		}, embeded.ReadTemplateFile(filepath.Join("rpc", "middleware_http.go.tpl")))
 		if err != nil {
 			return err
 		}
@@ -170,9 +170,9 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 	}
 
 	for _, v := range zrpcMiddlewares {
-		template, err := templatex.ParseTemplate(filepath.Join("plugins", "rpc", "middleware_zrpc.go.tpl"), map[string]any{
+		template, err := templatex.ParseTemplate(filepath.Join("rpc", "middleware_zrpc.go.tpl"), map[string]any{
 			"Name": v.Name,
-		}, embeded.ReadTemplateFile(filepath.Join("plugins", "rpc", "middleware_zrpc.go.tpl")))
+		}, embeded.ReadTemplateFile(filepath.Join("rpc", "middleware_zrpc.go.tpl")))
 		if err != nil {
 			return err
 		}
@@ -190,10 +190,10 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 		}
 	}
 
-	template, err := templatex.ParseTemplate(filepath.Join("plugins", "rpc", "middleware_gen.go.tpl"), map[string]any{
+	template, err := templatex.ParseTemplate(filepath.Join("rpc", "middleware_gen.go.tpl"), map[string]any{
 		"HttpMiddlewares": httpMiddlewares,
 		"ZrpcMiddlewares": zrpcMiddlewares,
-	}, embeded.ReadTemplateFile(filepath.Join("plugins", "rpc", "middleware_gen.go.tpl")))
+	}, embeded.ReadTemplateFile(filepath.Join("rpc", "middleware_gen.go.tpl")))
 	if err != nil {
 		return err
 	}

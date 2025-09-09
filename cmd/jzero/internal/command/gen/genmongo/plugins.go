@@ -57,12 +57,12 @@ func (jm *JzeroMongo) GenRegister(types []string) error {
 		mongoHasCache = len(config.C.Gen.MongoCacheType) > 0
 	}
 
-	template, err := templatex.ParseTemplate(filepath.Join("plugins", "mongo", "model.go.tpl"), map[string]any{
+	template, err := templatex.ParseTemplate(filepath.Join("mongo", "model.go.tpl"), map[string]any{
 		"Imports":      imports,
 		"TypePackages": typePackages,
 		"MutiModels":   mutiModels,
 		"withCache":    mongoHasCache,
-	}, embeded.ReadTemplateFile(filepath.Join("plugins", "mongo", "model.go.tpl")))
+	}, embeded.ReadTemplateFile(filepath.Join("mongo", "model.go.tpl")))
 	if err != nil {
 		return err
 	}
