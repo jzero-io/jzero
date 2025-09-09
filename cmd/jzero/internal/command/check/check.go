@@ -37,13 +37,16 @@ var toolVersionCheck = map[string]string{
 // RunCheck executes the check logic and can be called from other places
 func RunCheck(all bool) error {
 	// Detect frame type
-	frameType := desc.GetFrameType()
+	frameType, err := desc.GetFrameType()
+	if err != nil {
+		return err
+	}
 	if frameType == "" && !all {
 		return nil
 	}
 
 	// install goctl
-	_, err := env.LookPath("goctl")
+	_, err = env.LookPath("goctl")
 	if err != nil {
 		fmt.Printf("%s goctl %s\n", color.WithColor("Installing tool", color.FgGreen), toolVersionCheck["goctl"])
 		err = golang.Install(fmt.Sprintf("github.com/zeromicro/go-zero/tools/goctl@v%s", toolVersionCheck["goctl"]))
@@ -70,7 +73,7 @@ func RunCheck(all bool) error {
 	}
 
 	// Install frame-specific tools
-	if frameType == "rpc" || all {
+	if frameType == "rpc" || frameType == "gateway" || all {
 		// protoc
 		_, err = env.LookPath("protoc")
 		if err != nil {

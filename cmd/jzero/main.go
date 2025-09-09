@@ -69,10 +69,13 @@ var rootCmd = &cobra.Command{
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// Run environment check first
 		if cmd.Name() != check.GetCommand().Use {
-			frameType := desc.GetFrameType()
+			frameType, err := desc.GetFrameType()
+			if err != nil {
+				return err
+			}
 			if frameType != "" {
 				if err := check.RunCheck(false); err != nil {
-					cobra.CheckErr(err)
+					return err
 				}
 			}
 		}

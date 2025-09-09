@@ -10,6 +10,7 @@ import (
 	"github.com/rinchsan/gosimports"
 	"golang.org/x/mod/modfile"
 
+	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
@@ -75,7 +76,7 @@ func Run() error {
 		plugins[i].Module = pluginGoMod.Path
 	}
 
-	projectType, err := plugin.GetProjectType()
+	frameType, err := desc.GetFrameType()
 	if err != nil {
 		return err
 	}
@@ -83,7 +84,7 @@ func Run() error {
 	pluginsGoBytes, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("plugins", "api", "serverless_plugins.go.tpl")), map[string]any{
 		"Plugins": plugins,
 		"Module":  goMod.Path,
-	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("plugins", projectType, "serverless_plugins.go.tpl"))))
+	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("plugins", frameType, "serverless_plugins.go.tpl"))))
 	if err != nil {
 		return err
 	}

@@ -210,14 +210,14 @@ func (jr *JzeroRpc) Gen() error {
 
 		// # gen proto descriptor
 		if lo.Contains(genCodeProtoFiles, v) {
-			if IsNeedGenProtoDescriptor(jr.ProtoSpecMap[v]) {
-				if !pathx.FileExists(getProtoDescriptorPath(v)) {
-					_ = os.MkdirAll(filepath.Dir(getProtoDescriptorPath(v)), 0o755)
+			if jzerodesc.IsNeedGenProtoDescriptor(jr.ProtoSpecMap[v]) {
+				if !pathx.FileExists(jzerodesc.GetProtoDescriptorPath(v)) {
+					_ = os.MkdirAll(filepath.Dir(jzerodesc.GetProtoDescriptorPath(v)), 0o755)
 				}
 				protocCommand := fmt.Sprintf("protoc --include_imports -I%s -I%s --descriptor_set_out=%s %s",
 					config.C.ProtoDir(),
 					filepath.Join(config.C.ProtoDir(), "third_party"),
-					getProtoDescriptorPath(v),
+					jzerodesc.GetProtoDescriptorPath(v),
 					v,
 				)
 				if len(config.C.Gen.ProtoInclude) > 0 {
@@ -250,26 +250,4 @@ func (jr *JzeroRpc) Gen() error {
 		}
 	}
 	return nil
-}
-
-func getProtoDescriptorPath(protoPath string) string {
-	rel, err := filepath.Rel(filepath.Join("desc", "proto"), protoPath)
-	if err != nil {
-		return ""
-	}
-
-	return filepath.Join("desc", "pb", strings.TrimSuffix(rel, ".proto")+".pb")
-}
-
-func IsNeedGenProtoDescriptor(proto rpcparser.Proto) bool {
-	for _, ps := range proto.Service {
-		for _, rpc := range ps.RPC {
-			for _, option := range rpc.Options {
-				if option.Name == "(google.api.http)" {
-					return true
-				}
-			}
-		}
-	}
-	return false
 }
