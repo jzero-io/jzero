@@ -94,10 +94,6 @@ func (ja *JzeroApi) patchLogic(file LogicFile) error {
 		return errors.Errorf("remove suffix meet error: [%v]", err)
 	}
 
-	if err = UpdateImportedModule(f, fset, config.C.Wd(), ja.Module); err != nil {
-		return err
-	}
-
 	// change logic types
 	if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
 		if err = ja.changeLogicTypes(f, fset, file); err != nil {

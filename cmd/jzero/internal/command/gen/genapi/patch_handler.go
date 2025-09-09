@@ -9,23 +9,18 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/dave/dst"
 	"github.com/dave/dst/decorator"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
-	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-	"golang.org/x/tools/go/ast/astutil"
-
-	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 )
 
 type HandlerFile struct {
@@ -86,10 +81,6 @@ func (ja *JzeroApi) patchHandler(file HandlerFile) error {
 
 	// remove-suffix
 	if err = ja.removeHandlerSuffix(f); err != nil {
-		return err
-	}
-
-	if err = UpdateImportedModule(f, fset, config.C.Wd(), ja.Module); err != nil {
 		return err
 	}
 
@@ -264,32 +255,5 @@ func (ja *JzeroApi) compactHandler(f *dst.File, fset *token.FileSet, file Handle
 		return err
 	}
 
-	return nil
-}
-
-func UpdateImportedModule(f *ast.File, fset *token.FileSet, workDir, module string) error {
-	// 当前项目存在 go.mod 项目, 并且 go list -json -m 有多个, 即使用了 go workspace 机制
-	if pathx.FileExists("go.mod") {
-		mods, err := mod.GetGoMods(workDir)
-		if err != nil {
-			return err
-		}
-		if len(mods) > 1 {
-			rootPkg, err := golang.GetParentPackage(workDir)
-			if err != nil {
-				return err
-			}
-			imports := astutil.Imports(fset, f)
-			for _, imp := range imports {
-				for _, name := range imp {
-					if strings.HasPrefix(name.Path.Value, "\""+rootPkg) {
-						unQuote, _ := strconv.Unquote(name.Path.Value)
-						newImp := strings.Replace(unQuote, rootPkg, module, 1)
-						astutil.RewriteImport(fset, f, unQuote, newImp)
-					}
-				}
-			}
-		}
-	}
 	return nil
 }
