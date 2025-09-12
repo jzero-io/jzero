@@ -177,6 +177,9 @@ func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
 				}
 				// if ignore is dir
 				for _, v := range ignore {
+					if config.C.New.Serverless {
+						v = filepath.Join(config.C.New.Output, v)
+					}
 					if stat, err := os.Stat(v); err == nil && stat.IsDir() {
 						if filepath.ToSlash(filepath.Dir(string(stylePathBytes))) == filepath.ToSlash(v) {
 							return true

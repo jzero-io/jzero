@@ -47,6 +47,10 @@ var newCmd = &cobra.Command{
 			app = config.C.New.Name
 		}
 
+		if config.C.New.Serverless && config.C.New.Output != "" {
+			return errors.New("serverless mode not support output dir, must be in current project")
+		}
+
 		if config.C.New.Output == "" {
 			if len(args) > 0 {
 				config.C.New.Output = args[0]
@@ -58,10 +62,8 @@ var newCmd = &cobra.Command{
 				return errors.Errorf("%s already exists", config.C.New.Output)
 			}
 		}
+
 		if config.C.New.Serverless {
-			// serverless 插件的话忽略 ignore
-			config.C.New.Ignore = []string{}
-			config.C.New.IgnoreExtra = []string{}
 			config.C.New.Output = filepath.Join("plugins", config.C.New.Output)
 		}
 
