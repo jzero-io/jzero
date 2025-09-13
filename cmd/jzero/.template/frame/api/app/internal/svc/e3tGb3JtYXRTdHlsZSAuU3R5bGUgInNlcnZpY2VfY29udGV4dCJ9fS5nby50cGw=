@@ -2,20 +2,28 @@ package svc
 
 import (
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
+	{{ if has "model" .Features }}"github.com/jzero-io/jzero/core/stores/modelx"{{ end }}
 
 	"{{ .Module }}/internal/config"
 	"{{ .Module }}/internal/middleware"
+	{{ if has "model" .Features }}"{{ .Module }}/internal/model"{{ end }}
 )
 
 type ServiceContext struct {
 	Config configurator.Configurator[config.Config]
 	Middleware
+	{{ if has "model" .Features }}SqlxConn sqlx.SqlConn
+	Model model.Model{{ end }}
 }
 
 func NewServiceContext(cc configurator.Configurator[config.Config]) *ServiceContext {
     sc := &ServiceContext{
 		Config: cc,
 	}
+
+	{{ if has "model" .Features }}sc.SqlxConn = modelx.MustNewConn(sc.MustGetConfig().Sqlx.SqlConf)
+	sc.Model = model.NewModel(sc.SqlxConn){{ end }}
+
 	sc.SetConfigListener()
 	return sc
 }

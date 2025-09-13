@@ -3,11 +3,13 @@ package config
 import (
     "github.com/zeromicro/go-zero/core/logx"
     "github.com/zeromicro/go-zero/rest"
+    {{ if has "model" .Features }}"github.com/zeromicro/go-zero/core/stores/sqlx"{{ end }}
 )
 
 type Config struct {
 	Rest RestConf
 	Log  LogConf
+	{{ if has "model" .Features }}Sqlx SqlxConf{{ end }}
 
 	Banner BannerConf
 }
@@ -19,6 +21,10 @@ type RestConf struct {
 type LogConf struct {
 	logx.LogConf
 }
+
+{{ if has "model" .Features }}type SqlxConf struct {
+	sqlx.SqlConf
+}{{ end }}
 
 type BannerConf struct {
 	Text     string `json:",default=JZERO"`
