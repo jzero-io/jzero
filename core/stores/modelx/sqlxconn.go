@@ -3,10 +3,11 @@ package modelx
 import (
 	"github.com/huandu/go-sqlbuilder"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/jzero-io/jzero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+
+	"github.com/jzero-io/jzero/core/stores/cache"
 )
 
 func MustNewConn(c sqlx.SqlConf) sqlx.SqlConn {
