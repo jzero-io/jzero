@@ -101,17 +101,6 @@ func (c redisNode) TakeWithExpireCtx(ctx context.Context, val any, key string, q
 	return c.node.TakeWithExpireCtx(ctx, val, key, query)
 }
 
-func MustNewRedisConn(c redis.RedisConf) *redis.Redis {
-	return redis.MustNewRedis(redis.RedisConf{
-		Host:        c.Host,
-		Type:        c.Type,
-		Pass:        c.Pass,
-		Tls:         c.Tls,
-		NonBlock:    c.NonBlock,
-		PingTimeout: c.PingTimeout,
-	})
-}
-
 // WithExpiry returns a func to customize an Options with given expiry.
 func WithExpiry(expiry time.Duration) cache.Option {
 	return func(o *cache.Options) {
