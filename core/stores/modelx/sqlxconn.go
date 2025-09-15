@@ -3,7 +3,9 @@ package modelx
 import (
 	"github.com/huandu/go-sqlbuilder"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jzero-io/jzero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -16,6 +18,11 @@ func MustNewConn(c sqlx.SqlConf) sqlx.SqlConn {
 
 	setSqlbuilderFlavor(c.DriverName)
 	return sqlConn
+}
+
+// NewConnWithCache returns a CachedConn with a custom cache.
+func NewConnWithCache(db sqlx.SqlConn, c cache.Cache) sqlc.CachedConn {
+	return sqlc.NewConnWithCache(db, c)
 }
 
 func setSqlbuilderFlavor(driverName string) {
