@@ -2,6 +2,7 @@ package fuzzy
 
 import (
 	"encoding/json"
+	"fmt"
 	"html"
 	"testing"
 
@@ -212,6 +213,73 @@ func TestFuzzyDecodeRequest_EdgeCases(t *testing.T) {
 			_, err := Decode(tt.input, output)
 			assert.NoError(t, err)
 			tt.check(t, output)
+		})
+	}
+}
+
+func TestDecode(t *testing.T) {
+	type args struct {
+		bodyBytes []byte
+		req       any
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "test1",
+			args: args{
+				bodyBytes: []byte(`{}`),
+				req: &struct {
+					A int `json:"a"`
+				}{},
+			},
+			want: []byte(`{}`),
+			wantErr:// no error expected
+			assert.NoError,
+		},
+		{
+			name: "test2",
+			args: args{
+				bodyBytes: []byte(`{"b":{"d":""}}`),
+				req: &struct {
+					A int `json:"a"`
+					B struct {
+						C int    `json:"c"`
+						D string `json:"d"`
+					} `json:"b"`
+				}{},
+			},
+			want: []byte(`{"b":{"d":""}}`),
+			wantErr:// no error expected
+			assert.NoError,
+		},
+		{
+			name: "test3",
+			args: args{
+				bodyBytes: []byte(`{"a":"2"}`),
+				req: &struct {
+					A int `json:"a"`
+					B struct {
+						C int    `json:"c"`
+						D string `json:"d"`
+					} `json:"b"`
+				}{},
+			},
+			want: []byte(`{"a":2}`),
+			wantErr:// no error expected
+			assert.NoError,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Decode(tt.args.bodyBytes, tt.args.req)
+			if !tt.wantErr(t, err, fmt.Sprintf("Decode(%v, %v)", tt.args.bodyBytes, tt.args.req)) {
+				return
+			}
+			assert.JSONEq(t, string(tt.want), string(got), "Decode(%v, %v)", tt.args.bodyBytes, tt.args.req)
 		})
 	}
 }
