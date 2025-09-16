@@ -366,7 +366,7 @@ func (r Result) Into(obj any, options *IntoOptions) error {
 		}
 		if code != http.StatusOK {
 			message, _ := j.Get(options.WrapCodeMsgMapping.Msg).String()
-			return fmt.Errorf(message)
+			return errors.New(message)
 		}
 		data := j.Get(options.WrapCodeMsgMapping.Data)
 		marshalJSON, err = data.MarshalJSON()
