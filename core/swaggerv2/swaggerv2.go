@@ -190,5 +190,12 @@ func getSwaggerFiles(dir string) ([]string, error) {
 			}
 		}
 	}
+	// 保证如果有 swagger.json, 就放第一位
+	for i, file := range files {
+		if file == "swagger.json" {
+			files[0], files[i] = files[i], files[0]
+			break
+		}
+	}
 	return files, nil
 }

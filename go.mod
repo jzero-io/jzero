@@ -12,7 +12,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/huandu/go-sqlbuilder v1.36.1
 	github.com/jackc/pgx/v5 v5.7.6
-	github.com/jaronnie/genius v0.5.3-0.20250916014018-d3b2c4ccf076
+	github.com/jaronnie/genius v0.6.0
 	github.com/json-iterator/go v1.1.12
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/modern-go/reflect2 v1.0.2
