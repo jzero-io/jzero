@@ -51,6 +51,19 @@ jobs:
           
           cd ..
           
+          rm -rf simpleapi-with-model-redis
+          jzero new simpleapi-with-model-redis --features model,redis
+          cd simpleapi-with-model-redis
+          go mod tidy
+          jzero gen swagger
+          jzero gen sdk
+          jzero format --git-change=false
+          go mod tidy && go mod download
+          go run main.go version
+          git add .
+          git diff-index --quiet HEAD || git commit -m "chore(simpleapi-with-model-redis): update simpleapi-with-model-redis"
+          git push -f
+          
           rm -rf simplegateway
           jzero new simplegateway --frame gateway
           cd simplegateway
