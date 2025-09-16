@@ -153,7 +153,7 @@ func InitConfig() {
 			logx.Debugf("using jzero frame debug mode")
 		}
 		time.Sleep(time.Duration(config.C.DebugSleepTime) * time.Second)
-		logx.Debugf("get config: %v", config.C)
+		logx.Debugf("get config: %#v", config.C)
 	} else {
 		logx.Disable()
 	}
