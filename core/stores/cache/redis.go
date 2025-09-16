@@ -12,15 +12,22 @@ import (
 )
 
 type redisNode struct {
-	rds  *redis.Redis
-	node cache.Cache
+	rds         *redis.Redis
+	node        cache.Cache
+	cachePrefix string
 }
 
 func (c redisNode) ExpireCtx(ctx context.Context, key string, expire time.Duration) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.rds.ExpireCtx(ctx, key, int(math.Ceil(expire.Seconds())))
 }
 
 func (c redisNode) SetNoExpireCtx(ctx context.Context, key string, val any) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	data, err := jsonx.Marshal(val)
 	if err != nil {
 		return err
@@ -29,6 +36,9 @@ func (c redisNode) SetNoExpireCtx(ctx context.Context, key string, val any) erro
 }
 
 func (c redisNode) GetPrefixKeysCtx(ctx context.Context, keyPrefix string) ([]string, error) {
+	if c.cachePrefix != "" {
+		keyPrefix = c.cachePrefix + keyPrefix
+	}
 	var (
 		cursor  uint64
 		allKeys []string
@@ -50,18 +60,34 @@ func (c redisNode) GetPrefixKeysCtx(ctx context.Context, keyPrefix string) ([]st
 }
 
 func (c redisNode) Del(keys ...string) error {
+	if c.cachePrefix != "" {
+		for i, key := range keys {
+			keys[i] = c.cachePrefix + key
+		}
+	}
 	return c.node.Del(keys...)
 }
 
 func (c redisNode) DelCtx(ctx context.Context, keys ...string) error {
+	if c.cachePrefix != "" {
+		for i, key := range keys {
+			keys[i] = c.cachePrefix + key
+		}
+	}
 	return c.node.DelCtx(ctx, keys...)
 }
 
 func (c redisNode) Get(key string, val any) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.node.Get(key, val)
 }
 
 func (c redisNode) GetCtx(ctx context.Context, key string, val any) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.node.GetCtx(ctx, key, val)
 }
 
@@ -70,34 +96,58 @@ func (c redisNode) IsNotFound(err error) bool {
 }
 
 func (c redisNode) Set(key string, val any) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.node.SetCtx(context.Background(), key, val)
 }
 
 func (c redisNode) SetCtx(ctx context.Context, key string, val any) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.node.SetCtx(ctx, key, val)
 }
 
 func (c redisNode) SetWithExpire(key string, val any, expire time.Duration) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.node.SetWithExpireCtx(context.Background(), key, val, expire)
 }
 
 func (c redisNode) SetWithExpireCtx(ctx context.Context, key string, val any, expire time.Duration) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.node.SetWithExpireCtx(ctx, key, val, expire)
 }
 
 func (c redisNode) Take(val any, key string, query func(val any) error) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.node.Take(val, key, query)
 }
 
 func (c redisNode) TakeCtx(ctx context.Context, val any, key string, query func(val any) error) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.node.TakeCtx(ctx, val, key, query)
 }
 
 func (c redisNode) TakeWithExpire(val any, key string, query func(val any, expire time.Duration) error) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.node.TakeWithExpire(val, key, query)
 }
 
 func (c redisNode) TakeWithExpireCtx(ctx context.Context, val any, key string, query func(val any, expire time.Duration) error) error {
+	if c.cachePrefix != "" {
+		key = c.cachePrefix + key
+	}
 	return c.node.TakeWithExpireCtx(ctx, val, key, query)
 }
 
@@ -122,5 +172,16 @@ func NewRedisNode(rds *redis.Redis, errNotFound error, opts ...cache.Option) Cac
 	return &redisNode{
 		rds:  rds,
 		node: node,
+	}
+}
+
+func NewRedisNodeWithCachePrefix(rds *redis.Redis, errNotFound error, cachePrefix string, opts ...cache.Option) Cache {
+	singleFlights := syncx.NewSingleFlight()
+	stats := cache.NewStat("redis-cache")
+	node := cache.NewNode(rds, singleFlights, stats, errNotFound, opts...)
+	return &redisNode{
+		rds:         rds,
+		node:        node,
+		cachePrefix: cachePrefix,
 	}
 }
