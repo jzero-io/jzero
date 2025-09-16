@@ -11,7 +11,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2
 	github.com/hashicorp/go-version v1.7.0
 	github.com/iancoleman/orderedmap v0.3.0
-	github.com/jaronnie/genius v0.5.2
+	github.com/jaronnie/genius v0.6.0
 	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v1.1.0
 	github.com/jzero-io/go_fmt v0.0.0-20250905015347-1a45352494b7

@@ -3,6 +3,7 @@ syntax = "v1"
 info (
     go_package: "version"
     version: "v1"
+    WrapCodeMsg: true
 )
 
 type VersionRequest {}

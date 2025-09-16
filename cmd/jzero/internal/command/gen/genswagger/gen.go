@@ -20,6 +20,7 @@ import (
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/stringx"
 )
@@ -96,10 +97,6 @@ func Gen() (err error) {
 					apiFile = fmt.Sprintf("%s.swagger", strings.ReplaceAll(goPackage, "/", "-"))
 				}
 
-				if apiFile == "version.swagger" {
-					apiFile = "swagger"
-				}
-
 				cmd := exec.Command("goctl", "api", "swagger", "--api", v, "--filename", apiFile, "--dir", config.C.Gen.Swagger.Output)
 
 				logx.Debug(cmd.String())
@@ -126,8 +123,20 @@ func Gen() (err error) {
 					_ = g.Set("host", "")
 				}
 
-				// 处理 x-date
-				_ = g.Set("x-date", "")
+				/*
+				 "x-date": "",
+				  "x-description": "This is a goctl generated swagger file.",
+				  "x-github": "https://github.com/zeromicro/go-zero",
+				  "x-go-zero-doc": "https://go-zero.dev/",
+				  "x-goctl-version": "1.9.0"
+				*/
+
+				// 删除 x-date
+				g.Del("x-date")
+				g.Del("x-description")
+				g.Del("x-github")
+				g.Del("x-go-zero-doc")
+				g.Del("x-goctl-version")
 
 				// 处理 securityDefinitions 值
 				if g.Get("securityDefinitions") == nil {
@@ -227,7 +236,11 @@ func Gen() (err error) {
 		if config.C.Gen.Swagger.Merge {
 			swaggerJson, err := os.ReadFile(filepath.Join(config.C.SwaggerDir(), "swagger.json"))
 			if err != nil {
-				return err
+				swaggerJson = embeded.ReadTemplateFile(filepath.Join("swagger", "swagger.json.tpl"))
+				if swaggerJson == nil {
+					return err
+				}
+				err = nil
 			}
 			swaggerJsonG, err := genius.NewFromRawJSON(swaggerJson)
 			if err != nil {
