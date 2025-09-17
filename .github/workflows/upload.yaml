@@ -110,16 +110,3 @@ jobs:
           git push -f
           
           cd ..
-          
-          # 测试第三方仓库(https://github.com/jzero-io/templates)模板
-          rm -rf simplerpc-goctl
-          jzero new simplerpc-goctl --branch rpc-goctl
-          cd simplerpc-goctl
-          jzero gen swagger
-          jzero gen zrpcclient
-          jzero format --git-change=false
-          go mod tidy && go mod download
-          go build && rm -rf simplerpc-goctl
-          git add .
-          git diff-index --quiet HEAD || git commit -m "chore(simplerpc-goctl): update simplerpc-goctl"
-          git push -f
