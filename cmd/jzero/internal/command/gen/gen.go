@@ -165,7 +165,7 @@ func GetCommand() *cobra.Command {
 		// mongo cache prefix
 		genCmd.Flags().StringP("mongo-cache-prefix", "", "cache", "mongo cache prefix")
 		// mongo cache type
-		genCmd.Flags().StringSliceP("mongo-cache-type", "", []string{}, "mongo cache type names to enable caching")
+		genCmd.Flags().StringSliceP("mongo-cache-type", "", []string{"*"}, "mongo cache type names to enable caching")
 	}
 
 	{

@@ -61,7 +61,6 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 		"Imports":       imports,
 		"TablePackages": tablePackages,
 		"MutiModels":    mutiModels,
-		"withCache":     config.C.Gen.ModelCache,
 	}, lo.If(
 		// 兼容老版本 model 路径
 		// TODO: wait to remove

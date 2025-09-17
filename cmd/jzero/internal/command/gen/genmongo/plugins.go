@@ -11,7 +11,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
-	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
@@ -51,17 +50,10 @@ func (jm *JzeroMongo) GenRegister(types []string) error {
 	logx.Debugf("get register types packages: %v", typePackages)
 	logx.Debugf("get register muti models: %v", mutiModels)
 
-	// Determine if any mongo types have cache enabled
-	mongoHasCache := config.C.Gen.MongoCache
-	if len(config.C.Gen.MongoCacheType) > 0 {
-		mongoHasCache = len(config.C.Gen.MongoCacheType) > 0
-	}
-
 	template, err := templatex.ParseTemplate(filepath.Join("mongo", "model.go.tpl"), map[string]any{
 		"Imports":      imports,
 		"TypePackages": typePackages,
 		"MutiModels":   mutiModels,
-		"withCache":    mongoHasCache,
 	}, embeded.ReadTemplateFile(filepath.Join("mongo", "model.go.tpl")))
 	if err != nil {
 		return err

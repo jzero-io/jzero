@@ -74,15 +74,16 @@ func (jm *JzeroMongo) Gen() error {
 			"--style", config.C.Gen.Style,
 		}
 
-		// Check if cache should be enabled for this specific mongo type
-		enableCache := config.C.Gen.MongoCache
-		if len(config.C.Gen.MongoCacheType) > 0 {
-			// If MongoCacheType is specified, only enable cache for types in the list
-			enableCache = false
-			for _, cacheType := range config.C.Gen.MongoCacheType {
-				if strings.EqualFold(cacheType, mongoType) {
-					enableCache = true
-					break
+		var enableCache bool
+		if config.C.Gen.MongoCache {
+			if len(config.C.Gen.MongoCacheType) == 1 && config.C.Gen.MongoCacheType[0] == "*" {
+				enableCache = true
+			} else {
+				for _, cacheType := range config.C.Gen.MongoCacheType {
+					if cacheType == mongoType {
+						enableCache = true
+						break
+					}
 				}
 			}
 		}
