@@ -380,9 +380,11 @@ func getIsCacheTable(t string) bool {
 		return true
 	}
 
-	for _, v := range config.C.Gen.ModelCacheTable {
-		if v == t {
-			return true
+	if config.C.Gen.ModelCache {
+		for _, v := range config.C.Gen.ModelCacheTable {
+			if v == t {
+				return true
+			}
 		}
 	}
 	return false
