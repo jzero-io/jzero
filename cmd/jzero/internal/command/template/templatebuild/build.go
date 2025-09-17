@@ -44,12 +44,12 @@ func Run(tc config.TemplateConfig) error {
 	tc.Build.Output = filepath.Join(tc.Build.Output, "app")
 	wd, _ := os.Getwd()
 
-	modfileBytes, err := os.ReadFile(filepath.Join(tc.Build.WorkingDir, "go.mod"))
+	modifiedBytes, err := os.ReadFile(filepath.Join(tc.Build.WorkingDir, "go.mod"))
 	if err != nil {
 		return err
 	}
 
-	mod, err := modfile.Parse("", modfileBytes, nil)
+	mod, err := modfile.Parse("", modifiedBytes, nil)
 	if err != nil {
 		return err
 	}

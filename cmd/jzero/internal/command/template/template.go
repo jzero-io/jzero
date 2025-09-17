@@ -46,13 +46,11 @@ var templateBuildCmd = &cobra.Command{
 	Use:   "build",
 	Short: `Build your current project to template`,
 	Long:  `Build your current project to template and save them into ${HOME}/.jzero/templates/local.`,
-	PreRun: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if config.C.Template.Build.Output == "" {
 			home, _ := os.UserHomeDir()
 			config.C.Template.Build.Output = filepath.Join(home, ".jzero", "templates", "local", config.C.Template.Build.Name)
 		}
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
 		return templatebuild.Run(config.C.Template)
 	},
 }
