@@ -64,6 +64,8 @@ jobs:
           git diff-index --quiet HEAD || git commit -m "chore(simpleapi-with-model-redis): update simpleapi-with-model-redis"
           git push -f
           
+          cd ..
+          
           rm -rf simplegateway
           jzero new simplegateway --frame gateway
           cd simplegateway
