@@ -5,13 +5,13 @@ import { navbar } from "vuepress-theme-hope";
 export const enNavbar = navbar([
   "/en/",
   {
-    link: "https://github.com/jzero-io/templates",
-    text: "template repo",
-    icon: "octicon:repo-16"
-  },
-  {
     link: "https://github.com/jzero-io/examples",
     text: "code example",
     icon: "vscode-icons:file-type-go"
+  },
+  {
+    link: "https://github.com/jzero-io/jzero-admin",
+    text: "jzero admin",
+    icon: "icon-park-outline:system"
   },
 ]);

@@ -1,3 +1,4 @@
+// @ts-ignore
 import { sidebar } from "vuepress-theme-hope";
 
 export default sidebar({
@@ -22,13 +23,6 @@ export default sidebar({
       text: "问题与解决",
       icon: "mdi:faq",
       prefix: "faq/",
-      children: "structure",
-      collapsible: true,
-    },
-    {
-      text: "路线图",
-      icon: "mdi:roadmap",
-      prefix: "roadmap/",
       children: "structure",
       collapsible: true,
     },
