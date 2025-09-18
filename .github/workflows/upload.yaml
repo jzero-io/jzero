@@ -37,6 +37,8 @@ jobs:
           rm -rf simpleapi
           jzero new simpleapi
           cd simpleapi
+          jzero new helloworld --serverless
+          jzero serverless build
           go mod tidy
           jzero gen swagger
           jzero gen sdk
@@ -93,20 +95,6 @@ jobs:
           go run main.go version
           git add .
           git diff-index --quiet HEAD || git commit -m "chore(simplerpc): update simplerpc"
-          git push -f
-          
-          cd ..
-
-          rm -rf simpleapi-serverless
-          jzero new simpleapi-serverless --frame api --features serverless
-          cd simpleapi-serverless
-          go mod tidy
-          jzero gen swagger
-          jzero format --git-change=false
-          go mod tidy && go mod download
-          go run main.go version
-          git add .
-          git diff-index --quiet HEAD || git commit -m "chore(simpleapi-serverless): update simpleapi-serverless"
           git push -f
           
           cd ..
