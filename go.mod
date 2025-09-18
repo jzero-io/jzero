@@ -10,7 +10,7 @@ require (
 	github.com/eddieowens/opts v0.1.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/huandu/go-sqlbuilder v1.36.1
+	github.com/huandu/go-sqlbuilder v1.37.0
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/jaronnie/genius v0.6.1
 	github.com/json-iterator/go v1.1.12
@@ -49,6 +49,7 @@ require (
 	github.com/grafana/pyroscope-go v1.2.4 // indirect
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.8 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect
+	github.com/huandu/go-clone v1.7.3 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
