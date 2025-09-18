@@ -12,7 +12,6 @@ type Config struct {
 	Log  LogConf
 	{{ if has "model" .Features }}Sqlx SqlxConf{{ end }}
 	{{ if has "redis" .Features }}Redis RedisConf{{ end }}
-
 	Banner BannerConf
 }
 
@@ -27,7 +26,6 @@ type LogConf struct {
 {{ if has "model" .Features }}type SqlxConf struct {
 	sqlx.SqlConf
 }{{ end }}
-
 {{ if has "redis" .Features }}type RedisConf struct {
     redis.RedisConf
 }{{ end }}

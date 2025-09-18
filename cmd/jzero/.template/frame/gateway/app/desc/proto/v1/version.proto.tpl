@@ -1,11 +1,11 @@
-syntax = "proto3";
+{{ if .Serverless }}{{else}}syntax = "proto3";
 
-package {{if .Serverless}}{{.APP | lower}}{{end}}versionpb;
+package versionpb;
 
 import "google/api/annotations.proto";
 import "grpc-gateway/protoc-gen-openapiv2/options/annotations.proto";
 
-option go_package = "./pb/{{if .Serverless}}{{.APP | lower}}{{end}}versionpb";
+option go_package = "./pb/versionpb";
 
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     info: {
@@ -22,10 +22,10 @@ message VersionResponse {
     string date = 4;
 }
 
-service {{if .Serverless}}{{.APP | ToCamel}}{{end}}Version {
+service Version {
     rpc Version(VersionRequest) returns(VersionResponse) {
         option (google.api.http) = {
-            get: "/api/v1{{if .Serverless}}/{{.APP | lower}}{{end}}/version"
+            get: "/api/v1/version"
         };
     };
-}
+}{{end}}

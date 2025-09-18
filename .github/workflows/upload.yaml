@@ -38,6 +38,9 @@ jobs:
           jzero new simpleapi
           cd simpleapi
           jzero new helloworld --serverless
+          cd plugins/helloworld
+          go mod tidy
+          cd ../..
           jzero serverless build
           go mod tidy
           jzero gen swagger
@@ -71,6 +74,11 @@ jobs:
           rm -rf simplegateway
           jzero new simplegateway --frame gateway
           cd simplegateway
+          jzero new helloworld --frame gateway --serverless
+          cd plugins/helloworld
+          go mod tidy
+          cd ../..
+          jzero serverless build
           go mod tidy
           jzero gen swagger
           jzero gen sdk
@@ -87,6 +95,11 @@ jobs:
           rm -rf simplerpc
           jzero new simplerpc --frame rpc
           cd simplerpc
+          jzero new helloworld --frame rpc --serverless
+          cd plugins/helloworld
+          go mod tidy
+          cd ../..
+          jzero serverless build
           go mod tidy
           jzero gen swagger
           jzero gen zrpcclient

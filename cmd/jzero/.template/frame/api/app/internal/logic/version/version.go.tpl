@@ -1,4 +1,4 @@
-package version
+{{if .Serverless}}{{else}}package version
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 
 	"github.com/zeromicro/go-zero/core/logx"
 
-	"{{ .Module }}/internal/svc"
-	"{{ .Module }}/internal/types"
+	"{{.Module}}/internal/svc"
+	types "{{.Module}}/internal/types/version"
 )
 
 type Version struct {
@@ -30,9 +30,9 @@ func NewVersion(ctx context.Context, svcCtx *svc.ServiceContext, r *http.Request
 
 func (l *Version) Version(req *types.VersionRequest) (resp *types.VersionResponse, err error) {
 	return &types.VersionResponse{
-		Version:   os.Getenv("VERSION"),
-		GoVersion: runtime.Version(),
-		Commit:    os.Getenv("COMMIT"),
-		Date:      os.Getenv("DATE"),
+		Version:     os.Getenv("VERSION"),
+		GoVersion:   runtime.Version(),
+		Commit:      os.Getenv("COMMIT"),
+		Date:        os.Getenv("DATE"),
 	}, nil
-}
+}{{end}}
