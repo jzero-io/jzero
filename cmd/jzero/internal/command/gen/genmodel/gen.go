@@ -11,11 +11,11 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
+	ddlparser "github.com/zeromicro/ddl-parser/parser"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/postgres"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"github.com/zeromicro/go-zero/tools/goctl/model/sql/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
 	"golang.org/x/sync/errgroup"
@@ -125,7 +125,7 @@ func (jm *JzeroModel) Gen() error {
 		allFiles        []string
 		genCodeSqlFiles []string
 	)
-	genCodeSqlSpecMap := make(map[string][]*parser.Table)
+	genCodeSqlSpecMap := make(map[string][]*ddlparser.Table)
 
 	allFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
 	if err != nil {
@@ -186,9 +186,9 @@ func (jm *JzeroModel) Gen() error {
 		if config.C.Gen.ModelDatasource {
 			allTables = config.C.Gen.ModelDatasourceTable
 			for _, f := range allFiles {
-				genCodeSqlSpecMap[f] = []*parser.Table{
+				genCodeSqlSpecMap[f] = []*ddlparser.Table{
 					{
-						Name: stringx.From(filepath.Base(f)),
+						Name: stringx.From(filepath.Base(f)).Source(),
 					},
 				}
 			}
@@ -196,7 +196,7 @@ func (jm *JzeroModel) Gen() error {
 			var eg errgroup.Group
 			for _, f := range allFiles {
 				eg.Go(func() error {
-					tableParsers, err := parser.Parse(filepath.Join(config.C.Wd(), f), "", config.C.Gen.ModelStrict)
+					tableParsers, err := ParseSql(filepath.Join(config.C.Wd(), f), "", config.C.Gen.ModelStrict)
 					if err != nil {
 						return err
 					}
@@ -208,9 +208,9 @@ func (jm *JzeroModel) Gen() error {
 
 					for _, tp := range tableParsers {
 						if strings.Contains(bf, ".") {
-							allTables = append(allTables, strings.Split(bf, ".")[0]+"."+tp.Name.Source())
+							allTables = append(allTables, strings.Split(bf, ".")[0]+"."+tp.Name)
 						} else {
-							allTables = append(allTables, tp.Name.Source())
+							allTables = append(allTables, tp.Name)
 						}
 					}
 					return nil
@@ -224,7 +224,7 @@ func (jm *JzeroModel) Gen() error {
 		return nil
 	}
 
-	fmt.Printf("%s to generate model code from sql files.\n", color.WithColor("Start", color.FgGreen))
+	fmt.Printf("%s to generate model code from sql files\n", color.WithColor("Start", color.FgGreen))
 
 	var eg errgroup.Group
 	eg.SetLimit(len(genCodeSqlFiles))
@@ -234,7 +234,7 @@ func (jm *JzeroModel) Gen() error {
 			tableParsers := genCodeSqlSpecMap[f]
 
 			for _, tp := range tableParsers {
-				genCodeTables = append(genCodeTables, tp.Name.Source())
+				genCodeTables = append(genCodeTables, tp.Name)
 			}
 
 			bf := strings.TrimSuffix(filepath.Base(f), ".sql")
@@ -388,4 +388,14 @@ func getIsCacheTable(t string) bool {
 		}
 	}
 	return false
+}
+
+// Parse parses ddl into golang structure
+func ParseSql(filename, database string, strict bool) ([]*ddlparser.Table, error) {
+	p := ddlparser.NewParser()
+	tables, err := p.From(filename)
+	if err != nil {
+		return nil, err
+	}
+	return tables, nil
 }

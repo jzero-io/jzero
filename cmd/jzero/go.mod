@@ -26,6 +26,7 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
+	github.com/zeromicro/ddl-parser v1.0.5
 	github.com/zeromicro/go-zero v1.9.0
 	github.com/zeromicro/go-zero/tools/goctl v1.9.0
 	golang.org/x/mod v0.28.0
@@ -112,7 +113,6 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/zeromicro/antlr v0.0.1 // indirect
-	github.com/zeromicro/ddl-parser v1.0.5 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0 // indirect
