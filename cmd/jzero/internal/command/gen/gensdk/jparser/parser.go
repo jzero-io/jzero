@@ -111,7 +111,7 @@ func genHTTPInterfaces(config *config.Config, fds []*desc.FileDescriptor, apiSpe
 
 				resource := vars.Resource(group.Annotation.Properties["group"])
 				if resource == "" {
-					resource = "api"
+					resource = "" // 使用空字符串标识未分组API
 				}
 				httpInterface := vars.HTTPInterface{
 					Resource:    resource,

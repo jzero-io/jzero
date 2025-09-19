@@ -6,6 +6,7 @@ import (
 )
 
 type Plugin struct {
+	Name   string
 	Path   string
 	Module string
 }
@@ -19,10 +20,12 @@ func GetPlugins() ([]Plugin, error) {
 	for _, p := range dir {
 		if p.IsDir() {
 			plugins = append(plugins, Plugin{
+				Name: p.Name(),
 				Path: filepath.ToSlash(filepath.Join("plugins", p.Name())),
 			})
 		} else if p.Type() == os.ModeSymlink {
 			plugins = append(plugins, Plugin{
+				Name: p.Name(),
 				Path: filepath.ToSlash(filepath.Join("plugins", p.Name())),
 			})
 		}

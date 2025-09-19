@@ -23,6 +23,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/stringx"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/plugin"
 )
 
 func Gen() (err error) {
@@ -55,6 +56,20 @@ func Gen() (err error) {
 			if err != nil {
 				return err
 			}
+
+			// 增加 plugins 的 api 文件
+			plugins, err := plugin.GetPlugins()
+			if err == nil {
+				for _, p := range plugins {
+					if pathx.FileExists(filepath.Join(p.Path, "desc", "api")) {
+						pluginFiles, err := desc.FindRouteApiFiles(filepath.Join(p.Path, "desc", "api"))
+						if err != nil {
+							return err
+						}
+						files = append(files, pluginFiles...)
+					}
+				}
+			}
 		}
 
 		for _, v := range config.C.Gen.Swagger.DescIgnore {
@@ -86,16 +101,11 @@ func Gen() (err error) {
 					return err
 				}
 
-				relativePath := strings.TrimPrefix(v, config.C.ApiDir())
-				relativePath = strings.TrimPrefix(relativePath, "/")
-				pathBasedName := strings.ReplaceAll(relativePath, "/", "-")
+				pathBasedName := strings.ReplaceAll(v, string(filepath.Separator), "-")
+				pathBasedName = strings.ReplaceAll(pathBasedName, "desc-api-", "")
 				pathBasedName = strings.TrimSuffix(pathBasedName, ".api")
-
 				apiFile := fmt.Sprintf("%s.swagger", pathBasedName)
-				goPackage, ok := parse.Info.Properties["go_package"]
-				if ok && goPackage != "" {
-					apiFile = fmt.Sprintf("%s.swagger", strings.ReplaceAll(goPackage, "/", "-"))
-				}
+				goPackage := parse.Info.Properties["go_package"]
 
 				cmd := exec.Command("goctl", "api", "swagger", "--api", v, "--filename", apiFile, "--dir", config.C.Gen.Swagger.Output)
 
@@ -179,8 +189,13 @@ func Gen() (err error) {
 						// 处理 tags
 						tags := cast.ToStringSlice(g.Get(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk)))
 						if len(tags) == 0 || (len(tags) == 1 && tags[0] == "") {
+							pluginName := getPluginNameFromFilePath(v)
 							if goPackage != "" {
-								_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{goPackage})
+								tagValue := goPackage
+								if pluginName != "" {
+									tagValue = "plugins/" + pluginName + "/" + goPackage
+								}
+								_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{tagValue})
 							} else {
 								for _, group := range parse.Service.Groups {
 									for _, route := range group.Routes {
@@ -189,11 +204,25 @@ func Gen() (err error) {
 											route.Path = group.GetAnnotation("prefix") + route.Path
 										}
 										if route.Method == pmmk && route.Path == adjustHttpPath(pmk) && group.GetAnnotation("group") != "" {
-											_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{group.GetAnnotation("group")})
+											tagValue := group.GetAnnotation("group")
+											if pluginName != "" {
+												tagValue = "plugins/" + pluginName + "/" + group.GetAnnotation("group")
+											}
+											_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{tagValue})
 											break
 										}
 									}
 								}
+							}
+						}
+
+						// 处理 operationId
+						pluginName := getPluginNameFromFilePath(v)
+						if pluginName != "" {
+							operationId := cast.ToString(g.Get(fmt.Sprintf("paths.%s.%s.operationId", pmk, pmmk)))
+							if operationId != "" {
+								newOperationId := "plugins/" + pluginName + "/" + operationId
+								_ = g.Set(fmt.Sprintf("paths.%s.%s.operationId", pmk, pmmk), newOperationId)
 							}
 						}
 
@@ -349,4 +378,16 @@ func adjustHttpPath(path string) string {
 	path = strings.ReplaceAll(path, "{", ":")
 	path = strings.ReplaceAll(path, "}", "")
 	return path
+}
+
+func getPluginNameFromFilePath(filePath string) string {
+	if strings.Contains(filePath, "plugins"+string(filepath.Separator)) {
+		parts := strings.Split(filePath, string(filepath.Separator))
+		for i, part := range parts {
+			if part == "plugins" && i+1 < len(parts) {
+				return parts[i+1]
+			}
+		}
+	}
+	return ""
 }

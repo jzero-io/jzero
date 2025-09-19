@@ -184,7 +184,7 @@ func GetCommand() *cobra.Command {
 
 		genSwaggerCmd.Flags().StringP("output", "o", filepath.Join("desc", "swagger"), "set swagger output dir")
 		genSwaggerCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
-		genSwaggerCmd.Flags().BoolP("merge", "", false, "is merge muti swagger to one file, goctl version >= v1.8.3 available")
+		genSwaggerCmd.Flags().BoolP("merge", "", true, "is merge muti swagger to one file")
 	}
 
 	{

@@ -359,7 +359,7 @@ func (r Result) Into(obj any, options *IntoOptions) error {
 	}
 
 	var marshalJSON []byte
-	if options.WrapCodeMsg {
+	if options != nil && options.WrapCodeMsg {
 		code, err := j.Get(options.WrapCodeMsgMapping.Code).Int()
 		if err != nil {
 			return err
