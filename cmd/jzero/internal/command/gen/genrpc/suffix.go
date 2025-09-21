@@ -12,6 +12,8 @@ import (
 	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+
+	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 )
 
 func (jr *JzeroRpc) removeServerSuffix(fp string) error {
@@ -91,12 +93,8 @@ func (jr *JzeroRpc) removeServerSuffix(fp string) error {
 	if err := goformat.Node(buf, fset, f); err != nil {
 		return err
 	}
-	process, err := gosimports.Process("", buf.Bytes(), nil)
-	if err != nil {
-		return err
-	}
 
-	if err = os.WriteFile(fp, process, 0o644); err != nil {
+	if err = os.WriteFile(fp, buf.Bytes(), 0o644); err != nil {
 		return err
 	}
 
@@ -109,7 +107,7 @@ func (jr *JzeroRpc) removeServerSuffix(fp string) error {
 		return err
 	}
 
-	return nil
+	return UpdateImportedModule(newFilePath+".go", config.C.Wd(), jr.Module)
 }
 
 func (jr *JzeroRpc) removeLogicSuffix(fp string) error {
@@ -196,5 +194,9 @@ func (jr *JzeroRpc) removeLogicSuffix(fp string) error {
 		return err
 	}
 
-	return os.Rename(fp, newFilePath)
+	if err = os.Rename(fp, newFilePath); err != nil {
+		return err
+	}
+
+	return UpdateImportedModule(newFilePath, config.C.Wd(), jr.Module)
 }

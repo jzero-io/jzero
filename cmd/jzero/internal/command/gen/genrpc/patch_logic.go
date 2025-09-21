@@ -9,14 +9,19 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/rinchsan/gosimports"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 )
 
 type LogicFile struct {
@@ -149,4 +154,47 @@ func (jr *JzeroRpc) changeLogicTypes(file LogicFile) error {
 	}
 
 	return nil
+}
+
+func UpdateImportedModule(filepath, workDir, module string) error {
+	fset := token.NewFileSet()
+	f, err := goparser.ParseFile(fset, filepath, nil, goparser.ParseComments)
+	if err != nil {
+		return err
+	}
+	// 当前项目存在 go.mod 项目, 并且 go list -json -m 有多个, 即使用了 go workspace 机制
+	if pathx.FileExists("go.mod") {
+		mods, err := mod.GetGoMods(workDir)
+		if err != nil {
+			return err
+		}
+		if len(mods) > 1 {
+			rootPkg, _, err := golang.GetParentPackage(workDir)
+			if err != nil {
+				return err
+			}
+			imports := astutil.Imports(fset, f)
+			for _, imp := range imports {
+				for _, name := range imp {
+					if strings.HasPrefix(name.Path.Value, "\""+rootPkg) {
+						unQuote, _ := strconv.Unquote(name.Path.Value)
+						newImp := strings.Replace(unQuote, rootPkg, module, 1)
+						astutil.RewriteImport(fset, f, unQuote, newImp)
+					}
+				}
+			}
+		}
+	}
+
+	// write back files
+	buf := bytes.NewBuffer(nil)
+	if err = goformat.Node(buf, fset, f); err != nil {
+		return err
+	}
+	process, err := gosimports.Process("", buf.Bytes(), nil)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(filepath, process, 0o644)
 }

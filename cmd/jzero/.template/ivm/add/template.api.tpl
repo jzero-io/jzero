@@ -15,7 +15,7 @@ type {{$v.Name | FirstUpper}}Response {}
     group:  {{ .Group }}
 )
 service {{ .Service }} {
-    {{range $v := .Handlers | uniq}}@handler {{$v.Name}}Handler
+    {{range $v := .Handlers | uniq}}@handler {{$v.Name}}
     {{$v.Verb}} /{{ $.Group }}/{{$v.Name | FirstLower}} ({{$v.Name | FirstUpper}}Request) returns ({{$v.Name | FirstUpper}}Response)
 
     {{end}}

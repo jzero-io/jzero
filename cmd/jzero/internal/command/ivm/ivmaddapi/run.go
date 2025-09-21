@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/zeromicro/go-zero/tools/goctl/api/format"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
@@ -21,8 +22,14 @@ type Handler struct {
 
 func Run() error {
 	baseApiDir := filepath.Join("desc", "api")
+	if !pathx.FileExists(baseApiDir) {
+		_ = os.MkdirAll(baseApiDir, 0o755)
+	}
 
 	service := desc.GetApiServiceName(filepath.Join("desc", "api"))
+	if service == "" {
+		service = config.C.Ivm.Add.Api.Name
+	}
 
 	var handlers []Handler
 	for _, v := range config.C.Ivm.Add.Api.Handlers {
