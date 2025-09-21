@@ -69,5 +69,7 @@ func Run() error {
 		return errors.New("proto file already exists")
 	}
 
+	_ = os.MkdirAll(filepath.Dir(output), 0o755)
+
 	return os.WriteFile(output, template, 0o644)
 }

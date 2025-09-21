@@ -101,13 +101,54 @@ func Gen() (err error) {
 					return err
 				}
 
-				pathBasedName := strings.ReplaceAll(v, string(filepath.Separator), "-")
-				pathBasedName = strings.ReplaceAll(pathBasedName, "desc-api-", "")
-				pathBasedName = strings.TrimSuffix(pathBasedName, ".api")
-				apiFile := fmt.Sprintf("%s.swagger", pathBasedName)
+				// 保持目录结构，生成到 desc/swagger 下
+				var relPath string
+
+				// 检查是否是插件文件
+				pluginName := getPluginNameFromFilePath(v)
+				if pluginName != "" {
+					// 插件文件处理：找到 desc/api 在路径中的位置
+					descApiIndex := strings.Index(v, "/desc/api/")
+					var pluginApiDir string
+					if descApiIndex == -1 {
+						// 如果找不到 /desc/api/ 模式，尝试查找路径末尾是否以 desc/api 结尾
+						if strings.HasSuffix(filepath.Dir(v), "/desc/api") {
+							pluginApiDir = filepath.Dir(v)
+						} else {
+							return fmt.Errorf("invalid plugin api path: %s", v)
+						}
+					} else {
+						pluginApiDir = v[:descApiIndex+len("/desc/api")]
+					}
+
+					var relErr error
+					relPath, relErr = filepath.Rel(pluginApiDir, v)
+					if relErr != nil {
+						return relErr
+					}
+					// 在插件目录下保持结构
+					relPath = "plugins/" + pluginName + "/" + relPath
+				} else {
+					// 普通 API 文件处理
+					relPath, err = filepath.Rel(config.C.ApiDir(), v)
+					if err != nil {
+						return err
+					}
+				}
+
+				// 将 .api 扩展名替换为 .swagger
+				swaggerFileName := strings.TrimSuffix(relPath, ".api") + ".swagger"
+
+				// 创建输出目录结构
+				outputDir := filepath.Join(config.C.Gen.Swagger.Output, filepath.Dir(swaggerFileName))
+				if err := os.MkdirAll(outputDir, 0o755); err != nil {
+					return err
+				}
+
+				apiFile := filepath.Base(swaggerFileName)
 				goPackage := parse.Info.Properties["go_package"]
 
-				cmd := exec.Command("goctl", "api", "swagger", "--api", v, "--filename", apiFile, "--dir", config.C.Gen.Swagger.Output)
+				cmd := exec.Command("goctl", "api", "swagger", "--api", v, "--filename", apiFile, "--dir", outputDir)
 
 				logx.Debug(cmd.String())
 				resp, err := cmd.CombinedOutput()
@@ -119,7 +160,7 @@ func Gen() (err error) {
 				}
 
 				// 兼容处理
-				file, err := os.ReadFile(filepath.Join(config.C.Gen.Swagger.Output, apiFile+".json"))
+				file, err := os.ReadFile(filepath.Join(outputDir, apiFile+".json"))
 				if err != nil {
 					return err
 				}
@@ -188,28 +229,57 @@ func Gen() (err error) {
 
 						// 处理 tags
 						tags := cast.ToStringSlice(g.Get(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk)))
-						if len(tags) == 0 || (len(tags) == 1 && tags[0] == "") {
-							pluginName := getPluginNameFromFilePath(v)
-							if goPackage != "" {
-								tagValue := goPackage
-								if pluginName != "" {
-									tagValue = "plugins/" + pluginName + "/" + goPackage
+						pluginName = getPluginNameFromFilePath(v)
+
+						if pluginName != "" {
+							// 插件文件：处理已存在的 tags，为每个 tag 添加插件前缀
+							if len(tags) > 0 && !(len(tags) == 1 && tags[0] == "") {
+								var newTags []string
+								for _, tag := range tags {
+									if tag != "" {
+										newTags = append(newTags, "plugins/"+pluginName+"/"+tag)
+									}
 								}
-								_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{tagValue})
+								if len(newTags) > 0 {
+									_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), newTags)
+								}
 							} else {
-								for _, group := range parse.Service.Groups {
-									for _, route := range group.Routes {
-										logx.Debugf("get route prefix: %s", route.GetAnnotation("prefix"))
-										if group.GetAnnotation("prefix") != "" {
-											route.Path = group.GetAnnotation("prefix") + route.Path
-										}
-										if route.Method == pmmk && route.Path == adjustHttpPath(pmk) && group.GetAnnotation("group") != "" {
-											tagValue := group.GetAnnotation("group")
-											if pluginName != "" {
-												tagValue = "plugins/" + pluginName + "/" + group.GetAnnotation("group")
+								// 如果没有 tags，设置默认 tags
+								if goPackage != "" {
+									tagValue := "plugins/" + pluginName + "/" + goPackage
+									_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{tagValue})
+								} else {
+									for _, group := range parse.Service.Groups {
+										for _, route := range group.Routes {
+											logx.Debugf("get route prefix: %s", route.GetAnnotation("prefix"))
+											if group.GetAnnotation("prefix") != "" {
+												route.Path = group.GetAnnotation("prefix") + route.Path
 											}
-											_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{tagValue})
-											break
+											if route.Method == pmmk && route.Path == adjustHttpPath(pmk) && group.GetAnnotation("group") != "" {
+												tagValue := "plugins/" + pluginName + "/" + group.GetAnnotation("group")
+												_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{tagValue})
+												break
+											}
+										}
+									}
+								}
+							}
+						} else {
+							// 普通文件：只在没有 tags 时设置默认值
+							if len(tags) == 0 || (len(tags) == 1 && tags[0] == "") {
+								if goPackage != "" {
+									_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{goPackage})
+								} else {
+									for _, group := range parse.Service.Groups {
+										for _, route := range group.Routes {
+											logx.Debugf("get route prefix: %s", route.GetAnnotation("prefix"))
+											if group.GetAnnotation("prefix") != "" {
+												route.Path = group.GetAnnotation("prefix") + route.Path
+											}
+											if route.Method == pmmk && route.Path == adjustHttpPath(pmk) && group.GetAnnotation("group") != "" {
+												_ = g.Set(fmt.Sprintf("paths.%s.%s.tags", pmk, pmmk), []string{group.GetAnnotation("group")})
+												break
+											}
 										}
 									}
 								}
@@ -217,7 +287,7 @@ func Gen() (err error) {
 						}
 
 						// 处理 operationId
-						pluginName := getPluginNameFromFilePath(v)
+						pluginName = getPluginNameFromFilePath(v)
 						if pluginName != "" {
 							operationId := cast.ToString(g.Get(fmt.Sprintf("paths.%s.%s.operationId", pmk, pmmk)))
 							if operationId != "" {
@@ -248,7 +318,7 @@ func Gen() (err error) {
 				if err != nil {
 					return err
 				}
-				err = os.WriteFile(filepath.Join(config.C.Gen.Swagger.Output, apiFile+".json"), encodeToJSON, 0o644)
+				err = os.WriteFile(filepath.Join(outputDir, apiFile+".json"), encodeToJSON, 0o644)
 				if err != nil {
 					return err
 				}
@@ -257,55 +327,6 @@ func Gen() (err error) {
 
 			if err = eg.Wait(); err != nil {
 				return err
-			}
-		}
-
-		// merge swagger to one file swagger.json
-		// use swagger.api to set global config
-		if config.C.Gen.Swagger.Merge {
-			swaggerJson, err := os.ReadFile(filepath.Join(config.C.SwaggerDir(), "swagger.json"))
-			if err != nil {
-				swaggerJson = embeded.ReadTemplateFile(filepath.Join("swagger", "swagger.json.tpl"))
-				if swaggerJson == nil {
-					return err
-				}
-				err = nil
-			}
-			swaggerJsonG, err := genius.NewFromRawJSON(swaggerJson)
-			if err != nil {
-				return err
-			}
-
-			dir, err := os.ReadDir(config.C.SwaggerDir())
-			if err == nil {
-				for _, sj := range dir {
-					if sj.Name() != "swagger.json" {
-						file, err := os.ReadFile(filepath.Join(config.C.SwaggerDir(), sj.Name()))
-						if err == nil {
-							g, err := genius.NewFromRawJSON(file)
-							if err == nil {
-								paths := g.Get("paths")
-								pathsMarshal, _ := json.Marshal(paths)
-
-								pathMaps := make(map[string]any)
-								_ = json.Unmarshal(pathsMarshal, &pathMaps)
-
-								for pmk, pmv := range pathMaps {
-									_ = swaggerJsonG.Set(fmt.Sprintf("paths.%s", pmk), pmv)
-								}
-							}
-						}
-					}
-				}
-
-				encodeToJSON, err := swaggerJsonG.EncodeToPrettyJSON()
-				if err != nil {
-					return err
-				}
-				err = os.WriteFile(filepath.Join(config.C.SwaggerDir(), "swagger.json"), encodeToJSON, 0o644)
-				if err != nil {
-					return err
-				}
 			}
 		}
 	}
@@ -335,6 +356,20 @@ func Gen() (err error) {
 			if err != nil {
 				return err
 			}
+
+			// 增加 plugins 的 proto 文件
+			plugins, err := plugin.GetPlugins()
+			if err == nil {
+				for _, p := range plugins {
+					if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
+						pluginFiles, err := desc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
+						if err != nil {
+							return err
+						}
+						files = append(files, pluginFiles...)
+					}
+				}
+			}
 		}
 
 		for _, v := range config.C.Gen.Swagger.DescIgnore {
@@ -358,20 +393,159 @@ func Gen() (err error) {
 		}
 
 		for _, path := range files {
-			command := fmt.Sprintf("protoc -I%s -I%s %s --openapiv2_out=%s",
-				config.C.ProtoDir(),
-				filepath.Join(config.C.ProtoDir(), "third_party"),
+			// 检查是否是插件文件
+			pluginName := getPluginNameFromFilePath(path)
+			var pluginProtoDir string
+			var outputDir string
+
+			if pluginName != "" {
+				// 插件文件处理：找到 proto 目录在路径中的位置
+				protoPath := filepath.Join("", config.C.ProtoDir()) + string(filepath.Separator)
+				descProtoIndex := strings.Index(path, protoPath)
+				if descProtoIndex == -1 {
+					// 如果找不到 proto 路径模式，尝试查找路径末尾是否以 proto 目录结尾
+					if strings.HasSuffix(filepath.Dir(path), filepath.Join("", config.C.ProtoDir())) {
+						pluginProtoDir = filepath.Dir(path)
+					} else {
+						return fmt.Errorf("invalid plugin proto path: %s", path)
+					}
+				} else {
+					pluginProtoDir = path[:descProtoIndex+len(protoPath)]
+				}
+				// 插件文件直接生成到 plugins/{插件名}/ 目录下
+				outputDir = filepath.Join(config.C.Gen.Swagger.Output, "plugins", pluginName)
+			} else {
+				// 普通 Proto 文件直接生成到根目录下
+				outputDir = config.C.Gen.Swagger.Output
+			}
+
+			// 创建输出目录结构
+			if err := os.MkdirAll(outputDir, 0o755); err != nil {
+				return err
+			}
+
+			// 为插件文件添加插件路径到 protoc 的 -I 参数
+			var includeArgs []string
+			if pluginName != "" {
+				includeArgs = append(includeArgs, "-I"+pluginProtoDir)
+				// 还需要包含插件的 third_party 目录
+				pluginThirdParty := filepath.Join(pluginProtoDir, "third_party")
+				if pathx.FileExists(pluginThirdParty) {
+					includeArgs = append(includeArgs, "-I"+pluginThirdParty)
+				}
+			}
+			includeArgs = append(includeArgs, "-I"+config.C.ProtoDir())
+			includeArgs = append(includeArgs, "-I"+filepath.Join(config.C.ProtoDir(), "third_party"))
+
+			command := fmt.Sprintf("protoc %s %s --openapiv2_out=%s",
+				strings.Join(includeArgs, " "),
 				path,
-				config.C.Gen.Swagger.Output,
+				outputDir,
 			)
-			_, err := execx.Run(command, config.C.Wd())
+			_, err = execx.Run(command, config.C.Wd())
 			if err != nil {
 				return err
 			}
 		}
 	}
 
+	// 统一的 merge 处理，合并所有生成的 swagger 文件
+	if config.C.Gen.Swagger.Merge {
+		err = mergeSwaggerFiles()
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+// mergeSwaggerFiles 递归扫描并合并所有的 swagger 文件
+func mergeSwaggerFiles() error {
+	swaggerJson := embeded.ReadTemplateFile(filepath.Join("swagger", "swagger.json.tpl"))
+
+	swaggerJsonG, err := genius.NewFromRawJSON(swaggerJson)
+	if err != nil {
+		return err
+	}
+
+	// 递归扫描所有 swagger 文件
+	swaggerFiles, err := findAllSwaggerFiles(config.C.Gen.Swagger.Output)
+	if err != nil {
+		return err
+	}
+
+	// 合并所有文件的 paths
+	for _, filePath := range swaggerFiles {
+		// 跳过主 swagger.json 文件
+		if filepath.Base(filePath) == "swagger.json" {
+			continue
+		}
+
+		file, err := os.ReadFile(filePath)
+		if err != nil {
+			logx.Errorf("failed to read swagger file %s: %v", filePath, err)
+			continue
+		}
+
+		g, err := genius.NewFromRawJSON(file)
+		if err != nil {
+			logx.Errorf("failed to parse swagger file %s: %v", filePath, err)
+			continue
+		}
+
+		// 合并 paths
+		paths := g.Get("paths")
+		if paths != nil {
+			pathsMarshal, _ := json.Marshal(paths)
+			pathMaps := make(map[string]any)
+			_ = json.Unmarshal(pathsMarshal, &pathMaps)
+
+			for pmk, pmv := range pathMaps {
+				_ = swaggerJsonG.Set(fmt.Sprintf("paths.%s", pmk), pmv)
+			}
+		}
+
+		// 合并 definitions（如果存在）
+		definitions := g.Get("definitions")
+		if definitions != nil {
+			definitionsMarshal, _ := json.Marshal(definitions)
+			definitionsMap := make(map[string]any)
+			_ = json.Unmarshal(definitionsMarshal, &definitionsMap)
+
+			for defKey, defValue := range definitionsMap {
+				_ = swaggerJsonG.Set(fmt.Sprintf("definitions.%s", defKey), defValue)
+			}
+		}
+	}
+
+	// 写入合并后的文件
+	encodeToJSON, err := swaggerJsonG.EncodeToPrettyJSON()
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(filepath.Join(config.C.SwaggerDir(), "swagger.json"), encodeToJSON, 0o644)
+}
+
+// findAllSwaggerFiles 递归查找所有的 swagger JSON 文件
+func findAllSwaggerFiles(dir string) ([]string, error) {
+	var files []string
+
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// 只处理 .json 文件
+		if !info.IsDir() && strings.HasSuffix(info.Name(), ".json") {
+			files = append(files, path)
+		}
+
+		return nil
+	})
+
+	return files, err
 }
 
 func adjustHttpPath(path string) string {

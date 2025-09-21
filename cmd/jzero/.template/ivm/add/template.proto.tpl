@@ -3,7 +3,6 @@ syntax = "proto3";
 package {{ .Package }}{{ .Version }}pb;
 
 import "google/api/annotations.proto";
-import "validate/validate.proto";
 import "grpc-gateway/protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "./pb/{{ .Package }}{{ .Version }}pb";

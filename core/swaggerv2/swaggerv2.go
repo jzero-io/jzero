@@ -66,7 +66,7 @@ const defaultSwaggerTemplate = `
         layout: "StandaloneLayout",
 		validatorUrl: null,
         urls: [
-			{{range $k, $v := .SwaggerJsonsPath}}{url: "swagger/{{ $v }}", name: "{{ $v }}"},
+			{{range $k, $v := .SwaggerJsonsPath}}{url: "swagger?path={{ $v }}", name: "{{ $v }}"},
 			{{end}}
 		]
       })
@@ -115,78 +115,68 @@ func RegisterRoutes(server *rest.Server, op ...opts.Opt[Swaggerv2Opts]) {
 
 	server.AddRoute(rest.Route{
 		Method:  http.MethodGet,
-		Path:    "/swagger/:path",
-		Handler: rawHandler(o),
-	})
-
-	server.AddRoute(rest.Route{
-		Method:  http.MethodGet,
 		Path:    "/swagger",
-		Handler: uiHandler(o),
+		Handler: swaggerHandler(o),
 	})
 }
 
-func rawHandler(config Swaggerv2Opts) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var swaggerPath string
-		err := filepath.Walk(config.SwaggerPath, func(path string, info os.FileInfo, err error) error {
-			if info.Name() == filepath.Base(r.URL.Path) {
-				swaggerPath = path
-			}
-			return nil
-		})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-
-		file, err := os.ReadFile(swaggerPath)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		_, _ = w.Write(file)
-	}
-}
-
-func uiHandler(config Swaggerv2Opts) http.HandlerFunc {
+func swaggerHandler(config Swaggerv2Opts) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if r.FormValue("path") != "" {
+			file, err := os.ReadFile(filepath.Join(config.SwaggerPath, r.FormValue("path")))
+			if err != nil {
+				http.Error(rw, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			_, _ = rw.Write(file)
+		} else {
+			rw.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		if strings.HasSuffix(r.URL.Path, "/") {
-			http.Redirect(rw, r, strings.TrimSuffix(r.RequestURI, "/"), 301)
+			if strings.HasSuffix(r.URL.Path, "/") {
+				http.Redirect(rw, r, strings.TrimSuffix(r.RequestURI, "/"), 301)
+			}
+
+			swaggerJsonsPath, err := getSwaggerFiles(config.SwaggerPath)
+			if err != nil {
+				http.Error(rw, err.Error(), http.StatusInternalServerError)
+			}
+
+			uiHTML, _ := templatex.ParseTemplate(map[string]any{
+				"SwaggerHost":      config.SwaggerHost,
+				"SwaggerJsonsPath": swaggerJsonsPath,
+			}, []byte(config.SwaggerTemplate))
+			_, _ = rw.Write(uiHTML)
 		}
-
-		swaggerJsonsPath, err := getSwaggerFiles(config.SwaggerPath)
-		if err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
-
-		uiHTML, _ := templatex.ParseTemplate(map[string]any{
-			"SwaggerHost":      config.SwaggerHost,
-			"SwaggerJsonsPath": swaggerJsonsPath,
-		}, []byte(config.SwaggerTemplate))
-		_, _ = rw.Write(uiHTML)
 	}
 }
 
 func getSwaggerFiles(dir string) ([]string, error) {
+	return getSwaggerFilesRecursive(dir, dir)
+}
+
+func getSwaggerFilesRecursive(rootDir, currentDir string) ([]string, error) {
 	var files []string
 
-	swaggerDir, err := os.ReadDir(dir)
+	swaggerDir, err := os.ReadDir(currentDir)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, swaggerFile := range swaggerDir {
 		if swaggerFile.IsDir() {
-			filenames, err := getSwaggerFiles(filepath.Join(dir, swaggerFile.Name()))
+			filenames, err := getSwaggerFilesRecursive(rootDir, filepath.Join(currentDir, swaggerFile.Name()))
 			if err != nil {
 				return nil, err
 			}
 			files = append(files, filenames...)
 		} else {
 			if strings.HasSuffix(swaggerFile.Name(), ".json") {
-				files = append(files, filepath.Join(swaggerFile.Name()))
+				// 计算相对于根目录的路径
+				relPath, err := filepath.Rel(rootDir, filepath.Join(currentDir, swaggerFile.Name()))
+				if err != nil {
+					return nil, err
+				}
+				files = append(files, relPath)
 			}
 		}
 	}
