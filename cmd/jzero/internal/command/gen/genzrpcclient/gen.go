@@ -13,6 +13,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/generator"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/new"
@@ -21,6 +22,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/plugin"
 )
 
 type DirContext struct {
@@ -120,6 +122,20 @@ func Generate(genModule bool) (err error) {
 		if err != nil {
 			return err
 		}
+
+		// 增加 plugins 的 proto 文件
+		plugins, err := plugin.GetPlugins()
+		if err == nil {
+			for _, p := range plugins {
+				if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
+					pluginFiles, err := desc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
+					if err != nil {
+						return err
+					}
+					files = append(files, pluginFiles...)
+				}
+			}
+		}
 	}
 
 	for _, v := range config.C.Gen.Zrpcclient.DescIgnore {
@@ -147,6 +163,9 @@ func Generate(genModule bool) (err error) {
 		return err
 	}
 
+	// 获取所有插件信息，用于后续判断文件来源
+	plugins, _ := plugin.GetPlugins()
+
 	var services []string
 	for _, fp := range files {
 		parser := rpcparser.NewDefaultProtoParser()
@@ -170,7 +189,30 @@ func Generate(genModule bool) (err error) {
 		if err != nil {
 			return err
 		}
-		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s --go_out=%s --go-grpc_out=%s %s", config.C.ProtoDir(), filepath.Join(config.C.ProtoDir(), "third_party"), pbDir, pbDir, fp), wd)
+
+		// 构建 protoc 命令，包含所有可能的导入路径
+		var importPaths []string
+		importPaths = append(importPaths, config.C.ProtoDir())
+		importPaths = append(importPaths, filepath.Join(config.C.ProtoDir(), "third_party"))
+
+		// 检查当前文件是否来自插件，如果是，添加对应的插件导入路径
+		for _, p := range plugins {
+			pluginProtoDir := filepath.Join(p.Path, "desc", "proto")
+			if pathx.FileExists(pluginProtoDir) {
+				importPaths = append(importPaths, pluginProtoDir)
+				importPaths = append(importPaths, filepath.Join(pluginProtoDir, "third_party"))
+			}
+		}
+
+		// 构建 -I 参数
+		var protocolIncludePaths []string
+		for _, path := range importPaths {
+			protocolIncludePaths = append(protocolIncludePaths, fmt.Sprintf("-I%s", path))
+		}
+
+		protocCmd := fmt.Sprintf("protoc %s --go_out=%s --go-grpc_out=%s %s",
+			strings.Join(protocolIncludePaths, " "), pbDir, pbDir, fp)
+		resp, err := execx.Run(protocCmd, wd)
 		if err != nil {
 			return errors.Errorf("err: [%v], resp: [%s]", err, resp)
 		}
@@ -186,11 +228,24 @@ func Generate(genModule bool) (err error) {
 		}
 	}
 
+	// 检查是否有插件
+	hasPlugins := len(plugins) > 0
+	for _, p := range plugins {
+		if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
+			pluginProtoFiles, err := desc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
+			if err == nil && len(pluginProtoFiles) > 0 {
+				hasPlugins = true
+				break
+			}
+		}
+	}
+
 	// gen clientset and options
 	template, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "clientset.go.tpl")), map[string]any{
-		"Module":   config.C.Gen.Zrpcclient.GoModule,
-		"Package":  config.C.Gen.Zrpcclient.GoPackage,
-		"Services": services,
+		"Module":     config.C.Gen.Zrpcclient.GoModule,
+		"Package":    config.C.Gen.Zrpcclient.GoPackage,
+		"Services":   services,
+		"HasPlugins": hasPlugins,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "clientset.go.tpl"))))
 	if err != nil {
 		return err
@@ -220,6 +275,177 @@ func Generate(genModule bool) (err error) {
 			return err
 		}
 		err = os.WriteFile(filepath.Join(config.C.Gen.Zrpcclient.Output, "go.mod"), template, 0o644)
+		if err != nil {
+			return err
+		}
+	}
+
+	// 生成插件相关文件
+	err = generatePluginFiles(plugins, config.C.Gen.Zrpcclient.GoModule, config.C.Gen.Zrpcclient.Output)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func generatePluginFiles(plugins []plugin.Plugin, goModule, output string) error {
+	if len(plugins) == 0 {
+		return nil
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	var pluginNames []string
+
+	// 为每个插件生成完整的文件结构
+	for _, p := range plugins {
+		if !pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
+			continue
+		}
+
+		// 获取插件的 proto 文件
+		pluginProtoFiles, err := desc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
+		if err != nil || len(pluginProtoFiles) == 0 {
+			continue
+		}
+
+		var pluginServices []string
+
+		// 1. 为插件生成 protobuf model 文件
+		pluginModelDir := filepath.Join(output, "plugins", p.Name, "model")
+		err = os.MkdirAll(pluginModelDir, 0o755)
+		if err != nil {
+			return err
+		}
+
+		// 解析插件的服务并生成 model
+		for _, fp := range pluginProtoFiles {
+			parser := rpcparser.NewDefaultProtoParser()
+			parse, err := parser.Parse(fp, true)
+			if err != nil {
+				continue
+			}
+
+			// 收集服务名称
+			for _, service := range parse.Service {
+				pluginServices = append(pluginServices, service.Name)
+			}
+
+			// 为每个插件的 proto 文件生成 Go 代码
+			// 构建 protoc 命令，包含所有可能的导入路径
+			var importPaths []string
+			importPaths = append(importPaths, config.C.ProtoDir())
+			importPaths = append(importPaths, filepath.Join(config.C.ProtoDir(), "third_party"))
+			importPaths = append(importPaths, filepath.Join(p.Path, "desc", "proto"))
+			importPaths = append(importPaths, filepath.Join(p.Path, "desc", "proto", "third_party"))
+
+			// 构建 -I 参数
+			var protocolIncludePaths []string
+			for _, path := range importPaths {
+				protocolIncludePaths = append(protocolIncludePaths, fmt.Sprintf("-I%s", path))
+			}
+
+			protocCmd := fmt.Sprintf("protoc %s --go_out=%s --go-grpc_out=%s %s",
+				strings.Join(protocolIncludePaths, " "), pluginModelDir, pluginModelDir, fp)
+			resp, err := execx.Run(protocCmd, wd)
+			if err != nil {
+				return errors.Errorf("err: [%v], resp: [%s]", err, resp)
+			}
+		}
+
+		if len(pluginServices) == 0 {
+			continue
+		}
+
+		// 2. 为插件生成 typed 文件 (使用 go-zero 的生成器)
+		g := generator.NewGenerator(config.C.Gen.Style, false)
+
+		for _, fp := range pluginProtoFiles {
+			parser := rpcparser.NewDefaultProtoParser()
+			parse, err := parser.Parse(fp, true)
+			if err != nil {
+				continue
+			}
+
+			// 为每个服务创建目录（类似主服务的处理方式）
+			pluginDirContext := DirContext{
+				ImportBase:      filepath.Join(goModule, "plugins", p.Name),
+				PbPackage:       parse.PbPackage,
+				OptionGoPackage: parse.GoPackage,
+				Output:          filepath.Join(output, "plugins", p.Name),
+			}
+
+			for _, service := range parse.Service {
+				_ = os.MkdirAll(filepath.Join(pluginDirContext.GetCall().Filename, strings.ToLower(service.Name)), 0o755)
+			}
+
+			// 为整个 proto 文件生成客户端代码（类似主服务的处理方式）
+			err = g.GenCall(pluginDirContext, parse, &conf.Config{
+				NamingFormat: config.C.Gen.Style,
+			}, &generator.ZRpcContext{
+				Multiple:    true,
+				IsGenClient: true,
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		pluginNames = append(pluginNames, p.Name)
+
+		// 3. 生成单个插件的聚合文件
+		pluginTemplate, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "plugin.go.tpl")), map[string]any{
+			"Module":     goModule,
+			"PluginName": p.Name,
+			"Services":   pluginServices,
+		}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "plugin.go.tpl"))))
+		if err != nil {
+			return err
+		}
+
+		formated, err := gosimports.Process("", pluginTemplate, nil)
+		if err != nil {
+			return errors.Errorf("format plugin go file meet error: %v", err)
+		}
+
+		pluginDir := filepath.Join(output, "plugins")
+		err = os.MkdirAll(pluginDir, 0o755)
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile(filepath.Join(pluginDir, p.Name+".go"), formated, 0o644)
+		if err != nil {
+			return err
+		}
+	}
+
+	// 4. 生成主 plugins.go 文件
+	if len(pluginNames) > 0 {
+		pluginsTemplate, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "plugins.go.tpl")), map[string]any{
+			"Module":      goModule,
+			"PluginNames": pluginNames,
+		}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "plugins.go.tpl"))))
+		if err != nil {
+			return err
+		}
+
+		formated, err := gosimports.Process("", pluginsTemplate, nil)
+		if err != nil {
+			return errors.Errorf("format plugins go file meet error: %v", err)
+		}
+
+		pluginDir := filepath.Join(output, "plugins")
+		err = os.MkdirAll(pluginDir, 0o755)
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile(filepath.Join(pluginDir, "plugins.go"), formated, 0o644)
 		if err != nil {
 			return err
 		}

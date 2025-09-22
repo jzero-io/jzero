@@ -4,29 +4,52 @@ package {{.Package}}
 
 import (
     "github.com/zeromicro/go-zero/zrpc"
+	{{if .HasPlugins}}"{{.Module}}/plugins"
 
-	{{range $v := .Services}}{{$v | ToCamel | lower}} "{{$.Module}}/typed/{{$v | lower}}"
+	{{end}}{{range $v := .Services}}{{$v | ToCamel | lower}} "{{$.Module}}/typed/{{$v | lower}}"
 	{{end}}
 )
 
 type Clientset interface {
+	Direct() zrpc.Client
+
 	{{range $v := .Services}}{{$v | ToCamel | FirstUpper}}() {{$v | ToCamel | lower}}.{{$v | ToCamel | FirstUpper}}
-	{{end}}}
+	{{end}}{{if .HasPlugins}}
+	Plugins() plugins.Plugins
+	{{end}}
+}
 
 type clientset struct {
+	// direct client to request
+	direct zrpc.Client
+
 	{{range $v := .Services}}{{$v | ToCamel | FirstLower}} {{$v | ToCamel | lower}}.{{$v | ToCamel | FirstUpper}}
-	{{end}}}
+	{{end}}{{if .HasPlugins}}
+	plugins plugins.Plugins
+	{{end}}
+}
+
+func (cs *clientset) Direct() zrpc.Client {
+	return cs.direct
+}
 
 {{range $v := .Services}}func (cs *clientset) {{$v | FirstUpper | ToCamel}}() {{$v | ToCamel |lower}}.{{$v | ToCamel | FirstUpper}} {
 	return cs.{{$v | ToCamel | FirstLower}}
+}
+
+{{end}}{{if .HasPlugins}}func (cs *clientset) Plugins() plugins.Plugins {
+	return cs.plugins
 }
 
 {{end}}
 
 func NewClientset(cli zrpc.Client) (Clientset, error) {
     cs := clientset{
+		direct: cli,
 		{{range $v := .Services}}{{$v | ToCamel | FirstLower}}: {{$v | ToCamel | lower}}.New{{$v | ToCamel | FirstUpper}}(cli),
-		{{end}}}
+		{{end}}{{if .HasPlugins}}plugins: plugins.NewPlugins(cli),
+		{{end}}
+	}
 
 	return &cs, nil
 }
