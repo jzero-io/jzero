@@ -22,6 +22,9 @@ const (
 	// NodeType means redis node.
 	NodeType = "node"
 
+	// SentinelType means redis sentinel.
+	SentinelType = "sentinel"
+
 	// Nil is an alias of redis.Nil.
 	Nil = red.Nil
 
@@ -53,15 +56,16 @@ type (
 		Score float64
 	}
 
-	// Redis defines a redis node/cluster. It is thread-safe.
+	// Redis defines a redis node/cluster/sentinel. It is thread-safe.
 	Redis struct {
-		Addr  string
-		Type  string
-		User  string
-		Pass  string
-		tls   bool
-		brk   breaker.Breaker
-		hooks []red.Hook
+		Addr       string
+		Type       string
+		User       string
+		Pass       string
+		tls        bool
+		brk        breaker.Breaker
+		hooks      []red.Hook
+		masterName string
 	}
 
 	// RedisNode interface represents a redis node.
@@ -136,6 +140,12 @@ func NewRedis(conf RedisConf, opts ...Option) (*Redis, error) {
 
 	if conf.Type == ClusterType {
 		opts = append([]Option{Cluster()}, opts...)
+	}
+	if conf.Type == SentinelType {
+		opts = append([]Option{func(r *Redis) { r.Type = SentinelType }}, opts...)
+		if len(conf.MasterName) > 0 {
+			opts = append([]Option{WithMasterName(conf.MasterName)}, opts...)
+		}
 	}
 	if len(conf.User) > 0 {
 		opts = append([]Option{WithUser(conf.User)}, opts...)
@@ -2675,6 +2685,13 @@ func WithUser(user string) Option {
 	}
 }
 
+// WithMasterName customizes the given Redis with master name for sentinel.
+func WithMasterName(masterName string) Option {
+	return func(r *Redis) {
+		r.masterName = masterName
+	}
+}
+
 func acceptable(err error) bool {
 	return err == nil || errorx.In(err, red.Nil, context.Canceled)
 }
@@ -2685,6 +2702,8 @@ func getRedis(r *Redis) (RedisNode, error) {
 		return getCluster(r)
 	case NodeType:
 		return getClient(r)
+	case SentinelType:
+		return getSentinel(r)
 	default:
 		return nil, fmt.Errorf("redis type '%s' is not supported", r.Type)
 	}

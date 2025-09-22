@@ -14,13 +14,16 @@ var (
 
 	// ErrEmptyKey is an error that indicates no redis key is set.
 	ErrEmptyKey = errors.New("empty redis key")
+
+	// ErrEmptyMasterName is an error that indicates no master name is set for sentinel.
+	ErrEmptyMasterName = errors.New("empty master name for sentinel")
 )
 
 type (
 	// A RedisConf is a redis config.
 	RedisConf struct {
 		Host     string
-		Type     string `json:",default=node,options=node|cluster"`
+		Type     string `json:",default=node,options=node|cluster|sentinel"`
 		User     string `json:",optional"`
 		Pass     string `json:",optional"`
 		Tls      bool   `json:",optional"`
@@ -28,6 +31,9 @@ type (
 
 		// PingTimeout is the timeout for ping redis.
 		PingTimeout time.Duration `json:",default=1s"`
+
+		// MasterName is the master name for sentinel mode only.
+		MasterName string `json:",optional"`
 	}
 
 	// A RedisKeyConf is a redis config with key.
@@ -44,6 +50,12 @@ func (rc RedisConf) NewRedis() *Redis {
 	if rc.Type == ClusterType {
 		opts = append(opts, Cluster())
 	}
+	if rc.Type == SentinelType {
+		opts = append(opts, func(r *Redis) { r.Type = SentinelType })
+		if len(rc.MasterName) > 0 {
+			opts = append(opts, WithMasterName(rc.MasterName))
+		}
+	}
 	if len(rc.User) > 0 {
 		opts = append(opts, WithUser(rc.User))
 	}
@@ -59,12 +71,23 @@ func (rc RedisConf) NewRedis() *Redis {
 
 // Validate validates the RedisConf.
 func (rc RedisConf) Validate() error {
-	if len(rc.Host) == 0 {
-		return ErrEmptyHost
-	}
-
 	if len(rc.Type) == 0 {
 		return ErrEmptyType
+	}
+
+	if rc.Type == SentinelType {
+		// For sentinel, Host and MasterName are required
+		if len(rc.Host) == 0 {
+			return ErrEmptyHost
+		}
+		if len(rc.MasterName) == 0 {
+			return ErrEmptyMasterName
+		}
+	} else {
+		// For node and cluster types, Host is required
+		if len(rc.Host) == 0 {
+			return ErrEmptyHost
+		}
 	}
 
 	return nil
