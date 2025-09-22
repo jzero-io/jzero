@@ -5,7 +5,7 @@ import (
     "github.com/zeromicro/go-zero/gateway"
     "github.com/zeromicro/go-zero/zrpc"
     {{ if has "model" .Features }}"github.com/zeromicro/go-zero/core/stores/sqlx"{{ end }}
-    {{ if has "redis" .Features }}"github.com/zeromicro/go-zero/core/stores/redis"{{ end }}
+    {{ if has "redis" .Features }}"github.com/jzero-io/jzero/core/stores/redis"{{ end }}
 )
 
 type Config struct {

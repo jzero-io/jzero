@@ -4,7 +4,7 @@ import (
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
 	{{ if has "model" .Features }}"github.com/jzero-io/jzero/core/stores/modelx"{{ end }}
 	{{ if has "redis" .Features }}"github.com/jzero-io/jzero/core/stores/cache"
-	"github.com/zeromicro/go-zero/core/stores/redis"
+	"github.com/zeromicro/jzero-io/jzero/stores/redis"
 	"github.com/pkg/errors"{{ end }}
 
 	"{{ .Module }}/internal/config"
