@@ -33,9 +33,7 @@ import (
 	mcppkg "github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mcp"
 )
 
-var (
-	WorkingDir string
-)
+var WorkingDir string
 
 // embeded
 var (
@@ -45,7 +43,7 @@ var (
 
 // ldflags
 var (
-	Version = "0.51.0"
+	Version = "0.60.0"
 	Commit  string
 	Date    string
 )

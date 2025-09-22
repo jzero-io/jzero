@@ -242,7 +242,7 @@ func installProtoc() error {
 
 	// 增加可执行权限
 	// chmod +x protoc
-	err = os.Chmod(protocPath, 0755)
+	err = os.Chmod(protocPath, 0o755)
 	if err != nil {
 		return err
 	}

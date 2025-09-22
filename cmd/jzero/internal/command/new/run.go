@@ -19,9 +19,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
-var (
-	base64Matcher = regexp.MustCompile(`^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{4})$`)
-)
+var base64Matcher = regexp.MustCompile(`^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{4})$`)
 
 func IsBase64(base64 string) bool {
 	return base64Matcher.MatchString(base64)
@@ -110,9 +108,9 @@ func checkWrite(path string, bytes []byte) error {
 	// 增加可执行权限
 	if lo.Contains(config.C.New.ExecutableExtensions, filepath.Ext(path)) {
 		logx.Debugf("Write executable file: %s", path)
-		return os.WriteFile(path, bytesFormat, 0755)
+		return os.WriteFile(path, bytesFormat, 0o755)
 	}
-	return os.WriteFile(path, bytesFormat, 0644)
+	return os.WriteFile(path, bytesFormat, 0o644)
 }
 
 func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {

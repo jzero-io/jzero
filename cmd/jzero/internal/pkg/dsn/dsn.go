@@ -26,19 +26,19 @@ func ParseDSN(driverName, dsn string) (meta map[string]string, err error) {
 	case "mysql":
 		meta, err = parseMySQLDSN(dsn)
 		if err != nil {
-			return
+			return meta, err
 		}
 	case "postgres", "pgx":
 		meta, err = parsePostgresDSN(dsn)
 		if err != nil {
-			return
+			return meta, err
 		}
 	default:
 		// Try to parse the DSN and see if the scheme contains a known driver name.
 		u, e := url.Parse(dsn)
 		if e != nil {
 			// dsn is not a valid URL, so just ignore
-			return
+			return meta, err
 		}
 		if driverName != u.Scheme {
 			// In some cases the driver is registered under a non-official name.

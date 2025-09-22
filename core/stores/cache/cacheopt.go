@@ -12,6 +12,7 @@ type (
 	Options struct {
 		Expiry         time.Duration
 		NotFoundExpiry time.Duration
+		CachePrefix    string
 	}
 
 	// Option defines the method to customize an Options.
@@ -45,5 +46,12 @@ func WithExpiry(expiry time.Duration) Option {
 func WithNotFoundExpiry(expiry time.Duration) Option {
 	return func(o *Options) {
 		o.NotFoundExpiry = expiry
+	}
+}
+
+// WithCachePrefix returns a func to customize an Options with given cache prefix.
+func WithCachePrefix(prefix string) Option {
+	return func(o *Options) {
+		o.CachePrefix = prefix
 	}
 }

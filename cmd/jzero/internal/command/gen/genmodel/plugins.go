@@ -113,9 +113,7 @@ func (jm *JzeroModel) GenDDL(conns []Conn, tables []string) ([]string, error) {
 		return nil, err
 	}
 
-	var (
-		writeTables []string
-	)
+	var writeTables []string
 
 	if len(config.C.Gen.ModelDatasourceTable) == 1 && config.C.Gen.ModelDatasourceTable[0] == "*" {
 		config.C.Gen.ModelDatasourceTable = tables

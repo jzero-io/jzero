@@ -2065,6 +2065,7 @@ func TestRedis_checkConnection(t *testing.T) {
 }
 
 func runOnRedis(t *testing.T, fn func(client *Redis)) {
+	t.Helper()
 	logx.Disable()
 
 	s := miniredis.RunT(t)
@@ -2075,6 +2076,7 @@ func runOnRedis(t *testing.T, fn func(client *Redis)) {
 }
 
 func runOnRedisWithAccount(t *testing.T, user, pass string, fn func(client *Redis)) {
+	t.Helper()
 	logx.Disable()
 
 	s := miniredis.RunT(t)
@@ -2088,6 +2090,7 @@ func runOnRedisWithAccount(t *testing.T, user, pass string, fn func(client *Redi
 }
 
 func runOnRedisWithError(t *testing.T, fn func(client *Redis)) {
+	t.Helper()
 	logx.Disable()
 
 	s := miniredis.RunT(t)
@@ -2096,6 +2099,7 @@ func runOnRedisWithError(t *testing.T, fn func(client *Redis)) {
 }
 
 func runOnRedisTLS(t *testing.T, fn func(client *Redis)) {
+	t.Helper()
 	logx.Disable()
 
 	s, err := miniredis.RunTLS(&tls.Config{

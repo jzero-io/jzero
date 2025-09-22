@@ -165,5 +165,5 @@ func mySQLConfigFromDSN(dsn string) (cfg *mySQLConfig, err error) {
 		}
 	}
 
-	return
+	return cfg, err
 }
