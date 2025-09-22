@@ -451,6 +451,62 @@ func (g *Golang) genPbTypesModel(protoFiles []string) ([]*GeneratedFile, error) 
 	return generatedFiles, nil
 }
 
+func (g *Golang) genPluginPbTypesModel(protoFiles []string, pluginName, pluginPath string) ([]*GeneratedFile, error) {
+	tmpDir, err := os.MkdirTemp(os.TempDir(), "")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmpDir)
+
+	for _, pf := range protoFiles {
+		resp, err := execx.Run(fmt.Sprintf("protoc -I%s -I%s -I%s -I%s --go_out=%s %s",
+			filepath.Join(pluginPath, "desc", "proto"),
+			filepath.Join(pluginPath, "desc", "proto", "third_party"),
+			gconfig.C.ProtoDir(),
+			filepath.Join(gconfig.C.ProtoDir(), "third_party"),
+			tmpDir, pf), g.wd)
+		if err != nil {
+			return nil, errors.Errorf("err: [%v], resp: [%s]", err, resp)
+		}
+	}
+
+	var generatedFiles []*GeneratedFile
+
+	err = filepath.Walk(tmpDir, func(filePath string, fileInfo os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if fileInfo.IsDir() {
+			return nil
+		}
+
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to read file: %v", err)
+		}
+
+		rel, err := filepath.Rel(tmpDir, filePath)
+		if err != nil {
+			return err
+		}
+
+		generatedFile := &GeneratedFile{
+			Path:    filepath.Join("plugins", pluginName, "model", rel),
+			Content: *bytes.NewBuffer(content),
+		}
+
+		generatedFiles = append(generatedFiles, generatedFile)
+
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to process directory: %v", err)
+	}
+
+	return generatedFiles, nil
+}
+
 func (g *Golang) genPlugins(plugins []plugin.Plugin) ([]*GeneratedFile, error) {
 	var files []*GeneratedFile
 
@@ -473,6 +529,41 @@ func (g *Golang) genPlugins(plugins []plugin.Plugin) ([]*GeneratedFile, error) {
 			}
 		}
 
+		// 解析该 plugin 的 proto 文件
+		var pluginProtoFiles []string
+		var pluginFds []*desc.FileDescriptor
+		if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
+			protoFiles, err := jzerodesc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
+			if err == nil {
+				pluginProtoFiles = protoFiles
+
+				// 解析 proto 文件
+				var protoParser protoparse.Parser
+				protoParser.ImportPaths = []string{
+					filepath.Join(p.Path, "desc", "proto"),
+					filepath.Join(p.Path, "desc", "proto", "third_party"),
+					gconfig.C.ProtoDir(),
+					filepath.Join(gconfig.C.ProtoDir(), "third_party"),
+				}
+
+				var protoRelFiles []string
+				for _, pf := range pluginProtoFiles {
+					rel, err := filepath.Rel(filepath.Join(p.Path, "desc", "proto"), pf)
+					if err != nil {
+						continue
+					}
+					protoRelFiles = append(protoRelFiles, rel)
+				}
+
+				if len(protoRelFiles) > 0 {
+					fds, err := protoParser.ParseFiles(protoRelFiles...)
+					if err == nil {
+						pluginFds = fds
+					}
+				}
+			}
+		}
+
 		if len(apiSpecs) > 0 {
 			// 生成 plugin 的 model 文件
 			pluginModelFiles, err := g.genPluginApiTypesModel(apiSpecs, p.Name)
@@ -482,7 +573,7 @@ func (g *Golang) genPlugins(plugins []plugin.Plugin) ([]*GeneratedFile, error) {
 			files = append(files, pluginModelFiles...)
 
 			// 解析 plugin 的 api 生成 typed 文件
-			rhis, err := jparser.Parse(g.config, nil, apiSpecs)
+			rhis, err := jparser.Parse(g.config, pluginFds, apiSpecs)
 			if err != nil {
 				return nil, err
 			}
@@ -495,6 +586,30 @@ func (g *Golang) genPlugins(plugins []plugin.Plugin) ([]*GeneratedFile, error) {
 				}
 				files = append(files, pluginTypedFiles...)
 			}
+		} else if len(pluginFds) > 0 {
+			// 只有 proto 文件的情况
+			rhis, err := jparser.Parse(g.config, pluginFds, nil)
+			if err != nil {
+				return nil, err
+			}
+
+			// 生成 plugin 的 typed 文件
+			for _, resource := range getResources(rhis) {
+				pluginTypedFiles, err := g.genPluginResources(rhis, resource, p.Name)
+				if err != nil {
+					return nil, err
+				}
+				files = append(files, pluginTypedFiles...)
+			}
+		}
+
+		// 生成 plugin 的 proto model 文件
+		if len(pluginProtoFiles) > 0 {
+			pluginPbFiles, err := g.genPluginPbTypesModel(pluginProtoFiles, p.Name, p.Path)
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, pluginPbFiles...)
 		}
 	}
 
@@ -662,11 +777,43 @@ func (g *Golang) genSinglePluginGoFile(p plugin.Plugin) (*GeneratedFile, error) 
 		}
 	}
 
-	if len(apiSpecs) == 0 {
+	// 解析该 plugin 的 proto 文件
+	var pluginFds []*desc.FileDescriptor
+	if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
+		protoFiles, err := jzerodesc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
+		if err == nil && len(protoFiles) > 0 {
+			// 解析 proto 文件
+			var protoParser protoparse.Parser
+			protoParser.ImportPaths = []string{
+				filepath.Join(p.Path, "desc", "proto"),
+				filepath.Join(p.Path, "desc", "proto", "third_party"),
+				gconfig.C.ProtoDir(),
+				filepath.Join(gconfig.C.ProtoDir(), "third_party"),
+			}
+
+			var protoRelFiles []string
+			for _, pf := range protoFiles {
+				rel, err := filepath.Rel(filepath.Join(p.Path, "desc", "proto"), pf)
+				if err != nil {
+					continue
+				}
+				protoRelFiles = append(protoRelFiles, rel)
+			}
+
+			if len(protoRelFiles) > 0 {
+				fds, err := protoParser.ParseFiles(protoRelFiles...)
+				if err == nil {
+					pluginFds = fds
+				}
+			}
+		}
+	}
+
+	if len(apiSpecs) == 0 && len(pluginFds) == 0 {
 		return nil, nil
 	}
 
-	rhis, err := jparser.Parse(g.config, nil, apiSpecs)
+	rhis, err := jparser.Parse(g.config, pluginFds, apiSpecs)
 	if err != nil {
 		return nil, nil
 	}
@@ -702,12 +849,27 @@ func (g *Golang) genMainPluginsGoFile(plugins []plugin.Plugin) (*GeneratedFile, 
 	// 只收集插件名称，具体实现在各自的文件中
 	var pluginNames []string
 	for _, p := range plugins {
+		hasApiFiles := false
+		hasProtoFiles := false
+
 		// 检查插件是否有API文件
 		if pathx.FileExists(filepath.Join(p.Path, "desc", "api")) {
 			apiFiles, err := jzerodesc.FindRouteApiFiles(filepath.Join(p.Path, "desc", "api"))
 			if err == nil && len(apiFiles) > 0 {
-				pluginNames = append(pluginNames, p.Name)
+				hasApiFiles = true
 			}
+		}
+
+		// 检查插件是否有proto文件
+		if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
+			protoFiles, err := jzerodesc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
+			if err == nil && len(protoFiles) > 0 {
+				hasProtoFiles = true
+			}
+		}
+
+		if hasApiFiles || hasProtoFiles {
+			pluginNames = append(pluginNames, p.Name)
 		}
 	}
 
