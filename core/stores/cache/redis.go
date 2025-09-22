@@ -7,8 +7,9 @@ import (
 
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/stores/cache"
-	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/syncx"
+
+	"github.com/jzero-io/jzero/core/stores/redis"
 )
 
 type redisNode struct {
@@ -151,34 +152,20 @@ func (c redisNode) TakeWithExpireCtx(ctx context.Context, val any, key string, q
 	return c.node.TakeWithExpireCtx(ctx, val, key, query)
 }
 
-// WithExpiry returns a func to customize an Options with given expiry.
-func WithExpiry(expiry time.Duration) cache.Option {
-	return func(o *cache.Options) {
-		o.Expiry = expiry
-	}
-}
-
-// WithNotFoundExpiry returns a func to customize an Options with given not found expiry.
-func WithNotFoundExpiry(expiry time.Duration) cache.Option {
-	return func(o *cache.Options) {
-		o.NotFoundExpiry = expiry
-	}
-}
-
-func NewRedisNode(rds *redis.Redis, errNotFound error, opts ...cache.Option) Cache {
+func NewRedisNode(rds *redis.Redis, errNotFound error, opts ...Option) Cache {
 	singleFlights := syncx.NewSingleFlight()
-	stats := cache.NewStat("redis-cache")
-	node := cache.NewNode(rds, singleFlights, stats, errNotFound, opts...)
+	stats := NewStat("redis-cache")
+	node := NewNode(rds, singleFlights, stats, errNotFound, opts...)
 	return &redisNode{
 		rds:  rds,
 		node: node,
 	}
 }
 
-func NewRedisNodeWithCachePrefix(rds *redis.Redis, errNotFound error, cachePrefix string, opts ...cache.Option) Cache {
+func NewRedisNodeWithCachePrefix(rds *redis.Redis, errNotFound error, cachePrefix string, opts ...Option) Cache {
 	singleFlights := syncx.NewSingleFlight()
-	stats := cache.NewStat("redis-cache")
-	node := cache.NewNode(rds, singleFlights, stats, errNotFound, opts...)
+	stats := NewStat("redis-cache")
+	node := NewNode(rds, singleFlights, stats, errNotFound, opts...)
 	return &redisNode{
 		rds:         rds,
 		node:        node,

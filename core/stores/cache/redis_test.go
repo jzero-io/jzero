@@ -7,7 +7,8 @@ import (
 	"github.com/alicebob/miniredis/v2"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"github.com/zeromicro/go-zero/core/stores/redis"
+
+	"github.com/jzero-io/jzero/core/stores/redis"
 )
 
 func TestRedisNode(t *testing.T) {
