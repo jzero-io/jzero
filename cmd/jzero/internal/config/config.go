@@ -300,12 +300,14 @@ func (c *Config) ProtocVersion() *version.Version {
 	protocVersionOnce.Do(func() {
 		protocVersionResp, err := protoc.Version()
 		if err != nil {
-			panic(err)
+			logx.Debugf("get protoc version failed, %v", err)
+			return
 		}
 		logx.Debugf("protoc version: %s", protocVersionResp)
 		protocVersion, err = version.NewVersion(strings.TrimPrefix(protocVersionResp, "libprotoc "))
 		if err != nil {
-			panic(err)
+			logx.Debugf("new protoc version failed, %v", err)
+			return
 		}
 	})
 	return protocVersion
@@ -315,7 +317,8 @@ func (c *Config) GoctlVersion() *version.Version {
 	goctlVersionOnce.Do(func() {
 		goctlVersionResp, err := execx.Run("goctl -v", "")
 		if err != nil {
-			panic(err)
+			logx.Debugf("get goctl version failed, %v", err)
+			return
 		}
 
 		logx.Debugf("goctl version: %s", goctlVersionResp)
@@ -323,7 +326,8 @@ func (c *Config) GoctlVersion() *version.Version {
 		if len(versionInfo) >= 3 {
 			goctlVersion, err = version.NewVersion(strings.TrimPrefix(versionInfo[2], "v"))
 			if err != nil {
-				panic(err)
+				logx.Debugf("new goctl version failed, %v", err)
+				return
 			}
 		}
 	})
@@ -335,12 +339,14 @@ func (c *Config) ProtocGenGoVersion() *version.Version {
 	protocGenGoVersionOnce.Do(func() {
 		protocGenGoVersionResp, err := protocgengo.Version()
 		if err != nil {
-			panic(err)
+			logx.Debugf("get protoc-gen-go version failed, %v", err)
+			return
 		}
 		logx.Debugf("protoc-gen-go version: %s", protocGenGoVersionResp)
 		protocGenGoVersion, err = version.NewVersion(strings.TrimPrefix(protocGenGoVersionResp, "v"))
 		if err != nil {
-			panic(err)
+			logx.Debugf("new protoc-gen-go version failed, %v", err)
+			return
 		}
 	})
 
@@ -351,12 +357,14 @@ func (c *Config) ProtocGenGoGrpcVersion() *version.Version {
 	protocGenGoGrpcOnce.Do(func() {
 		protocGenGoGrpcVersionResp, err := protocgengogrpc.Version()
 		if err != nil {
-			panic(err)
+			logx.Debugf("get protoc-gen-go-grpc version failed, %v", err)
+			return
 		}
 		logx.Debugf("protoc-gen-go-grpc version: %s", protocGenGoGrpcVersionResp)
 		protocGenGoGrpcVersion, err = version.NewVersion(strings.TrimPrefix(protocGenGoGrpcVersionResp, "v"))
 		if err != nil {
-			panic(err)
+			logx.Debugf("new protoc-gen-go-grpc version failed, %v", err)
+			return
 		}
 	})
 
@@ -367,14 +375,16 @@ func (c *Config) ProtocGenOpenapiv2Version() *version.Version {
 	protocGenOpenapiv2.Do(func() {
 		protocGenOpenapiv2VersionResp, err := execx.Run("protoc-gen-openapiv2 --version", "")
 		if err != nil {
-			panic(err)
+			logx.Debugf("get protoc-gen-openapiv2 version failed, %v", err)
+			return
 		}
 		logx.Debugf("protoc-gen-openapiv2 version: %s", protocGenOpenapiv2VersionResp)
 		versionInfo := strings.Split(protocGenOpenapiv2VersionResp, " ")
 		if len(versionInfo) >= 2 {
 			protocGenOpenapiv2Version, err = version.NewVersion(strings.TrimSuffix(strings.TrimPrefix(versionInfo[1], "v"), ","))
 			if err != nil {
-				panic(err)
+				logx.Debugf("new protoc-gen-openapiv2 version failed, %v", err)
+				return
 			}
 		}
 	})
@@ -386,14 +396,16 @@ func (c *Config) ProtocGenDocVersion() *version.Version {
 	protocGenDocOnce.Do(func() {
 		protocGenDocVersionResp, err := execx.Run("protoc-gen-doc --version", "")
 		if err != nil {
-			panic(err)
+			logx.Debugf("get protoc-gen-doc version failed, %v", err)
+			return
 		}
 		logx.Debugf("protoc-gen-doc version: %s", protocGenDocVersionResp)
 		versionInfo := strings.Split(protocGenDocVersionResp, " ")
 		if len(versionInfo) >= 3 {
 			protocGenDocVersion, err = version.NewVersion(strings.TrimPrefix(versionInfo[2], "v"))
 			if err != nil {
-				panic(err)
+				logx.Debugf("new protoc-gen-doc version failed, %v", err)
+				return
 			}
 		}
 	})
