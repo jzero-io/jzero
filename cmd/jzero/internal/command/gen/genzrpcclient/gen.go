@@ -425,30 +425,28 @@ func generatePluginFiles(plugins []plugin.Plugin, goModule, output string) error
 	}
 
 	// 4. 生成主 plugins.go 文件
-	if len(pluginNames) > 0 {
-		pluginsTemplate, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "plugins.go.tpl")), map[string]any{
-			"Module":      goModule,
-			"PluginNames": pluginNames,
-		}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "plugins.go.tpl"))))
-		if err != nil {
-			return err
-		}
+	pluginsTemplate, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "plugins.go.tpl")), map[string]any{
+		"Module":      goModule,
+		"PluginNames": pluginNames,
+	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "plugins.go.tpl"))))
+	if err != nil {
+		return err
+	}
 
-		formated, err := gosimports.Process("", pluginsTemplate, nil)
-		if err != nil {
-			return errors.Errorf("format plugins go file meet error: %v", err)
-		}
+	formated, err := gosimports.Process("", pluginsTemplate, nil)
+	if err != nil {
+		return errors.Errorf("format plugins go file meet error: %v", err)
+	}
 
-		pluginDir := filepath.Join(output, "plugins")
-		err = os.MkdirAll(pluginDir, 0o755)
-		if err != nil {
-			return err
-		}
+	pluginDir := filepath.Join(output, "plugins")
+	err = os.MkdirAll(pluginDir, 0o755)
+	if err != nil {
+		return err
+	}
 
-		err = os.WriteFile(filepath.Join(pluginDir, "plugins.go"), formated, 0o644)
-		if err != nil {
-			return err
-		}
+	err = os.WriteFile(filepath.Join(pluginDir, "plugins.go"), formated, 0o644)
+	if err != nil {
+		return err
 	}
 
 	return nil
