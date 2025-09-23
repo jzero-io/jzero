@@ -26,6 +26,7 @@ type (
 		Type     string `json:",default=node,options=node|cluster|sentinel"`
 		User     string `json:",optional"`
 		Pass     string `json:",optional"`
+		DB       int    `json:",default=0,range=[0:15]"`
 		Tls      bool   `json:",optional"`
 		NonBlock bool   `json:",default=true"`
 
@@ -61,6 +62,9 @@ func (rc RedisConf) NewRedis() *Redis {
 	}
 	if len(rc.Pass) > 0 {
 		opts = append(opts, WithPass(rc.Pass))
+	}
+	if rc.DB != 0 {
+		opts = append(opts, WithDB(rc.DB))
 	}
 	if rc.Tls {
 		opts = append(opts, WithTLS())

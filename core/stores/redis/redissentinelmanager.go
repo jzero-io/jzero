@@ -17,7 +17,8 @@ var (
 )
 
 func getSentinel(r *Redis) (*red.Client, error) {
-	val, err := sentinelManager.GetResource(r.Addr, func() (io.Closer, error) {
+	key := buildCacheKey(r.Addr, r.DB)
+	val, err := sentinelManager.GetResource(key, func() (io.Closer, error) {
 		var tlsConfig *tls.Config
 		if r.tls {
 			tlsConfig = &tls.Config{
@@ -33,6 +34,7 @@ func getSentinel(r *Redis) (*red.Client, error) {
 			SentinelAddrs:    sentinelAddrs,
 			Username:         r.User,
 			Password:         r.Pass,
+			DB:               r.DB,
 			SentinelPassword: r.Pass, // Reuse Pass field for sentinel password
 			MaxRetries:       maxRetries,
 			MinIdleConns:     idleConns,
@@ -48,7 +50,7 @@ func getSentinel(r *Redis) (*red.Client, error) {
 
 		connCollector.registerClient(&statGetter{
 			clientType: SentinelType,
-			key:        r.Addr,
+			key:        key,
 			poolSize:   sentinelPoolSize,
 			poolStats: func() *red.PoolStats {
 				return store.PoolStats()

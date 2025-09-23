@@ -2,6 +2,7 @@ package redis
 
 import (
 	"crypto/tls"
+	"fmt"
 	"io"
 	"runtime"
 
@@ -22,8 +23,18 @@ var (
 	nodePoolSize = 10 * runtime.GOMAXPROCS(0)
 )
 
+// buildCacheKey constructs a cache key for the resource manager.
+// For backward compatibility, DB 0 doesn't include the #db suffix.
+func buildCacheKey(addr string, db int) string {
+	if db == 0 {
+		return addr
+	}
+	return fmt.Sprintf("%s#%d", addr, db)
+}
+
 func getClient(r *Redis) (*red.Client, error) {
-	val, err := clientManager.GetResource(r.Addr, func() (io.Closer, error) {
+	key := buildCacheKey(r.Addr, r.DB)
+	val, err := clientManager.GetResource(key, func() (io.Closer, error) {
 		var tlsConfig *tls.Config
 		if r.tls {
 			tlsConfig = &tls.Config{
@@ -34,7 +45,7 @@ func getClient(r *Redis) (*red.Client, error) {
 			Addr:         r.Addr,
 			Username:     r.User,
 			Password:     r.Pass,
-			DB:           defaultDatabase,
+			DB:           r.DB,
 			MaxRetries:   maxRetries,
 			MinIdleConns: idleConns,
 			TLSConfig:    tlsConfig,
@@ -49,7 +60,7 @@ func getClient(r *Redis) (*red.Client, error) {
 
 		connCollector.registerClient(&statGetter{
 			clientType: NodeType,
-			key:        r.Addr,
+			key:        key,
 			poolSize:   nodePoolSize,
 			poolStats: func() *red.PoolStats {
 				return store.PoolStats()
