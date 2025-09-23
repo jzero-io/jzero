@@ -64,7 +64,7 @@ func RunCheck(all bool) error {
 	if err != nil {
 		return err
 	}
-	if goctlVersion.LessThan(checkGoctlVersion) {
+	if goctlVersion == nil || goctlVersion.LessThan(checkGoctlVersion) {
 		fmt.Printf("%s goctl to %s\n", color.WithColor("Upgrading tool", color.FgGreen), toolVersionCheck["goctl"])
 		err = golang.Install(fmt.Sprintf("github.com/zeromicro/go-zero/tools/goctl@v%s", toolVersionCheck["goctl"]))
 		if err != nil {
@@ -92,7 +92,7 @@ func RunCheck(all bool) error {
 		if err != nil {
 			return err
 		}
-		if protocVersion.LessThan(checkProtocVersion) {
+		if protocVersion == nil || protocVersion.LessThan(checkProtocVersion) {
 			fmt.Printf("%s protoc to %s\n", color.WithColor("Upgrading tool", color.FgGreen), toolVersionCheck["protoc"])
 			if err = installProtoc(); err != nil {
 				return err
@@ -117,7 +117,7 @@ func RunCheck(all bool) error {
 		if err != nil {
 			return err
 		}
-		if protocGenGoVersion.LessThan(checkProtocGenGoVersion) {
+		if protocGenGoVersion == nil || protocGenGoVersion.LessThan(checkProtocGenGoVersion) {
 			fmt.Printf("%s protoc-gen-go to %s\n", color.WithColor("Upgrading tool", color.FgGreen), toolVersionCheck["protoc-gen-go"])
 			if err = golang.Install(fmt.Sprintf("google.golang.org/protobuf/cmd/protoc-gen-go@v%s", toolVersionCheck["protoc-gen-go"])); err != nil {
 				return err
@@ -142,7 +142,7 @@ func RunCheck(all bool) error {
 		if err != nil {
 			return err
 		}
-		if protocGenGoGrpcVersion.LessThan(checkProtocGenGoGrpcVersion) {
+		if protocGenGoGrpcVersion == nil || protocGenGoGrpcVersion.LessThan(checkProtocGenGoGrpcVersion) {
 			fmt.Printf("%s protoc-gen-go-grpc to %s\n", color.WithColor("Upgrading tool", color.FgGreen), toolVersionCheck["protoc-gen-go-grpc"])
 			if err = golang.Install(fmt.Sprintf("google.golang.org/grpc/cmd/protoc-gen-go-grpc@v%s", toolVersionCheck["protoc-gen-go-grpc"])); err != nil {
 				return err
@@ -166,7 +166,7 @@ func RunCheck(all bool) error {
 		if err != nil {
 			return err
 		}
-		if protocGenOpenapiv2Version.LessThan(checkProtocGenOpenapiv2Version) {
+		if protocGenOpenapiv2Version == nil || protocGenOpenapiv2Version.LessThan(checkProtocGenOpenapiv2Version) {
 			fmt.Printf("%s protoc-gen-openapiv2 to %s\n", color.WithColor("Upgrading tool", color.FgGreen), toolVersionCheck["protoc-gen-openapiv2"])
 			if err = golang.Install(fmt.Sprintf("github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v%s", toolVersionCheck["protoc-gen-openapiv2"])); err != nil {
 				return err
@@ -191,7 +191,7 @@ func RunCheck(all bool) error {
 		if err != nil {
 			return err
 		}
-		if protocGenDocVersion.LessThan(checkProtocGenDocVersion) {
+		if protocGenDocVersion == nil || protocGenDocVersion.LessThan(checkProtocGenDocVersion) {
 			fmt.Printf("%s protoc-gen-doc to %s\n", color.WithColor("Upgrading tool", color.FgGreen), toolVersionCheck["protoc-gen-doc"])
 			if err = golang.Install(fmt.Sprintf("github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@v%s", toolVersionCheck["protoc-gen-doc"])); err != nil {
 				return err
