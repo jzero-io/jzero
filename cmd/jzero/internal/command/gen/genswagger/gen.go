@@ -472,6 +472,9 @@ func mergeSwaggerFiles() error {
 	// 递归扫描所有 swagger 文件
 	swaggerFiles, err := findAllSwaggerFiles(config.C.Gen.Swagger.Output)
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
 		return err
 	}
 
