@@ -20,6 +20,9 @@ func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, 
 }
 
 func (m *custom{{.upperStartCamelObject}}Model) FindSelectedColumnsByCondition(ctx context.Context, session sqlx.Session, columns []string, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
+    if len(columns) == 0 {
+        columns = {{.lowerStartCamelObject}}FieldNames
+    }
     sb := sqlbuilder.Select(columns...).From(m.table)
 	builder := condition.Select(*sb, conds...)
 	statement, args := builder.Build()
