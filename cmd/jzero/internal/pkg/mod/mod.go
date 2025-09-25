@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -11,6 +12,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
+	"golang.org/x/mod/modfile"
 )
 
 // ModuleStruct contains the relative data of go module,
@@ -41,6 +44,28 @@ func GetGoVersion() (string, error) {
 
 // GetGoMod is used to determine whether workDir is a go module project through command `go list -json -m`
 func GetGoMod(workDir string) (*ModuleStruct, error) {
+	// 判断是否有 go.mod, 如果有直接获取 module
+	if pathx.FileExists(filepath.Join(workDir, "go.mod")) {
+		// 解析 go.mod 获取 module 信息
+		goModBytes, err := os.ReadFile(filepath.Join(workDir, "go.mod"))
+		if err != nil {
+			return nil, err
+		}
+		mod, err := modfile.Parse("", goModBytes, nil)
+		if err != nil {
+			return nil, err
+		}
+		abs, err := filepath.Abs(workDir)
+		if err != nil {
+			return nil, err
+		}
+		return &ModuleStruct{
+			Path:      mod.Module.Mod.Path,
+			Dir:       abs,
+			GoVersion: mod.Go.Version,
+		}, nil
+	}
+	// 通过 go list -json -m 获取
 	ms, err := GetGoMods(workDir)
 	if err != nil {
 		return nil, err
@@ -50,26 +75,14 @@ func GetGoMod(workDir string) (*ModuleStruct, error) {
 		return nil, errors.New("not go module project")
 	}
 
-	if len(ms) == 1 {
-		return &ms[0], nil
-	}
-
-	// 是 go module 项目, 并且项目有 go.mod 文件, 但是使用了 go workspace 机制
+	// mono project
 	for _, m := range ms {
 		if filepath.Clean(workDir) == filepath.Clean(m.Dir) {
 			return &m, nil
 		}
 	}
 
-	// 是 go module 项目. mono app 项目, 本身不存在 go.mod 文件
-	// 但请保证在 go.work 中 use 中的第一行是当前项目, 如:
-	// go 1.23.3
-	//
-	// use (
-	//	.
-	//	./plugins/business
-	//	./plugins/resource
-	// )
+	// unknown
 	return &ms[0], nil
 }
 
