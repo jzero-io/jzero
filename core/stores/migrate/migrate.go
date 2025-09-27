@@ -3,7 +3,6 @@ package migrate
 import (
 	"context"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/eddieowens/opts"
@@ -102,9 +101,6 @@ func sqlMigrate(sourceUrl, databaseUrl string, c sqlx.SqlConf, ops MigrateOpts) 
 	fileDriver := &file.File{}
 	fileSource, err := fileDriver.Open(sourceUrl)
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return nil
-		}
 		return err
 	}
 
