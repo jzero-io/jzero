@@ -14,33 +14,44 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
-type MigrateOpts struct {
-	PreProcessSqlFunc func(content string) string
-	Source            string
+type MigrateUpOpts struct {
+	PreProcessSqlFunc    func(version uint, content string) string
+	BeforeMigrateUpFuncs map[uint]func(version uint) error
+	AfterMigrateUpFuncs  map[uint]func(version uint) error
+	Source               string
 }
 
-func (opts MigrateOpts) DefaultOptions() MigrateOpts {
-	return MigrateOpts{
-		PreProcessSqlFunc: func(content string) string {
-			return content
-		},
+func (opts MigrateUpOpts) DefaultOptions() MigrateUpOpts {
+	return MigrateUpOpts{
 		Source: "file://desc/sql_migration",
 	}
 }
 
-func WithPreProcessSqlFunc(f func(string) string) opts.Opt[MigrateOpts] {
-	return func(opts *MigrateOpts) {
+func WithPreProcessSqlFunc(f func(uint, string) string) opts.Opt[MigrateUpOpts] {
+	return func(opts *MigrateUpOpts) {
 		opts.PreProcessSqlFunc = f
 	}
 }
 
-func WithSource(source string) opts.Opt[MigrateOpts] {
-	return func(opts *MigrateOpts) {
+func WithSource(source string) opts.Opt[MigrateUpOpts] {
+	return func(opts *MigrateUpOpts) {
 		opts.Source = source
 	}
 }
 
-func Migrate(ctx context.Context, c sqlx.SqlConf, op ...opts.Opt[MigrateOpts]) error {
+func WithBeforeMigrateUpFunc(mapFuncs map[uint]func(uint) error) opts.Opt[MigrateUpOpts] {
+	return func(opts *MigrateUpOpts) {
+		opts.BeforeMigrateUpFuncs = mapFuncs
+	}
+}
+
+func WithAfterMigrateUpFunc(mapFunc map[uint]func(uint) error) opts.Opt[MigrateUpOpts] {
+	return func(opts *MigrateUpOpts) {
+		opts.AfterMigrateUpFuncs = mapFunc
+	}
+}
+
+func MigrateUp(ctx context.Context, c sqlx.SqlConf, op ...opts.Opt[MigrateUpOpts]) error {
 	ops := opts.DefaultApply(op...)
 	var databaseUrl string
 	switch c.DriverName {
@@ -49,7 +60,7 @@ func Migrate(ctx context.Context, c sqlx.SqlConf, op ...opts.Opt[MigrateOpts]) e
 	case "pgx":
 		databaseUrl = "pgx5://" + strings.TrimPrefix(c.DataSource, "postgres://")
 	}
-	if err := sqlMigrate(ops.Source, databaseUrl, c, ops); err != nil {
+	if err := migrateUp(ctx, ops.Source, databaseUrl, c, ops); err != nil {
 		return err
 	}
 	return nil
@@ -57,8 +68,9 @@ func Migrate(ctx context.Context, c sqlx.SqlConf, op ...opts.Opt[MigrateOpts]) e
 
 type customFileSource struct {
 	*file.File
-	driverName        string
-	preProcessSqlFunc func(content string) string
+	preProcessSqlFunc func(version uint, content string) string
+	sqlConf           sqlx.SqlConf
+	ctx               context.Context
 }
 
 func (c *customFileSource) ReadUp(version uint) (r io.ReadCloser, identifier string, err error) {
@@ -75,7 +87,8 @@ func (c *customFileSource) ReadUp(version uint) (r io.ReadCloser, identifier str
 	if err = rc.Close(); err != nil {
 		return nil, "", err
 	}
-	return io.NopCloser(strings.NewReader(c.preProcessSqlFunc(string(content)))), id, nil
+
+	return io.NopCloser(strings.NewReader(c.preProcessSqlFunc(version, string(content)))), id, nil
 }
 
 func (c *customFileSource) ReadDown(version uint) (r io.ReadCloser, identifier string, err error) {
@@ -93,11 +106,10 @@ func (c *customFileSource) ReadDown(version uint) (r io.ReadCloser, identifier s
 		return nil, "", err
 	}
 
-	modifiedContent := c.preProcessSqlFunc(string(content))
-	return io.NopCloser(strings.NewReader(modifiedContent)), id, nil
+	return io.NopCloser(strings.NewReader(c.preProcessSqlFunc(version, string(content)))), id, nil
 }
 
-func sqlMigrate(sourceUrl, databaseUrl string, c sqlx.SqlConf, ops MigrateOpts) error {
+func migrateUp(ctx context.Context, sourceUrl, databaseUrl string, c sqlx.SqlConf, ops MigrateUpOpts) error {
 	fileDriver := &file.File{}
 	fileSource, err := fileDriver.Open(sourceUrl)
 	if err != nil {
@@ -106,27 +118,65 @@ func sqlMigrate(sourceUrl, databaseUrl string, c sqlx.SqlConf, ops MigrateOpts) 
 
 	customSource := &customFileSource{
 		File:              fileSource.(*file.File),
-		driverName:        c.DriverName,
 		preProcessSqlFunc: ops.PreProcessSqlFunc,
+		sqlConf:           c,
+		ctx:               ctx,
 	}
 
-	m, err := migrate.NewWithSourceInstance("file", customSource, databaseUrl)
+	var m *migrate.Migrate
+	if ops.PreProcessSqlFunc == nil {
+		m, err = migrate.New(sourceUrl, databaseUrl)
+		if err != nil {
+			return err
+		}
+	} else {
+		m, err = migrate.NewWithSourceInstance("file", customSource, databaseUrl)
+		if err != nil {
+			return err
+		}
+	}
+	defer m.Close()
+
+	if ops.BeforeMigrateUpFuncs == nil && ops.AfterMigrateUpFuncs == nil {
+		err = m.Up()
+		if err != nil && !errors.Is(err, migrate.ErrNoChange) {
+			return err
+		}
+		return nil
+	}
+	// 获取当前版本
+	currentVersion, _, err := m.Version()
 	if err != nil {
-		return err
-	}
-
-	if err = m.Up(); err != nil {
-		if errors.Is(err, migrate.ErrNoChange) {
-			return nil
+		if errors.Is(err, migrate.ErrNilVersion) {
+			// 不存在的话, 直接返回 Up
+			return m.Up()
 		}
 	}
 
-	sourceErr, databaseErr := m.Close()
-	if sourceErr != nil {
-		return sourceErr
+	for {
+		nextVersion, err := customSource.Next(currentVersion)
+		if err == nil && nextVersion > currentVersion {
+			if f, ok := ops.BeforeMigrateUpFuncs[nextVersion]; ok {
+				if err = f(nextVersion); err != nil {
+					return err
+				}
+			}
+			if err = m.Steps(1); err != nil {
+				return err
+			}
+			if f, ok := ops.AfterMigrateUpFuncs[nextVersion]; ok {
+				if err = f(nextVersion); err != nil {
+					if stepDownErr := m.Steps(-1); stepDownErr != nil {
+						return stepDownErr
+					}
+					return err
+				}
+			}
+			currentVersion = nextVersion
+		} else {
+			break
+		}
 	}
-	if databaseErr != nil {
-		return databaseErr
-	}
+
 	return nil
 }
