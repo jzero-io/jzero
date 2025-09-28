@@ -23,7 +23,7 @@ func (m *custom{{.upperStartCamelObject}}Model) FindSelectedColumnsByCondition(c
     if len(columns) == 0 {
         columns = {{.lowerStartCamelObject}}FieldNames
     }
-    sb := sqlbuilder.Select(columns...).From(m.table)
+    sb := sqlbuilder.Select(m.withTableColumns(columns...)...).From(m.table)
 	builder := condition.Select(*sb, conds...)
 	statement, args := builder.Build()
 
@@ -73,7 +73,7 @@ func (m *custom{{.upperStartCamelObject}}Model) CountByCondition(ctx context.Con
 }
 
 func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
-	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
+	sb := sqlbuilder.Select(m.withTableColumns({{.lowerStartCamelObject}}FieldNames...)...).From(m.table)
 
 	builder := condition.Select(*sb, conds...)
 	builder.Limit(1)
@@ -94,7 +94,7 @@ func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.C
 }
 
 func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, int64 ,error) {
-	sb := sqlbuilder.Select({{.lowerStartCamelObject}}FieldNames...).From(m.table)
+	sb := sqlbuilder.Select(m.withTableColumns({{.lowerStartCamelObject}}FieldNames...)...).From(m.table)
 	builder := condition.Select(*sb, conds...)
 
 	var resp []*{{.upperStartCamelObject}}
