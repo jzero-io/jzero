@@ -116,37 +116,40 @@ func RegisterRoutes(server *rest.Server, op ...opts.Opt[Swaggerv2Opts]) {
 	server.AddRoute(rest.Route{
 		Method:  http.MethodGet,
 		Path:    "/swagger",
-		Handler: swaggerHandler(o),
+		Handler: SwaggerHandlerFunc(o),
 	})
 }
 
-func swaggerHandler(config Swaggerv2Opts) http.HandlerFunc {
+func SwaggerHandlerFunc(config Swaggerv2Opts) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		if r.FormValue("path") != "" {
-			file, err := os.ReadFile(filepath.Join(config.SwaggerPath, r.FormValue("path")))
-			if err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			_, _ = rw.Write(file)
-		} else {
-			rw.Header().Set("Content-Type", "text/html; charset=utf-8")
+		SwaggerHandler(config, rw, r)
+	}
+}
 
-			if strings.HasSuffix(r.URL.Path, "/") {
-				http.Redirect(rw, r, strings.TrimSuffix(r.RequestURI, "/"), 301)
-			}
-
-			swaggerJsonsPath, err := getSwaggerFiles(config.SwaggerPath)
-			if err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
-
-			uiHTML, _ := templatex.ParseTemplate(map[string]any{
-				"SwaggerHost":      config.SwaggerHost,
-				"SwaggerJsonsPath": swaggerJsonsPath,
-			}, []byte(config.SwaggerTemplate))
-			_, _ = rw.Write(uiHTML)
+func SwaggerHandler(config Swaggerv2Opts, w http.ResponseWriter, r *http.Request) {
+	if r.FormValue("path") != "" {
+		file, err := os.ReadFile(filepath.Join(config.SwaggerPath, r.FormValue("path")))
+		if err != nil {
+			return
 		}
+		_, _ = w.Write(file)
+	} else {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.Redirect(w, r, strings.TrimSuffix(r.RequestURI, "/"), 301)
+		}
+
+		swaggerJsonsPath, err := getSwaggerFiles(config.SwaggerPath)
+		if err != nil {
+			return
+		}
+
+		uiHTML, _ := templatex.ParseTemplate(map[string]any{
+			"SwaggerHost":      config.SwaggerHost,
+			"SwaggerJsonsPath": swaggerJsonsPath,
+		}, []byte(config.SwaggerTemplate))
+		_, _ = w.Write(uiHTML)
 	}
 }
 
