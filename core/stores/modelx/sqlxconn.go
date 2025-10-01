@@ -6,6 +6,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	_ "modernc.org/sqlite"
 
 	"github.com/jzero-io/jzero/core/stores/cache"
 )
@@ -32,5 +33,7 @@ func setSqlbuilderFlavor(driverName string) {
 		sqlbuilder.DefaultFlavor = sqlbuilder.MySQL
 	case "pgx":
 		sqlbuilder.DefaultFlavor = sqlbuilder.PostgreSQL
+	case "sqlite":
+		sqlbuilder.DefaultFlavor = sqlbuilder.SQLite
 	}
 }
