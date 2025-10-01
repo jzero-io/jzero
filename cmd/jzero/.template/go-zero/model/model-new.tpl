@@ -10,16 +10,17 @@ func new{{.upperStartCamelObject}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx
 
     initVars()
 
-    var table string
-    if o.TableName == "" {
-    	table = condition.AdaptTable({{.table}})
-    } else {
-    	table = condition.AdaptTable(o.TableName)
-    }
-
 	return &default{{.upperStartCamelObject}}Model{
 		cachedConn: cachedConn,
 		conn: conn,
-		table:      table,
+		table:      condition.AdaptTable({{.table}}),
+	}
+}
+
+func (m *default{{.upperStartCamelObject}}Model) clone() *default{{.upperStartCamelObject}}Model {
+	return &default{{.upperStartCamelObject}}Model{
+		cachedConn: m.cachedConn,
+		conn:       m.conn,
+		table:      m.table,
 	}
 }

@@ -1,3 +1,11 @@
+func (m *custom{{.upperStartCamelObject}}Model) SetTable(f func(table string) string) {{.lowerStartCamelObject}}Model  {
+	mc := &custom{{.upperStartCamelObject}}Model{
+		default{{.upperStartCamelObject}}Model: m.clone(),
+	}
+	mc.table = condition.AdaptTable(f(condition.Unquote(m.table)))
+	return mc
+}
+
 func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, session sqlx.Session, datas []*{{.upperStartCamelObject}}) error {
     if len(datas) == 0 {
         return nil
