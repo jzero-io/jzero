@@ -10,7 +10,6 @@ type ModelOpts struct {
 	CachedConn *sqlc.CachedConn
 	CacheConf  cache.CacheConf
 	CacheOpts  []cache.Option
-	TableName  string
 }
 
 func (opts ModelOpts) DefaultOptions() ModelOpts {
@@ -32,11 +31,5 @@ func WithCacheConf(cacheConf cache.CacheConf) opts.Opt[ModelOpts] {
 func WithCacheOpts(cacheOpts ...cache.Option) opts.Opt[ModelOpts] {
 	return func(o *ModelOpts) {
 		o.CacheOpts = cacheOpts
-	}
-}
-
-func WithTableName(tableName string) opts.Opt[ModelOpts] {
-	return func(o *ModelOpts) {
-		o.TableName = tableName
 	}
 }

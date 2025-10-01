@@ -105,9 +105,11 @@ func AdaptField(field string) string {
 }
 
 func adapt(str string) string {
+	str = Unquote(str)
 	switch sqlbuilder.DefaultFlavor {
-	case sqlbuilder.PostgreSQL:
-		str = Unquote(str)
+	case sqlbuilder.MySQL:
+		return fmt.Sprintf("`%s`", str)
+	case sqlbuilder.PostgreSQL, sqlbuilder.SQLite:
 		return fmt.Sprintf(`"%s"`, str)
 	default:
 		return str
