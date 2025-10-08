@@ -49,9 +49,6 @@ type Config struct {
 	// gen command
 	Gen GenConfig `mapstructure:"gen"`
 
-	// ivm command
-	Ivm IvmConfig `mapstructure:"ivm"`
-
 	// template command
 	Template TemplateConfig `mapstructure:"template"`
 
@@ -175,36 +172,6 @@ type GenDocsConfig struct {
 	DescIgnore []string `mapstructure:"desc-ignore"`
 	Output     string   `mapstructure:"output"`
 	Format     string   `mapstructure:"format"`
-}
-
-type IvmConfig struct {
-	// global flags
-	Version string `mapstructure:"version"`
-
-	Init IvmInitConfig `mapstructure:"init"`
-	Add  IvmAddConfig  `mapstructure:"add"`
-}
-
-type IvmInitConfig struct {
-	Style            string `mapstructure:"style"`
-	ChangeLogicTypes bool   `mapstructure:"change-logic-types"`
-}
-
-type IvmAddConfig struct {
-	Api   IvmAddApiConfig   `mapstructure:"api"`
-	Proto IvmAddProtoConfig `mapstructure:"proto"`
-}
-
-type IvmAddApiConfig struct {
-	Name     string   `mapstructure:"name"`
-	Group    string   `mapstructure:"group"`
-	Handlers []string `mapstructure:"handlers"`
-}
-
-type IvmAddProtoConfig struct {
-	Methods  []string `mapstructure:"methods"`
-	Name     string   `mapstructure:"name"`
-	Services []string `mapstructure:"services"`
 }
 
 type TemplateConfig struct {
