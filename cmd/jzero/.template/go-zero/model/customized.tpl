@@ -1,4 +1,4 @@
-func (m *custom{{.upperStartCamelObject}}Model) SetTable(f func(table string) string) {{.lowerStartCamelObject}}Model  {
+func (m *custom{{.upperStartCamelObject}}Model) WithTable(f func(table string) string) {{.lowerStartCamelObject}}Model  {
 	mc := &custom{{.upperStartCamelObject}}Model{
 		default{{.upperStartCamelObject}}Model: m.clone(),
 	}
