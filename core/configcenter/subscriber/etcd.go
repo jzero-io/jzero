@@ -5,9 +5,11 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+type EtcdConf subscriber.EtcdConf
+
 // MustNewEtcdSubscriber returns an etcd Subscriber, exits on errors.
-func MustNewEtcdSubscriber(conf subscriber.EtcdConf) subscriber.Subscriber {
-	s, err := subscriber.NewEtcdSubscriber(conf)
+func MustNewEtcdSubscriber(conf EtcdConf) subscriber.Subscriber {
+	s, err := subscriber.NewEtcdSubscriber(subscriber.EtcdConf(conf))
 	logx.Must(err)
 	return s
 }
