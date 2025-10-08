@@ -8,7 +8,6 @@ require (
 	github.com/dave/dst v0.27.3
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/golang-migrate/migrate/v4 v4.19.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2
 	github.com/hashicorp/go-version v1.7.0
 	github.com/iancoleman/orderedmap v0.3.0
 	github.com/jaronnie/genius v0.6.0
@@ -70,6 +69,7 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gookit/color v1.6.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
