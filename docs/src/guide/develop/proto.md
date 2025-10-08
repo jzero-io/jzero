@@ -18,7 +18,6 @@ jzero 框架的理念是:
 
 * 不同模块分在不同的 proto 文件下. 如一个系统, 凭证模块即 credential.proto, 主机模块即 machine.proto.
 * 每个 proto 文件可以有多个 service. 对于复杂模块可以使用多个 service.
-* 应该考虑接口版本控制, 如 v1/hello.proto, v2/hello_v2.proto
 
 jzero 中 proto 规范:
 

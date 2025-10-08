@@ -18,7 +18,6 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/completion"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/format"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/command/ivm"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/mcp"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/migrate"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/new"
@@ -117,7 +116,6 @@ func init() {
 	rootCmd.AddCommand(completion.GetCommand())
 	rootCmd.AddCommand(format.GetCommand())
 	rootCmd.AddCommand(gen.GetCommand())
-	rootCmd.AddCommand(ivm.GetCommand())
 	rootCmd.AddCommand(mcp.GetCommand())
 	rootCmd.AddCommand(migrate.GetCommand())
 	rootCmd.AddCommand(new.GetCommand())

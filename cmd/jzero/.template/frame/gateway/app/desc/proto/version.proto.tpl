@@ -7,12 +7,6 @@ import "grpc-gateway/protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "./pb/versionpb";
 
-option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-    info: {
-        version: "v1";
-    };
-};
-
 message VersionRequest {}
 
 message VersionResponse {
@@ -25,7 +19,7 @@ message VersionResponse {
 service Version {
     rpc Version(VersionRequest) returns(VersionResponse) {
         option (google.api.http) = {
-            get: "/api/v1/version"
+            get: "/version"
         };
     };
 }{{end}}

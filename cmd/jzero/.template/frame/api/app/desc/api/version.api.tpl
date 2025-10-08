@@ -2,7 +2,6 @@
 
 info (
     go_package: "version"
-    version: "v1"
     WrapCodeMsg: true
 )
 
@@ -16,7 +15,6 @@ type VersionResponse {
 }
 
 @server(
-    prefix: /api/v1
     group: version
 )
 service {{ .APP | ToCamel }} {
