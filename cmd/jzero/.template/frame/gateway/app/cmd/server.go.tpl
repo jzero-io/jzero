@@ -1,10 +1,9 @@
 package cmd
 
 import (
-    "path/filepath"
-
-	configurator "github.com/zeromicro/go-zero/core/configcenter"
+    "github.com/jzero-io/jzero/core/configcenter"
 	"github.com/jzero-io/jzero/core/configcenter/subscriber"
+	"github.com/jzero-io/jzero/core/swaggerv2"
 	"github.com/common-nighthawk/go-figure"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -27,60 +26,58 @@ var serverCmd = &cobra.Command{
 	Short: "{{ .APP }} server",
 	Long:  "{{ .APP }} server",
 	Run: func(cmd *cobra.Command, args []string) {
-		cc := configurator.MustNewConfigCenter[config.Config](configurator.Config{
+		cc := configcenter.MustNewConfigCenter[config.Config](configcenter.Config{
 			Type: "yaml",
-		}, subscriber.MustNewFsnotifySubscriber(cfgFile, subscriber.WithUseEnv(true)))
-		c, err := cc.GetConfig()
-		logx.Must(err)
+		}, subscriber.MustNewFsnotifySubscriber(cmd.Flag("config").Value.String(), subscriber.WithUseEnv(true)))
 
         // set up logger
-    	logx.Must(logx.SetUp(c.Log.LogConf))
+    	logx.Must(logx.SetUp(cc.MustGetConfig().Log.LogConf))
 
     	// print banner
-        printBanner(c)
+        printBanner(cc.MustGetConfig().Banner)
         // print version
         printVersion()
 
+        // create service context
     	svcCtx := svc.NewServiceContext(cc)
-    	global.ServiceContext = *svcCtx
-    	run(svcCtx)
+
+    	var err error
+    	// write protosets to local
+        cc.MustGetConfig().Gateway.Upstreams[0].ProtoSets, err = pb.WriteToLocal(pb.Embed)
+        logx.Must(err)
+
+        // create zrpc server
+        zrpcServer := zrpc.MustNewServer(cc.MustGetConfig().Zrpc.RpcServerConf, func(grpcServer *grpc.Server) {
+        	server.RegisterZrpcServer(grpcServer, svcCtx)
+               {{if not .Serverless }}// register plugins
+               plugins.LoadPlugins(grpcServer, svcCtx){{end}}
+        	if cc.MustGetConfig().Zrpc.Mode == service.DevMode || cc.MustGetConfig().Zrpc.Mode == service.TestMode {
+        		reflection.Register(grpcServer)
+        	}
+        })
+        // create gateway server
+        gatewayServer := gateway.MustNewServer(cc.MustGetConfig().Gateway.GatewayConf, middleware.WithHeaderProcessor())
+        // register swagger routes
+        swaggerv2.RegisterRoutes(gatewayServer.Server)
+        // // create custom server
+        customServer := custom.New()
+
+        // register middleware
+        middleware.Register(zrpcServer, gatewayServer)
+
+        group := service.NewServiceGroup()
+        group.Add(zrpcServer)
+        group.Add(gatewayServer)
+        group.Add(customServer)
+
+        logx.Infof("Starting rpc server at %s...", cc.MustGetConfig().Zrpc.ListenOn)
+        logx.Infof("Starting gateway server at %s:%d...", cc.MustGetConfig().Gateway.Host, cc.MustGetConfig().Gateway.Port)
+        group.Start()
 	},
 }
 
-func run(svcCtx *svc.ServiceContext) {
-    var err error
-    svcCtx.MustGetConfig().Gateway.Upstreams[0].ProtoSets, err = pb.WriteToLocal(pb.Embed)
-    logx.Must(err)
-
-	zrpcServer := zrpc.MustNewServer(svcCtx.MustGetConfig().Zrpc.RpcServerConf, func(grpcServer *grpc.Server) {
-		server.RegisterZrpcServer(grpcServer, svcCtx)
-        {{if not .Serverless }}// register plugins
-        plugins.LoadPlugins(grpcServer, svcCtx){{end}}
-		if svcCtx.MustGetConfig().Zrpc.Mode == service.DevMode || svcCtx.MustGetConfig().Zrpc.Mode == service.TestMode {
-			reflection.Register(grpcServer)
-		}
-	})
-	gatewayServer := gateway.MustNewServer(svcCtx.MustGetConfig().Gateway.GatewayConf, middleware.WithHeaderProcessor())
-
-	ctm := custom.New(zrpcServer, gatewayServer)
-	ctm.Init()
-
-	// register middleware
-	middleware.Register(zrpcServer, gatewayServer)
-
-	group := service.NewServiceGroup()
-	group.Add(zrpcServer)
-	group.Add(gatewayServer)
-	group.Add(ctm)
-
-	logx.Infof("Starting rpc server at %s...", svcCtx.MustGetConfig().Zrpc.ListenOn)
-	logx.Infof("Starting gateway server at %s:%d...", svcCtx.MustGetConfig().Gateway.Host, svcCtx.MustGetConfig().Gateway.Port)
-
-	group.Start()
-}
-
-func printBanner(c config.Config) {
-	figure.NewColorFigure(c.Banner.Text, c.Banner.FontName, c.Banner.Color, true).Print()
+func printBanner(c config.BannerConf) {
+	figure.NewColorFigure(c.Text, c.FontName, c.Color, true).Print()
 }
 
 func init() {

@@ -1,22 +1,9 @@
 package custom
 
-import (
-	"github.com/zeromicro/go-zero/rest"
-)
+type Custom struct{}
 
-type Custom struct {
-	Server *rest.Server
-}
-
-func New(server *rest.Server) *Custom {
-	return &Custom{
-		Server: server,
-	}
-}
-
-// Init Please add custom logic here.
-func (c *Custom) Init() {
-	c.AddRoutes(c.Server)
+func New() *Custom {
+	return &Custom{}
 }
 
 // Start Please add custom logic here.

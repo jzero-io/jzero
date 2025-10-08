@@ -1,7 +1,7 @@
 package svc
 
 import (
-	configurator "github.com/zeromicro/go-zero/core/configcenter"
+	"github.com/jzero-io/jzero/core/configcenter"
 	{{ if has "model" .Features }}"github.com/jzero-io/jzero/core/stores/modelx"{{ end }}
 	{{ if has "redis" .Features }}"github.com/jzero-io/jzero/core/stores/cache"
 	"github.com/jzero-io/jzero/core/stores/redis"
@@ -13,7 +13,7 @@ import (
 )
 
 type ServiceContext struct {
-	Config configurator.Configurator[config.Config]
+	ConfigCenter configcenter.ConfigCenter[config.Config]
 	Middleware
 	{{ if has "model" .Features }}SqlxConn sqlx.SqlConn
 	Model model.Model{{ end }}
@@ -21,15 +21,16 @@ type ServiceContext struct {
 	Cache cache.Cache{{ end }}
 }
 
-func NewServiceContext(cc configurator.Configurator[config.Config]) *ServiceContext {
-    sc := &ServiceContext{
-		Config: cc,
+func NewServiceContext(cc configcenter.ConfigCenter[config.Config]) *ServiceContext {
+    svcCtx := &ServiceContext{
+		ConfigCenter: cc,
 	}
 
-	{{ if has "model" .Features }}sc.SqlxConn = modelx.MustNewConn(sc.MustGetConfig().Sqlx.SqlConf){{ end }}
-	{{ if has "redis" .Features }}sc.RedisConn = redis.MustNewRedis(sc.MustGetConfig().Redis.RedisConf){{ end }}
-	{{ if has "redis" .Features }}sc.Cache = cache.NewRedisNode(sc.RedisConn, errors.New("cache not found"), cache.WithExpiry(time.Duration(5)*time.Second)){{ end }}
-	{{ if and (has "model" .Features) (has "redis" .Features) }}sc.Model = model.NewModel(sc.SqlxConn, modelx.WithCachedConn(modelx.NewConnWithCache(sc.SqlxConn, sc.Cache))){{else if has "model" .Features }}sc.Model = model.NewModel(sc.SqlxConn){{ end }}
-	sc.SetConfigListener()
-	return sc
+	{{ if has "model" .Features }}svcCtx.SqlxConn = modelx.MustNewConn(cc.MustGetConfig().Sqlx.SqlConf){{ end }}
+	{{ if has "redis" .Features }}svcCtx.RedisConn = redis.MustNewRedis(cc.MustGetConfig().Redis.RedisConf){{ end }}
+	{{ if has "redis" .Features }}svcCtx.Cache = cache.NewRedisNode(svcCtx.RedisConn, errors.New("cache not found"), cache.WithExpiry(time.Duration(5)*time.Second)){{ end }}
+	{{ if and (has "model" .Features) (has "redis" .Features) }}svcCtx.Model = model.NewModel(svcCtx.SqlxConn, modelx.WithCachedConn(modelx.NewConnWithCache(svcCtx.SqlxConn, svcCtx.Cache))){{else if has "model" .Features }}svcCtx.Model = model.NewModel(svcCtx.SqlxConn){{ end }}
+	svcCtx.SetConfigListener()
+	svcCtx.Middleware = svcCtx.NewMiddleware()
+	return svcCtx
 }

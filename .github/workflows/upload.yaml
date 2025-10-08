@@ -92,6 +92,22 @@ jobs:
           
           cd ..
           
+          rm -rf simplegateway-with-model-redis
+          jzero new simplegateway-with-model-redis --frame gateway --features model,redis
+          cd simplegateway-with-model-redis
+          go mod tidy
+          jzero gen swagger
+          jzero gen sdk
+          jzero gen zrpcclient
+          jzero format --git-change=false
+          go mod tidy && go mod download
+          go run main.go version
+          git add .
+          git diff-index --quiet HEAD || git commit -m "chore(simplegateway-with-model-redis): update simplegateway-with-model-redis"
+          git push -f
+          
+          cd ..
+          
           rm -rf simplerpc
           jzero new simplerpc --frame rpc
           cd simplerpc
@@ -111,3 +127,16 @@ jobs:
           git push -f
           
           cd ..
+          
+          rm -rf simplerpc-with-model-redis
+          jzero new simplerpc-with-model-redis --frame rpc --features model,redis
+          cd simplerpc-with-model-redis
+          go mod tidy
+          jzero gen swagger
+          jzero gen zrpcclient
+          jzero format --git-change=false
+          go mod tidy && go mod download
+          go run main.go version
+          git add .
+          git diff-index --quiet HEAD || git commit -m "chore(simplerpc-with-model-redis): update simplerpc-with-model-redis"
+          git push -f

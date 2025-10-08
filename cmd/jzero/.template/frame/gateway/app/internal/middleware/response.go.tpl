@@ -9,10 +9,11 @@ import (
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
+	"google.golang.org/grpc/status"
 )
 
 type Body struct {
-	Data    interface{} `json:"data"`
+	Data    any `json:"data"`
 	Code    int         `json:"code"`
 	Message string      `json:"msg"`
 }
@@ -34,6 +35,23 @@ func (rw *responseWriter) Write(p []byte) (int, error) {
 
 func (rw *responseWriter) Body() []byte {
 	return rw.body.Bytes()
+}
+
+func ErrorMiddleware(_ context.Context, err error) (int, any) {
+	code := http.StatusInternalServerError
+	message := err.Error()
+
+	// from grpc error
+	if st, ok := status.FromError(err); ok {
+		code = int(st.Code())
+		message = st.Message()
+	}
+
+	return http.StatusOK, Body{
+		Data:    nil,
+		Code:    code,
+		Message: message,
+	}
 }
 
 func ResponseMiddleware(next http.HandlerFunc) http.HandlerFunc {

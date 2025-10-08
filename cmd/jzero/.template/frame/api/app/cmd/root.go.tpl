@@ -6,8 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var cfgFile string
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "{{ .APP }}",
@@ -28,5 +26,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "etc/etc.yaml", "config file (default is project root dir etc/etc.yaml")
+	rootCmd.PersistentFlags().String("config", "etc/etc.yaml", "config file (default is project root dir etc/etc.yaml")
 }

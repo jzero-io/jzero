@@ -14,7 +14,7 @@ func LoadPlugins(grpcServer *grpc.Server,svcCtx *svc.ServiceContext) {
 	    {
             serverless := {{ $v.Path | base }}.New()
             serverless.RegisterZrpcServer(grpcServer, serverless.SvcCtx)
-            svcCtx.MustGetConfig().Gateway.Upstreams[0].ProtoSets = append(svcCtx.MustGetConfig().Gateway.Upstreams[0].ProtoSets, serverless.ProtoSets...)
+            svcCtx.ConfigCenter.MustGetConfig().Gateway.Upstreams[0].ProtoSets = append(svcCtx.ConfigCenter.MustGetConfig().Gateway.Upstreams[0].ProtoSets, serverless.ProtoSets...)
         }
 	{{end}}
 }

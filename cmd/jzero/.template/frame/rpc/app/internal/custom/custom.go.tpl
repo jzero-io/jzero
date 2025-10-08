@@ -4,17 +4,11 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
-type Custom struct{
-    ZrpcServer *zrpc.RpcServer
-}
+type Custom struct{}
 
-func New(zrpcServer *zrpc.RpcServer) *Custom {
-	return &Custom{
-		ZrpcServer: zrpcServer,
-	}
+func New() *Custom {
+	return &Custom{}
 }
-
-func (c *Custom) Init() {}
 
 // Start Please add custom logic here.
 func (c *Custom) Start() {}
