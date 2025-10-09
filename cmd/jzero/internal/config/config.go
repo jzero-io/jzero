@@ -103,7 +103,6 @@ type GenConfig struct {
 	GitChange bool `mapstructure:"git-change"`
 
 	Route2Code   bool
-	RpcClient    bool     `mapstructure:"rpc-client"`
 	ProtoInclude []string `mapstructure:"proto-include"`
 
 	// model flag
@@ -241,10 +240,6 @@ func (c *Config) ApiDir() string {
 
 func (c *Config) SqlDir() string {
 	return filepath.Join("desc", "sql")
-}
-
-func (c *Config) SwaggerDir() string {
-	return filepath.Join("desc", "swagger")
 }
 
 var (

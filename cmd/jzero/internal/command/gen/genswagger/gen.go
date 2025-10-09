@@ -528,7 +528,7 @@ func mergeSwaggerFiles() error {
 		return err
 	}
 
-	return os.WriteFile(filepath.Join(config.C.SwaggerDir(), "swagger.json"), encodeToJSON, 0o644)
+	return os.WriteFile(filepath.Join(config.C.Gen.Swagger.Output, "swagger.json"), encodeToJSON, 0o644)
 }
 
 // findAllSwaggerFiles 递归查找所有的 swagger JSON 文件

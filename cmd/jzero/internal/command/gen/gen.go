@@ -142,7 +142,6 @@ func GetCommand() *cobra.Command {
 
 		genCmd.Flags().BoolP("git-change", "", false, "set is git change, if changes then generate code")
 		genCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
-		genCmd.Flags().BoolP("rpc-client", "", false, "is generate rpc client code by goctl")
 		genCmd.Flags().StringSliceP("proto-include", "", []string{}, "proto include path")
 
 		// common model, support more db
