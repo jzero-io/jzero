@@ -60,6 +60,10 @@ func (r *Request) Verb(verb string) *Request {
 	return r
 }
 
+func (r *Request) GetVerb() string {
+	return r.verb
+}
+
 func (r *Request) GetBody() io.Reader {
 	return r.body
 }
