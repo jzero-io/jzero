@@ -128,7 +128,6 @@ type PathParam struct {
 
 // Path set path
 func (r *Request) Path(path string, args ...PathParam) *Request {
-	r.path = path
 	for _, v := range args {
 		val := reflect.ValueOf(v.Value)
 		kind := val.Kind()
@@ -144,6 +143,7 @@ func (r *Request) Path(path string, args ...PathParam) *Request {
 			path = strings.ReplaceAll(path, ":"+v.Name, cast.ToString(v.Value))
 		}
 	}
+	r.path = path
 	return r
 }
 
