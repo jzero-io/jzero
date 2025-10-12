@@ -111,6 +111,10 @@ func (r *Request) parseParam() string {
 	return queryParams.String()
 }
 
+func (r *Request) GetPath() string {
+	return r.path
+}
+
 func (r *Request) AddHeader(key, value string) {
 	r.c.lock.Lock()
 	defer r.c.lock.Unlock()
