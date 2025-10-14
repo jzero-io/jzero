@@ -35,9 +35,13 @@ const (
 	Offset           Operator = "OFFSET"
 	Between          Operator = "BETWEEN"
 	NotBetween       Operator = "NOT BETWEEN"
-	OrderBy          Operator = "ORDER BY"
-	GroupBy          Operator = "GROUP BY"
-	Join             Operator = "JOIN"
+
+	// Deprecated Use OrderByDesc or OrderByAsc instead.
+	OrderBy     Operator = "ORDER BY"
+	OrderByDesc Operator = "ORDER BY DESC"
+	OrderByAsc  Operator = "ORDER BY ASC"
+	GroupBy     Operator = "GROUP BY"
+	Join        Operator = "JOIN"
 )
 
 type Condition struct {
@@ -179,6 +183,10 @@ func Select(sb sqlbuilder.SelectBuilder, conditions ...Condition) sqlbuilder.Sel
 			sb.Offset(cast.ToInt(c.Value))
 		case OrderBy:
 			sb.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
+		case OrderByDesc:
+			sb.OrderByDesc(cast.ToString(c.Value))
+		case OrderByAsc:
+			sb.OrderByAsc(cast.ToString(c.Value))
 		case GroupBy:
 			sb.GroupBy(cast.ToStringSlice(ToSlice(c.Value))...)
 		case Join:
@@ -207,9 +215,11 @@ func Update(builder sqlbuilder.UpdateBuilder, conditions ...Condition) sqlbuilde
 		case Limit:
 			builder.Limit(cast.ToInt(c.Value))
 		case OrderBy:
-			if len(ToSlice(c.Value)) > 0 {
-				builder.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
-			}
+			builder.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
+		case OrderByDesc:
+			builder.OrderByDesc(cast.ToString(c.Value))
+		case OrderByAsc:
+			builder.OrderByAsc(cast.ToString(c.Value))
 		}
 	}
 	if clause != nil {
@@ -235,6 +245,10 @@ func Delete(builder sqlbuilder.DeleteBuilder, conditions ...Condition) sqlbuilde
 			builder.Limit(cast.ToInt(c.Value))
 		case OrderBy:
 			builder.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
+		case OrderByDesc:
+			builder.OrderByDesc(cast.ToString(c.Value))
+		case OrderByAsc:
+			builder.OrderByAsc(cast.ToString(c.Value))
 		}
 	}
 	if clause != nil {

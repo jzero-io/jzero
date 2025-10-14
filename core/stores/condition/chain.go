@@ -131,8 +131,17 @@ func (c Chain) Or(fields []Field, operators []Operator, values []any, op ...opts
 	return c
 }
 
+// Deprecated: Use OrderByDesc or OrderByAsc instead
 func (c Chain) OrderBy(value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
 	return c.addChain("", OrderBy, value, op...)
+}
+
+func (c Chain) OrderByDesc(value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
+	return c.addChain("", OrderByDesc, value, op...)
+}
+
+func (c Chain) OrderByAsc(value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
+	return c.addChain("", OrderByAsc, value, op...)
 }
 
 func (c Chain) Limit(value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
