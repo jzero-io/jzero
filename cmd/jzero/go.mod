@@ -10,7 +10,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.19.0
 	github.com/hashicorp/go-version v1.7.0
 	github.com/iancoleman/orderedmap v0.3.0
-	github.com/jaronnie/genius v0.6.0
+	github.com/jaronnie/genius v0.6.1
 	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v1.1.0
 	github.com/jzero-io/go_fmt v0.0.0-20250905015347-1a45352494b7
@@ -19,7 +19,7 @@ require (
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/rinchsan/gosimports v0.3.8
-	github.com/samber/lo v1.51.0
+	github.com/samber/lo v1.52.0
 	github.com/spf13/cast v1.10.0
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
@@ -28,7 +28,7 @@ require (
 	github.com/zeromicro/ddl-parser v1.0.5
 	github.com/zeromicro/go-zero v1.9.2
 	github.com/zeromicro/go-zero/tools/goctl v1.9.2
-	golang.org/x/mod v0.28.0
+	golang.org/x/mod v0.29.0
 	golang.org/x/sync v0.17.0
 	golang.org/x/tools v0.37.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250818200422-3122310a409c

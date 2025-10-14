@@ -196,7 +196,7 @@ func (jm *JzeroModel) Gen() error {
 			var eg errgroup.Group
 			for _, f := range allFiles {
 				eg.Go(func() error {
-					tableParsers, err := ParseSql(filepath.Join(config.C.Wd(), f), "", config.C.Gen.ModelStrict)
+					tableParsers, err := ParseSql(filepath.Join(config.C.Wd(), f))
 					if err != nil {
 						return err
 					}
@@ -287,19 +287,24 @@ func (jm *JzeroModel) Gen() error {
 					datasourceUrl = config.C.Gen.ModelDatasourceUrl[0]
 				}
 
-				cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", datasourceUrl, "--schema", schema, "-t", func() string {
+				tableName := func() string {
 					if strings.Contains(bf, ".") {
 						return strings.Split(bf, ".")[1]
 					}
 					return bf
-				}(), "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+				}()
+				cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", datasourceUrl, "--schema", schema, "-t", tableName, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(getIgnoreColumns(tableName), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 				logx.Debug(cmd.String())
 				resp, err := cmd.CombinedOutput()
 				if err != nil {
 					return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
 				}
 			} else {
-				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", schema, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(config.C.Gen.ModelIgnoreColumns, ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+				tableName := bf
+				if strings.Contains(bf, ".") {
+					tableName = strings.Split(bf, ".")[1]
+				}
+				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", schema, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(getIgnoreColumns(tableName), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 				logx.Debug(cmd.String())
 				resp, err := cmd.CombinedOutput()
 				if err != nil {
@@ -390,8 +395,19 @@ func getIsCacheTable(t string) bool {
 	return false
 }
 
+func getIgnoreColumns(tableName string) []string {
+	if config.C.Gen.ModelIgnoreColumnsTable != nil {
+		for _, v := range config.C.Gen.ModelIgnoreColumnsTable {
+			if v.Table == tableName {
+				return v.Columns
+			}
+		}
+	}
+	return config.C.Gen.ModelIgnoreColumns
+}
+
 // Parse parses ddl into golang structure
-func ParseSql(filename, database string, strict bool) ([]*ddlparser.Table, error) {
+func ParseSql(filename string) ([]*ddlparser.Table, error) {
 	p := ddlparser.NewParser()
 	tables, err := p.From(filename)
 	if err != nil {

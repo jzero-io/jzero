@@ -108,8 +108,12 @@ type GenConfig struct {
 	// model flag
 	ModelDriver string `mapstructure:"model-driver"`
 
-	ModelStrict          bool     `mapstructure:"model-strict"`
-	ModelIgnoreColumns   []string `mapstructure:"model-ignore-columns"`
+	ModelStrict             bool     `mapstructure:"model-strict"`
+	ModelIgnoreColumns      []string `mapstructure:"model-ignore-columns"`
+	ModelIgnoreColumnsTable []struct {
+		Table   string   `mapstructure:"table"`
+		Columns []string `mapstructure:"columns"`
+	} `mapstructure:"model-ignore-columns-table"`
 	ModelSchema          string   `mapstructure:"model-schema"`
 	ModelDatasource      bool     `mapstructure:"model-datasource"`
 	ModelDatasourceUrl   []string `mapstructure:"model-datasource-url"`
