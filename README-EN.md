@@ -17,7 +17,7 @@
 
 * Deploy jzero applications on [Vercel](https://vercel.com), [Template repository branch](https://github.com/jzero-io/templates/tree/api-vercel), [Code example](https://github.com/jaronnie/go-serverless-vercel)
 * Generate code based on git changes, greatly improving development experience for large projects
-* [Admin management system](https://github.com/jzero-io/jzero-admin) based on jzero, [Demo 1 - deployed on Vercel](https://admin.jzero.io), [Demo 2 - deployed on Alibaba Cloud Function Compute](https://jzero-admin.jaronnie.com)
+* [Admin management system](https://github.com/jzero-io/jzero-admin) based on jzero, [Demo 1 - deployed on Vercel](https://admin.jzero.io), [Demo 2 - deployed on Alibaba Cloud Function Compute](http://jzero-admin.jaronnie.com)
 * [Serverless](https://docs.jzero.io/guide/serverless.html) plugin feature based on jzero, achieving multi-module decoupling and automatic dependency injection of third-party modules at compile time
 * [Dynamic configuration feature](https://docs.jzero.io/guide/config/dynamic_conf.html), allowing dynamic modification of server configuration without restarting the server
 * Implemented jzero mcp server, allowing jzero tools to be called in mcp client dialogs to generate code
