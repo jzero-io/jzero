@@ -10,6 +10,9 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, ses
         split := strings.Split({{.lowerStartCamelObject}}RowsExpectAutoSet, ",")
         var assigns []string
         for _, s := range split {
+           if condition.Unquote(s) == condition.Unquote("{{.originalPrimaryKey}}") {
+               continue
+           }
            assigns = append(assigns, sb.Assign(s, nil))
         }
         sb.Set(assigns...)
@@ -28,6 +31,9 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, ses
 	split := strings.Split({{.lowerStartCamelObject}}RowsExpectAutoSet, ",")
 	var assigns []string
     for _, s := range split {
+        if condition.Unquote(s) == condition.Unquote("{{.originalPrimaryKey}}") {
+            continue
+        }
         assigns = append(assigns, sb.Assign(s, nil))
     }
     sb.Set(assigns...)
