@@ -11,11 +11,7 @@ import (
 func SelectByWhereRawSql(sb *sqlbuilder.SelectBuilder, originalField string, args ...any) {
 	originalFields := strings.Split(originalField, " and ")
 	for i, v := range originalFields {
-		field := strings.Split(v, " = ")[0]
-		if sqlbuilder.DefaultFlavor == sqlbuilder.PostgreSQL {
-			field = Unquote(field)
-			field = fmt.Sprintf(`"%s"`, field)
-		}
+		field := AdaptField(strings.Split(v, " = ")[0])
 		sb.Where(sb.EQ(field, args[i]))
 	}
 }
@@ -37,24 +33,14 @@ func RawFieldNames(in any) []string {
 
 	typ := v.Type()
 	for i := 0; i < v.NumField(); i++ {
-		// gets us a StructField
 		fi := typ.Field(i)
 		tagv := fi.Tag.Get(dbTag)
 		switch tagv {
 		case "-":
 			continue
 		case "":
-			if sqlbuilder.DefaultFlavor == sqlbuilder.PostgreSQL {
-				out = append(out, fmt.Sprintf(`"%s"`, fi.Name))
-			} else {
-				out = append(out, fmt.Sprintf("`%s`", fi.Name))
-			}
+			out = append(out, adapt(fi.Name))
 		default:
-			// get tag name with the tag option, e.g.:
-			// `db:"id"`
-			// `db:"id,type=char,length=16"`
-			// `db:",type=char,length=16"`
-			// `db:"-,type=char,length=16"`
 			if strings.Contains(tagv, ",") {
 				tagv = strings.TrimSpace(strings.Split(tagv, ",")[0])
 			}
@@ -64,28 +50,21 @@ func RawFieldNames(in any) []string {
 			if len(tagv) == 0 {
 				tagv = fi.Name
 			}
-			if sqlbuilder.DefaultFlavor == sqlbuilder.PostgreSQL {
-				out = append(out, fmt.Sprintf(`"%s"`, tagv))
-			} else {
-				out = append(out, fmt.Sprintf("`%s`", tagv))
-			}
+			out = append(out, adapt(tagv))
 		}
 	}
 
 	return out
 }
 
-func RemoveIgnoreColumns(strings []string, strs ...string) []string {
-	out := append([]string(nil), strings...)
+func RemoveIgnoreColumns(columns []string, ignoreColumns ...string) []string {
+	out := append([]string(nil), columns...)
 
-	for _, str := range strs {
-		if sqlbuilder.DefaultFlavor == sqlbuilder.PostgreSQL {
-			str = fmt.Sprintf(`"%s"`, Unquote(str))
-		}
-
+	for _, ic := range ignoreColumns {
+		ic = adapt(ic)
 		var n int
 		for _, v := range out {
-			if v != str {
+			if v != ic {
 				out[n] = v
 				n++
 			}
@@ -106,14 +85,7 @@ func AdaptField(field string) string {
 
 func adapt(str string) string {
 	str = Unquote(str)
-	switch sqlbuilder.DefaultFlavor {
-	case sqlbuilder.MySQL:
-		return fmt.Sprintf("`%s`", str)
-	case sqlbuilder.PostgreSQL, sqlbuilder.SQLite:
-		return fmt.Sprintf(`"%s"`, str)
-	default:
-		return str
-	}
+	return sqlbuilder.DefaultFlavor.Quote(str)
 }
 
 func Unquote(s string) string {

@@ -20,7 +20,7 @@ func TestChain(t *testing.T) {
 	builder := Select(*sb, conds...)
 
 	sql, args := builder.BuildWithFlavor(sqlbuilder.MySQL)
-	assert.Equal(t, `SELECT name, age FROM user WHERE field2 = ? ORDER BY create_time desc, sort desc`, sql)
+	assert.Equal(t, "SELECT name, age FROM user WHERE \"field2\" = ? ORDER BY create_time desc, sort desc", sql)
 	assert.Equal(t, []any{"value2"}, args)
 }
 
@@ -33,6 +33,6 @@ func TestChainJoin(t *testing.T) {
 		Build()
 	builder := Select(*sb, conds...)
 	sql, args := builder.BuildWithFlavor(sqlbuilder.MySQL)
-	assert.Equal(t, `SELECT user.name, user.age FROM user INNER JOIN user_info ON user.id = user_info.user_id WHERE user.field = ?`, sql)
+	assert.Equal(t, `SELECT user.name, user.age FROM user INNER JOIN user_info ON user.id = user_info.user_id WHERE "user.field" = ?`, sql)
 	assert.Equal(t, []any{"value2"}, args)
 }

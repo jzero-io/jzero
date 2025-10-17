@@ -85,6 +85,7 @@ func New(conditions ...Condition) []Condition {
 }
 
 func buildExpr(cond *sqlbuilder.Cond, field Field, operator Operator, value any) string {
+	field = Field(adapt(string(field)))
 	switch operator {
 	case Equal:
 		return cond.Equal(string(field), value)
@@ -184,11 +185,16 @@ func Select(sb sqlbuilder.SelectBuilder, conditions ...Condition) sqlbuilder.Sel
 		case OrderBy:
 			sb.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
 		case OrderByDesc:
-			sb.OrderByDesc(cast.ToString(c.Value))
+			sb.OrderByDesc(adapt(string(c.Field)))
 		case OrderByAsc:
-			sb.OrderByAsc(cast.ToString(c.Value))
+			sb.OrderByAsc(adapt(string(c.Field)))
 		case GroupBy:
-			sb.GroupBy(cast.ToStringSlice(ToSlice(c.Value))...)
+			// compatibility with old version
+			if c.Value != nil {
+				sb.GroupBy(cast.ToStringSlice(ToSlice(c.Value))...)
+			} else {
+				sb.GroupBy(adapt(string(c.Field)))
+			}
 		case Join:
 			sb.JoinWithOption(c.JoinCondition.Option, c.JoinCondition.Table, cast.ToStringSlice(ToSlice(c.JoinCondition.OnExpr))...)
 		}
@@ -217,9 +223,9 @@ func Update(builder sqlbuilder.UpdateBuilder, conditions ...Condition) sqlbuilde
 		case OrderBy:
 			builder.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
 		case OrderByDesc:
-			builder.OrderByDesc(cast.ToString(c.Value))
+			builder.OrderByDesc(adapt(string(c.Field)))
 		case OrderByAsc:
-			builder.OrderByAsc(cast.ToString(c.Value))
+			builder.OrderByAsc(adapt(string(c.Field)))
 		}
 	}
 	if clause != nil {
@@ -246,9 +252,9 @@ func Delete(builder sqlbuilder.DeleteBuilder, conditions ...Condition) sqlbuilde
 		case OrderBy:
 			builder.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
 		case OrderByDesc:
-			builder.OrderByDesc(cast.ToString(c.Value))
+			builder.OrderByDesc(adapt(string(c.Field)))
 		case OrderByAsc:
-			builder.OrderByAsc(cast.ToString(c.Value))
+			builder.OrderByAsc(adapt(string(c.Field)))
 		}
 	}
 	if clause != nil {

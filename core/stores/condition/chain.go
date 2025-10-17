@@ -136,12 +136,12 @@ func (c Chain) OrderBy(value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
 	return c.addChain("", OrderBy, value, op...)
 }
 
-func (c Chain) OrderByDesc(value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
-	return c.addChain("", OrderByDesc, value, op...)
+func (c Chain) OrderByDesc(field Field, op ...opts.Opt[ChainOperatorOpts]) Chain {
+	return c.addChain(field, OrderByDesc, nil, op...)
 }
 
-func (c Chain) OrderByAsc(value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
-	return c.addChain("", OrderByAsc, value, op...)
+func (c Chain) OrderByAsc(field Field, op ...opts.Opt[ChainOperatorOpts]) Chain {
+	return c.addChain(field, OrderByAsc, nil, op...)
 }
 
 func (c Chain) Limit(value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
@@ -156,8 +156,8 @@ func (c Chain) Page(page, pageSize int, op ...opts.Opt[ChainOperatorOpts]) Chain
 	return c.addChain("", Offset, (page-1)*pageSize, op...).addChain("", Limit, pageSize, op...)
 }
 
-func (c Chain) GroupBy(value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
-	return c.addChain("", GroupBy, value, op...)
+func (c Chain) GroupBy(field Field, op ...opts.Opt[ChainOperatorOpts]) Chain {
+	return c.addChain(field, GroupBy, nil, op...)
 }
 
 func (c Chain) Join(option sqlbuilder.JoinOption, table string, onExpr ...string) Chain {
