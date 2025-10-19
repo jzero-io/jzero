@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"github.com/common-nighthawk/go-figure"
     "github.com/jzero-io/jzero/core/configcenter"
 	"github.com/jzero-io/jzero/core/configcenter/subscriber"
 	"github.com/spf13/cobra"
     "github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
-	"github.com/common-nighthawk/go-figure"
+    "github.com/zeromicro/go-zero/zrpc"
+    "google.golang.org/grpc"
+    "google.golang.org/grpc/reflection"
 
 	"{{ .Module }}/internal/config"
 	"{{ .Module }}/internal/custom"

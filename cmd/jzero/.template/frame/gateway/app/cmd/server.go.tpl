@@ -1,22 +1,26 @@
 package cmd
 
 import (
+    "github.com/common-nighthawk/go-figure"
     "github.com/jzero-io/jzero/core/configcenter"
 	"github.com/jzero-io/jzero/core/configcenter/subscriber"
 	"github.com/jzero-io/jzero/core/swaggerv2"
-	"github.com/common-nighthawk/go-figure"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/gateway"
+	"github.com/zeromicro/go-zero/zrpc"
+    "google.golang.org/grpc"
+    "google.golang.org/grpc/reflection"
+
 
 	"{{ .Module }}/desc/pb"
 	"{{ .Module }}/internal/config"
+	"{{ .Module }}/internal/custom"
 	"{{ .Module }}/internal/global"
 	"{{ .Module }}/internal/middleware"
-	"{{ .Module }}/internal/svc"
 	"{{ .Module }}/internal/server"
-	"{{ .Module }}/internal/custom"
+	"{{ .Module }}/internal/svc"
 	{{ if not .Serverless }}"{{ .Module }}/plugins"{{end}}
 )
 
