@@ -11,7 +11,7 @@ const (
 {{end}}
 )
 
-func initVars() {
+func init{{.upperStartCamelObject}}Vars() {
         {{.lowerStartCamelObject}}FieldNames = condition.RawFieldNames(&{{.upperStartCamelObject}}{})
         {{.lowerStartCamelObject}}Rows = strings.Join({{.lowerStartCamelObject}}FieldNames, ",")
         {{.lowerStartCamelObject}}RowsExpectAutoSet = strings.Join(condition.RemoveIgnoreColumns({{.lowerStartCamelObject}}FieldNames, {{if .autoIncrement}}"{{.originalPrimaryKey}}", {{end}} {{.ignoreColumns}}), ",")

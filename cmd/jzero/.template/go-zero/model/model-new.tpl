@@ -8,7 +8,7 @@ func new{{.upperStartCamelObject}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx
     	cachedConn = *o.CachedConn
     }
 
-    initVars()
+    init{{.upperStartCamelObject}}Vars()
 
 	return &default{{.upperStartCamelObject}}Model{
 		cachedConn: cachedConn,
