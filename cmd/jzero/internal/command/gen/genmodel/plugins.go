@@ -82,10 +82,15 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 }
 
 func (jm *JzeroModel) GenDDL(conns []Conn, tables []string) ([]string, error) {
+	if len(tables) == 0 {
+		return nil, nil
+	}
+
 	var (
 		eg          errgroup.Group
 		tableDDLMap sync.Map
 	)
+
 	eg.SetLimit(len(tables))
 
 	for _, conn := range conns {

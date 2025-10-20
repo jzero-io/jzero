@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
@@ -45,7 +46,11 @@ func (jm *JzeroModel) Gen() error {
 		conns         []Conn
 	)
 
-	if config.C.Gen.ModelDriver == "postgres" && !config.C.Gen.ModelDatasource {
+	if config.C.Gen.ModelDriver == "postgres" {
+		config.C.Gen.ModelDriver = "pgx"
+	}
+
+	if config.C.Gen.ModelDriver == "pgx" && !config.C.Gen.ModelDatasource {
 		return errors.New("postgres model only support datasource mode")
 	}
 
@@ -62,7 +67,7 @@ func (jm *JzeroModel) Gen() error {
 					SqlConn: sqlx.NewMysql(v),
 				})
 			}
-		case "postgres":
+		case "pgx":
 			for _, v := range config.C.Gen.ModelDatasourceUrl {
 				meta, err := dsn.ParseDSN(config.C.Gen.ModelDriver, v)
 				if err != nil {
@@ -250,7 +255,7 @@ func (jm *JzeroModel) Gen() error {
 				modelDir = filepath.Join("internal", "model", strings.ToLower(bf))
 			}
 
-			if config.C.Gen.ModelDriver == "postgres" {
+			if config.C.Gen.ModelDriver == "pgx" {
 				if schema == "" {
 					schema = "public"
 				}
@@ -270,11 +275,11 @@ func (jm *JzeroModel) Gen() error {
 				}
 			}
 
-			if config.C.Gen.ModelDriver == "postgres" {
+			if config.C.Gen.ModelDriver == "pgx" {
 				var datasourceUrl string
 				if strings.Contains(bf, ".") {
 					for _, v := range config.C.Gen.ModelDatasourceUrl {
-						meta, err := dsn.ParseDSN("postgres", v)
+						meta, err := dsn.ParseDSN("pgx", v)
 						if err != nil {
 							return err
 						}
@@ -330,27 +335,30 @@ func (jm *JzeroModel) Gen() error {
 }
 
 func getAllTables(conns []Conn, driver string) ([]string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
 	var allTables []string
 
 	switch driver {
 	case "mysql":
 		for _, conn := range conns {
 			var tables []string
-			err := conn.SqlConn.QueryRowsCtx(context.Background(), &tables, "show tables")
+			err := conn.SqlConn.QueryRowsCtx(ctx, &tables, "show tables")
 			if err != nil {
 				return nil, err
 			}
 			for _, v := range tables {
-				allTables = append(allTables, conn.Schema+"."+v)
+				allTables = append(allTables, fmt.Sprintf("`%s`", conn.Schema)+"."+fmt.Sprintf("`%s`", v))
 			}
 		}
-	case "postgres":
+	case "pgx":
 		if config.C.Gen.ModelSchema == "" {
 			config.C.Gen.ModelSchema = "public"
 		}
 		for _, conn := range conns {
 			var tables []string
-			err := conn.SqlConn.QueryRowsCtx(context.Background(), &tables, fmt.Sprintf("select tablename from pg_tables where schemaname = '%s'", config.C.Gen.ModelSchema))
+			err := conn.SqlConn.QueryRowsCtx(ctx, &tables, fmt.Sprintf("select tablename from pg_tables where schemaname = '%s'", config.C.Gen.ModelSchema))
 			if err != nil {
 				return nil, err
 			}
@@ -367,13 +375,16 @@ type ShowCreateTableResult struct {
 }
 
 func getTableDDL(sqlConn sqlx.SqlConn, driver, table string) (string, error) {
-	if driver == "postgres" {
+	if driver == "pgx" {
 		return "-- todo", nil
 	}
 
 	var showCreateTableResult ShowCreateTableResult
 
-	err := sqlConn.QueryRowCtx(context.Background(), &showCreateTableResult, "show create table "+table)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	err := sqlConn.QueryRowCtx(ctx, &showCreateTableResult, "show create table "+table)
 	if err != nil {
 		return "", err
 	}

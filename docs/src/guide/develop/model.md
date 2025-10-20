@@ -22,8 +22,8 @@ jzero 支持通过 `desc/sql` 文件夹下的 sql ddl 文件和远程数据源�
 ## 特性
 
 * 支持多数据源生成代码
-* 支持 redis/sync_map 缓存
-* 动态适配多数据库类型, 仅修改配置文件指定数据库 driver 即可动态切换不同的数据库, 无需修改任何代码
+* 支持 redis/自定义缓存
+* 动态适配多数据库类型(mysql/postgres/sqlite), 仅修改配置文件指定数据库 driver 即可动态切换不同的数据库, 无需修改任何代码
 
 ## 基于本地 sql ddl 文件生成代码
 
@@ -48,7 +48,7 @@ gen:
   model-cache-table:
     - manage_user
   # schema
-  model-schema: jzeroadmin
+  model-schema: jzero-admin
   # Ignore columns while creating or updating rows, 默认为 create_at,created_at,create_time,update_at,updated_at,update_time
   model-ignore-columns: ["create_time", "update_time"]
 ```
@@ -113,7 +113,7 @@ desc/sql
    ├── manage_role_menu.sql
    └── manage_user.sql
    └── manage_user_role.sql
-   └── jzeroadmin_log.operate_log.sql
+   └── jzero-admin_log.operate_log.sql
 ```
 
 
@@ -130,17 +130,22 @@ package model
 
 import (
 	"github.com/eddieowens/opts"
+	"github.com/jzero-io/jzero/core/stores/modelx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+
 	"github.com/jzero-io/jzero-admin/server/internal/model/casbin_rule"
+	"github.com/jzero-io/jzero-admin/server/internal/model/jzero-admin_log/operate_log"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_email"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_menu"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_role"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_role_menu"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_user"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_user_role"
-	"github.com/jzero-io/jzero-admin/server/internal/model/jzeroadmin_log/operate_log"
-	"github.com/jzero-io/jzero/core/stores/modelx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
+
+type JzeroAdminLogModel struct {
+	OperateLog operate_log.OperateLogModel
+}
 
 type Model struct {
 	CasbinRule     casbin_rule.CasbinRuleModel
@@ -150,10 +155,6 @@ type Model struct {
 	ManageRoleMenu manage_role_menu.ManageRoleMenuModel
 	ManageUser     manage_user.ManageUserModel
 	ManageUserRole manage_user_role.ManageUserRoleModel
-}
-
-type JzeroadminLogModel struct {
-	OperateLog jzeroadmin_log.operate_log.OperateLogModel
 }
 
 func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
@@ -168,8 +169,8 @@ func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
 	}
 }
 
-func NewJzeroadminLogModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) JzeroadminLogModel {
-	return JzeroadminLogModel{
+func NewJzeroAdminLogModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) JzeroAdminLogModel {
+	return JzeroAdminLogModel{
 		OperateLog: operate_log.NewOperateLogModel(conn, op...),
 	}
 }
@@ -190,7 +191,7 @@ gen:
   # 是否使用远程 mysql 数据源生成代码
   model-datasource: true
   # mysql 数据源配置
-  model-datasource-url: "root:123456@tcp(127.0.0.1:3306)/jzeroadmin"
+  model-datasource-url: "root:123456@tcp(127.0.0.1:3306)/jzero-admin"
   # Ignore columns while creating or updating rows, 默认为 create_at,created_at,create_time,update_at,updated_at,update_time
   model-ignore-columns: ["create_time", "update_time"]
   # 使用哪些 table, 默认为 *(所有)
@@ -213,7 +214,7 @@ jzero gen
 
 jzero 支持多数据源, 通过在 model-datasource-table 中指定 schema 即可
 
-如新增 `jzeroadmin_log.operate_log` 表
+如新增 `jzero-admin_log.operate_log` 表
 
 ```yaml
 gen:
@@ -227,8 +228,8 @@ gen:
   model-datasource: true
   # mysql 数据源配置
   model-datasource-url:
-    - "root:123456@tcp(127.0.0.1:3306)/jzeroadmin"
-    - "root:123456@tcp(127.0.0.1:3306)/jzeroadmin_log"
+    - "root:123456@tcp(127.0.0.1:3306)/jzero-admin"
+    - "root:123456@tcp(127.0.0.1:3306)/jzero-admin_log"
   # Ignore columns while creating or updating rows, 默认为 create_at,created_at,create_time,update_at,updated_at,update_time
   model-ignore-columns: ["create_time", "update_time"]
   # 使用哪些 table, 默认为 *(所有)
@@ -240,7 +241,7 @@ gen:
     - manage_role_menu
     - manage_user
     - manage_user_role
-    - jzeroadmin_log.operate_log
+    - jzero-admin_log.operate_log
 ```
 
 
@@ -254,7 +255,7 @@ jzero gen
 
 ```yaml
 gen:
-  model-driver: postgres
+  model-driver: ppx
   # 是否生成带缓存的数据库代码
   model-cache: true
   # 缓存表, 默认为 *(所有)
@@ -263,7 +264,7 @@ gen:
   # 是否使用远程 postgres 数据源生成代码
   model-datasource: true
   # postgres 数据源配置
-  model-datasource-url: "postgres://root:123456@127.0.0.1:5432/jzeroadmin?sslmode=disable"
+  model-datasource-url: "postgres://root:123456@127.0.0.1:5432/jzero-admin"
   # Ignore columns while creating or updating rows, 默认为 create_at,created_at,create_time,update_at,updated_at,update_time
   model-ignore-columns: ["create_time", "update_time"]
   # 使用哪些 table, 默认为 *(所有)
@@ -300,8 +301,8 @@ gen:
   model-datasource: true
   # postgres 数据源配置
   model-datasource-url:
-    - "postgres://root:123456@127.0.0.1:5432/jzeroadmin?sslmode=disable"
-    - "postgres://root:123456@127.0.0.1:5432/jzeroadmin_log?sslmode=disable"
+    - "postgres://root:123456@127.0.0.1:5432/jzero-admin"
+    - "postgres://root:123456@127.0.0.1:5432/jzero-admin_log"
   # Ignore columns while creating or updating rows, 默认为 create_at,created_at,create_time,update_at,updated_at,update_time
   model-ignore-columns: ["create_time", "update_time"]
   # 使用哪些 table, 默认为 *(所有)
@@ -313,7 +314,7 @@ gen:
     - manage_role_menu
     - manage_user
     - manage_user_role
-    - jzeroadmin_log.operate_log
+    - jzero-admin_log.operate_log
 ```
 
 
@@ -379,7 +380,7 @@ rest:
 
 sqlx:
     driverName: "mysql"
-    dataSource: "root:123456@tcp(127.0.0.1:3306)/jzeroadmin?charset=utf8mb4&parseTime=True&loc=Local"
+    dataSource: "root:123456@tcp(127.0.0.1:3306)/jzero-admin?charset=utf8mb4&parseTime=True&loc=Local"
 
 redis:
     host: "127.0.0.1:6379"
@@ -422,16 +423,13 @@ type RestConf struct {
 package svc
 
 import (
-	"net/http"
 	"time"
 
+	"github.com/jzero-io/jzero/core/configcenter"
 	"github.com/jzero-io/jzero/core/stores/cache"
 	"github.com/jzero-io/jzero/core/stores/modelx"
+	"github.com/jzero-io/jzero/core/stores/redis"
 	"github.com/pkg/errors"
-	configurator "github.com/zeromicro/go-zero/core/configcenter"
-	zerocache "github.com/zeromicro/go-zero/core/stores/cache"
-	"github.com/zeromicro/go-zero/core/stores/redis"
-	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/jzero-io/jzero-admin/server/internal/config"
@@ -439,27 +437,22 @@ import (
 )
 
 type ServiceContext struct {
-	Config         configurator.Configurator[config.Config]
-	SqlxConn       sqlx.SqlConn
-	Model          model.Model
-	Cache          cache.Cache
+	ConfigCenter configcenter.ConfigCenter[config.Config]
+	SqlxConn  sqlx.SqlConn
+	Model     model.Model
+	RedisConn *redis.Redis
+	Cache     cache.Cache
 }
 
-func NewServiceContext(cc configurator.Configurator[config.Config], route2Code func(r *http.Request) string) *ServiceContext {
+func NewServiceContext(cc configcenter.ConfigCenter[config.Config]) *ServiceContext {
 	svcCtx := &ServiceContext{
-		Config: cc,
-	}
-	svcCtx.SetConfigListener()
-	svcCtx.SqlxConn = sqlx.MustNewConn(svcCtx.MustGetConfig().Sqlx)
-	if svcCtx.MustGetConfig().CacheType == "local" {
-		svcCtx.Cache = cache.NewSyncMap(errors.New("cache not found"))
-	} else {
-		// redis cache
-		rds := redis.MustNewRedis(svcCtx.MustGetConfig().Redis)
-		svcCtx.Cache = cache.NewRedisNode(rds, errors.New("cache not found"), zerocache.WithExpiry(time.Duration(5)*time.Second))
+		ConfigCenter: cc,
 	}
 
-	svcCtx.Model = model.NewModel(svcCtx.SqlxConn, modelx.WithCachedConn(sqlc.NewConnWithCache(svcCtx.SqlxConn, svcCtx.Cache)))
+	svcCtx.SqlxConn = modelx.MustNewConn(cc.MustGetConfig().Sqlx.SqlConf)
+	svcCtx.RedisConn = redis.MustNewRedis(cc.MustGetConfig().Redis.RedisConf)
+	svcCtx.Cache = cache.NewRedisNode(svcCtx.RedisConn, errors.New("cache not found"), cache.WithExpiry(time.Duration(5)*time.Second))
+	svcCtx.Model = model.NewModel(svcCtx.SqlxConn, modelx.WithCachedConn(modelx.NewConnWithCache(svcCtx.SqlxConn, svcCtx.Cache)))
 	return svcCtx
 }
 
