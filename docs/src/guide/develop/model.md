@@ -29,7 +29,6 @@ jzero 支持通过 `desc/sql` 文件夹下的 sql ddl 文件和远程数据源�
 
 ```shell
 desc/sql
-   ├── casbin_rule.sql
    ├── manage_email.sql
    ├── manage_menu.sql
    ├── manage_role.sql
@@ -66,7 +65,6 @@ package model
 
 import (
 	"github.com/eddieowens/opts"
-	"github.com/jzero-io/jzero-admin/server/internal/model/casbin_rule"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_email"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_menu"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_role"
@@ -78,7 +76,6 @@ import (
 )
 
 type Model struct {
-	CasbinRule     casbin_rule.CasbinRuleModel
 	ManageEmail    manage_email.ManageEmailModel
 	ManageMenu     manage_menu.ManageMenuModel
 	ManageRole     manage_role.ManageRoleModel
@@ -89,7 +86,6 @@ type Model struct {
 
 func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
 	return Model{
-		CasbinRule:     casbin_rule.NewCasbinRuleModel(conn, op...),
 		ManageEmail:    manage_email.NewManageEmailModel(conn, op...),
 		ManageMenu:     manage_menu.NewManageMenuModel(conn, op...),
 		ManageRole:     manage_role.NewManageRoleModel(conn, op...),
@@ -106,7 +102,6 @@ jzero 支持多数据源, 通过在 sql 文件中指定 schema 即可
 
 ```shell
 desc/sql
-   ├── casbin_rule.sql
    ├── manage_email.sql
    ├── manage_menu.sql
    ├── manage_role.sql
@@ -132,8 +127,7 @@ import (
 	"github.com/eddieowens/opts"
 	"github.com/jzero-io/jzero/core/stores/modelx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-
-	"github.com/jzero-io/jzero-admin/server/internal/model/casbin_rule"
+	
 	"github.com/jzero-io/jzero-admin/server/internal/model/jzero-admin_log/operate_log"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_email"
 	"github.com/jzero-io/jzero-admin/server/internal/model/manage_menu"
@@ -148,7 +142,6 @@ type JzeroAdminLogModel struct {
 }
 
 type Model struct {
-	CasbinRule     casbin_rule.CasbinRuleModel
 	ManageEmail    manage_email.ManageEmailModel
 	ManageMenu     manage_menu.ManageMenuModel
 	ManageRole     manage_role.ManageRoleModel
@@ -159,7 +152,6 @@ type Model struct {
 
 func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
 	return Model{
-		CasbinRule:     casbin_rule.NewCasbinRuleModel(conn, op...),
 		ManageEmail:    manage_email.NewManageEmailModel(conn, op...),
 		ManageMenu:     manage_menu.NewManageMenuModel(conn, op...),
 		ManageRole:     manage_role.NewManageRoleModel(conn, op...),
@@ -196,7 +188,6 @@ gen:
   model-ignore-columns: ["create_time", "update_time"]
   # 使用哪些 table, 默认为 *(所有)
   model-datasource-table:
-    - casbin_rule
     - manage_email
     - manage_menu
     - manage_role
@@ -234,7 +225,6 @@ gen:
   model-ignore-columns: ["create_time", "update_time"]
   # 使用哪些 table, 默认为 *(所有)
   model-datasource-table:
-    - casbin_rule
     - manage_email
     - manage_menu
     - manage_role
@@ -255,7 +245,7 @@ jzero gen
 
 ```yaml
 gen:
-  model-driver: ppx
+  model-driver: pgx
   # 是否生成带缓存的数据库代码
   model-cache: true
   # 缓存表, 默认为 *(所有)
@@ -269,7 +259,6 @@ gen:
   model-ignore-columns: ["create_time", "update_time"]
   # 使用哪些 table, 默认为 *(所有)
   model-datasource-table:
-    - casbin_rule
     - manage_email
     - manage_menu
     - manage_role
@@ -307,7 +296,6 @@ gen:
   model-ignore-columns: ["create_time", "update_time"]
   # 使用哪些 table, 默认为 *(所有)
   model-datasource-table:
-    - casbin_rule
     - manage_email
     - manage_menu
     - manage_role
