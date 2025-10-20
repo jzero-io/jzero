@@ -11,7 +11,7 @@ tag:
 :::tip jzero 支持多 proto 进行管理 proto(goctl 原生工具不支持).
 
 jzero 在自动生成代码的时候会自动识别 desc/proto 下的文件并自动注册到 zrpc 上.
-jzero 默认支持对 proto 的字段校验, 使用 protoc-gen-validate.
+jzero 默认支持对 proto 的字段校验
 :::
 
 jzero 框架的理念是:
@@ -193,11 +193,6 @@ message VersionRequest {
 ## proto 扩展
 
 ### middleware 的分组管理
-
-:::tip 确保存在 desc/proto/jzero/api 文件夹
-
-如果不存在, 请下载到本地 https://github.com/jzero-io/desc/tree/main/proto/jzero/api
-:::
 
 添加 middleware, 多个 middleware 使用逗号隔开
 

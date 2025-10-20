@@ -255,7 +255,7 @@ jzero gen
 
 ```yaml
 gen:
-  model-driver: ppx
+  model-driver: pgx
   # 是否生成带缓存的数据库代码
   model-cache: true
   # 缓存表, 默认为 *(所有)

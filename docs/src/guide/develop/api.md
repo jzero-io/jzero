@@ -71,15 +71,3 @@ service simpleapi {
 	get /system/user/deleteUser (DeleteUserRequest) returns (DeleteUserResponse)
 }
 ```
-
-## 自动生成 api 文件:
-
-```shell
-jzero ivm add api --name user
-```
-
-完整命令如下:
-
-```shell
-jzero ivm add api --name user --handlers get:List,get:Get,post:Edit,get:Delete
-```
