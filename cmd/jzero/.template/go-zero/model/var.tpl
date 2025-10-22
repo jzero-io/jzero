@@ -3,9 +3,18 @@ var (
 {{.lowerStartCamelObject}}Rows string
 {{.lowerStartCamelObject}}RowsExpectAutoSet string
 
+{{.upperStartCamelObject}}Field = struct {
+    {{range $index, $v := .data.Fields}}{{$v.Name.ToCamel}} condition.Field
+    {{end}}
+} {
+    {{range $index, $v := .data.Fields}}{{$v.Name.ToCamel}}: "{{$v.NameOriginal}}",
+    {{end}}
+}
+
 {{if .withCache}}{{.cacheKeys}}{{end}}
 )
 
+// Deprecated use {{.upperStartCamelObject}}Field instead
 const (
 {{range $index, $v := .data.Fields}}{{$v.Name.ToCamel}} condition.Field = "{{$v.NameOriginal}}"
 {{end}}
