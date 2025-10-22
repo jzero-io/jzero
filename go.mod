@@ -9,7 +9,6 @@ require (
 	github.com/bitly/go-simplejson v0.5.1
 	github.com/eddieowens/opts v0.1.0
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/gorilla/websocket v1.5.3
 	github.com/huandu/go-sqlbuilder v1.38.0
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/jaronnie/genius v0.6.1

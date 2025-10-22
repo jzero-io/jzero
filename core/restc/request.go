@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/bitly/go-simplejson"
-	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -32,19 +31,13 @@ var (
 type Request struct {
 	c *client
 
-	verb string
-	path string
-
-	queryParams []QueryParam
-
-	// output
-	err error
-
-	// headers
+	verb    string
 	headers http.Header
+	path    string
+	params  string
+	body    io.Reader
 
-	// body
-	body io.Reader
+	err error
 }
 
 func NewRequest(c *client) *Request {
@@ -68,47 +61,8 @@ func (r *Request) GetBody() io.Reader {
 	return r.body
 }
 
-func (r *Request) GetParams() []QueryParam {
-	return r.queryParams
-}
-
-func (r *Request) parseParam() string {
-	if len(r.queryParams) == 0 {
-		return ""
-	}
-
-	var queryParams strings.Builder
-	queryParams.WriteString("?")
-	for i, v := range r.queryParams {
-		val := reflect.ValueOf(v.Value)
-		kind := val.Kind()
-		if kind == reflect.Slice || kind == reflect.Array {
-			length := val.Len()
-			for j := 0; j < length; j++ {
-				value := val.Index(j).Interface()
-				if cast.ToString(value) == "" {
-					continue
-				}
-				va := url.QueryEscape(cast.ToString(value))
-				if i == len(r.queryParams)-1 && j == length-1 {
-					queryParams.WriteString(fmt.Sprintf("%s=%s", v.Name, va))
-				} else {
-					queryParams.WriteString(fmt.Sprintf("%s=%s&", v.Name, va))
-				}
-			}
-		} else {
-			if cast.ToString(v.Value) == "" {
-				continue
-			}
-			va := url.QueryEscape(cast.ToString(v.Value))
-			if i == len(r.queryParams)-1 {
-				queryParams.WriteString(fmt.Sprintf("%s=%s", v.Name, va))
-			} else {
-				queryParams.WriteString(fmt.Sprintf("%s=%s&", v.Name, va))
-			}
-		}
-	}
-	return queryParams.String()
+func (r *Request) GetParams() string {
+	return r.params
 }
 
 func (r *Request) GetPath() string {
@@ -156,45 +110,43 @@ func (r *Request) Params(args ...QueryParam) *Request {
 	if len(args) == 0 {
 		return r
 	}
-	r.queryParams = args
+
+	var queryParams strings.Builder
+	queryParams.WriteString("?")
+	for i, v := range args {
+		val := reflect.ValueOf(v.Value)
+		kind := val.Kind()
+		if kind == reflect.Slice || kind == reflect.Array {
+			length := val.Len()
+			for j := 0; j < length; j++ {
+				value := val.Index(j).Interface()
+				if cast.ToString(value) == "" {
+					continue
+				}
+				va := url.QueryEscape(cast.ToString(value))
+				if i == len(args)-1 && j == length-1 {
+					queryParams.WriteString(fmt.Sprintf("%s=%s", v.Name, va))
+				} else {
+					queryParams.WriteString(fmt.Sprintf("%s=%s&", v.Name, va))
+				}
+			}
+		} else {
+			if cast.ToString(v.Value) == "" {
+				continue
+			}
+			va := url.QueryEscape(cast.ToString(v.Value))
+			if i == len(args)-1 {
+				queryParams.WriteString(fmt.Sprintf("%s=%s", v.Name, va))
+			} else {
+				queryParams.WriteString(fmt.Sprintf("%s=%s&", v.Name, va))
+			}
+		}
+	}
+	r.params = queryParams.String()
 	return r
 }
 
-// getUrl get url for request
-func (r *Request) getUrl() (string, error) {
-	if r.c.protocol == "" || r.c.addr == "" {
-		return "", errors.New("invalid url, please check")
-	}
-
-	if r.c.protocol == "https" && r.c.port == "" {
-		r.c.port = "443"
-	} else if r.c.protocol == "http" && r.c.port == "" {
-		r.c.port = "80"
-	}
-
-	return fmt.Sprintf("%s://%s:%s", r.c.protocol, r.c.addr, r.c.port+r.path+r.parseParam()), nil
-}
-
-// wsUrl get websocket url for request
-func (r *Request) getWsUrl() (string, error) {
-	if r.c.protocol == "" || r.c.addr == "" || r.c.port == "" {
-		return "", errors.New("invalid url, you may not login")
-	}
-
-	// upgrade http to websocket proto
-	if r.c.protocol == "https" {
-		r.c.protocol = "wss"
-	} else {
-		r.c.protocol = "ws"
-	}
-
-	return fmt.Sprintf("%s://%s:%s", r.c.protocol, r.c.addr, r.c.port+r.path+r.parseParam()), nil
-}
-
 // Body makes the request use obj as the body. Optional.
-// If obj is a string, try to read a file of that name.
-// If obj is a []byte, send it directly.
-// default marshal it
 func (r *Request) Body(obj any) *Request {
 	if r.err != nil {
 		return r
@@ -229,44 +181,27 @@ type Result struct {
 }
 
 // Do format and executes the request. Returns a Result object for easy response
-// processing.
-//
-// Error type:
-// http.Client.Do errors are returned directly.
 func (r *Request) Do(ctx context.Context) Result {
 	if err := r.c.executeRequestMiddlewares(r); err != nil {
 		return Result{err: err}
 	}
 
-	defaultUrl, err := r.getUrl()
+	request, err := http.NewRequestWithContext(ctx, r.verb, r.c.addr+r.path+r.params, r.body)
 	if err != nil {
 		return Result{err: err}
 	}
 
-	request, err := http.NewRequestWithContext(ctx, r.verb, defaultUrl, r.body)
-	if err != nil {
-		return Result{err: err}
-	}
-
-	if r.c.client == nil {
-		r.c.client = http.DefaultClient
-	}
-
-	if r.c.retryTimes == 0 {
-		r.c.retryTimes = 1
-	}
 	request.Header = r.headers
 
 	var rawResp *http.Response
-	// if meet error, retry times that you set
-	for k := 0; k < r.c.retryTimes; k++ {
+	for k := 0; k <= r.c.retryTimes; k++ {
 		rawResp, err = r.doRequest(r.c.client, request)
-		if err != nil {
-			// sleep retry delay
-			time.Sleep(r.c.retryDelay)
-			continue
+		if err == nil || k == r.c.retryTimes {
+			break
 		}
-		break
+
+		time.Sleep(r.c.retryDelay)
+		continue
 	}
 
 	if err != nil {
@@ -289,14 +224,6 @@ func (r *Request) Do(ctx context.Context) Result {
 		statusCode: rawResp.StatusCode,
 		status:     rawResp.Status,
 	}
-}
-
-func (r *Request) WsConn(ctx context.Context) (*websocket.Conn, *http.Response, error) {
-	wsUrl, err := r.getWsUrl()
-	if err != nil {
-		return nil, nil, err
-	}
-	return websocket.DefaultDialer.DialContext(ctx, wsUrl, r.c.headers)
 }
 
 func (r *Request) doRequest(client *http.Client, request *http.Request) (*http.Response, error) {
@@ -405,38 +332,24 @@ func (r Result) Into(obj any, options *IntoOptions) error {
 	return nil
 }
 
-// Stream proto Stream way return io.ReadCloser
+// Stream return io.ReadCloser
 func (r *Request) Stream(ctx context.Context) (io.ReadCloser, error) {
-	defaultUrl, err := r.getUrl()
-	if err != nil {
-		return nil, err
-	}
-
-	request, err := http.NewRequestWithContext(ctx, r.verb, defaultUrl, r.body)
+	request, err := http.NewRequestWithContext(ctx, r.verb, r.c.addr+r.path+r.params, r.body)
 	if err != nil {
 		return nil, err
 	}
 
 	request.Header = r.headers
 
-	if r.c.client == nil {
-		r.c.client = http.DefaultClient
-	}
-
-	if r.c.retryTimes == 0 {
-		r.c.retryTimes = 1
-	}
-
 	var rawResp *http.Response
-	// if meet error, retry times that you set
-	for k := 0; k < r.c.retryTimes; k++ {
+	for k := 0; k <= r.c.retryTimes; k++ {
 		rawResp, err = r.doRequest(r.c.client, request)
-		if err != nil {
-			// sleep retry delay
-			time.Sleep(r.c.retryDelay)
-			continue
+		if err == nil || k == r.c.retryTimes {
+			break
 		}
-		break
+
+		time.Sleep(r.c.retryDelay)
+		continue
 	}
 
 	if err != nil {

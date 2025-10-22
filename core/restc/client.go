@@ -2,7 +2,6 @@ package restc
 
 import (
 	"net/http"
-	"net/url"
 	"sync"
 	"time"
 )
@@ -15,10 +14,8 @@ type Client interface {
 type Opt func(client *client) error
 
 type client struct {
-	lock     *sync.RWMutex
-	protocol string
-	addr     string
-	port     string
+	lock *sync.RWMutex
+	addr string
 
 	retryTimes int
 	retryDelay time.Duration
@@ -57,25 +54,23 @@ func (c *client) Verb(verb string) *Request {
 	return NewRequest(c).Verb(verb)
 }
 
-func NewClient(target string, ops ...Opt) (Client, error) {
+func NewClient(addr string, ops ...Opt) (Client, error) {
 	c := &client{
-		lock:    &sync.RWMutex{},
-		headers: make(http.Header),
+		lock: &sync.RWMutex{},
+		addr: addr,
 	}
-
-	// parse url
-	parse, err := url.Parse(target)
-	if err != nil {
-		return nil, err
-	}
-	c.protocol = parse.Scheme
-	c.addr = parse.Hostname()
-	c.port = parse.Port()
 
 	for _, op := range ops {
-		if err = op(c); err != nil {
+		if err := op(c); err != nil {
 			return nil, err
 		}
+	}
+
+	if c.client == nil {
+		c.client = &http.Client{}
+	}
+	if c.headers == nil {
+		c.headers = make(http.Header)
 	}
 	return c, nil
 }
