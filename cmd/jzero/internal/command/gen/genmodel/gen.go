@@ -25,6 +25,7 @@ import (
 	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/dsn"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 )
@@ -108,22 +109,30 @@ func (jm *JzeroModel) Gen() error {
 		return nil
 	}
 
+	// 处理模板
 	var goctlHome string
-
-	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "model")) {
-		tempDir, err := os.MkdirTemp(os.TempDir(), "")
-		if err != nil {
-			return err
-		}
-		defer os.RemoveAll(tempDir)
-		err = embeded.WriteTemplateDir(filepath.Join("go-zero", "model"), filepath.Join(tempDir, "model"))
-		if err != nil {
-			return err
-		}
-		goctlHome = tempDir
-	} else {
-		goctlHome = filepath.Join(config.C.Gen.Home, "go-zero")
+	tempDir, err := os.MkdirTemp(os.TempDir(), "")
+	if err != nil {
+		return err
 	}
+	defer os.RemoveAll(tempDir)
+
+	// 先写入内置模板
+	err = embeded.WriteTemplateDir(filepath.Join("go-zero", "model"), filepath.Join(tempDir, "model"))
+	if err != nil {
+		return err
+	}
+
+	// 如果用户自定义了模板，则复制覆盖
+	customTemplatePath := filepath.Join(config.C.Gen.Home, "go-zero", "model")
+	if pathx.FileExists(customTemplatePath) {
+		err = filex.CopyDir(customTemplatePath, filepath.Join(tempDir, "model"))
+		if err != nil {
+			return err
+		}
+	}
+
+	goctlHome = tempDir
 	logx.Debugf("goctl_home = %s", goctlHome)
 
 	var (
