@@ -8,12 +8,13 @@ func new{{.upperStartCamelObject}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx
     	cachedConn = *o.CachedConn
     }
 
-    init{{.upperStartCamelObject}}Vars()
+    init{{.upperStartCamelObject}}Vars(o.Flavor)
 
 	return &default{{.upperStartCamelObject}}Model{
 		cachedConn: cachedConn,
-		conn: conn,
-		table:      condition.AdaptTable({{.table}}),
+		conn:       conn,
+		flavor:     o.Flavor,
+		table:      condition.QuoteWithFlavor(o.Flavor, {{.table}}),
 	}
 }
 
@@ -22,5 +23,6 @@ func (m *default{{.upperStartCamelObject}}Model) clone() *default{{.upperStartCa
 		cachedConn: m.cachedConn,
 		conn:       m.conn,
 		table:      m.table,
+		flavor:     m.flavor,
 	}
 }

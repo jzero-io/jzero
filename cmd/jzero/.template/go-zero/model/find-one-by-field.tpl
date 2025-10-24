@@ -4,9 +4,9 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 	var resp {{.upperStartCamelObject}}
 	err := m.cachedConn.QueryRowIndexCtx(ctx, &resp, {{.cacheKeyVariable}}, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
 		sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-		condition.SelectByWhereRawSql(sb, "{{.originalField}}", {{.lowerStartCamelField}})
+		condition.SelectByWhereRawSqlWithFlavor(sb, "{{.originalField}}", {{.lowerStartCamelField}})
 		sb.Limit(1)
-        sql, args := sb.Build()
+        sql, args := sb.BuildWithFlavor(m.flavor)
         var err error
 
         if session != nil {
@@ -37,7 +37,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 	condition.SelectByWhereRawSql(sb, "{{.originalField}}", {{.lowerStartCamelField}})
     sb.Limit(1)
 
-    sql, args := sb.Build()
+    sql, args := sb.BuildWithFlavor(m.flavor)
 
     if session != nil {
         err = session.QueryRowCtx(ctx, &resp, sql, args...)

@@ -6,7 +6,7 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, ses
 	}
     {{end}}{{.keys}}
     _, {{if .containsIndexCache}}err{{else}}err :{{end}}= m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-        sb := sqlbuilder.Update(m.table)
+        sb := sqlbuilder.UpdateWithFlavor(m.flavor, m.table)
         split := strings.Split({{.lowerStartCamelObject}}RowsExpectAutoSet, ",")
         var assigns []string
         for _, s := range split {
@@ -16,8 +16,8 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, ses
            assigns = append(assigns, sb.Assign(s, nil))
         }
         sb.Set(assigns...)
-        sb.Where(sb.EQ(condition.AdaptField("{{.originalPrimaryKey}}"), nil))
-        statement, _ := sb.Build()
+        sb.Where(sb.EQ(condition.QuoteWithFlavor(m.flavor, "{{.originalPrimaryKey}}"), nil))
+        statement, _ := sb.BuildWithFlavor(m.flavor)
         if session != nil{
             return session.ExecCtx(ctx, statement, {{.expressionValues}})
         }
@@ -37,8 +37,8 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, ses
         assigns = append(assigns, sb.Assign(s, nil))
     }
     sb.Set(assigns...)
-    sb.Where(sb.EQ(condition.AdaptField("{{.originalPrimaryKey}}"), nil))
-    statement, _ := sb.Build()
+    sb.Where(sb.EQ(condition.QuoteWithFlavor(m.flavor, "{{.originalPrimaryKey}}"), nil))
+    statement, _ := sb.BuildWithFlavor(m.flavor)
 
     var err error
     if session != nil{

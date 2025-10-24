@@ -4,7 +4,7 @@ import (
     "github.com/jzero-io/jzero/core/configcenter"
 	{{ if has "model" .Features }}"github.com/jzero-io/jzero/core/stores/modelx"{{ end }}
 	{{ if has "redis" .Features }}"github.com/jzero-io/jzero/core/stores/cache"
-	"github.com/jzero-io/jzero/core/stores/redis"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/pkg/errors"{{ end }}
 
 	"{{ .Module }}/internal/config"
@@ -26,7 +26,7 @@ func NewServiceContext(cc configcenter.ConfigCenter[config.Config]) *ServiceCont
 
 	{{ if has "model" .Features }}svcCtx.SqlxConn = modelx.MustNewConn(cc.MustGetConfig().Sqlx.SqlConf){{ end }}
 	{{ if has "redis" .Features }}svcCtx.RedisConn = redis.MustNewRedis(cc.MustGetConfig().Redis.RedisConf){{ end }}
-	{{ if has "redis" .Features }}svcCtx.Cache = cache.NewRedisNode(svcCtx.RedisConn, errors.New("cache not found"), cache.WithExpiry(time.Duration(5)*time.Second)){{ end }}
+	{{ if has "redis" .Features }}svcCtx.Cache = cache.NewRedisNode(svcCtx.RedisConn, errors.New("cache not found")){{ end }}
 	{{ if and (has "model" .Features) (has "redis" .Features) }}svcCtx.Model = model.NewModel(svcCtx.SqlxConn, modelx.WithCachedConn(modelx.NewConnWithCache(svcCtx.SqlxConn, svcCtx.Cache))){{else if has "model" .Features }}svcCtx.Model = model.NewModel(svcCtx.SqlxConn){{ end }}
 	svcCtx.SetConfigListener()
 	return svcCtx

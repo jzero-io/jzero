@@ -4,7 +4,7 @@ func (m *default{{.upperStartCamelObject}}Model) Insert(ctx context.Context, ses
 	statement, args := sqlbuilder.NewInsertBuilder().
                 InsertInto(m.table).
                 Cols({{.lowerStartCamelObject}}RowsExpectAutoSet).
-                Values({{.expressionValues}}).Build()
+                Values({{.expressionValues}}).BuildWithFlavor(m.flavor)
     return m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
         if session != nil {
             return session.ExecCtx(ctx, statement, args...)
@@ -17,7 +17,7 @@ func (m *default{{.upperStartCamelObject}}Model) Insert(ctx context.Context, ses
     statement, args := sqlbuilder.NewInsertBuilder().
             InsertInto(m.table).
             Cols({{.lowerStartCamelObject}}RowsExpectAutoSet).
-            Values({{.expressionValues}}).Build()
+            Values({{.expressionValues}}).BuildWithFlavor(m.flavor)
 	if session != nil {
        return session.ExecCtx(ctx, statement, args...)
 	}
@@ -34,16 +34,16 @@ func (m *default{{.upperStartCamelObject}}Model) InsertV2(ctx context.Context, s
 		statement, args = sqlbuilder.NewInsertBuilder().
 			InsertInto(m.table).
 			Cols({{.lowerStartCamelObject}}RowsExpectAutoSet).
-			Values({{.expressionValues}}).Returning("{{.data.Table.PrimaryKey.Name.Source}}").Build()
+			Values({{.expressionValues}}).Returning("{{.data.Table.PrimaryKey.Name.Source}}").BuildWithFlavor(m.flavor)
 	} else {
 		statement, args = sqlbuilder.NewInsertBuilder().
 			InsertInto(m.table).
 			Cols({{.lowerStartCamelObject}}RowsExpectAutoSet).
-			Values({{.expressionValues}}).Build()
+			Values({{.expressionValues}}).BuildWithFlavor(m.flavor)
 	}{{else}}statement, args = sqlbuilder.NewInsertBuilder().
 		InsertInto(m.table).
 		Cols({{.lowerStartCamelObject}}RowsExpectAutoSet).
-		Values({{.expressionValues}}).Build(){{end}}
+		Values({{.expressionValues}}).BuildWithFlavor(m.flavor){{end}}
 	{{if .data.Table.PrimaryKey.AutoIncrement}}var primaryKey {{.data.Table.PrimaryKey.Field.DataType}}{{end}}
 	var err error
 	{{if .data.Table.PrimaryKey.AutoIncrement}}if sqlbuilder.DefaultFlavor == sqlbuilder.PostgreSQL || sqlbuilder.DefaultFlavor == sqlbuilder.SQLite {
@@ -99,16 +99,16 @@ func (m *default{{.upperStartCamelObject}}Model) InsertV2(ctx context.Context, s
         statement, args = sqlbuilder.NewInsertBuilder().
                 InsertInto(m.table).
                 Cols({{.lowerStartCamelObject}}RowsExpectAutoSet).
-                Values({{.expressionValues}}).Returning("{{.data.Table.PrimaryKey.Name.Source}}").Build()
+                Values({{.expressionValues}}).Returning("{{.data.Table.PrimaryKey.Name.Source}}").BuildWithFlavor(m.flavor)
     } else {
         statement, args = sqlbuilder.NewInsertBuilder().
                 InsertInto(m.table).
                 Cols({{.lowerStartCamelObject}}RowsExpectAutoSet).
-                Values({{.expressionValues}}).Build()
+                Values({{.expressionValues}}).BuildWithFlavor(m.flavor)
     }{{else}}statement, args = sqlbuilder.NewInsertBuilder().
             InsertInto(m.table).
             Cols({{.lowerStartCamelObject}}RowsExpectAutoSet).
-            Values({{.expressionValues}}).Build(){{end}}
+            Values({{.expressionValues}}).BuildWithFlavor(m.flavor){{end}}
 	{{if .data.Table.PrimaryKey.AutoIncrement}}var primaryKey {{.data.Table.PrimaryKey.Field.DataType}}{{end}}
 	var err error
 	{{if .data.Table.PrimaryKey.AutoIncrement}}if session != nil {
