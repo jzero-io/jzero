@@ -18,8 +18,18 @@ func MustNewConn(c sqlx.SqlConf) sqlx.SqlConn {
 	err = db.Ping()
 	logx.Must(err)
 
-	setSqlbuilderFlavor(c.DriverName)
+	sqlbuilder.DefaultFlavor = getSqlbuilderFlavor(c.DriverName)
 	return sqlConn
+}
+
+func MustNewConnAndSqlbuilderFlavor(c sqlx.SqlConf) (sqlx.SqlConn, sqlbuilder.Flavor) {
+	sqlConn := sqlx.MustNewConn(c)
+	db, err := sqlConn.RawDB()
+	logx.Must(err)
+	err = db.Ping()
+	logx.Must(err)
+
+	return sqlConn, getSqlbuilderFlavor(c.DriverName)
 }
 
 // NewConnWithCache returns a CachedConn with a custom cache.
@@ -27,13 +37,15 @@ func NewConnWithCache(db sqlx.SqlConn, c cache.Cache) sqlc.CachedConn {
 	return sqlc.NewConnWithCache(db, c)
 }
 
-func setSqlbuilderFlavor(driverName string) {
+func getSqlbuilderFlavor(driverName string) sqlbuilder.Flavor {
 	switch driverName {
 	case "mysql":
-		sqlbuilder.DefaultFlavor = sqlbuilder.MySQL
+		return sqlbuilder.MySQL
 	case "pgx":
-		sqlbuilder.DefaultFlavor = sqlbuilder.PostgreSQL
+		return sqlbuilder.PostgreSQL
 	case "sqlite":
-		sqlbuilder.DefaultFlavor = sqlbuilder.SQLite
+		return sqlbuilder.SQLite
+	default:
+		return sqlbuilder.DefaultFlavor
 	}
 }

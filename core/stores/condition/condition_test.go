@@ -132,7 +132,7 @@ func TestWhereClause(t *testing.T) {
 			return []any{[]int{24, 49}, []int{170, 176}}
 		},
 	})
-	clause := whereClause(cds...)
+	clause := whereClause(sqlbuilder.DefaultFlavor, cds...)
 	statement, args := clause.Build()
 	assert.Equal(t, "WHERE (`age` BETWEEN ? AND ? OR `height` BETWEEN ? AND ?)", statement)
 	assert.Equal(t, []any{24, 49, 170, 176}, args)

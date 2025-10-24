@@ -84,8 +84,8 @@ func New(conditions ...Condition) []Condition {
 	return conditions
 }
 
-func buildExpr(cond *sqlbuilder.Cond, field Field, operator Operator, value any) string {
-	field = Field(adapt(string(field)))
+func buildExpr(flavor sqlbuilder.Flavor, cond *sqlbuilder.Cond, field Field, operator Operator, value any) string {
+	field = Field(QuoteWithFlavor(flavor, string(field)))
 	switch operator {
 	case Equal:
 		return cond.Equal(string(field), value)
@@ -125,7 +125,7 @@ func buildExpr(cond *sqlbuilder.Cond, field Field, operator Operator, value any)
 	return ""
 }
 
-func whereClause(conditions ...Condition) *sqlbuilder.WhereClause {
+func whereClause(flavor sqlbuilder.Flavor, conditions ...Condition) *sqlbuilder.WhereClause {
 	clause := sqlbuilder.NewWhereClause()
 	cond := sqlbuilder.NewCond()
 
@@ -146,7 +146,7 @@ func whereClause(conditions ...Condition) *sqlbuilder.WhereClause {
 			}
 			var expr []string
 			for i, field := range c.OrFields {
-				if or := buildExpr(cond, field, c.OrOperators[i], c.OrValues[i]); or != "" {
+				if or := buildExpr(flavor, cond, field, c.OrOperators[i], c.OrValues[i]); or != "" {
 					expr = append(expr, or)
 				}
 			}
@@ -157,7 +157,7 @@ func whereClause(conditions ...Condition) *sqlbuilder.WhereClause {
 			if c.ValueFunc != nil {
 				c.Value = c.ValueFunc()
 			}
-			if and := buildExpr(cond, c.Field, c.Operator, c.Value); and != "" {
+			if and := buildExpr(flavor, cond, c.Field, c.Operator, c.Value); and != "" {
 				clause.AddWhereExpr(cond.Args, and)
 			}
 		}
@@ -165,8 +165,13 @@ func whereClause(conditions ...Condition) *sqlbuilder.WhereClause {
 	return clause
 }
 
-func Select(sb sqlbuilder.SelectBuilder, conditions ...Condition) sqlbuilder.SelectBuilder {
-	clause := whereClause(conditions...)
+func Select(builder sqlbuilder.SelectBuilder, conditions ...Condition) sqlbuilder.SelectBuilder {
+	return SelectWithFlavor(sqlbuilder.DefaultFlavor, builder, conditions...)
+}
+
+func SelectWithFlavor(flavor sqlbuilder.Flavor, builder sqlbuilder.SelectBuilder, conditions ...Condition) sqlbuilder.SelectBuilder {
+	builder.SetFlavor(flavor)
+	clause := whereClause(flavor, conditions...)
 	for _, c := range conditions {
 		if c.SkipFunc != nil {
 			c.Skip = c.SkipFunc()
@@ -179,34 +184,39 @@ func Select(sb sqlbuilder.SelectBuilder, conditions ...Condition) sqlbuilder.Sel
 		}
 		switch Operator(strings.ToUpper(string(c.Operator))) {
 		case Limit:
-			sb.Limit(cast.ToInt(c.Value))
+			builder.Limit(cast.ToInt(c.Value))
 		case Offset:
-			sb.Offset(cast.ToInt(c.Value))
+			builder.Offset(cast.ToInt(c.Value))
 		case OrderBy:
-			sb.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
+			builder.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
 		case OrderByDesc:
-			sb.OrderByDesc(adapt(string(c.Field)))
+			builder.OrderByDesc(QuoteWithFlavor(flavor, string(c.Field)))
 		case OrderByAsc:
-			sb.OrderByAsc(adapt(string(c.Field)))
+			builder.OrderByAsc(QuoteWithFlavor(flavor, string(c.Field)))
 		case GroupBy:
 			// compatibility with old version
 			if c.Value != nil {
-				sb.GroupBy(cast.ToStringSlice(ToSlice(c.Value))...)
+				builder.GroupBy(cast.ToStringSlice(ToSlice(c.Value))...)
 			} else {
-				sb.GroupBy(adapt(string(c.Field)))
+				builder.GroupBy(QuoteWithFlavor(flavor, string(c.Field)))
 			}
 		case Join:
-			sb.JoinWithOption(c.JoinCondition.Option, c.JoinCondition.Table, cast.ToStringSlice(ToSlice(c.JoinCondition.OnExpr))...)
+			builder.JoinWithOption(c.JoinCondition.Option, c.JoinCondition.Table, cast.ToStringSlice(ToSlice(c.JoinCondition.OnExpr))...)
 		}
 	}
 	if clause != nil {
-		sb = *sb.AddWhereClause(clause)
+		builder = *builder.AddWhereClause(clause)
 	}
-	return sb
+	return builder
 }
 
 func Update(builder sqlbuilder.UpdateBuilder, conditions ...Condition) sqlbuilder.UpdateBuilder {
-	clause := whereClause(conditions...)
+	return UpdateWithFlavor(sqlbuilder.DefaultFlavor, builder, conditions...)
+}
+
+func UpdateWithFlavor(flavor sqlbuilder.Flavor, builder sqlbuilder.UpdateBuilder, conditions ...Condition) sqlbuilder.UpdateBuilder {
+	builder.SetFlavor(flavor)
+	clause := whereClause(flavor, conditions...)
 	for _, c := range conditions {
 		if c.SkipFunc != nil {
 			c.Skip = c.SkipFunc()
@@ -223,9 +233,9 @@ func Update(builder sqlbuilder.UpdateBuilder, conditions ...Condition) sqlbuilde
 		case OrderBy:
 			builder.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
 		case OrderByDesc:
-			builder.OrderByDesc(adapt(string(c.Field)))
+			builder.OrderByDesc(QuoteWithFlavor(flavor, string(c.Field)))
 		case OrderByAsc:
-			builder.OrderByAsc(adapt(string(c.Field)))
+			builder.OrderByAsc(QuoteWithFlavor(flavor, string(c.Field)))
 		}
 	}
 	if clause != nil {
@@ -235,7 +245,12 @@ func Update(builder sqlbuilder.UpdateBuilder, conditions ...Condition) sqlbuilde
 }
 
 func Delete(builder sqlbuilder.DeleteBuilder, conditions ...Condition) sqlbuilder.DeleteBuilder {
-	clause := whereClause(conditions...)
+	return DeleteWithFlavor(sqlbuilder.DefaultFlavor, builder, conditions...)
+}
+
+func DeleteWithFlavor(flavor sqlbuilder.Flavor, builder sqlbuilder.DeleteBuilder, conditions ...Condition) sqlbuilder.DeleteBuilder {
+	builder.SetFlavor(flavor)
+	clause := whereClause(flavor, conditions...)
 	for _, c := range conditions {
 		if c.SkipFunc != nil {
 			c.Skip = c.SkipFunc()
@@ -252,9 +267,9 @@ func Delete(builder sqlbuilder.DeleteBuilder, conditions ...Condition) sqlbuilde
 		case OrderBy:
 			builder.OrderBy(cast.ToStringSlice(ToSlice(c.Value))...)
 		case OrderByDesc:
-			builder.OrderByDesc(adapt(string(c.Field)))
+			builder.OrderByDesc(QuoteWithFlavor(flavor, string(c.Field)))
 		case OrderByAsc:
-			builder.OrderByAsc(adapt(string(c.Field)))
+			builder.OrderByAsc(QuoteWithFlavor(flavor, string(c.Field)))
 		}
 	}
 	if clause != nil {

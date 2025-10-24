@@ -9,9 +9,13 @@ import (
 )
 
 func SelectByWhereRawSql(sb *sqlbuilder.SelectBuilder, originalField string, args ...any) {
+	SelectByWhereRawSqlWithFlavor(sqlbuilder.DefaultFlavor, sb, originalField, args...)
+}
+
+func SelectByWhereRawSqlWithFlavor(flavor sqlbuilder.Flavor, sb *sqlbuilder.SelectBuilder, originalField string, args ...any) {
 	originalFields := strings.Split(originalField, " and ")
 	for i, v := range originalFields {
-		field := AdaptField(strings.Split(v, " = ")[0])
+		field := QuoteWithFlavor(flavor, strings.Split(v, " = ")[0])
 		sb.Where(sb.EQ(field, args[i]))
 	}
 }
@@ -20,6 +24,11 @@ const dbTag = "db"
 
 // RawFieldNames converts golang struct field into slice string.
 func RawFieldNames(in any) []string {
+	return RawFieldNamesWithFlavor(sqlbuilder.DefaultFlavor, in)
+}
+
+// RawFieldNames converts golang struct field into slice string.
+func RawFieldNamesWithFlavor(flavor sqlbuilder.Flavor, in any) []string {
 	out := make([]string, 0)
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
@@ -39,7 +48,7 @@ func RawFieldNames(in any) []string {
 		case "-":
 			continue
 		case "":
-			out = append(out, adapt(fi.Name))
+			out = append(out, QuoteWithFlavor(flavor, fi.Name))
 		default:
 			if strings.Contains(tagv, ",") {
 				tagv = strings.TrimSpace(strings.Split(tagv, ",")[0])
@@ -50,7 +59,7 @@ func RawFieldNames(in any) []string {
 			if len(tagv) == 0 {
 				tagv = fi.Name
 			}
-			out = append(out, adapt(tagv))
+			out = append(out, QuoteWithFlavor(flavor, tagv))
 		}
 	}
 
@@ -58,10 +67,14 @@ func RawFieldNames(in any) []string {
 }
 
 func RemoveIgnoreColumns(columns []string, ignoreColumns ...string) []string {
+	return RemoveIgnoreColumnsWithFlavor(sqlbuilder.DefaultFlavor, columns, ignoreColumns...)
+}
+
+func RemoveIgnoreColumnsWithFlavor(flavor sqlbuilder.Flavor, columns []string, ignoreColumns ...string) []string {
 	out := append([]string(nil), columns...)
 
 	for _, ic := range ignoreColumns {
-		ic = adapt(ic)
+		ic = QuoteWithFlavor(flavor, ic)
 		var n int
 		for _, v := range out {
 			if v != ic {
@@ -75,17 +88,19 @@ func RemoveIgnoreColumns(columns []string, ignoreColumns ...string) []string {
 	return out
 }
 
+// Deprecated use Quote instead
 func AdaptTable(table string) string {
-	return adapt(table)
+	return QuoteWithFlavor(sqlbuilder.DefaultFlavor, table)
 }
 
+// Deprecated use Quote instead
 func AdaptField(field string) string {
-	return adapt(field)
+	return QuoteWithFlavor(sqlbuilder.DefaultFlavor, field)
 }
 
-func adapt(str string) string {
+func QuoteWithFlavor(flavor sqlbuilder.Flavor, str string) string {
 	str = Unquote(str)
-	return sqlbuilder.DefaultFlavor.Quote(str)
+	return flavor.Quote(str)
 }
 
 func Unquote(s string) string {
