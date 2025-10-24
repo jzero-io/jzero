@@ -6,7 +6,7 @@ func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, ses
 	}
     {{end}}{{.keys}}
     _, {{if .containsIndexCache}}err{{else}}err :{{end}}= m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-        sb := sqlbuilder.UpdateWithFlavor(m.flavor, m.table)
+        sb := sqlbuilder.Update(m.table)
         split := strings.Split({{.lowerStartCamelObject}}RowsExpectAutoSet, ",")
         var assigns []string
         for _, s := range split {
