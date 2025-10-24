@@ -358,7 +358,7 @@ func getAllTables(conns []Conn, driver string) ([]string, error) {
 				return nil, err
 			}
 			for _, v := range tables {
-				allTables = append(allTables, fmt.Sprintf("`%s`", conn.Schema)+"."+fmt.Sprintf("`%s`", v))
+				allTables = append(allTables, conn.Schema+"."+v)
 			}
 		}
 	case "pgx":
