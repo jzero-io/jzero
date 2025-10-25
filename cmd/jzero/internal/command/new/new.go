@@ -225,7 +225,7 @@ func GetCommand() *cobra.Command {
 	newCmd.Flags().StringP("home", "", "", "use the specified template.")
 	newCmd.Flags().StringP("frame", "", "", "set frame")
 	newCmd.Flags().StringP("style", "", "gozero", "set style")
-	newCmd.Flags().StringP("remote", "r", "", "remote templates repo")
+	newCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().IntP("remote-timeout", "", 30, "remote templates repo timeout")
 	newCmd.Flags().StringP("remote-auth-username", "", "", "remote templates repo auth username")
 	newCmd.Flags().StringP("remote-auth-password", "", "", "remote templates repo auth password")
