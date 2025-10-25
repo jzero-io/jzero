@@ -162,60 +162,6 @@ jzero new your_project --home your_template_path
 使用 cache 参数可以不再重复拉取仓库, 如 **jzero new your_project --branch xx --cache**
 :::
 
-### 新建 go-zero 原汁原味的 api 项目
-
-::: code-tabs#shell
-
-@tab jzero
-
-```bash
-jzero new your_project --branch api-goctl
-cd your_project
-# 下载依赖
-go mod tidy
-# 启动项目
-go run main.go
-```
-
-@tab Docker
-
-```bash
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --branch api-goctl
-cd your_project
-# 下载依赖
-go mod tidy
-# 启动项目
-go run main.go
-```
-:::
-
-### 新建 go-zero 原汁原味的 rpc 项目
-
-::: code-tabs#shell
-
-@tab jzero
-
-```bash
-jzero new your_project --branch rpc-goctl
-cd your_project
-# 下载依赖
-go mod tidy
-# 启动项目
-go run main.go
-```
-
-@tab Docker
-
-```bash
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --branch rpc-goctl
-cd your_project
-# 下载依赖
-go mod tidy
-# 启动项目
-go run main.go
-```
-:::
-
 ### 新建命令行项目
 
 ::: code-tabs#shell

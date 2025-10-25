@@ -21,9 +21,9 @@ package main
 
 import (
 	"fmt"
-	
+
+    "github.com/jzero-io/jzero/core/configcenter"
     "github.com/jzero-io/jzero/core/configcenter/subscriber"
-    configurator "github.com/zeromicro/go-zero/core/configcenter"
 )
 
 type Config struct {
@@ -33,14 +33,11 @@ type Config struct {
 
 func main() {
 	cfgFile := "config.yaml"
-	cc := configurator.MustNewConfigCenter[Config](configurator.Config{
+	cc := configcenter.MustNewConfigCenter[Config](configcenter.Config{
 		Type: "yaml",
 	}, subscriber.MustNewFsnotifySubscriber(cfgFile, subscriber.WithUseEnv(true)))
 	
-	config , err := cc.GetConfig()
-	if err != nil {
-		panic(err)
-	}
+	config := cc.MustGetConfig()
 	fmt.Println(config)
 }
 ```
@@ -52,16 +49,14 @@ databaseType: mysql
 
 ## 替换 fsnotify 为 etcd 等注册中心
 
-> https://go-zero.dev/docs/tasks/configcenter?_highlight=configcenter
-
 ```go
 package main
 
 import (
 	"fmt"
 
-	subscriber "github.com/zeromicro/go-zero/core/configcenter/subscriber"
-	configurator "github.com/zeromicro/go-zero/core/configcenter"
+    "github.com/jzero-io/jzero/core/configcenter"
+    "github.com/jzero-io/jzero/core/configcenter/subscriber"
 )
 
 type Config struct {
@@ -70,17 +65,14 @@ type Config struct {
 }
 
 func main() {
-	cc := configurator.MustNewConfigCenter[Config](configurator.Config{
+	cc := configcenter.MustNewConfigCenter[Config](configcenter.Config{
 		Type: "yaml",
 	},subscriber.MustNewEtcdSubscriber(subscriber.EtcdConf{
 		Hosts: []string{"localhost:2379"}, // etcd 地址
 		Key:   "test1",    // 配置key
 	}))
 
-	config , err := cc.GetConfig()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(config)
+    config := cc.MustGetConfig()
+    fmt.Println(config)
 }
 ```
