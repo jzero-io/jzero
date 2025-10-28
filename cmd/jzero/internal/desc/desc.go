@@ -109,7 +109,7 @@ func protoHasService(fp string) (bool, error) {
 		if strings.Contains(err.Error(), "rpc service not found") {
 			return false, nil
 		}
-		return false, err
+		return false, errors.Errorf("failed to parse proto %s: %v", fp, err)
 	}
 	return len(parse.Service) > 0, nil
 }
