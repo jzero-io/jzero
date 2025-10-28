@@ -37,3 +37,69 @@ func TestSelectByWhereRawSql(t *testing.T) {
 		})
 	}
 }
+
+func TestQuoteWithFlavor(t *testing.T) {
+	type args struct {
+		flavor sqlbuilder.Flavor
+		str    string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "test1",
+			args: args{
+				flavor: sqlbuilder.MySQL,
+				str:    "manage_role.id",
+			},
+			want: "`manage_role`.`id`",
+		},
+		{
+			name: "test2",
+			args: args{
+				flavor: sqlbuilder.MySQL,
+				str:    "id",
+			},
+			want: "`id`",
+		},
+		{
+			name: "test3",
+			args: args{
+				flavor: sqlbuilder.MySQL,
+				str:    "`manage_role`.`id`",
+			},
+			want: "`manage_role`.`id`",
+		},
+		{
+			name: "test4",
+			args: args{
+				flavor: sqlbuilder.PostgreSQL,
+				str:    "`manage_role`.`id`",
+			},
+			want: `"manage_role"."id"`,
+		},
+		{
+			name: "test4",
+			args: args{
+				flavor: sqlbuilder.PostgreSQL,
+				str:    "id",
+			},
+			want: `"id"`,
+		},
+		{
+			name: "test5",
+			args: args{
+				flavor: sqlbuilder.PostgreSQL,
+				str:    `"manage_role"."id"`,
+			},
+			want: `"manage_role"."id"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, QuoteWithFlavor(tt.args.flavor, tt.args.str), "QuoteWithFlavor(%v, %v)", tt.args.flavor, tt.args.str)
+		})
+	}
+}

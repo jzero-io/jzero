@@ -27,7 +27,7 @@ func RawFieldNames(in any) []string {
 	return RawFieldNamesWithFlavor(sqlbuilder.DefaultFlavor, in)
 }
 
-// RawFieldNames converts golang struct field into slice string.
+// RawFieldNamesWithFlavor converts golang struct field into slice string.
 func RawFieldNamesWithFlavor(flavor sqlbuilder.Flavor, in any) []string {
 	out := make([]string, 0)
 	v := reflect.ValueOf(in)
@@ -88,19 +88,24 @@ func RemoveIgnoreColumnsWithFlavor(flavor sqlbuilder.Flavor, columns []string, i
 	return out
 }
 
-// Deprecated use Quote instead
+// AdaptTable Deprecated use Quote instead
 func AdaptTable(table string) string {
 	return QuoteWithFlavor(sqlbuilder.DefaultFlavor, table)
 }
 
-// Deprecated use Quote instead
+// AdaptField Deprecated use Quote instead
 func AdaptField(field string) string {
 	return QuoteWithFlavor(sqlbuilder.DefaultFlavor, field)
 }
 
 func QuoteWithFlavor(flavor sqlbuilder.Flavor, str string) string {
-	str = Unquote(str)
-	return flavor.Quote(str)
+	split := strings.Split(str, ".")
+
+	var quoteStrs []string
+	for _, v := range split {
+		quoteStrs = append(quoteStrs, flavor.Quote(Unquote(v)))
+	}
+	return strings.Join(quoteStrs, ".")
 }
 
 func Unquote(s string) string {
