@@ -122,20 +122,6 @@ func Generate(genModule bool) (err error) {
 		if err != nil {
 			return err
 		}
-
-		// 增加 plugins 的 proto 文件
-		plugins, err := plugin.GetPlugins()
-		if err == nil {
-			for _, p := range plugins {
-				if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
-					pluginFiles, err := desc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
-					if err != nil {
-						return err
-					}
-					files = append(files, pluginFiles...)
-				}
-			}
-		}
 	}
 
 	for _, v := range config.C.Gen.Zrpcclient.DescIgnore {
