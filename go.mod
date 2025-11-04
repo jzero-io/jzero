@@ -21,7 +21,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/zeromicro/go-zero v1.9.2
 	google.golang.org/protobuf v1.36.10
-	modernc.org/sqlite v1.39.1
+	modernc.org/sqlite v1.40.0
 )
 
 require (
