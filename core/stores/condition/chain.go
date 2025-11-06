@@ -81,6 +81,14 @@ func (c Chain) NotEqual(field Field, value any, op ...opts.Opt[ChainOperatorOpts
 	return c.addChain(field, NotEqual, value, op...)
 }
 
+func (c Chain) IsNull(field Field, op ...opts.Opt[ChainOperatorOpts]) Chain {
+	return c.addChain(field, IsNull, nil, op...)
+}
+
+func (c Chain) IsNotNull(field Field, op ...opts.Opt[ChainOperatorOpts]) Chain {
+	return c.addChain(field, IsNotNull, nil, op...)
+}
+
 func (c Chain) GreaterThan(field Field, value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
 	return c.addChain(field, GreaterThan, value, op...)
 }

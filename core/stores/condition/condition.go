@@ -23,6 +23,8 @@ func (f Field) String() string {
 const (
 	Equal            Operator = "="
 	NotEqual         Operator = "!="
+	IsNull           Operator = "IS NULL"
+	IsNotNull        Operator = "IS NOT NULL"
 	GreaterThan      Operator = ">"
 	LessThan         Operator = "<"
 	GreaterEqualThan Operator = ">="
@@ -36,7 +38,7 @@ const (
 	Between          Operator = "BETWEEN"
 	NotBetween       Operator = "NOT BETWEEN"
 
-	// Deprecated Use OrderByDesc or OrderByAsc instead.
+	// OrderBy Deprecated Use OrderByDesc or OrderByAsc instead.
 	OrderBy     Operator = "ORDER BY"
 	OrderByDesc Operator = "ORDER BY DESC"
 	OrderByAsc  Operator = "ORDER BY ASC"
@@ -91,6 +93,10 @@ func buildExpr(flavor sqlbuilder.Flavor, cond *sqlbuilder.Cond, field Field, ope
 		return cond.Equal(string(field), value)
 	case NotEqual:
 		return cond.NotEqual(string(field), value)
+	case IsNull:
+		return cond.IsNull(string(field))
+	case IsNotNull:
+		return cond.IsNotNull(string(field))
 	case GreaterThan:
 		return cond.GreaterThan(string(field), value)
 	case LessThan:

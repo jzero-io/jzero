@@ -36,3 +36,29 @@ func TestChainJoin(t *testing.T) {
 	assert.Equal(t, "SELECT user.name, user.age FROM user INNER JOIN user_info ON user.id = user_info.user_id WHERE `user`.`field` = ?", sql)
 	assert.Equal(t, []any{"value2"}, args)
 }
+
+func TestChainIsNull(t *testing.T) {
+	sb := sqlbuilder.NewSelectBuilder().Select("user.name", "user.age").From("user")
+	chain := NewChain()
+	conds := chain.
+		Equal("user.field", "value2").
+		IsNull("delete_at").
+		Build()
+	builder := SelectWithFlavor(sqlbuilder.MySQL, *sb, conds...)
+	sql, args := builder.BuildWithFlavor(sqlbuilder.MySQL)
+	assert.Equal(t, "SELECT user.name, user.age FROM user WHERE `user`.`field` = ? AND `delete_at` IS NULL", sql)
+	assert.Equal(t, []any{"value2"}, args)
+}
+
+func TestChainIsNotNull(t *testing.T) {
+	sb := sqlbuilder.NewSelectBuilder().Select("user.name", "user.age").From("user")
+	chain := NewChain()
+	conds := chain.
+		Equal("user.field", "value2").
+		IsNotNull("delete_at").
+		Build()
+	builder := SelectWithFlavor(sqlbuilder.MySQL, *sb, conds...)
+	sql, args := builder.BuildWithFlavor(sqlbuilder.MySQL)
+	assert.Equal(t, "SELECT user.name, user.age FROM user WHERE `user`.`field` = ? AND `delete_at` IS NOT NULL", sql)
+	assert.Equal(t, []any{"value2"}, args)
+}
