@@ -1,5 +1,6 @@
 .vscode
 .idea
+.claude
 dist
 node_modules
 docs/package-lock.json
