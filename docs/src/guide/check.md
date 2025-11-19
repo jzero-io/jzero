@@ -8,13 +8,13 @@ order: 2
 
 jzero 依赖于 golang 环境, 推荐使用 go1.23 版本
 
-如果你是 macOS 或者 Linux 用户, 推荐采用 [gvm](https://github.com/jaronnie/gvm) 安装 golang 环境
+推荐采用 [gvm](https://github.com/jaronnie/gvm) 安装 golang 环境
 
 ## 安装 jzero
 
 提供以下三种方式使用 jzero, 请根据实际情况任选一种即可
 
-* 源码安装(**go version >= go1.22.10**)
+* 源码安装(**go version >= go1.24.3**)
 * 直接[下载 jzero 二进制文件](https://github.com/jzero-io/jzero/releases)
 * 基于 Docker 安装 jzero, [镜像地址](https://github.com/jzero-io/jzero/pkgs/container/jzero)
 
@@ -57,13 +57,6 @@ jzero check
 ```shell
 # 获取 jzero 版本信息
 docker run --rm ghcr.io/jzero-io/jzero:latest version
-```
-
-**国内阿里云镜像源**
-
-```shell
-# 获取 jzero 版本信息
-docker run --rm registry.cn-hangzhou.aliyuncs.com/jaronnie/jzero:latest version
 ```
 
 ## 命令补全

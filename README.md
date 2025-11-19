@@ -11,16 +11,6 @@
 <img align="center" width="150px" src="https://oss.jaronnie.com/jzero.jpg">
 </p>
 
-![Static Badge](https://img.shields.io/badge/Latest_New_Feature-blue?style=for-the-badge)
-
-* 将 jzero 应用部署在 [Vercel](https://vercel.com), [模板仓库分支](https://github.com/jzero-io/templates/tree/api-vercel), [代码示例](https://github.com/jaronnie/go-serverless-vercel)
-* 基于 git change 生成代码, 极大提升大型项目开发体验
-* 基于 jzero 的[后台管理系统](https://github.com/jzero-io/jzero-admin), [演示地址1-部署在vercel](https://admin.jzero.io), [演示地址2-部署在阿里云函数计算](http://jzero-admin.jaronnie.com)
-* 基于 jzero 的 [serverless](https://docs.jzero.io/guide/serverless.html) 插件特性, 实现多模块解耦, 在编译阶段实现第三方模块的自动依赖注入
-* [动态配置特性](https://docs.jzero.io/guide/config/dynamic_conf.html), 可动态修改服务端配置, 无需重启服务端
-* 实现了 jzero mcp server, 可在 mcp client 对话框中调用 jzero 工具生成代码
-* 同一套代码动态能适配多数据库类型
-
 ## 介绍
 
 通过模板创建项目，并基于 [proto](https://docs.jzero.io/guide/develop/proto.html)/[api](https://docs.jzero.io/guide/develop/api.html)/[sql](https://docs.jzero.io/guide/develop/model.html) 文件生成 Server/Client/Model 代码。
@@ -59,8 +49,6 @@ cd your_project
 go mod tidy
 # 生成 swagger json
 jzero gen swagger
-# 生成 http 客户端 sdk
-jzero gen sdk
 # 运行服务端
 go run main.go server
 ```
@@ -74,8 +62,6 @@ cd your_project
 go mod tidy
 # 生成 swagger json
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
-# 生成 http 客户端 sdk
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen sdk
 # 运行服务端
 go run main.go server
 ```
