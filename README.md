@@ -21,8 +21,6 @@
 * 实现了 jzero mcp server, 可在 mcp client 对话框中调用 jzero 工具生成代码
 * 同一套代码动态能适配多数据库类型
 
-中文 | [ENGLISH](README-EN.md)
-
 ## 介绍
 
 通过模板创建项目，并基于 [proto](https://docs.jzero.io/guide/develop/proto.html)/[api](https://docs.jzero.io/guide/develop/api.html)/[sql](https://docs.jzero.io/guide/develop/model.html) 文件生成 Server/Client/Model 代码。
