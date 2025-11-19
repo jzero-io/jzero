@@ -130,9 +130,6 @@ type GenConfig struct {
 	MongoCachePrefix string   `mapstructure:"mongo-cache-prefix"`
 	MongoCacheType   []string `mapstructure:"mongo-cache-type"`
 
-	// Sub command
-	Sdk GenSdkConfig `mapstructure:"sdk"`
-
 	Swagger    GenSwaggerConfig    `mapstructure:"swagger"`
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`
 	Docs       GenDocsConfig       `mapstructure:"docs"`

@@ -6,24 +6,18 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package gen
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/rinchsan/gosimports"
-	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
-
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gen"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gendocs"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gensdk"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genswagger"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genzrpcclient"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
+	"github.com/rinchsan/gosimports"
+	"github.com/spf13/cobra"
 )
 
 // genCmd represents the gen command
@@ -74,53 +68,6 @@ var genSwaggerCmd = &cobra.Command{
 	},
 }
 
-// genSdkCmd represents the gen sdk command
-var genSdkCmd = &cobra.Command{
-	Use:   "sdk",
-	Short: `Generate sdk client by api file and proto file`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if config.C.Gen.Sdk.Language == "ts" {
-			console.Warning("[warning] ts client is still working...")
-		}
-
-		mod, err := mod.GetGoMod(config.C.Wd())
-		if err != nil {
-			return err
-		}
-
-		if config.C.Gen.Sdk.Output == "" {
-			config.C.Gen.Sdk.Output = fmt.Sprintf("%s-%s", filepath.Base(mod.Path), config.C.Gen.Sdk.Language)
-		}
-
-		var genModule bool
-		if config.C.Gen.Sdk.GoModule == "" {
-			// module 为空, sdk 作为服务端的一个 package
-			if config.C.Gen.Sdk.Language == "go" {
-				config.C.Gen.Sdk.GoModule = filepath.ToSlash(filepath.Join(mod.Path, config.C.Gen.Sdk.Output))
-			}
-		} else {
-			// module 不为空, 则生成 go.mod 文件
-			if !config.C.Gen.Sdk.Mono {
-				genModule = true
-			}
-		}
-		gosimports.LocalPrefix = config.C.Gen.Sdk.GoModule
-
-		if config.C.Gen.Sdk.GoPackage == "" {
-			config.C.Gen.Sdk.GoPackage = strings.ReplaceAll(strings.ToLower(filepath.Base(config.C.Gen.Sdk.GoModule)), "-", "_")
-		}
-
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return err
-		}
-		if embeded.Home == "" {
-			embeded.Home = filepath.Join(homeDir, ".jzero", "templates", version.Version)
-		}
-		return gensdk.GenSdk(genModule)
-	},
-}
-
 // genDocsCmd represents the genDocs command
 var genDocsCmd = &cobra.Command{
 	Use:   "docs",
@@ -165,17 +112,6 @@ func GetCommand() *cobra.Command {
 		genCmd.Flags().StringP("mongo-cache-prefix", "", "cache", "mongo cache prefix")
 		// mongo cache type
 		genCmd.Flags().StringSliceP("mongo-cache-type", "", []string{"*"}, "mongo cache type names to enable caching")
-	}
-
-	{
-		genCmd.AddCommand(genSdkCmd)
-
-		genSdkCmd.Flags().StringP("language", "l", "go", "set language")
-		genSdkCmd.Flags().StringP("output", "o", "", "set output dir")
-		genSdkCmd.Flags().StringP("goModule", "", "", "set go module name")
-		genSdkCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")
-		genSdkCmd.Flags().StringP("goPackage", "", "", "set package name")
-		genSdkCmd.Flags().BoolP("mono", "", false, "mono sdk project under go mod project")
 	}
 
 	{
