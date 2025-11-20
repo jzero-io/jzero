@@ -44,7 +44,6 @@ jobs:
           jzero serverless build
           go mod tidy
           jzero gen swagger
-          jzero gen sdk
           jzero format --git-change=false
           go mod tidy && go mod download
           go run main.go version
@@ -61,7 +60,6 @@ jobs:
           cd simpleapi-with-model-redis
           go mod tidy
           jzero gen swagger
-          jzero gen sdk
           jzero format --git-change=false
           go mod tidy && go mod download
           go run main.go version
@@ -81,7 +79,6 @@ jobs:
           jzero serverless build
           go mod tidy
           jzero gen swagger
-          jzero gen sdk
           jzero gen zrpcclient
           jzero format --git-change=false
           go mod tidy && go mod download
@@ -97,7 +94,6 @@ jobs:
           cd simplegateway-with-model-redis
           go mod tidy
           jzero gen swagger
-          jzero gen sdk
           jzero gen zrpcclient
           jzero format --git-change=false
           go mod tidy && go mod download
