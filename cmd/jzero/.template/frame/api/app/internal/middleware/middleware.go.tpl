@@ -11,9 +11,9 @@ func Register(server *rest.Server) {
 	httpx.SetValidator(NewValidator())
 
 	// add custom middleware
-	//server.Use(func(next http .HandlerFunc) http.HandlerFunc {
+	// server.Use(func(next http .HandlerFunc) http.HandlerFunc {
 	//	return func(w http.ResponseWriter, r *http.Request) {
 	//		next.ServeHTTP(w, r)
 	//	}
-	//})
+	// })
 }
