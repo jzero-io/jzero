@@ -6,14 +6,12 @@ import (
 	"{{ .Module }}/internal/config"
 )
 
-func (sc *ServiceContext) GetConfig() (config.Config, error) {
-	return sc.ConfigCenter.GetConfig()
+func (svcCtx *ServiceContext) GetConfig() (config.Config, error) {
+	return svcCtx.ConfigCenter.GetConfig()
 }
 
-func (sc *ServiceContext) MustGetConfig() config.Config {
-	c, err := sc.ConfigCenter.GetConfig()
-	logx.Must(err)
-	return c
+func (svcCtx *ServiceContext) MustGetConfig() config.Config {
+	return svcCtx.ConfigCenter.MustGetConfig()
 }
 
 func (svcCtx *ServiceContext) SetConfigListener() {
