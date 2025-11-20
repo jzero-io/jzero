@@ -23,7 +23,7 @@ func NewValidator() *Validator {
 }
 
 func (v *Validator) UnaryServerMiddleware() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		switch req.(type) {
 		case proto.Message:
 			if err := v.v.Validate(req.(proto.Message)); err != nil {

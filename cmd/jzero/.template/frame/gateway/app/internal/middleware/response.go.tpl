@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -13,9 +14,9 @@ import (
 )
 
 type Body struct {
-	Data    any `json:"data"`
-	Code    int         `json:"code"`
-	Message string      `json:"msg"`
+	Data    any    `json:"data"`
+	Code    int    `json:"code"`
+	Message string `json:"msg"`
 }
 
 type responseWriter struct {
@@ -66,7 +67,7 @@ func ResponseMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		next.ServeHTTP(rw, r)
 
 		if strings.Contains(strings.ToLower(w.Header().Get("Content-Type")), "application/json") {
-			var resp map[string]interface{}
+			var resp map[string]any
 			err := json.Unmarshal(rw.Body(), &resp)
 			if err != nil {
 				logc.Errorf(logCtx, "Unmarshal resp error: %s\n", err.Error())
