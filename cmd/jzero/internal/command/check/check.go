@@ -31,7 +31,6 @@ var toolVersionCheck = map[string]string{
 	"protoc-gen-go":        "1.36.8",
 	"protoc-gen-go-grpc":   "1.5.1",
 	"protoc-gen-openapiv2": "2.27.2",
-	"protoc-gen-doc":       "1.5.1",
 }
 
 // RunCheck executes the check logic and can be called from other places
@@ -59,7 +58,7 @@ func RunCheck(all bool) error {
 	}
 
 	// check goctl version
-	goctlVersion := config.C.GoctlVersion()
+	goctlVersion := config.C.ToolVersion().GoctlVersion
 	checkGoctlVersion, err := version.NewVersion(toolVersionCheck["goctl"])
 	if err != nil {
 		return err
@@ -87,7 +86,7 @@ func RunCheck(all bool) error {
 		}
 
 		// check protoc version
-		protocVersion := config.C.ProtocVersion()
+		protocVersion := config.C.ToolVersion().ProtocVersion
 		checkProtocVersion, err := version.NewVersion(toolVersionCheck["protoc"])
 		if err != nil {
 			return err
@@ -112,7 +111,7 @@ func RunCheck(all bool) error {
 		}
 
 		// check protoc-gen-go version
-		protocGenGoVersion := config.C.ProtocGenGoVersion()
+		protocGenGoVersion := config.C.ToolVersion().ProtocGenGoVersion
 		checkProtocGenGoVersion, err := version.NewVersion(toolVersionCheck["protoc-gen-go"])
 		if err != nil {
 			return err
@@ -137,7 +136,7 @@ func RunCheck(all bool) error {
 		}
 
 		// check protoc-gen-go-grpc version
-		protocGenGoGrpcVersion := config.C.ProtocGenGoGrpcVersion()
+		protocGenGoGrpcVersion := config.C.ToolVersion().ProtocGenGoGrpcVersion
 		checkProtocGenGoGrpcVersion, err := version.NewVersion(toolVersionCheck["protoc-gen-go-grpc"])
 		if err != nil {
 			return err
@@ -161,7 +160,7 @@ func RunCheck(all bool) error {
 		}
 
 		// check protoc-gen-openapiv2 version
-		protocGenOpenapiv2Version := config.C.ProtocGenOpenapiv2Version()
+		protocGenOpenapiv2Version := config.C.ToolVersion().ProtocGenOpenapiv2Version
 		checkProtocGenOpenapiv2Version, err := version.NewVersion(toolVersionCheck["protoc-gen-openapiv2"])
 		if err != nil {
 			return err
@@ -172,36 +171,11 @@ func RunCheck(all bool) error {
 				return err
 			}
 		}
-
-		// protoc-gen-doc
-		_, err = env.LookPath("protoc-gen-doc")
-		if err != nil {
-			fmt.Printf("%s protoc-gen-doc %s\n", color.WithColor("Installing tool", color.FgGreen), toolVersionCheck["protoc-gen-doc"])
-			if err = golang.Install(fmt.Sprintf("github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@v%s", toolVersionCheck["protoc-gen-doc"])); err != nil {
-				return err
-			}
-		}
-		if _, err = env.LookPath("protoc-gen-doc"); err != nil {
-			return errors.New("protoc-gen-doc is not installed")
-		}
-
-		// check protoc-gen-doc version
-		protocGenDocVersion := config.C.ProtocGenDocVersion()
-		checkProtocGenDocVersion, err := version.NewVersion(toolVersionCheck["protoc-gen-doc"])
-		if err != nil {
-			return err
-		}
-		if protocGenDocVersion == nil || protocGenDocVersion.LessThan(checkProtocGenDocVersion) {
-			fmt.Printf("%s protoc-gen-doc to %s\n", color.WithColor("Upgrading tool", color.FgGreen), toolVersionCheck["protoc-gen-doc"])
-			if err = golang.Install(fmt.Sprintf("github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@v%s", toolVersionCheck["protoc-gen-doc"])); err != nil {
-				return err
-			}
-		}
 	}
 	return nil
 }
 
-var url = map[string]string{
+var protocDownloadUrl = map[string]string{
 	"linux_amd64":   "https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-linux-x86_64.zip",
 	"linux_arm64":   "https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-linux-aarch_64.zip",
 	"darwin_amd64":  "https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-osx-x86_64.zip",
@@ -218,7 +192,7 @@ const (
 func installProtoc() error {
 	tempFile := filepath.Join(os.TempDir(), ZipFileName)
 	var downloadUrl string
-	downloadUrl = url[fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)]
+	downloadUrl = protocDownloadUrl[fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)]
 	if downloadUrl == "" {
 		return errors.Errorf("not support platform %s_%s", runtime.GOOS, runtime.GOARCH)
 	}

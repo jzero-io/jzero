@@ -10,14 +10,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/rinchsan/gosimports"
+	"github.com/spf13/cobra"
+
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gen"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gendocs"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genswagger"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genzrpcclient"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
-	"github.com/rinchsan/gosimports"
-	"github.com/spf13/cobra"
 )
 
 // genCmd represents the gen command
@@ -68,18 +68,6 @@ var genSwaggerCmd = &cobra.Command{
 	},
 }
 
-// genDocsCmd represents the genDocs command
-var genDocsCmd = &cobra.Command{
-	Use:   "docs",
-	Short: "jzero gen docs",
-	Long:  `jzero gen docs`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		config.C.Gen.Docs.Output = filepath.Join("desc", "docs", config.C.Gen.Docs.Format)
-		return gendocs.Gen()
-	},
-	Aliases: []string{"doc"},
-}
-
 func GetCommand() *cobra.Command {
 	{
 		genCmd.PersistentFlags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
@@ -120,13 +108,6 @@ func GetCommand() *cobra.Command {
 		genSwaggerCmd.Flags().StringP("output", "o", filepath.Join("desc", "swagger"), "set swagger output dir")
 		genSwaggerCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
 		genSwaggerCmd.Flags().BoolP("merge", "", true, "is merge muti swagger to one file")
-	}
-
-	{
-		genCmd.AddCommand(genDocsCmd)
-
-		genDocsCmd.Flags().StringP("output", "o", filepath.Join("desc", "docs", "md"), "set docs output dir")
-		genDocsCmd.Flags().StringP("format", "", "md", "set output format")
 	}
 
 	{

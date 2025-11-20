@@ -132,7 +132,6 @@ type GenConfig struct {
 
 	Swagger    GenSwaggerConfig    `mapstructure:"swagger"`
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`
-	Docs       GenDocsConfig       `mapstructure:"docs"`
 }
 
 type GenSdkConfig struct {
@@ -244,136 +243,49 @@ func (c *Config) SqlDir() string {
 }
 
 var (
-	goctlVersionOnce       sync.Once
-	protocVersionOnce      sync.Once
-	protocGenGoVersionOnce sync.Once
-	protocGenGoGrpcOnce    sync.Once
-	protocGenOpenapiv2     sync.Once
-	protocGenDocOnce       sync.Once
-
-	protocVersion             *version.Version
-	goctlVersion              *version.Version
-	protocGenGoVersion        *version.Version
-	protocGenGoGrpcVersion    *version.Version
-	protocGenOpenapiv2Version *version.Version
-	protocGenDocVersion       *version.Version
+	ToolVersionOnce sync.Once
 )
 
-func (c *Config) ProtocVersion() *version.Version {
-	protocVersionOnce.Do(func() {
-		protocVersionResp, err := protoc.Version()
-		if err != nil {
-			logx.Debugf("get protoc version failed, %v", err)
-			return
-		}
-		logx.Debugf("protoc version: %s", protocVersionResp)
-		protocVersion, err = version.NewVersion(strings.TrimPrefix(protocVersionResp, "libprotoc "))
-		if err != nil {
-			logx.Debugf("new protoc version failed, %v", err)
-			return
-		}
-	})
-	return protocVersion
+type ToolVersion struct {
+	ProtocVersion             *version.Version
+	GoctlVersion              *version.Version
+	ProtocGenGoVersion        *version.Version
+	ProtocGenGoGrpcVersion    *version.Version
+	ProtocGenOpenapiv2Version *version.Version
 }
 
-func (c *Config) GoctlVersion() *version.Version {
-	goctlVersionOnce.Do(func() {
-		goctlVersionResp, err := execx.Run("goctl -v", "")
-		if err != nil {
-			logx.Debugf("get goctl version failed, %v", err)
-			return
-		}
+func (c *Config) ToolVersion() ToolVersion {
+	toolVersion := ToolVersion{}
 
+	ToolVersionOnce.Do(func() {
+		goctlVersionResp, _ := execx.Run("goctl -v", "")
 		logx.Debugf("goctl version: %s", goctlVersionResp)
 		versionInfo := strings.Split(goctlVersionResp, " ")
 		if len(versionInfo) >= 3 {
-			goctlVersion, err = version.NewVersion(strings.TrimPrefix(versionInfo[2], "v"))
-			if err != nil {
-				logx.Debugf("new goctl version failed, %v", err)
-				return
-			}
+			toolVersion.GoctlVersion, _ = version.NewVersion(strings.TrimPrefix(versionInfo[2], "v"))
 		}
-	})
 
-	return goctlVersion
-}
+		protocVersionResp, _ := protoc.Version()
+		logx.Debugf("protoc version: %s", protocVersionResp)
+		toolVersion.ProtocVersion, _ = version.NewVersion(strings.TrimPrefix(protocVersionResp, "libprotoc "))
 
-func (c *Config) ProtocGenGoVersion() *version.Version {
-	protocGenGoVersionOnce.Do(func() {
-		protocGenGoVersionResp, err := protocgengo.Version()
-		if err != nil {
-			logx.Debugf("get protoc-gen-go version failed, %v", err)
-			return
-		}
+		protocGenGoVersionResp, _ := protocgengo.Version()
 		logx.Debugf("protoc-gen-go version: %s", protocGenGoVersionResp)
-		protocGenGoVersion, err = version.NewVersion(strings.TrimPrefix(protocGenGoVersionResp, "v"))
-		if err != nil {
-			logx.Debugf("new protoc-gen-go version failed, %v", err)
-			return
-		}
-	})
+		toolVersion.ProtocGenGoVersion, _ = version.NewVersion(strings.TrimPrefix(protocGenGoVersionResp, "v"))
 
-	return protocGenGoVersion
-}
-
-func (c *Config) ProtocGenGoGrpcVersion() *version.Version {
-	protocGenGoGrpcOnce.Do(func() {
-		protocGenGoGrpcVersionResp, err := protocgengogrpc.Version()
-		if err != nil {
-			logx.Debugf("get protoc-gen-go-grpc version failed, %v", err)
-			return
-		}
+		protocGenGoGrpcVersionResp, _ := protocgengogrpc.Version()
 		logx.Debugf("protoc-gen-go-grpc version: %s", protocGenGoGrpcVersionResp)
-		protocGenGoGrpcVersion, err = version.NewVersion(strings.TrimPrefix(protocGenGoGrpcVersionResp, "v"))
-		if err != nil {
-			logx.Debugf("new protoc-gen-go-grpc version failed, %v", err)
-			return
-		}
-	})
+		toolVersion.ProtocGenGoGrpcVersion, _ = version.NewVersion(strings.TrimPrefix(protocGenGoGrpcVersionResp, "v"))
 
-	return protocGenGoGrpcVersion
-}
-
-func (c *Config) ProtocGenOpenapiv2Version() *version.Version {
-	protocGenOpenapiv2.Do(func() {
-		protocGenOpenapiv2VersionResp, err := execx.Run("protoc-gen-openapiv2 --version", "")
-		if err != nil {
-			logx.Debugf("get protoc-gen-openapiv2 version failed, %v", err)
-			return
-		}
+		protocGenOpenapiv2VersionResp, _ := execx.Run("protoc-gen-openapiv2 --version", "")
 		logx.Debugf("protoc-gen-openapiv2 version: %s", protocGenOpenapiv2VersionResp)
-		versionInfo := strings.Split(protocGenOpenapiv2VersionResp, " ")
+		versionInfo = strings.Split(protocGenOpenapiv2VersionResp, " ")
 		if len(versionInfo) >= 2 {
-			protocGenOpenapiv2Version, err = version.NewVersion(strings.TrimSuffix(strings.TrimPrefix(versionInfo[1], "v"), ","))
-			if err != nil {
-				logx.Debugf("new protoc-gen-openapiv2 version failed, %v", err)
-				return
-			}
+			toolVersion.ProtocGenOpenapiv2Version, _ = version.NewVersion(strings.TrimSuffix(strings.TrimPrefix(versionInfo[1], "v"), ","))
 		}
 	})
 
-	return protocGenOpenapiv2Version
-}
-
-func (c *Config) ProtocGenDocVersion() *version.Version {
-	protocGenDocOnce.Do(func() {
-		protocGenDocVersionResp, err := execx.Run("protoc-gen-doc --version", "")
-		if err != nil {
-			logx.Debugf("get protoc-gen-doc version failed, %v", err)
-			return
-		}
-		logx.Debugf("protoc-gen-doc version: %s", protocGenDocVersionResp)
-		versionInfo := strings.Split(protocGenDocVersionResp, " ")
-		if len(versionInfo) >= 3 {
-			protocGenDocVersion, err = version.NewVersion(strings.TrimPrefix(versionInfo[2], "v"))
-			if err != nil {
-				logx.Debugf("new protoc-gen-doc version failed, %v", err)
-				return
-			}
-		}
-	})
-
-	return protocGenDocVersion
+	return toolVersion
 }
 
 func TraverseCommands(prefix string, cmd *cobra.Command) error {
