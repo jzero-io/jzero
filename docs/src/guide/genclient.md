@@ -1,6 +1,6 @@
 ---
-title: 生成客户端
-icon: carbon:sdk
+title: 生成客户端代码
+icon: clarity:thin-client-line
 order: 5
 ---
 

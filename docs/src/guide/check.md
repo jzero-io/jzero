@@ -1,12 +1,10 @@
 ---
-title: 环境准备
+title: 安装 jzero
 icon: marketeq:download-alt-4
 order: 2
 ---
 
 ## 安装 golang
-
-jzero 依赖于 golang 环境, 推荐使用 go1.23 版本
 
 推荐采用 [gvm](https://github.com/jaronnie/gvm) 安装 golang 环境
 
@@ -21,14 +19,14 @@ jzero 依赖于 golang 环境, 推荐使用 go1.23 版本
 ### 源码安装 jzero
 
 ```bash
-# 设置国内代理
-go env -w GOPROXY=https://goproxy.cn,direct
+# 设置国内代理(可选)
+# go env -w GOPROXY=https://goproxy.cn,direct
 go install github.com/jzero-io/jzero/cmd/jzero@latest
 
 # 获取 jzero 版本信息
 jzero version
 
-# 自动下载所依赖的环境
+# 自动下载所依赖的工具
 jzero check
 ```
 
@@ -44,15 +42,11 @@ jzero check
 # 获取 jzero 版本信息
 jzero version
 
-# 自动下载所依赖的环境
+# 自动下载所依赖的工具
 jzero check
 ```
 
-### 基于 Docker 使用 jzero
-
-好处便是将所有依赖的工具链全部集成在容器中, 减少用户环境依赖, 减少用户环境配置的复杂度
-
-**github 镜像源**
+### 基于 Docker 安装 jzero
 
 ```shell
 # 获取 jzero 版本信息
