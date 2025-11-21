@@ -11,11 +11,11 @@ export default defineUserConfig({
       title: "Jzero Framework",
       description: "Jzero docs",
     },
-    "/en/": {
-      lang: "en-US",
-      title: "Jzero Framework",
-      description: "Jzero docs",
-    },
+    // "/en/": {
+    //   lang: "en-US",
+    //   title: "Jzero Framework",
+    //   description: "Jzero docs",
+    // },
   },
 
   theme,
