@@ -1,7 +1,7 @@
 {{ if .Serverless }}{{else}}syntax = "proto3";
 
-package {{if .Serverless}}{{.APP | lower}}{{end}}versionpb;
-option go_package = "./pb/{{if .Serverless}}{{.APP | lower}}{{end}}versionpb";
+package {{if .Serverless}}{{.APP | lower}}{{end}}version;
+option go_package = "./types/{{if .Serverless}}{{.APP | lower}}{{end}}version";
 
 message VersionRequest {}
 

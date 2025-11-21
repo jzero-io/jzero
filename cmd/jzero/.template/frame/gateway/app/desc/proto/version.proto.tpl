@@ -1,11 +1,11 @@
 {{ if .Serverless }}{{else}}syntax = "proto3";
 
-package versionpb;
+package version;
 
 import "google/api/annotations.proto";
 import "grpc-gateway/protoc-gen-openapiv2/options/annotations.proto";
 
-option go_package = "./pb/versionpb";
+option go_package = "./types/version";
 
 message VersionRequest {}
 
