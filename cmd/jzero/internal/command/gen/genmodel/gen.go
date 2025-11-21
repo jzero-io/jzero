@@ -433,5 +433,11 @@ func ParseSql(filename string) ([]*ddlparser.Table, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Restrict SQL files to only one table
+	if len(tables) != 1 {
+		return nil, errors.Errorf("SQL file %s contains %d tables, but only one table per SQL file is allowed", filename, len(tables))
+	}
+
 	return tables, nil
 }
