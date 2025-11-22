@@ -90,7 +90,7 @@ func GetCommand() *cobra.Command {
 		genCmd.Flags().BoolP("model-cache", "", false, "goctl model cache")
 		genCmd.Flags().StringSliceP("model-cache-table", "", []string{"*"}, "goctl model cache tables")
 		genCmd.Flags().StringP("model-cache-prefix", "", "cache", "goctl model cache prefix")
-	
+
 		// mongo type strings
 		genCmd.Flags().StringSliceP("mongo-type", "", []string{}, "mongo type name")
 		// mongo cache bool

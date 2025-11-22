@@ -93,7 +93,8 @@ type GenConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
 	// gen global flags
-	Home       string   `mapstructure:"home"`
+	Home string `mapstructure:"home"`
+
 	Style      string   `mapstructure:"style"`
 	Desc       []string `mapstructure:"desc"`
 	DescIgnore []string `mapstructure:"desc-ignore"`
@@ -106,7 +107,8 @@ type GenConfig struct {
 	ProtoInclude []string `mapstructure:"proto-include"`
 
 	// model flag
-	ModelDriver             string   `mapstructure:"model-driver"`
+	ModelDriver string `mapstructure:"model-driver"`
+
 	ModelStrict             bool     `mapstructure:"model-strict"`
 	ModelIgnoreColumns      []string `mapstructure:"model-ignore-columns"`
 	ModelIgnoreColumnsTable []struct {
@@ -122,7 +124,8 @@ type GenConfig struct {
 	ModelCachePrefix     string   `mapstructure:"model-cache-prefix"`
 
 	// mongo flags
-	MongoType        []string `mapstructure:"mongo-type"`
+	MongoType []string `mapstructure:"mongo-type"`
+
 	MongoCache       bool     `mapstructure:"mongo-cache"`
 	MongoCachePrefix string   `mapstructure:"mongo-cache-prefix"`
 	MongoCacheType   []string `mapstructure:"mongo-cache-type"`

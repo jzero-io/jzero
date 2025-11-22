@@ -458,7 +458,6 @@ func generateModelFromDatasource(tableName, goctlHome string) error {
 			return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
 		}
 	} else if config.C.Gen.ModelDriver == "mysql" {
-
 		var datasourceUrl string
 		if strings.Contains(tableName, ".") {
 			for _, v := range config.C.Gen.ModelDatasourceUrl {
