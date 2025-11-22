@@ -98,11 +98,12 @@ type GenConfig struct {
 	Style      string   `mapstructure:"style"`
 	Desc       []string `mapstructure:"desc"`
 	DescIgnore []string `mapstructure:"desc-ignore"`
+	GitChange  bool     `mapstructure:"git-change"`
 
-	// gen self flags
-	GitChange bool `mapstructure:"git-change"`
+	// api flags
+	Route2Code bool
 
-	Route2Code   bool
+	// proto flags
 	ProtoInclude []string `mapstructure:"proto-include"`
 
 	// model flag
@@ -121,7 +122,6 @@ type GenConfig struct {
 	ModelCache           bool     `mapstructure:"model-cache"`
 	ModelCacheTable      []string `mapstructure:"model-cache-table"`
 	ModelCachePrefix     string   `mapstructure:"model-cache-prefix"`
-	ModelCreateTableDDL  bool     `mapstructure:"model-create-table-ddl"`
 
 	// mongo flags
 	MongoType []string `mapstructure:"mongo-type"`

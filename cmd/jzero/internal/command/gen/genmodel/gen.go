@@ -18,7 +18,6 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/postgres"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
-	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
@@ -83,26 +82,12 @@ func (jm *JzeroModel) Gen() error {
 			return errors.Errorf("model driver %s not support", config.C.Gen.ModelDriver)
 		}
 
-		tables, err := getAllTables(conns, config.C.Gen.ModelDriver)
+		_, err = getAllTables(conns, config.C.Gen.ModelDriver)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s to generate ddl from %s\n", color.WithColor("Start", color.FgGreen), config.C.Gen.ModelDatasourceUrl)
-
-		writeTables, err := jm.GenDDL(conns, tables)
-		if err != nil {
-			return err
-		}
-		if !config.C.Gen.ModelCreateTableDDL {
-			defer func() {
-				for _, v := range writeTables {
-					if err = os.Remove(v); err != nil {
-						logx.Debugf("remove write ddl file error: %s", err.Error())
-					}
-				}
-			}()
-		}
+		fmt.Printf("%s to generate model from %s\n", color.WithColor("Start", color.FgGreen), config.C.Gen.ModelDatasourceUrl)
 	}
 
 	if !pathx.FileExists(config.C.SqlDir()) {
@@ -136,12 +121,12 @@ func (jm *JzeroModel) Gen() error {
 	logx.Debugf("goctl_home = %s", goctlHome)
 
 	var (
-		allFiles        []string
+		allSqlFiles     []string
 		genCodeSqlFiles []string
 	)
 	genCodeSqlSpecMap := make(map[string][]*ddlparser.Table)
 
-	allFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
+	allSqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
 	if err != nil {
 		return err
 	}
@@ -196,43 +181,46 @@ func (jm *JzeroModel) Gen() error {
 
 	var mu sync.Mutex
 
-	if len(genCodeSqlFiles) != 0 {
-		if config.C.Gen.ModelDatasource {
-			allTables = config.C.Gen.ModelDatasourceTable
-			for _, f := range allFiles {
-				genCodeSqlSpecMap[f] = []*ddlparser.Table{
-					{
-						Name: stringx.From(filepath.Base(f)).Source(),
-					},
+	if config.C.Gen.ModelDatasource {
+		allTables = config.C.Gen.ModelDatasourceTable
+		// For datasource mode, generate code for each table directly
+		var eg errgroup.Group
+		eg.SetLimit(len(allTables))
+		for _, tableName := range allTables {
+			eg.Go(func() error {
+				return generateModelFromDatasource(tableName, goctlHome)
+			})
+		}
+		if err = eg.Wait(); err != nil {
+			return err
+		}
+		return jm.GenRegister(allTables)
+	} else if len(genCodeSqlFiles) != 0 {
+		var eg errgroup.Group
+		for _, f := range allSqlFiles {
+			eg.Go(func() error {
+				tableParsers, err := ParseSql(filepath.Join(config.C.Wd(), f))
+				if err != nil {
+					return err
 				}
-			}
-		} else {
-			var eg errgroup.Group
-			for _, f := range allFiles {
-				eg.Go(func() error {
-					tableParsers, err := ParseSql(filepath.Join(config.C.Wd(), f))
-					if err != nil {
-						return err
-					}
-					mu.Lock()
-					defer mu.Unlock()
-					genCodeSqlSpecMap[f] = tableParsers
+				mu.Lock()
+				defer mu.Unlock()
+				genCodeSqlSpecMap[f] = tableParsers
 
-					bf := strings.TrimSuffix(filepath.Base(f), ".sql")
+				bf := strings.TrimSuffix(filepath.Base(f), ".sql")
 
-					for _, tp := range tableParsers {
-						if strings.Contains(bf, ".") {
-							allTables = append(allTables, strings.Split(bf, ".")[0]+"."+tp.Name)
-						} else {
-							allTables = append(allTables, tp.Name)
-						}
+				for _, tp := range tableParsers {
+					if strings.Contains(bf, ".") {
+						allTables = append(allTables, strings.Split(bf, ".")[0]+"."+tp.Name)
+					} else {
+						allTables = append(allTables, tp.Name)
 					}
-					return nil
-				})
-			}
-			if err = eg.Wait(); err != nil {
-				return err
-			}
+				}
+				return nil
+			})
+		}
+		if err = eg.Wait(); err != nil {
+			return err
 		}
 	} else {
 		return nil
@@ -314,11 +302,8 @@ func (jm *JzeroModel) Gen() error {
 					return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
 				}
 			} else {
-				tableName := bf
-				if strings.Contains(bf, ".") {
-					tableName = strings.Split(bf, ".")[1]
-				}
-				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", schema, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(getIgnoreColumns(tableName), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+				// For non-datasource mode, use SQL file
+				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", schema, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 				logx.Debug(cmd.String())
 				resp, err := cmd.CombinedOutput()
 				if err != nil {
@@ -426,6 +411,80 @@ func getIgnoreColumns(tableName string) []string {
 	return config.C.Gen.ModelIgnoreColumns
 }
 
+func generateModelFromDatasource(tableName, goctlHome string) error {
+	fmt.Printf("%s table %s from datasource\n", color.WithColor("Generating", color.FgGreen), tableName)
+
+	bf := tableName
+	if strings.Contains(tableName, ".") {
+		bf = strings.Split(tableName, ".")[1]
+	}
+
+	var (
+		modelDir string
+		schema   = config.C.Gen.ModelSchema
+	)
+
+	if strings.Contains(tableName, ".") {
+		split := strings.Split(tableName, ".")
+		modelDir = filepath.Join("internal", "model", split[0], strings.ToLower(split[1]))
+	} else {
+		modelDir = filepath.Join("internal", "model", strings.ToLower(bf))
+	}
+
+	if config.C.Gen.ModelDriver == "pgx" {
+		if schema == "" {
+			schema = "public"
+		}
+		var datasourceUrl string
+		if strings.Contains(tableName, ".") {
+			for _, v := range config.C.Gen.ModelDatasourceUrl {
+				meta, err := dsn.ParseDSN("pgx", v)
+				if err != nil {
+					return err
+				}
+				if meta[dsn.Database] == strings.Split(tableName, ".")[0] {
+					datasourceUrl = v
+					break
+				}
+			}
+		} else {
+			datasourceUrl = config.C.Gen.ModelDatasourceUrl[0]
+		}
+
+		cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", datasourceUrl, "--schema", schema, "-t", bf, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+		logx.Debug(cmd.String())
+		resp, err := cmd.CombinedOutput()
+		if err != nil {
+			return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
+		}
+	} else if config.C.Gen.ModelDriver == "mysql" {
+		var datasourceUrl string
+		if strings.Contains(tableName, ".") {
+			for _, v := range config.C.Gen.ModelDatasourceUrl {
+				meta, err := dsn.ParseDSN("mysql", v)
+				if err != nil {
+					return err
+				}
+				if meta[dsn.Database] == strings.Split(tableName, ".")[0] {
+					datasourceUrl = v
+					break
+				}
+			}
+		} else {
+			datasourceUrl = config.C.Gen.ModelDatasourceUrl[0]
+		}
+
+		cmd := exec.Command("goctl", "model", "mysql", "datasource", "--url", datasourceUrl, "-t", bf, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+		logx.Debug(cmd.String())
+		resp, err := cmd.CombinedOutput()
+		if err != nil {
+			return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
+		}
+	}
+
+	return nil
+}
+
 // Parse parses ddl into golang structure
 func ParseSql(filename string) ([]*ddlparser.Table, error) {
 	p := ddlparser.NewParser()
@@ -433,5 +492,11 @@ func ParseSql(filename string) ([]*ddlparser.Table, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Restrict SQL files to only one table
+	if len(tables) != 1 {
+		return nil, errors.Errorf("SQL file %s contains %d tables, but only one table per SQL file is allowed", filename, len(tables))
+	}
+
 	return tables, nil
 }
