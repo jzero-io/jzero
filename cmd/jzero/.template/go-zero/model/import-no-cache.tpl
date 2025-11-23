@@ -2,6 +2,7 @@ import (
 	"context"
 	"database/sql"
 	"strings"
+	"slices"
 	{{if .time}}"time"{{end}}
 
 	"github.com/zeromicro/go-zero/core/stores/sqlc"

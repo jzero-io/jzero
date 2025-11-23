@@ -3,6 +3,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"slices"
 	{{if .time}}"time"{{end}}
 
 	"github.com/zeromicro/go-zero/core/stores/sqlc"

@@ -14,7 +14,7 @@ func new{{.upperStartCamelObject}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx
 		cachedConn: cachedConn,
 		conn:       conn,
 		flavor:     o.Flavor,
-		table:      condition.QuoteWithFlavor(o.Flavor, {{.table}}),
+		table:      condition.QuoteWithFlavor(o.Flavor, "{{.data.Name.Source}}"),
 	}
 }
 
