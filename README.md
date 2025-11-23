@@ -68,10 +68,6 @@ go run main.go server
 
 更多示例代码请参阅: https://github.com/jzero-io/examples
 
-项目实战请参阅:
-* api 框架: https://docs.jzero.io/project/api.html
-* gateway 框架: https://docs.jzero.io/project/gateway.html
-
 ## 相关项目
 * jzero-admin(基于 jzero 的后台管理系统): https://github.com/jzero-io/jzero-admin
 
