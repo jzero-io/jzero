@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -16,10 +17,10 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/stringx"
 
-	"github.com/jzero-io/jzero/cmd/jzero/internal/command/new"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/plugin"
@@ -248,15 +249,19 @@ func Generate(genModule bool) (err error) {
 
 	// if set --module flag
 	if genModule {
-		data, err := new.NewTemplateData()
+		goVersion, err := mod.GetGoVersion()
 		if err != nil {
 			return err
 		}
-		data["Module"] = config.C.Gen.Zrpcclient.GoModule
-		if config.C.Gen.Zrpcclient.GoVersion != "" {
-			data["GoVersion"] = config.C.Gen.Zrpcclient.GoVersion
+		templateData := map[string]any{
+			"GoVersion": goVersion,
+			"GoArch":    runtime.GOARCH,
 		}
-		template, err = templatex.ParseTemplate(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl")), data, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl"))))
+		templateData["Module"] = config.C.Gen.Zrpcclient.GoModule
+		if config.C.Gen.Zrpcclient.GoVersion != "" {
+			templateData["GoVersion"] = config.C.Gen.Zrpcclient.GoVersion
+		}
+		template, err = templatex.ParseTemplate(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl")), templateData, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "go.mod.tpl"))))
 		if err != nil {
 			return err
 		}

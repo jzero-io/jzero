@@ -6,11 +6,15 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package new
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -19,8 +23,10 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/check"
@@ -32,7 +38,24 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
+
+func IsBase64(base64 string) bool {
+	return regexp.MustCompile(`^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{4})$`).MatchString(base64)
+}
+
+type JzeroNew struct {
+	TemplateData map[string]any
+	nc           config.NewConfig
+	base         string
+}
+
+type GeneratedFile struct {
+	Path    string
+	Content bytes.Buffer
+	Skip    bool
+}
 
 // newCmd represents the new command
 var newCmd = &cobra.Command{
@@ -216,6 +239,163 @@ var newCmd = &cobra.Command{
 		}
 		return hooks.Run(cmd, "After", "gen", config.C.Gen.Hooks.After)
 	},
+}
+
+func Run(appName, base string) error {
+	if err := os.MkdirAll(config.C.New.Output, 0o755); err != nil {
+		return err
+	}
+
+	goVersion, err := mod.GetGoVersion()
+	if err != nil {
+		return err
+	}
+
+	templateData := map[string]any{
+		"GoVersion": goVersion,
+		"GoArch":    runtime.GOARCH,
+	}
+	templateData["Features"] = config.C.New.Features
+	templateData["Module"] = config.C.New.Module
+	templateData["APP"] = appName
+	if abs, err := filepath.Abs(config.C.New.Output); err == nil {
+		templateData["DirName"] = filepath.Base(abs)
+	} else {
+		return err
+	}
+	templateData["Style"] = config.C.New.Style
+	templateData["Serverless"] = config.C.New.Serverless
+
+	jn := JzeroNew{
+		TemplateData: templateData,
+		nc:           config.C.New,
+		base:         base,
+	}
+
+	gfs, err := jn.New(base)
+	if err != nil {
+		return err
+	}
+
+	for _, gf := range gfs {
+		if !gf.Skip {
+			err = checkWrite(gf.Path, gf.Content.Bytes())
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func checkWrite(path string, bytes []byte) error {
+	var err error
+	if len(bytes) == 0 {
+		return nil
+	}
+	if !pathx.FileExists(filepath.Dir(path)) {
+		err = os.MkdirAll(filepath.Dir(path), 0o755)
+		if err != nil {
+			return err
+		}
+	}
+
+	bytesFormat := bytes
+	if filepath.Ext(path) == ".go" {
+		bytesFormat, err = gosimports.Process("", bytes, nil)
+		if err != nil {
+			return errors.Wrapf(err, "format %s", path)
+		}
+	}
+
+	// 增加可执行权限
+	if lo.Contains(config.C.New.ExecutableExtensions, filepath.Ext(path)) {
+		logx.Debugf("Write executable file: %s", path)
+		return os.WriteFile(path, bytesFormat, 0o755)
+	}
+	return os.WriteFile(path, bytesFormat, 0o644)
+}
+
+func (jn *JzeroNew) New(dirname string) ([]*GeneratedFile, error) {
+	var gsf []*GeneratedFile
+
+	dir := embeded.ReadTemplateDir(dirname)
+	for _, file := range dir {
+		if file.IsDir() {
+			files, err := jn.New(filepath.Join(dirname, file.Name()))
+			if err != nil {
+				return nil, err
+			}
+			gsf = append(gsf, files...)
+		}
+
+		filename := file.Name()
+		if IsBase64(filename) {
+			filenameBytes, _ := base64.StdEncoding.DecodeString(filename)
+			filename = string(filenameBytes)
+		}
+
+		filename = strings.TrimSuffix(filename, ".tpl")
+
+		rel, err := filepath.Rel(jn.base, filepath.Join(dirname, filename))
+		if err != nil {
+			return nil, err
+		}
+
+		var fileBytes []byte
+		if strings.HasSuffix(file.Name(), ".tpl.tpl") {
+			// .tpl.tpl suffix means it is a template, do not parse if anymore
+			fileBytes = embeded.ReadTemplateFile(filepath.Join(dirname, file.Name()))
+		} else {
+			fileBytes, err = templatex.ParseTemplate(filepath.Join(dirname, file.Name()), jn.TemplateData, embeded.ReadTemplateFile(filepath.Join(dirname, file.Name())))
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// parse template name
+		templatePath := filepath.Join(filepath.Dir(rel), filename)
+		stylePathBytes, err := templatex.ParseTemplate(templatePath, jn.TemplateData, []byte(templatePath))
+		if err != nil {
+			return nil, err
+		}
+
+		// specify
+		if filename == "go.mod" && jn.nc.Mono {
+			continue
+		}
+
+		gsf = append(gsf, &GeneratedFile{
+			Path:    filepath.Join(jn.nc.Output, string(stylePathBytes)),
+			Content: *bytes.NewBuffer(fileBytes),
+			Skip: func() bool {
+				var ignore []string
+				for _, v := range jn.nc.Ignore {
+					ignore = append(ignore, filepath.ToSlash(v))
+				}
+				for _, v := range jn.nc.IgnoreExtra {
+					ignore = append(ignore, filepath.ToSlash(v))
+				}
+				// if ignore is dir
+				for _, v := range ignore {
+					if config.C.New.Serverless {
+						v = filepath.Join(config.C.New.Output, v)
+					}
+					if stat, err := os.Stat(v); err == nil && stat.IsDir() {
+						if filepath.ToSlash(filepath.Dir(string(stylePathBytes))) == filepath.ToSlash(v) {
+							return true
+						}
+					} else {
+						if filepath.ToSlash(string(stylePathBytes)) == filepath.ToSlash(v) {
+							return true
+						}
+					}
+				}
+				return false
+			}(),
+		})
+	}
+	return gsf, nil
 }
 
 func GetCommand() *cobra.Command {

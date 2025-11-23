@@ -9,11 +9,15 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/jaronnie/genius"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/color"
+
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mcp"
 )
 
 // mcpCmd represents the mcp command
@@ -21,7 +25,23 @@ var mcpCmd = &cobra.Command{
 	Use:   "mcp",
 	Short: "mcp server for jzero",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return Run(cmd.Root())
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		commands := cmd.Commands()
+		for _, cmd := range commands {
+			if cmd.Use == "mcp" {
+				cmd.RemoveCommand(cmd)
+			}
+		}
+		mcpServer := mcp.NewCobraMCPServer(cmd)
+		go func() {
+			if err := mcpServer.ServeStdio(); err != nil {
+				fmt.Printf("MCP server error: %v\n", err)
+				os.Exit(1)
+			}
+		}()
+		<-quit
+		return nil
 	},
 }
 
