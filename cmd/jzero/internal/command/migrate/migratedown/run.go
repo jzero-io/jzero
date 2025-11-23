@@ -4,8 +4,6 @@ import (
 	"errors"
 
 	migrate "github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/mysql"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/spf13/cast"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
