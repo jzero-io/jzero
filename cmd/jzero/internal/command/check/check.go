@@ -27,7 +27,7 @@ import (
 
 var toolVersionCheck = map[string]string{
 	"protoc":               "32.0",
-	"goctl":                "1.9.0",
+	"goctl":                "1.9.2",
 	"protoc-gen-go":        "1.36.8",
 	"protoc-gen-go-grpc":   "1.5.1",
 	"protoc-gen-openapiv2": "2.27.2",
