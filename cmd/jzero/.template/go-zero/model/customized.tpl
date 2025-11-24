@@ -59,7 +59,7 @@ func (m *custom{{.upperStartCamelObject}}Model) CountByCondition(ctx context.Con
 
    var countConds []condition.Condition
    for _, cond := range conds {
-    if cond.Operator != condition.Limit && cond.Operator != condition.Offset && cond.Operator != condition.OrderBy {
+    if cond.Operator != condition.Limit && cond.Operator != condition.Offset && cond.Operator != condition.OrderBy && cond.Operator != condition.OrderByDesc && cond.Operator != condition.OrderByAsc {
    	    countConds = append(countConds, cond)
     }
    }
