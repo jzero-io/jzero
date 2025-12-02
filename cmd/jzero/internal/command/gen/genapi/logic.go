@@ -2,7 +2,6 @@ package genapi
 
 import (
 	"bytes"
-	"fmt"
 	"go/ast"
 	goformat "go/format"
 	goparser "go/parser"
@@ -11,12 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/dave/dst"
-	"github.com/dave/dst/decorator"
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cast"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/console"
@@ -135,17 +131,6 @@ func (ja *JzeroApi) patchLogic(file LogicFile) error {
 
 	file.Path = newFilePath
 
-	// compact handler
-	df, err := decorator.ParseFile(fset, file.Path, nil, goparser.ParseComments)
-	if err != nil {
-		return err
-	}
-	if file.Compact {
-		if err = ja.compactLogic(df, fset, file); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -202,107 +187,5 @@ func (ja *JzeroApi) removeLogicSuffix(f *ast.File) error {
 		}
 		return true
 	})
-	return nil
-}
-
-func (ja *JzeroApi) compactLogic(f *dst.File, fset *token.FileSet, file LogicFile) error {
-	namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, filepath.Base(file.Group))
-	if err != nil {
-		return err
-	}
-	compactFile := filepath.Join(filepath.Dir(file.Path), namingFormat+"_compact.go")
-	if !pathx.FileExists(compactFile) {
-		_ = os.WriteFile(compactFile, []byte(fmt.Sprintf(`package %s`, f.Name.Name)), 0o644)
-	}
-
-	// 解析目标文件
-	compactF, err := decorator.ParseFile(fset, compactFile, nil, goparser.ParseComments)
-	if err != nil {
-		return err
-	}
-
-	// 判断 compactFile 文件中是否已经存在该函数
-	var isExist bool
-	for _, decl := range compactF.Decls {
-		if funcDecl, ok := decl.(*dst.FuncDecl); ok {
-			if funcDecl.Name.Name == util.Title(strings.TrimSuffix(file.Handler, "Handler")) {
-				isExist = true
-				break
-			}
-		}
-	}
-
-	if !isExist {
-		// 将 import 语句添加到 compactFile 中
-		for _, imp := range f.Imports {
-			importSpec := &dst.ImportSpec{
-				Path: &dst.BasicLit{
-					Kind:  token.STRING,
-					Value: imp.Path.Value,
-				},
-			}
-			if imp.Name != nil {
-				importSpec.Name = &dst.Ident{
-					Name: imp.Name.Name,
-				}
-			}
-
-			// 查找是否已经存在 import 声明
-			var foundImportDecl *dst.GenDecl
-			for _, decl := range compactF.Decls {
-				if genDecl, ok := decl.(*dst.GenDecl); ok && genDecl.Tok == token.IMPORT {
-					foundImportDecl = genDecl
-					break
-				}
-			}
-
-			// 如果没有找到 import 声明，创建一个新的
-			if foundImportDecl == nil {
-				foundImportDecl = &dst.GenDecl{
-					Tok:   token.IMPORT,
-					Specs: []dst.Spec{},
-				}
-				compactF.Decls = append([]dst.Decl{foundImportDecl}, compactF.Decls...)
-			}
-
-			// 添加导入语句
-			foundImportDecl.Specs = append(foundImportDecl.Specs, importSpec)
-		}
-
-		// 添加其他声明（类型、常量、变量、函数等）
-		for _, decl := range f.Decls {
-			if gd, ok := decl.(*dst.GenDecl); ok {
-				if gd.Tok == token.TYPE || gd.Tok == token.VAR || gd.Tok == token.CONST {
-					compactF.Decls = append(compactF.Decls, gd)
-				}
-			}
-			if fd, ok := decl.(*dst.FuncDecl); ok {
-				compactF.Decls = append(compactF.Decls, fd)
-			}
-		}
-
-		// 格式化并写入文件
-		buf := bytes.NewBuffer(nil)
-		if err := decorator.Fprint(buf, compactF); err != nil {
-			return err
-		}
-		formatted, err := goformat.Source(buf.Bytes())
-		if err != nil {
-			return err
-		}
-		process, err := gosimports.Process("", formatted, nil)
-		if err != nil {
-			return err
-		}
-		if err = os.WriteFile(compactFile, process, 0o644); err != nil {
-			return err
-		}
-	}
-
-	logx.Debugf("remove old logic file: %s", file.Path)
-	if err = os.Remove(file.Path); err != nil {
-		return err
-	}
-
 	return nil
 }

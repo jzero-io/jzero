@@ -54,14 +54,13 @@ info (
 )
 ```
 
-## 合并同一个 group 的 handler/logic 为同一个文件
+## 合并同一个 group 的 handler 为同一个文件
 
-```shell {4,5}
+```shell {4}
 @server (
 	prefix:          /api/v1
 	group:           system/user
 	compact_handler: true
-	compact_logic: true
 )
 service simpleapi {
 	@handler GetUserHandler
