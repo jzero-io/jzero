@@ -69,6 +69,8 @@ go run main.go server
 更多示例代码请参阅: https://github.com/jzero-io/examples
 
 ## 相关项目
+
+* jzero-intellij(jzero 的 goland 插件): https://github.com/jzero-io/jzero-intellij
 * jzero-admin(基于 jzero 的后台管理系统): https://github.com/jzero-io/jzero-admin
 
 ## 贡献者
