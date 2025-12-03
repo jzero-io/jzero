@@ -82,7 +82,7 @@ gen:
 
 ```shell
 jzero gen --desc desc/api/xx.api
-jzero gen --desc desc/proto/v1/xx.proto
+jzero gen --desc desc/proto/xx.proto
 jzero gen --desc desc/sql/xx.sql
 ```
 
@@ -92,6 +92,6 @@ jzero gen --desc desc/sql/xx.sql
 
 ```shell
 jzero gen --desc-ignore desc/api/xx.api
-jzero gen --desc-ignore desc/proto/v1/xx.proto
+jzero gen --desc-ignore desc/proto/xx.proto
 jzero gen --desc-ignore desc/sql/xx.sql
 ```
