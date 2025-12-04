@@ -5,7 +5,7 @@ title: 首页
 ---
 
 <div style="text-align: center;">
-  <img src="https://oss.jaronnie.com/jzero.jpg" style="width: 33%;" alt=""/>
+  <img src="https://oss.jaronnie.com/hiking.svg" style="width: 33%;" alt=""/>
 </div>
 
 ## 介绍

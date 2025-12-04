@@ -16,7 +16,7 @@ export default hopeTheme({
 
   // made by https://gopherize.me
   // favicon.ico made by https://www.bitbug.net
-  logo: "https://oss.jaronnie.com/jzero.jpg",
+  logo: "https://oss.jaronnie.com/hiking.svg",
 
   repo: "jzero-io/jzero",
 
