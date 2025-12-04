@@ -82,15 +82,10 @@ func (jm *JzeroModel) Gen() error {
 			return errors.Errorf("model driver %s not support", config.C.Gen.ModelDriver)
 		}
 
-		_, err = getAllTables(conns, config.C.Gen.ModelDriver)
-		if err != nil {
-			return err
-		}
-
 		fmt.Printf("%s to generate model from %s\n", console.Green("Start"), config.C.Gen.ModelDatasourceUrl)
 	}
 
-	if !pathx.FileExists(config.C.SqlDir()) {
+	if !pathx.FileExists(config.C.SqlDir()) && !config.C.Gen.ModelDatasource {
 		return nil
 	}
 
@@ -126,55 +121,57 @@ func (jm *JzeroModel) Gen() error {
 	)
 	genCodeSqlSpecMap := make(map[string][]*ddlparser.Table)
 
-	allSqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
-	if err != nil {
-		return err
-	}
-
-	switch {
-	case config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0 && !config.C.Gen.ModelDatasource:
-		m, _, err := gitstatus.ChangedFiles(config.C.SqlDir(), ".sql")
-		if err == nil {
-			genCodeSqlFiles = append(genCodeSqlFiles, m...)
+	if !config.C.Gen.ModelDatasource {
+		allSqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
+		if err != nil {
+			return err
 		}
-	case len(config.C.Gen.Desc) > 0:
-		for _, v := range config.C.Gen.Desc {
+
+		switch {
+		case config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0 && !config.C.Gen.ModelDatasource:
+			m, _, err := gitstatus.ChangedFiles(config.C.SqlDir(), ".sql")
+			if err == nil {
+				genCodeSqlFiles = append(genCodeSqlFiles, m...)
+			}
+		case len(config.C.Gen.Desc) > 0:
+			for _, v := range config.C.Gen.Desc {
+				if !osx.IsDir(v) {
+					if filepath.Ext(v) == ".sql" {
+						genCodeSqlFiles = append(genCodeSqlFiles, filepath.Clean(v))
+					}
+				} else {
+					specifiedSqlFiles, err := jzerodesc.FindSqlFiles(v)
+					if err != nil {
+						return err
+					}
+					genCodeSqlFiles = append(genCodeSqlFiles, specifiedSqlFiles...)
+				}
+			}
+		default:
+			genCodeSqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
+			if err != nil {
+				return err
+			}
+		}
+
+		// ignore sql desc
+		for _, v := range config.C.Gen.DescIgnore {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".sql" {
-					genCodeSqlFiles = append(genCodeSqlFiles, filepath.Clean(v))
+					genCodeSqlFiles = lo.Reject(genCodeSqlFiles, func(item string, _ int) bool {
+						return item == v
+					})
 				}
 			} else {
 				specifiedSqlFiles, err := jzerodesc.FindSqlFiles(v)
 				if err != nil {
 					return err
 				}
-				genCodeSqlFiles = append(genCodeSqlFiles, specifiedSqlFiles...)
-			}
-		}
-	default:
-		genCodeSqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
-		if err != nil {
-			return err
-		}
-	}
-
-	// ignore sql desc
-	for _, v := range config.C.Gen.DescIgnore {
-		if !osx.IsDir(v) {
-			if filepath.Ext(v) == ".sql" {
-				genCodeSqlFiles = lo.Reject(genCodeSqlFiles, func(item string, _ int) bool {
-					return item == v
-				})
-			}
-		} else {
-			specifiedSqlFiles, err := jzerodesc.FindSqlFiles(v)
-			if err != nil {
-				return err
-			}
-			for _, saf := range specifiedSqlFiles {
-				genCodeSqlFiles = lo.Reject(genCodeSqlFiles, func(item string, _ int) bool {
-					return item == saf
-				})
+				for _, saf := range specifiedSqlFiles {
+					genCodeSqlFiles = lo.Reject(genCodeSqlFiles, func(item string, _ int) bool {
+						return item == saf
+					})
+				}
 			}
 		}
 	}
@@ -182,7 +179,14 @@ func (jm *JzeroModel) Gen() error {
 	var mu sync.Mutex
 
 	if config.C.Gen.ModelDatasource {
-		allTables = config.C.Gen.ModelDatasourceTable
+		if len(config.C.Gen.ModelDatasourceTable) == 1 && config.C.Gen.ModelDatasourceTable[0] == "*" {
+			allTables, err = getAllTables(conns, config.C.Gen.ModelDriver)
+			if err != nil {
+				return err
+			}
+		} else {
+			allTables = config.C.Gen.ModelDatasourceTable
+		}
 		// For datasource mode, generate code for each table directly
 		var eg errgroup.Group
 		eg.SetLimit(len(allTables))
@@ -343,7 +347,7 @@ func getAllTables(conns []Conn, driver string) ([]string, error) {
 				return nil, err
 			}
 			for _, v := range tables {
-				allTables = append(allTables, conn.Schema+"."+v)
+				allTables = append(allTables, v)
 			}
 		}
 	case "pgx":
@@ -357,7 +361,7 @@ func getAllTables(conns []Conn, driver string) ([]string, error) {
 				return nil, err
 			}
 			for _, v := range tables {
-				allTables = append(allTables, conn.Schema+"."+v)
+				allTables = append(allTables, v)
 			}
 		}
 	}
