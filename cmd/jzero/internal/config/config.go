@@ -243,7 +243,8 @@ func (c *Config) SqlDir() string {
 }
 
 var (
-	ToolVersionOnce sync.Once
+	ToolVersionOnce  sync.Once
+	ToolVersionValue ToolVersion
 )
 
 type ToolVersion struct {
@@ -255,37 +256,35 @@ type ToolVersion struct {
 }
 
 func (c *Config) ToolVersion() ToolVersion {
-	toolVersion := ToolVersion{}
-
 	ToolVersionOnce.Do(func() {
 		goctlVersionResp, _ := execx.Run("goctl -v", "")
 		logx.Debugf("goctl version: %s", goctlVersionResp)
 		versionInfo := strings.Split(goctlVersionResp, " ")
 		if len(versionInfo) >= 3 {
-			toolVersion.GoctlVersion, _ = version.NewVersion(strings.TrimPrefix(versionInfo[2], "v"))
+			ToolVersionValue.GoctlVersion, _ = version.NewVersion(strings.TrimPrefix(versionInfo[2], "v"))
 		}
 
 		protocVersionResp, _ := protoc.Version()
 		logx.Debugf("protoc version: %s", protocVersionResp)
-		toolVersion.ProtocVersion, _ = version.NewVersion(strings.TrimPrefix(protocVersionResp, "libprotoc "))
+		ToolVersionValue.ProtocVersion, _ = version.NewVersion(strings.TrimPrefix(protocVersionResp, "libprotoc "))
 
 		protocGenGoVersionResp, _ := protocgengo.Version()
 		logx.Debugf("protoc-gen-go version: %s", protocGenGoVersionResp)
-		toolVersion.ProtocGenGoVersion, _ = version.NewVersion(strings.TrimPrefix(protocGenGoVersionResp, "v"))
+		ToolVersionValue.ProtocGenGoVersion, _ = version.NewVersion(strings.TrimPrefix(protocGenGoVersionResp, "v"))
 
 		protocGenGoGrpcVersionResp, _ := protocgengogrpc.Version()
 		logx.Debugf("protoc-gen-go-grpc version: %s", protocGenGoGrpcVersionResp)
-		toolVersion.ProtocGenGoGrpcVersion, _ = version.NewVersion(strings.TrimPrefix(protocGenGoGrpcVersionResp, "v"))
+		ToolVersionValue.ProtocGenGoGrpcVersion, _ = version.NewVersion(strings.TrimPrefix(protocGenGoGrpcVersionResp, "v"))
 
 		protocGenOpenapiv2VersionResp, _ := execx.Run("protoc-gen-openapiv2 --version", "")
 		logx.Debugf("protoc-gen-openapiv2 version: %s", protocGenOpenapiv2VersionResp)
 		versionInfo = strings.Split(protocGenOpenapiv2VersionResp, " ")
 		if len(versionInfo) >= 2 {
-			toolVersion.ProtocGenOpenapiv2Version, _ = version.NewVersion(strings.TrimSuffix(strings.TrimPrefix(versionInfo[1], "v"), ","))
+			ToolVersionValue.ProtocGenOpenapiv2Version, _ = version.NewVersion(strings.TrimSuffix(strings.TrimPrefix(versionInfo[1], "v"), ","))
 		}
 	})
 
-	return toolVersion
+	return ToolVersionValue
 }
 
 func TraverseCommands(prefix string, cmd *cobra.Command) error {
