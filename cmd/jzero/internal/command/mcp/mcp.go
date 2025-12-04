@@ -15,8 +15,8 @@ import (
 
 	"github.com/jaronnie/genius"
 	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/core/color"
 
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mcp"
 )
 
@@ -74,20 +74,20 @@ var mcpTestCmd = &cobra.Command{
 		go func() {
 			scanner := bufio.NewScanner(stdout)
 			for scanner.Scan() {
-				fmt.Printf("%s %s\n", color.WithColor("[SERVER OUTPUT]", color.FgGreen), scanner.Text())
-				fmt.Printf("%s Enter your method (press Enter to send):\n", color.WithColor("[INPUT]", color.FgYellow))
+				fmt.Printf("%s %s\n", console.Green("[SERVER OUTPUT]"), scanner.Text())
+				fmt.Printf("%s Enter your method (press Enter to send):\n", console.Yellow("[INPUT]"))
 			}
 		}()
 
 		go func() {
 			scanner := bufio.NewScanner(stderr)
 			for scanner.Scan() {
-				fmt.Printf("%s %s\n", color.WithColor("[SERVER ERROR]", color.FgRed), scanner.Text())
-				fmt.Printf("%s Enter your method (press Enter to send):\n", color.WithColor("[INPUT]", color.FgYellow))
+				fmt.Printf("%s %s\n", console.Red("[SERVER ERROR]"), scanner.Text())
+				fmt.Printf("%s Enter your method (press Enter to send):\n", console.Yellow("[INPUT]"))
 			}
 		}()
 
-		fmt.Printf("%s Enter your method (press Enter to send):\n", color.WithColor("[INPUT]", color.FgYellow))
+		fmt.Printf("%s Enter your method (press Enter to send):\n", console.Yellow("[INPUT]"))
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			text := scanner.Text()
@@ -97,7 +97,7 @@ var mcpTestCmd = &cobra.Command{
 			if err == nil {
 				if method, ok := g.Get("method").(string); ok && method != "" {
 					if strings.HasPrefix(method, "notifications") {
-						fmt.Printf("%s Enter your method (press Enter to send):\n", color.WithColor("[INPUT]", color.FgYellow))
+						fmt.Printf("%s Enter your method (press Enter to send):\n", console.Yellow("[INPUT]"))
 					}
 				}
 			}

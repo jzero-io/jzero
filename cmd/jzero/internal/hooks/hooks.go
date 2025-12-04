@@ -7,9 +7,9 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/execx"
 )
 
@@ -25,11 +25,11 @@ func Run(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error
 	}
 
 	if len(hooks) > 0 {
-		fmt.Printf("%s\n", color.WithColor(fmt.Sprintf("Start %s %s hooks", hookAction, hooksName), color.FgGreen))
+		fmt.Printf("%s\n", console.Green(fmt.Sprintf("Start %s %s hooks", hookAction, hooksName)))
 	}
 
 	for _, v := range hooks {
-		fmt.Printf("%s command %s\n", color.WithColor("Run", color.FgGreen), v)
+		fmt.Printf("%s command %s\n", console.Green("Run"), v)
 		err := execx.Run(v, wd, "JZERO_HOOK_TRIGGERED=true")
 		if err != nil {
 			return err
@@ -37,7 +37,7 @@ func Run(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error
 	}
 
 	if len(hooks) > 0 {
-		fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
+		fmt.Printf("%s\n", console.Green("Done"))
 	}
 
 	// fork 一个子进程来运行后续的指令

@@ -14,11 +14,11 @@ import (
 
 	"github.com/moby/patternmatcher"
 	"github.com/rinchsan/gosimports"
-	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/mod/modfile"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 )
 
 func checkWrite(path string, bytes []byte) error {
@@ -40,7 +40,7 @@ func Run(tc config.TemplateConfig) error {
 	if pathx.FileExists(tc.Build.Output) {
 		return errors.New("template build output already exists")
 	}
-	fmt.Printf("%s your project to templates into '%s', please wait...\n", color.WithColor("Building", color.FgGreen), tc.Build.Output)
+	fmt.Printf("%s your project to templates into '%s', please wait...\n", console.Green("Building"), tc.Build.Output)
 	tc.Build.Output = filepath.Join(tc.Build.Output, "app")
 	wd, _ := os.Getwd()
 
@@ -58,7 +58,7 @@ func Run(tc config.TemplateConfig) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(color.WithColor("Done", color.FgGreen))
+	fmt.Println(console.Green("Done"))
 	return nil
 }
 

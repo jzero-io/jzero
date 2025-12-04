@@ -13,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	ddlparser "github.com/zeromicro/ddl-parser/parser"
-	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/postgres"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -23,6 +22,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/dsn"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
@@ -87,7 +87,7 @@ func (jm *JzeroModel) Gen() error {
 			return err
 		}
 
-		fmt.Printf("%s to generate model from %s\n", color.WithColor("Start", color.FgGreen), config.C.Gen.ModelDatasourceUrl)
+		fmt.Printf("%s to generate model from %s\n", console.Green("Start"), config.C.Gen.ModelDatasourceUrl)
 	}
 
 	if !pathx.FileExists(config.C.SqlDir()) {
@@ -226,13 +226,13 @@ func (jm *JzeroModel) Gen() error {
 		return nil
 	}
 
-	fmt.Printf("%s to generate model code from sql files\n", color.WithColor("Start", color.FgGreen))
+	fmt.Printf("%s to generate model code from sql files\n", console.Green("Start"))
 
 	var eg errgroup.Group
 	eg.SetLimit(len(genCodeSqlFiles))
 	for _, f := range genCodeSqlFiles {
 		eg.Go(func() error {
-			fmt.Printf("%s sql file %s\n", color.WithColor("Using", color.FgGreen), f)
+			fmt.Printf("%s sql file %s\n", console.Green("Using"), f)
 			tableParsers := genCodeSqlSpecMap[f]
 
 			for _, tp := range tableParsers {
@@ -323,7 +323,7 @@ func (jm *JzeroModel) Gen() error {
 		return err
 	}
 
-	fmt.Println(color.WithColor("Done", color.FgGreen))
+	fmt.Println(console.Green("Done"))
 
 	return nil
 }
@@ -412,7 +412,7 @@ func getIgnoreColumns(tableName string) []string {
 }
 
 func generateModelFromDatasource(tableName, goctlHome string) error {
-	fmt.Printf("%s table %s from datasource\n", color.WithColor("Generating", color.FgGreen), tableName)
+	fmt.Printf("%s table %s from datasource\n", console.Green("Generating"), tableName)
 
 	bf := tableName
 	if strings.Contains(tableName, ".") {

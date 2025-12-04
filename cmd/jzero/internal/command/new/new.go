@@ -25,7 +25,6 @@ import (
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
@@ -36,6 +35,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
@@ -90,7 +90,7 @@ var newCmd = &cobra.Command{
 			config.C.New.Output = filepath.Join("plugins", config.C.New.Output)
 		}
 
-		fmt.Printf("%s project %s in %s dir\n", color.WithColor("Creating", color.FgGreen), app, config.C.New.Output)
+		fmt.Printf("%s project %s in %s dir\n", console.Green("Creating"), app, config.C.New.Output)
 
 		if config.C.New.Module == "" {
 			if len(args) > 0 {
@@ -136,10 +136,10 @@ var newCmd = &cobra.Command{
 		case config.C.New.Remote != "" && config.C.New.Branch != "":
 			fp := filepath.Join(home, ".jzero", "templates", "remote", config.C.New.Branch)
 			if filex.DirExists(fp) && config.C.New.Cache {
-				fmt.Printf("%s cache templates from '%s', please wait...\n", color.WithColor("Using", color.FgGreen), fp)
+				fmt.Printf("%s cache templates from '%s', please wait...\n", console.Green("Using"), fp)
 			} else {
 				_ = os.RemoveAll(fp)
-				fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), fp)
+				fmt.Printf("%s templates into '%s', please wait...\n", console.Green("Cloning"), fp)
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(config.C.New.RemoteTimeout))
 				defer cancel()
 
@@ -169,7 +169,7 @@ var newCmd = &cobra.Command{
 
 				_ = os.RemoveAll(filepath.Join(fp, ".git"))
 			}
-			fmt.Println(color.WithColor("Done", color.FgGreen))
+			fmt.Println(console.Green("Done"))
 			embeded.Home = fp
 			base = filepath.Join("app")
 		default:
@@ -215,7 +215,7 @@ var newCmd = &cobra.Command{
 		if !filex.DirExists("desc") {
 			return nil
 		}
-		fmt.Printf("%s desc dir in %s, auto generate code\n", color.WithColor("Detected", color.FgGreen), config.C.New.Output)
+		fmt.Printf("%s desc dir in %s, auto generate code\n", console.Green("Detected"), config.C.New.Output)
 
 		config.ResetConfig()
 		if err := config.InitConfig(cmd.Root()); err != nil {

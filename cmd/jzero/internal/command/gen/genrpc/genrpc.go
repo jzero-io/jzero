@@ -7,16 +7,16 @@ import (
 	"strings"
 
 	"github.com/samber/lo"
-	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
-	"github.com/zeromicro/go-zero/tools/goctl/util/console"
+	goctlconsole "github.com/zeromicro/go-zero/tools/goctl/util/console"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/stringx"
@@ -141,7 +141,7 @@ func (jr *JzeroRpc) Gen() error {
 		return nil
 	}
 
-	fmt.Printf("%s to generate rpc code from proto files\n", color.WithColor("Start", color.FgGreen))
+	fmt.Printf("%s to generate rpc code from proto files\n", console.Green("Start"))
 
 	for _, v := range jr.ProtoFiles {
 		allLogicFiles, err := jr.GetAllLogicFiles(v, jr.ProtoSpecMap[v])
@@ -155,7 +155,7 @@ func (jr *JzeroRpc) Gen() error {
 		}
 
 		if lo.Contains(genCodeProtoFiles, v) {
-			fmt.Printf("%s proto file %s\n", color.WithColor("Using", color.FgGreen), v)
+			fmt.Printf("%s proto file %s\n", console.Green("Using"), v)
 			zrpcOut := "."
 			command := fmt.Sprintf("goctl rpc protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s",
 				v,
@@ -183,7 +183,7 @@ func (jr *JzeroRpc) Gen() error {
 			if filepath.Clean(file.DescFilepath) == filepath.Clean(v) {
 				if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
 					if err := jr.removeServerSuffix(file.Path); err != nil {
-						console.Warning("[warning]: remove server suffix %s meet error %v", file.Path, err)
+						goctlconsole.Warning("[warning]: remove server suffix %s meet error %v", file.Path, err)
 						continue
 					}
 				}
@@ -192,7 +192,7 @@ func (jr *JzeroRpc) Gen() error {
 		for _, file := range allLogicFiles {
 			if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
 				if err := jr.removeLogicSuffix(file.Path); err != nil {
-					console.Warning("[warning]: remove logic suffix %s meet error %v", file.Path, err)
+					goctlconsole.Warning("[warning]: remove logic suffix %s meet error %v", file.Path, err)
 					continue
 				}
 			}
@@ -201,7 +201,7 @@ func (jr *JzeroRpc) Gen() error {
 		if lo.Contains(genCodeProtoFiles, v) {
 			for _, file := range allLogicFiles {
 				if err = jr.changeLogicTypes(file); err != nil {
-					console.Warning("[warning]: change logic types %s meet error %v", file.Path, err)
+					goctlconsole.Warning("[warning]: change logic types %s meet error %v", file.Path, err)
 					continue
 				}
 			}
@@ -237,7 +237,7 @@ func (jr *JzeroRpc) Gen() error {
 		pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(jr.ProtoSpecMap[v].GoPackage, "./")))
 	}
 	if len(jr.GenCodeProtoFiles) > 0 {
-		fmt.Println(color.WithColor("Done", color.FgGreen))
+		fmt.Println(console.Green("Done"))
 	}
 
 	if pathx.FileExists(config.C.ProtoDir()) {

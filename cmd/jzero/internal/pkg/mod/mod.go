@@ -10,10 +10,11 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"golang.org/x/mod/modfile"
+
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 )
 
 // ModuleStruct contains the relative data of go module,
@@ -92,7 +93,7 @@ func GetGoMods(workDir string) ([]ModuleStruct, error) {
 	data, err := command.CombinedOutput()
 	if err != nil {
 		if strings.Contains(string(data), "go mod tidy") {
-			fmt.Printf("%s go mod tidy. Please wait...\n", color.WithColor("Running", color.FgGreen))
+			fmt.Printf("%s go mod tidy. Please wait...\n", console.Green("Running"))
 			if _, err = execx.Run("go mod tidy", workDir); err != nil {
 				return nil, err
 			}

@@ -11,7 +11,6 @@ import (
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
-	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
@@ -22,6 +21,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
@@ -151,7 +151,7 @@ func (ja *JzeroApi) Gen() error {
 		return nil
 	}
 
-	fmt.Printf("%s to generate api code from api files\n", color.WithColor("Start", color.FgGreen))
+	fmt.Printf("%s to generate api code from api files\n", console.Green("Start"))
 
 	err = ja.generateApiCode()
 	if err != nil {
@@ -164,7 +164,7 @@ func (ja *JzeroApi) Gen() error {
 		return err
 	}
 
-	fmt.Println(color.WithColor("Done", color.FgGreen))
+	fmt.Println(console.Green("Done"))
 	return nil
 }
 
@@ -253,7 +253,7 @@ func (ja *JzeroApi) generateApiCode() error {
 			}
 
 			dir := "."
-			fmt.Printf("%s api file %s\n", color.WithColor("Using", color.FgGreen), v)
+			fmt.Printf("%s api file %s\n", console.Green("Using"), v)
 			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, config.C.Gen.Style)
 			logx.Debugf("command: %s", command)
 			if _, err := execx.Run(command, config.C.Wd()); err != nil {
@@ -303,7 +303,7 @@ func (ja *JzeroApi) generateApiCode() error {
 	}
 
 	if config.C.Gen.Route2Code {
-		fmt.Printf("%s to generate internal/handler/route2code.go\n", color.WithColor("Start", color.FgGreen))
+		fmt.Printf("%s to generate internal/handler/route2code.go\n", console.Green("Start"))
 		if route2CodeBytes, err := ja.genRoute2Code(); err != nil {
 			return err
 		} else {
@@ -311,7 +311,7 @@ func (ja *JzeroApi) generateApiCode() error {
 				return err
 			}
 		}
-		fmt.Printf("%s", color.WithColor("Done\n", color.FgGreen))
+		fmt.Printf("%s", console.Green("Done\n"))
 	}
 	return nil
 }

@@ -9,17 +9,17 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/zeromicro/go-zero/core/color"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 )
 
 func Run() error {
 	if config.C.Template.Init.Remote != "" && config.C.Template.Init.Branch != "" {
 		target := filepath.Join(config.C.Template.Init.Output, config.C.Template.Init.Branch)
 		_ = os.MkdirAll(target, 0o755)
-		fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Cloning", color.FgGreen), target)
+		fmt.Printf("%s templates into '%s', please wait...\n", console.Green("Cloning"), target)
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
@@ -33,14 +33,14 @@ func Run() error {
 			return err
 		}
 		_ = os.RemoveAll(filepath.Join(target, ".git"))
-		fmt.Println(color.WithColor("Done", color.FgGreen))
+		fmt.Println(console.Green("Done"))
 		return nil
 	}
-	fmt.Printf("%s templates into '%s', please wait...\n", color.WithColor("Initializing embedded", color.FgGreen), config.C.Template.Init.Output)
+	fmt.Printf("%s templates into '%s', please wait...\n", console.Green("Initializing embedded"), config.C.Template.Init.Output)
 	err := embeded.WriteTemplateDir("", config.C.Template.Init.Output)
 	if err != nil {
 		return err
 	}
-	fmt.Println(color.WithColor("Done", color.FgGreen))
+	fmt.Println(console.Green("Done"))
 	return nil
 }

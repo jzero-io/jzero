@@ -11,13 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zeromicro/go-zero/core/color"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
@@ -28,7 +28,7 @@ type ServerFile struct {
 }
 
 func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServers RegisterLines) error {
-	fmt.Printf("%s to generate internal/server/server.go\n", color.WithColor("Start", color.FgGreen))
+	fmt.Printf("%s to generate internal/server/server.go\n", console.Green("Start"))
 	serverFile, err := templatex.ParseTemplate(filepath.Join("rpc", "server.go.tpl"), map[string]any{
 		"Module":          jr.Module,
 		"ServerImports":   serverImports,
@@ -42,7 +42,7 @@ func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServ
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%s", color.WithColor("Done\n", color.FgGreen))
+	fmt.Printf("%s", console.Green("Done\n"))
 	return nil
 }
 

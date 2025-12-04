@@ -9,7 +9,6 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
-	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
@@ -21,6 +20,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 )
 
@@ -32,7 +32,7 @@ func Run() error {
 	}
 	embeded.Home = config.C.Gen.Home
 
-	fmt.Printf("%s working dir %s\n", color.WithColor("Enter", color.FgGreen), config.C.Wd())
+	fmt.Printf("%s working dir %s\n", console.Green("Enter"), config.C.Wd())
 
 	var module string
 	moduleStruct, err := mod.GetGoMod(config.C.Wd())

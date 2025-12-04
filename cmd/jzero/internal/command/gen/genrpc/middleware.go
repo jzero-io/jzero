@@ -12,7 +12,6 @@ import (
 	jzeroapi "github.com/jzero-io/desc/proto/third_party/jzero/api"
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
-	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 	"google.golang.org/protobuf/proto"
@@ -20,6 +19,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
@@ -147,7 +147,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 		return nil
 	}
 
-	fmt.Printf("%s to generate internal/middleware/middleware_gen.go\n", color.WithColor("Start", color.FgGreen))
+	fmt.Printf("%s to generate internal/middleware/middleware_gen.go\n", console.Green("Start"))
 
 	for _, v := range httpMiddlewares {
 		template, err := templatex.ParseTemplate(filepath.Join("rpc", "middleware_http.go.tpl"), map[string]any{
@@ -208,7 +208,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 		return err
 	}
 
-	fmt.Printf("%s\n", color.WithColor("Done", color.FgGreen))
+	fmt.Printf("%s\n", console.Green("Done"))
 	return nil
 }
 

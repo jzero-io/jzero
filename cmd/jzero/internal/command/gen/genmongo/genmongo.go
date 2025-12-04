@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/zeromicro/go-zero/core/color"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 )
 
 type JzeroMongo struct {
@@ -43,10 +43,10 @@ func (jm *JzeroMongo) Gen() error {
 	}
 	logx.Debugf("goctl_home = %s", goctlHome)
 
-	fmt.Printf("%s to generate mongo model code from types.\n", color.WithColor("Start", color.FgGreen))
+	fmt.Printf("%s to generate mongo model code from types.\n", console.Green("Start"))
 
 	for _, mongoType := range config.C.Gen.MongoType {
-		fmt.Printf("%s mongo type %s\n", color.WithColor("Using", color.FgGreen), mongoType)
+		fmt.Printf("%s mongo type %s\n", console.Green("Using"), mongoType)
 
 		// Support MutiModel with dot notation like "ntls_log.user"
 		var typeName string
@@ -113,7 +113,7 @@ func (jm *JzeroMongo) Gen() error {
 		return err
 	}
 
-	fmt.Println(color.WithColor("Done", color.FgGreen))
+	fmt.Println(console.Green("Done"))
 
 	return nil
 }
