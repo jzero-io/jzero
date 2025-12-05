@@ -206,8 +206,11 @@ type ServerlessDeleteConfig struct {
 }
 
 type MigrateConfig struct {
-	Source   string `mapstructure:"source"`
-	Database string `mapstructure:"database"`
+	Driver             string `mapstructure:"driver"`
+	DataSourceUrl      string `mapstructure:"datasource-url"`
+	Source             string `mapstructure:"source"`
+	SourceAppendDriver bool   `mapstructure:"source-append-driver"`
+	XMigrationsTable   string `mapstructure:"x-migrations-table"`
 }
 
 type FormatConfig struct {

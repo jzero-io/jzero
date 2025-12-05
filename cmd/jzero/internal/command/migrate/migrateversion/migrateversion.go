@@ -3,13 +3,20 @@ package migrateversion
 import (
 	"fmt"
 
-	migrate "github.com/golang-migrate/migrate/v4"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/migrate"
 )
 
 func Run(args []string) error {
-	m, err := migrate.New(config.C.Migrate.Source, config.C.Migrate.Database)
+	m, err := migrate.NewMigrate(sqlx.SqlConf{
+		DataSource: config.C.Migrate.DataSourceUrl,
+		DriverName: config.C.Migrate.Driver,
+	},
+		migrate.WithXMigrationsTable(config.C.Migrate.XMigrationsTable),
+		migrate.WithSource(config.C.Migrate.Source),
+		migrate.WithSourceAppendDriver(config.C.Migrate.SourceAppendDriver))
 	if err != nil {
 		return err
 	}

@@ -16,7 +16,8 @@ tag:
 
 ```yaml
 migrate:
-  database: "mysql://root:123456@tcp(127.0.0.1:3306)/jzero"
+  driver: "mysql"
+  datasource-url: "root:123456@tcp(127.0.0.1:3306)/jzero-admin"
 ```
 
 ## 升级
@@ -24,13 +25,17 @@ migrate:
 ```shell
 # 默认升级到最新
 jzero migrate up
+# 升级 n 个 migrations
+jzero migrate up 3
 ```
 
 ## 回滚
 
 ```shell
-# 默认仅回滚 1 个版本
+# 默认回滚所有
 jzero migrate down
+# 回滚 n 个 migrations
+jzero migrate down 3
 ```
 
 ## 获取版本

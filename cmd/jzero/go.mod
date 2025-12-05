@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
+	github.com/eddieowens/opts v0.1.0
 	github.com/go-git/go-git/v5 v5.16.3
 	github.com/golang-migrate/migrate/v4 v4.19.0
 	github.com/hashicorp/go-version v1.7.0

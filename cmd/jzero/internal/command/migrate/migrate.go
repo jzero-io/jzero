@@ -64,8 +64,10 @@ var migrateVersionCmd = &cobra.Command{
 func GetCommand() *cobra.Command {
 	migrateCmd.PersistentFlags().StringP("source", "", "file://desc/sql_migration", "migrate source")
 	_ = migrateCmd.MarkFlagRequired("source")
-	migrateCmd.PersistentFlags().StringP("database", "", "mysql", "migrate database")
-	_ = migrateCmd.MarkFlagRequired("database")
+	migrateCmd.PersistentFlags().StringP("datasource-url", "", "", "migrate datasource url")
+	_ = migrateCmd.MarkFlagRequired("datasource-url")
+	migrateCmd.PersistentFlags().StringP("x-migrations-table", "", "schema_migrations", "migrate table name")
+	migrateCmd.PersistentFlags().BoolP("source-append-driver", "", false, "migrate source append driver")
 
 	migrateCmd.AddCommand(migrateUpCmd)
 	migrateCmd.AddCommand(migrateDownCmd)
