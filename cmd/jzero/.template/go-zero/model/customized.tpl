@@ -128,20 +128,13 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 	return resp, total, nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx context.Context, session sqlx.Session, field map[string]any, conds ...condition.Condition) error {
-    if field == nil {
+func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx context.Context, session sqlx.Session, data map[string]any, conds ...condition.Condition) error {
+    if data == nil {
         return nil
     }
 
 	sb := sqlbuilder.Update(m.table)
-	builder := condition.UpdateWithFlavor(m.flavor, *sb, conds...)
-
-	var assigns []string
-    for key, value := range field {
-        assigns = append(assigns, sb.Assign(key, value))
-    }
-    builder.Set(assigns...)
-
+	builder := condition.SetUpdateFieldsWithFlavor(m.flavor, condition.UpdateWithFlavor(m.flavor, *sb, conds...), data)
 	statement, args := builder.BuildWithFlavor(m.flavor)
 
 	var err error

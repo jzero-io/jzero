@@ -51,7 +51,7 @@ func TestUpdateWithCondition(t *testing.T) {
 
 	sb := sqlbuilder.NewUpdateBuilder().Update("user")
 	builder := Update(*sb, cds...)
-	builder.Set(sb.Equal("name", "gocloudcoder"))
+	builder.SetMore(sb.Equal("name", "gocloudcoder"))
 
 	sql, args := builder.Build()
 	assert.Equal(t, `UPDATE user SET name = ? WHERE `+"`name`"+` = ? AND (`+"`age`"+` BETWEEN ? AND ? OR `+"`height`"+` BETWEEN ? AND ?)`, sql)
