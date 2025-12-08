@@ -1,11 +1,8 @@
 ---
-title: mongo 使用文档
+title: mongodb 指南
 icon: logos:mongodb
 star: true
 order: 5
-category: 开发
-tag:
-  - Guide
 ---
 
 ## 前言

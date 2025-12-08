@@ -1,11 +1,8 @@
 ---
-title: 数据库迁移特性
+title: 数据库迁移指南
 icon: carbon:migrate
 star: true
 order: 5.5
-category: 开发
-tag:
-  - Guide
 ---
 
 * jzero 基于 [migrate](https://github.com/golang-migrate/migrate) 实现数据库迁移能力

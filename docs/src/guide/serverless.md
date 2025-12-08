@@ -1,11 +1,8 @@
 ---
-title: serverless 插件化特性
+title: 插件指南
 icon: arcticons:game-plugins
 star: true
 order: 5.4
-category: 开发
-tag:
-  - Guide
 ---
 
 jzero 支持插件化机制, 可以方便的进行插件的安装和卸载操作.

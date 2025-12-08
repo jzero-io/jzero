@@ -30,7 +30,7 @@ jzero version
 jzero check
 ```
 
-### 直接下载 jzero 二进制文件
+### 下载 jzero 二进制文件
 
 [下载地址](https://github.com/jzero-io/jzero/releases)
 
@@ -51,4 +51,13 @@ jzero check
 ```shell
 # 获取 jzero 版本信息
 docker run --rm ghcr.io/jzero-io/jzero:latest version
+```
+
+## 升级 jzero
+
+```shell
+# 升级为最新版
+jzero upgrade
+# 升级到指定版本 
+jzero upgrade --channel <commit_hash> 或 <tag>
 ```

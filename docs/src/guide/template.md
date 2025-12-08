@@ -1,11 +1,8 @@
 ---
-title: 模版特性
+title: 模版指南
 icon: vscode-icons:folder-type-template
 star: true
 order: 5.3
-category: 开发
-tag:
-  - Guide
 ---
 
 ## 模版初始化
@@ -31,41 +28,23 @@ goctl template init --home .template/go-zero
 jzero template build --name template_name
 ```
 
-## 使用模版创建项目
+## 使用自定义模版初始化项目
 
-1. 使用远程模版
-
-:::tip 此指令将重新从远程拉去模版
-:::
-
-- 使用默认仓库：`https://github.com/jzero-io/templates`
+* 指定远程仓库模板
 
 ```shell
-jzero new project_name --branch template_branch
+jzero new project_name --remote repo_to_your_templates --branch template_branch
+# 从缓存获取远程模板
+jzero new project_name --remote repo_to_your_templates --branch template_branch --cache
 ```
 
-- 指定远程仓库
-
-```shell
-jzero new project_name --remote repo_to_your_templates --branch template_branch 
-```
-
-2. 使用本地缓存的远程模版
-
-:::tip 本地缓存的模版在 `$HOME/.jzero/templates/remote` 下。
-:::
-
-```shell
-jzero new project_name --branch --cache template_branch
-```
-
-3. 使用自构建模版
+* 使用本地模版
 
 ```shell
 jzero new project_name --local template_name
 ```
 
-4. 使用指定路径模版
+* 使用路径模版
 
 ```shell
 jzero new project_name --home path_to_template

@@ -1,5 +1,5 @@
 ---
-title: 贡献指南
+title: 欢迎贡献👏
 icon: ooui:user-contributions-ltr
 star: true
 order: 30

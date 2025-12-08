@@ -1,11 +1,8 @@
 ---
-title: api 使用文档
+title: api 指南
 icon: eos-icons:api
 star: true
 order: 0.2
-category: 开发
-tag:
-  - Guide
 ---
 
 ## 前言
@@ -15,12 +12,6 @@ tag:
 * 自动生成多语言服务端代码
 * 自动生成文档(json/html/swagger)
 * 自动生成多语言客户端代码
-
-与 proto 文件有异曲同工之妙, 但是比 proto 更简单易用
-
-[go-zero api 教程](https://go-zero.dev/docs/tutorials)
-
-![](http://oss.jaronnie.com/image-20250120232337438.png)
 
 ## api 字段校验
 
