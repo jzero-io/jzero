@@ -13,57 +13,42 @@
 
 ## 介绍
 
-通过模板创建项目，并基于 [proto](https://docs.jzero.io/guide/develop/proto.html)/[api](https://docs.jzero.io/guide/develop/api.html)/[sql](https://docs.jzero.io/guide/develop/model.html) 文件生成 Server/Client/Model 代码。
+一键新增 api/gateway/rpc 项目, 并基于可描述文件(**api/proto/sql**)自动生成**服务端和客户端代码**代码, 降低开发心智, 解放双手!
 
 具备以下特点:
-* 基于 [go-zero](https://go-zero.dev) 框架但不局限于 go-zero 框架, 基于模板特性支持任意框架
-* 优化 go-zero 框架已有痛点, 并扩展新的特性, 完全兼容 go-zero 框架
-* 基于配置文件, 通过极简指令生成代码, MCP 模式下使用友好
-* 基于 git 仅对改动文件部分生成代码, 极大提升大型项目代码生成效率
-* 内置不同场景模板, 并支持自定义模板，开箱即用并高度可定制化
-* 所有配套工具链跨平台使用, 支持 windows/mac/linux
+
+* 支持通过配置文件/命令行参数/环境变量组合的方式灵活控制 jzero 的各项配置, 极简指令生成代码, ai 友好
+* 支持基于 git 对改动文件部分生成代码, 支持对指定描述文件生成代码或忽略指定描述文件生成代码, 提升大型项目代码生成效率
+* 内置常用开发模板并增强模板特性, 支持自定义模板, 构建专属企业内部代码模板, 极大降低开发成本
 
 更多详情请参阅：https://docs.jzero.io
-
-## 下载
-
-```shell
-go install github.com/jzero-io/jzero/cmd/jzero@latest
-# 检查工具并下载
-jzero check
-```
-
-### docker
-
-```shell
-docker pull ghcr.io/jzero-io/jzero:latest
-```
 
 ## 快速开始
 
 ```shell
-# 新建项目
+# 安装 jzero
+go install github.com/jzero-io/jzero/cmd/jzero@latest
+# 一键安装所需的工具
+jzero check
+# 一键创建项目
 jzero new your_project
 cd your_project
-# 下载依赖
-go mod tidy
-# 生成 swagger json
-jzero gen swagger
-# 运行服务端
+# 启动服务端程序
 go run main.go server
+# 访问 swagger ui
+http://localhost:8001/swagger
 ```
 
 ### docker
 
 ```shell
+# 一键创建项目
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project
-cd your_project
-# 下载依赖
-go mod tidy
-# 生成 swagger json
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
-# 运行服务端
+cd your_project 
+# 启动服务端程序
 go run main.go server
+# 访问 swagger ui
+http://localhost:8001/swagger
 ```
 
 更多示例代码请参阅: https://github.com/jzero-io/examples
@@ -81,17 +66,6 @@ go run main.go server
   <img src="https://openomy.app/svg?repo=jzero-io/jzero&chart=bubble&latestMonth=3" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />
 </a>
 
-## 致谢
-
-该项目由 JetBrains 开源开发许可证支持。
-
-[![Jetbrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/?from=jzero)
-
-## 捐赠
-
-[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?label=Sponsor-WePay)](https://oss.jaronnie.com/2021723027876_.pic.jpg)
-[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?label=Sponsor-AliPay)](https://oss.jaronnie.com/2031723027877_.pic.jpg)
-
 ## Stargazers over time
 
 [![Star History Chart](https://api.star-history.com/svg?repos=jzero-io/jzero&type=Date)](https://star-history.com/#jzero-io/jzero&Date)
@@ -103,9 +77,3 @@ jzero 基于 MIT License 发布，完全免费提供。作者及贡献者不对�
 无任何保证：本软件不提供任何明示或暗示的保证，包括但不限于对特定用途的适用性、无侵权性、商用性及可靠性的保证。
 
 用户责任：使用本软件即表示您理解并同意承担由此产生的一切风险及责任。
-
-## 联系我
-
-<p align="center">
-<img align="left" width="250px" height="250px" src="https://oss.jaronnie.com/weixin2.jpg">
-</p>

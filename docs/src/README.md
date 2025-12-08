@@ -10,15 +10,15 @@ title: 首页
 
 ## 介绍
 
-基于 [go-zero](https://go-zero.dev) 开发的低代码微服务开发框架 `jzero`, 通过可描述文件(**api/proto/sql**)自动生成**服务端代码/客户端代码/数据库**代码, 降低开发心智, 解放双手!
+一键新增 api/gateway/rpc 项目, 并基于可描述文件(**api/proto/sql**)自动生成**服务端和客户端代码**代码, 降低开发心智, 解放双手!
 
-jzero 具备以下特点:
+具备以下特点:
 
-* 支持通过配置文件, 命令行参数以及环境变量的组合的方式控制命令的参数, 告别繁琐的命令配置
-* 支持基于 git 对改动文件部分生成代码, 极大提升大型项目代码生成效率
-* 优化 go-zero 已有的痛点并扩展新的特性
-* 内置常用开发模板并增强模板特性, 支持通过自定义模板内容, 构建企业内部代码模板
-* 所有配套工具链跨平台使用, 支持 windows/mac/linux
+* 支持通过配置文件/命令行参数/环境变量组合的方式灵活控制 jzero 的各项配置, 极简指令生成代码, ai 友好
+* 支持基于 git 对改动文件部分生成代码, 支持对指定描述文件生成代码或忽略指定描述文件生成代码, 提升大型项目代码生成效率
+* 内置常用开发模板并增强模板特性, 支持自定义模板, 构建专属企业内部代码模板, 极大降低开发成本
+
+更多详情请参阅：https://docs.jzero.io
 
 ## 快速开始
 
@@ -36,10 +36,6 @@ jzero check
 # 一键创建项目
 jzero new your_project
 cd your_project
-# 下载依赖
-go mod tidy
-# 生成 swagger
-jzero gen swagger
 # 启动服务端程序
 go run main.go server
 # 访问 swagger ui
@@ -49,14 +45,10 @@ http://localhost:8001/swagger
 @tab Docker
 
 ```bash
-# 创建项目
+# 一键创建项目
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project
 cd your_project 
-# 下载依赖
-go mod tidy
-# 生成 swagger
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
-# 启动项目
+# 启动服务端程序
 go run main.go server
 # 访问 swagger ui
 http://localhost:8001/swagger
