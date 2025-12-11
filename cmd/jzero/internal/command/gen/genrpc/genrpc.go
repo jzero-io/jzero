@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -17,6 +16,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/stringx"
@@ -152,11 +152,11 @@ func (jr *JzeroRpc) Gen() error {
 	}
 	defer os.RemoveAll(tempDir)
 
-	//// 先写入内置模板
-	//err = embeded.WriteTemplateDir(filepath.Join("go-zero", "rpc"), filepath.Join(tempDir, "rpc"))
-	//if err != nil {
+	// // 先写入内置模板
+	// err = embeded.WriteTemplateDir(filepath.Join("go-zero", "rpc"), filepath.Join(tempDir, "rpc"))
+	// if err != nil {
 	//	return err
-	//}
+	// }
 
 	// 如果用户自定义了模板，则复制覆盖
 	customTemplatePath := filepath.Join(config.C.Gen.Home, "go-zero", "rpc")

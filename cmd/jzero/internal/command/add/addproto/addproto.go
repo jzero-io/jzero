@@ -1,0 +1,47 @@
+package addproto
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/stringx"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
+)
+
+func Run(args []string) error {
+	baseDir := filepath.Join("desc", "proto")
+
+	protoName := args[0]
+
+	frameType, _ := desc.GetFrameType()
+	if frameType == "" {
+		frameType = "rpc"
+	}
+
+	var template []byte
+
+	template, err := templatex.ParseTemplate(filepath.Join(frameType, "template.proto.tpl"), map[string]any{
+		"Package": protoName,
+		"Service": stringx.ToCamel(protoName),
+	}, embeded.ReadTemplateFile(filepath.Join(frameType, "template.proto.tpl")))
+	if err != nil {
+		return err
+	}
+
+	_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, protoName)), 0755)
+
+	if filex.FileExists(filepath.Join(baseDir, protoName+".proto")) {
+		return fmt.Errorf("%s already exists", protoName)
+	}
+
+	err = os.WriteFile(filepath.Join(baseDir, protoName+".proto"), template, 0o644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

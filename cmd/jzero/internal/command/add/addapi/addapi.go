@@ -1,0 +1,44 @@
+package addapi
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/zeromicro/go-zero/tools/goctl/api/format"
+
+	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
+)
+
+func Run(args []string) error {
+	baseDir := filepath.Join("desc", "api")
+
+	service := desc.GetApiServiceName(filepath.Join("desc", "api"))
+
+	apiName := args[0]
+
+	template, err := templatex.ParseTemplate(filepath.Join("api", "template.api.tpl"), map[string]any{
+		"Service": service,
+		"Group":   apiName,
+	}, embeded.ReadTemplateFile(filepath.Join("api", "template.api.tpl")))
+	if err != nil {
+		return err
+	}
+
+	if filex.FileExists(filepath.Join(baseDir, apiName+".api")) {
+		return fmt.Errorf("%s already exists", apiName)
+	}
+
+	_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, apiName)), 0755)
+
+	err = os.WriteFile(filepath.Join(baseDir, apiName+".api"), template, 0o644)
+	if err != nil {
+		return err
+	}
+
+	// format
+	return format.ApiFormatByPath(filepath.Join(baseDir, apiName+".api"), false)
+}

@@ -19,5 +19,5 @@ type VersionResponse {
 )
 service {{ .APP | ToCamel }} {
     @handler Version
-    get /version (VersionRequest) returns (VersionResponse)
+    get /api/version (VersionRequest) returns (VersionResponse)
 }{{end}}

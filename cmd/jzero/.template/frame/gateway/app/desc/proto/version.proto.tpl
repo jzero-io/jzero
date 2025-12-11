@@ -19,7 +19,7 @@ message VersionResponse {
 service Version {
     rpc Version(VersionRequest) returns(VersionResponse) {
         option (google.api.http) = {
-            get: "/version"
+            get: "/api/version"
         };
     };
 }{{end}}

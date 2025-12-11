@@ -46,6 +46,9 @@ type Config struct {
 	// new command
 	New NewConfig `mapstructure:"new"`
 
+	// add command
+	Add AddConfig `mapstructure:"add"`
+
 	// gen command
 	Gen GenConfig `mapstructure:"gen"`
 
@@ -217,6 +220,26 @@ type FormatConfig struct {
 	GitChange   bool `mapstructure:"git-change"`
 	DisplayDiff bool `mapstructure:"display-diff"`
 }
+
+type AddConfig struct {
+	Api          AddApiConfig          `mapstructure:"api"`
+	Proto        AddProtoConfig        `mapstructure:"proto"`
+	Sql          AddSqlConfig          `mapstructure:"sql"`
+	SqlMigration AddSqlMigrationConfig `mapstructure:"sql-migration"`
+}
+
+type AddApiConfig struct {
+	Handlers []string `mapstructure:"handlers"`
+}
+
+type AddProtoConfig struct {
+	Handlers []string `mapstructure:"handlers"`
+}
+
+type AddSqlConfig struct {
+}
+
+type AddSqlMigrationConfig struct{}
 
 type HooksConfig struct {
 	Before []string `mapstructure:"before"`

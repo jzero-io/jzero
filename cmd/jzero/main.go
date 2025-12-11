@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/logx"
 
+	"github.com/jzero-io/jzero/cmd/jzero/internal/command/add"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/check"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/completion"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/format"
@@ -115,6 +116,7 @@ func init() {
 	rootCmd.AddCommand(check.GetCommand())
 	rootCmd.AddCommand(completion.GetCommand())
 	rootCmd.AddCommand(format.GetCommand())
+	rootCmd.AddCommand(add.GetCommand())
 	rootCmd.AddCommand(gen.GetCommand())
 	rootCmd.AddCommand(mcp.GetCommand())
 	rootCmd.AddCommand(migrate.GetCommand())
