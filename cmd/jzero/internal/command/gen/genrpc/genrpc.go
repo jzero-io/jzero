@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
@@ -57,6 +57,7 @@ func (jr *JzeroRpc) Gen() error {
 	if err != nil {
 		return err
 	}
+
 	jr.ProtoFiles = protoFiles
 	if len(jr.ProtoFiles) == 0 {
 		return nil
@@ -143,6 +144,32 @@ func (jr *JzeroRpc) Gen() error {
 
 	fmt.Printf("%s to generate rpc code from proto files\n", console.Green("Start"))
 
+	// 处理模板
+	var goctlHome string
+	tempDir, err := os.MkdirTemp(os.TempDir(), "")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tempDir)
+
+	//// 先写入内置模板
+	//err = embeded.WriteTemplateDir(filepath.Join("go-zero", "rpc"), filepath.Join(tempDir, "rpc"))
+	//if err != nil {
+	//	return err
+	//}
+
+	// 如果用户自定义了模板，则复制覆盖
+	customTemplatePath := filepath.Join(config.C.Gen.Home, "go-zero", "rpc")
+	if pathx.FileExists(customTemplatePath) {
+		err = filex.CopyDir(customTemplatePath, filepath.Join(tempDir, "rpc"))
+		if err != nil {
+			return err
+		}
+	}
+
+	goctlHome = tempDir
+	logx.Debugf("goctl_home = %s", goctlHome)
+
 	for _, v := range jr.ProtoFiles {
 		allLogicFiles, err := jr.GetAllLogicFiles(v, jr.ProtoSpecMap[v])
 		if err != nil {
@@ -164,7 +191,7 @@ func (jr *JzeroRpc) Gen() error {
 				filepath.Join("internal"),
 				filepath.Join("internal"),
 				zrpcOut,
-				filepath.Join(embeded.Home, "go-zero"),
+				goctlHome,
 				config.C.Gen.Style)
 
 			if len(config.C.Gen.ProtoInclude) > 0 {
@@ -189,6 +216,7 @@ func (jr *JzeroRpc) Gen() error {
 				}
 			}
 		}
+
 		for _, file := range allLogicFiles {
 			if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
 				if err := jr.removeLogicSuffix(file.Path); err != nil {
@@ -236,6 +264,7 @@ func (jr *JzeroRpc) Gen() error {
 		}
 		pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(jr.ProtoSpecMap[v].GoPackage, "./")))
 	}
+
 	if len(jr.GenCodeProtoFiles) > 0 {
 		fmt.Println(console.Green("Done"))
 	}
@@ -248,5 +277,6 @@ func (jr *JzeroRpc) Gen() error {
 			return err
 		}
 	}
+
 	return nil
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	zeroconfig "github.com/zeromicro/go-zero/tools/goctl/config"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
@@ -22,8 +23,13 @@ import (
 )
 
 func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {
+	rootPkg, projectPkg, err := golang.GetParentPackageWithModule(config.C.Wd(), ja.Module)
+	if err != nil {
+		return "", err
+	}
+
 	if len(ja.ApiSpecMap[fp].Service.Routes()) > 0 {
-		routesGoBody, err := jgogen.GenRoutesString(ja.Module, &zeroconfig.Config{NamingFormat: config.C.Gen.Style}, ja.ApiSpecMap[fp])
+		routesGoBody, err := jgogen.GenRoutesString(rootPkg, projectPkg, &zeroconfig.Config{NamingFormat: config.C.Gen.Style}, ja.ApiSpecMap[fp])
 		if err != nil {
 			return "", err
 		}

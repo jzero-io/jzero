@@ -2,6 +2,7 @@ package gogen
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"sort"
 	"strconv"
@@ -49,7 +50,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 `
 	routesAdditionTemplate = `
 	server.AddRoutes(
-		{{.routes}} {{.jwt}}{{.signature}} {{.prefix}} {{.timeout}} {{.maxBytes}}
+		{{.routes}} {{.jwt}}{{.signature}} {{.prefix}} {{.timeout}} {{.maxBytes}} {{.sse}}
 	)
 `
 	timeoutThreshold = time.Millisecond
@@ -72,6 +73,7 @@ type (
 		routes           []route
 		jwtEnabled       bool
 		signatureEnabled bool
+		sseEnabled       bool
 		authName         string
 		timeout          string
 		middlewares      []string
@@ -79,7 +81,6 @@ type (
 		jwtTrans         string
 		maxBytes         string
 	}
-
 	route struct {
 		method  string
 		path    string
@@ -88,15 +89,15 @@ type (
 	}
 )
 
-func GenRoutesString(rootPkg string, cfg *config.Config, api *spec.ApiSpec) (string, error) {
-	fgc, err := genRoutesConfig("", rootPkg, cfg, api)
+func GenRoutesString(rootPkg string, projectPkg string, cfg *config.Config, api *spec.ApiSpec) (string, error) {
+	fgc, err := genRoutesConfig("", rootPkg, projectPkg, cfg, api)
 	if err != nil {
 		return "", err
 	}
 	return genFileString(*fgc)
 }
 
-func genRoutesConfig(dir, rootPkg string, cfg *config.Config, api *spec.ApiSpec) (*fileGenConfig, error) {
+func genRoutesConfig(dir, rootPkg, projectPkg string, cfg *config.Config, api *spec.ApiSpec) (*fileGenConfig, error) {
 	var builder strings.Builder
 	groups, err := getRoutes(api)
 	if err != nil {
@@ -141,10 +142,17 @@ func genRoutesConfig(dir, rootPkg string, cfg *config.Config, api *spec.ApiSpec)
 		if len(g.jwtTrans) > 0 {
 			jwt = jwt + fmt.Sprintf("\n rest.WithJwtTransition(serverCtx.MustGetConfig().%s.PrevSecret,serverCtx.MustGetConfig().%s.Secret),", g.jwtTrans, g.jwtTrans)
 		}
+
 		var signature, prefix string
 		if g.signatureEnabled {
 			signature = "\n rest.WithSignature(serverCtx.MustGetConfig().Signature),"
 		}
+
+		var sse string
+		if g.sseEnabled {
+			sse = "\n rest.WithSSE(),"
+		}
+
 		if len(g.prefix) > 0 {
 			prefix = fmt.Sprintf(`
 rest.WithPrefix("%s"),`, g.prefix)
@@ -157,12 +165,7 @@ rest.WithPrefix("%s"),`, g.prefix)
 				return nil, err
 			}
 
-			// why we check this, maybe some users set value 1, it's 1ns, not 1s.
-			if duration < timeoutThreshold {
-				return nil, fmt.Errorf("timeout should not less than 1ms, now %v", duration)
-			}
-
-			timeout = fmt.Sprintf("\n rest.WithTimeout(%d * time.Millisecond),", duration.Milliseconds())
+			timeout = fmt.Sprintf("\n rest.WithTimeout(%s),", formatDuration(duration))
 			hasTimeout = true
 		}
 
@@ -195,6 +198,7 @@ rest.WithPrefix("%s"),`, g.prefix)
 			"routes":    routes,
 			"jwt":       jwt,
 			"signature": signature,
+			"sse":       sse,
 			"prefix":    prefix,
 			"timeout":   timeout,
 			"maxBytes":  maxBytes,
@@ -209,6 +213,9 @@ rest.WithPrefix("%s"),`, g.prefix)
 	}
 
 	routeFilename = routeFilename + ".go"
+	filename := path.Join(dir, handlerDir, routeFilename)
+	os.Remove(filename)
+
 	return &fileGenConfig{
 		dir:             dir,
 		subdir:          handlerDir,
@@ -221,8 +228,19 @@ rest.WithPrefix("%s"),`, g.prefix)
 			"hasTimeout":      hasTimeout,
 			"importPackages":  genRouteImports(rootPkg, api),
 			"routesAdditions": strings.TrimSpace(builder.String()),
+			"projectPkg":      projectPkg,
 		},
 	}, nil
+}
+
+func formatDuration(duration time.Duration) string {
+	if duration < time.Microsecond {
+		return fmt.Sprintf("%d * time.Nanosecond", duration.Nanoseconds())
+	}
+	if duration < time.Millisecond {
+		return fmt.Sprintf("%d * time.Microsecond", duration.Microseconds())
+	}
+	return fmt.Sprintf("%d * time.Millisecond", duration.Milliseconds())
 }
 
 func genRouteImports(parentPkg string, api *spec.ApiSpec) string {
@@ -289,6 +307,10 @@ func getRoutes(api *spec.ApiSpec) ([]group, error) {
 		signature := g.GetAnnotation("signature")
 		if signature == "true" {
 			groupedRoutes.signatureEnabled = true
+		}
+		sse := g.GetAnnotation("sse")
+		if sse == "true" {
+			groupedRoutes.sseEnabled = true
 		}
 		middleware := g.GetAnnotation("middleware")
 		if len(middleware) > 0 {
