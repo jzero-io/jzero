@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
@@ -32,16 +33,19 @@ func Run(args []string) error {
 		return err
 	}
 
-	_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, protoName)), 0755)
+	if config.C.Add.Output == "file" {
+		if filex.FileExists(filepath.Join(baseDir, protoName+".proto")) {
+			return fmt.Errorf("%s already exists", protoName)
+		}
 
-	if filex.FileExists(filepath.Join(baseDir, protoName+".proto")) {
-		return fmt.Errorf("%s already exists", protoName)
+		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, protoName)), 0755)
+
+		err = os.WriteFile(filepath.Join(baseDir, protoName+".proto"), template, 0o644)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
-
-	err = os.WriteFile(filepath.Join(baseDir, protoName+".proto"), template, 0o644)
-	if err != nil {
-		return err
-	}
-
+	fmt.Println(string(template))
 	return nil
 }

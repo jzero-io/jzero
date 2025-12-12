@@ -7,6 +7,7 @@ import (
 
 	"github.com/zeromicro/go-zero/tools/goctl/api/format"
 
+	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
@@ -28,17 +29,21 @@ func Run(args []string) error {
 		return err
 	}
 
-	if filex.FileExists(filepath.Join(baseDir, apiName+".api")) {
-		return fmt.Errorf("%s already exists", apiName)
+	if config.C.Add.Output == "file" {
+		if filex.FileExists(filepath.Join(baseDir, apiName+".api")) {
+			return fmt.Errorf("%s already exists", apiName)
+		}
+
+		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, apiName)), 0755)
+
+		err = os.WriteFile(filepath.Join(baseDir, apiName+".api"), template, 0o644)
+		if err != nil {
+			return err
+		}
+
+		// format
+		return format.ApiFormatByPath(filepath.Join(baseDir, apiName+".api"), false)
 	}
-
-	_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, apiName)), 0755)
-
-	err = os.WriteFile(filepath.Join(baseDir, apiName+".api"), template, 0o644)
-	if err != nil {
-		return err
-	}
-
-	// format
-	return format.ApiFormatByPath(filepath.Join(baseDir, apiName+".api"), false)
+	fmt.Println(string(template))
+	return nil
 }

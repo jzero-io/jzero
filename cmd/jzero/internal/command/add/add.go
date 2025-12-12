@@ -43,6 +43,8 @@ var addSqlCmd = &cobra.Command{
 }
 
 func GetCommand() *cobra.Command {
+	addCmd.PersistentFlags().StringP("output", "o", "file", "Output format. One of: file | std")
+
 	addCmd.AddCommand(addApiCmd)
 	addCmd.AddCommand(addProtoCmd)
 	addCmd.AddCommand(addSqlCmd)

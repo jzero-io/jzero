@@ -222,19 +222,17 @@ type FormatConfig struct {
 }
 
 type AddConfig struct {
+	Output string `mapstructure:"output"`
+
 	Api          AddApiConfig          `mapstructure:"api"`
 	Proto        AddProtoConfig        `mapstructure:"proto"`
 	Sql          AddSqlConfig          `mapstructure:"sql"`
 	SqlMigration AddSqlMigrationConfig `mapstructure:"sql-migration"`
 }
 
-type AddApiConfig struct {
-	Handlers []string `mapstructure:"handlers"`
-}
+type AddApiConfig struct{}
 
-type AddProtoConfig struct {
-	Handlers []string `mapstructure:"handlers"`
-}
+type AddProtoConfig struct{}
 
 type AddSqlConfig struct {
 }
