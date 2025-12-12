@@ -12,6 +12,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/tools/goctl/api/format"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -54,13 +55,6 @@ func (l RegisterLines) String() string {
 func (ja *JzeroApi) Gen() error {
 	if !pathx.FileExists(config.C.ApiDir()) {
 		return nil
-	}
-
-	// format api dir
-	command := fmt.Sprintf("goctl api format --dir %s", config.C.ApiDir())
-	_, err := execx.Run(command, config.C.Wd())
-	if err != nil {
-		return err
 	}
 
 	apiFiles, err := desc.FindApiFiles(config.C.ApiDir())
@@ -254,6 +248,11 @@ func (ja *JzeroApi) generateApiCode() error {
 
 			dir := "."
 			fmt.Printf("%s api file %s\n", console.Green("Using"), v)
+
+			if err = format.ApiFormatByPath(v, false); err != nil {
+				return errors.Wrapf(err, "format api file: %s", v)
+			}
+
 			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, config.C.Gen.Style)
 			logx.Debugf("command: %s", command)
 			if _, err := execx.Run(command, config.C.Wd()); err != nil {
