@@ -82,7 +82,11 @@ func (m *custom{{.upperStartCamelObject}}Model) CountByCondition(ctx context.Con
 }
 
 func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
-	sb := sqlbuilder.Select(m.withTableColumns({{.lowerStartCamelObject}}FieldNames...)...).From(m.table)
+    return m.FindOneSelectedColumnsByCondition(ctx, session, {{.lowerStartCamelObject}}FieldNames, conds...)
+}
+
+func (m *custom{{.upperStartCamelObject}}Model) FindOneSelectedColumnsByCondition(ctx context.Context, session sqlx.Session, columns []string, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
+	sb := sqlbuilder.Select(m.withTableColumns(columns...)...).From(m.table)
 
 	builder := condition.SelectWithFlavor(m.flavor, *sb, conds...)
 	builder.Limit(1)
