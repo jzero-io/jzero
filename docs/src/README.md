@@ -5,7 +5,7 @@ title: 首页
 ---
 
 <div style="text-align: center;">
-  <img src="https://oss.jaronnie.com/hiking.svg" style="width: 33%;" alt=""/>
+  <img src="https://oss.jaronnie.com/jzero.svg" style="width: 33%;" alt=""/>
 </div>
 
 ## 简介
@@ -22,6 +22,7 @@ title: 首页
 
 ## 设计理念
 
+* **开发体验**: 提供简单好用的一站式生产可用的解决方案, 提升开发体验感
 * **模板驱动**: 所有代码生成均基于模板渲染, 默认生成即最佳实践, 且支持自定义模板内容
 * **生态兼容**: 不修改 go-zero 和 go-zero/goctl, 保持生态兼容, 同时解决已有的痛点问题并扩展新的功能
 * **团队开发**: 通过模块**分层**, **插件**设计, 团队开发友好
