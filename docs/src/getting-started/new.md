@@ -30,6 +30,8 @@ jzero 提供了以下几种类型模板, 满足各种场景:
 ```bash
 jzero new your_project --frame api
 cd your_project
+# 下载依赖
+go mod tidy
 # 启动服务端程序
 go run main.go server
 # 访问 swagger ui
@@ -41,6 +43,8 @@ http://localhost:8001/swagger
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --frame api
 cd your_project
+# 下载依赖
+go mod tidy
 # 启动服务端程序
 go run main.go server
 # 访问 swagger ui
@@ -57,6 +61,8 @@ http://localhost:8001/swagger
 ```bash
 jzero new your_project --frame rpc
 cd your_project
+# 下载依赖
+go mod tidy
 # 启动服务端程序
 go run main.go server
 ```
@@ -66,6 +72,8 @@ go run main.go server
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --frame rpc
 cd your_project
+# 下载依赖
+go mod tidy
 # 启动服务端程序
 go run main.go server
 ```
@@ -82,6 +90,9 @@ go run main.go server
 
 ```bash
 jzero new your_project --frame gateway
+cd your_project
+# 下载依赖
+go mod tidy
 # 启动服务端程序
 go run main.go server
 # 访问 swagger ui
@@ -93,6 +104,8 @@ http://localhost:8001/swagger
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --frame gateway
 cd your_project
+# 下载依赖
+go mod tidy
 # 启动服务端程序
 go run main.go server
 # 访问 swagger ui

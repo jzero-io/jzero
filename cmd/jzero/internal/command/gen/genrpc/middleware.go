@@ -160,7 +160,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 		if err != nil {
 			return err
 		}
-		namingFormat, _ := format.FileNamingFormat(config.C.Gen.Style, v.Name+"Middleware")
+		namingFormat, _ := format.FileNamingFormat(config.C.Style, v.Name+"Middleware")
 		if !pathx.FileExists(filepath.Join("internal", "middleware", namingFormat+".go")) {
 			err = os.WriteFile(filepath.Join("internal", "middleware", namingFormat+".go"), process, 0o644)
 			if err != nil {
@@ -181,7 +181,7 @@ func (jr *JzeroRpc) genApiMiddlewares() (err error) {
 		if err != nil {
 			return err
 		}
-		namingFormat, _ := format.FileNamingFormat(config.C.Gen.Style, v.Name+"Middleware")
+		namingFormat, _ := format.FileNamingFormat(config.C.Style, v.Name+"Middleware")
 		if !pathx.FileExists(filepath.Join("internal", "middleware", namingFormat+".go")) {
 			err = os.WriteFile(filepath.Join("internal", "middleware", namingFormat+".go"), process, 0o644)
 			if err != nil {

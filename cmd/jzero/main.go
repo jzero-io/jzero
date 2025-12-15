@@ -8,11 +8,13 @@ package main
 import (
 	"embed"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/add"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/check"
@@ -77,6 +79,19 @@ var rootCmd = &cobra.Command{
 				}
 			}
 		}
+
+		// Check home
+		if !pathx.FileExists(config.C.Home) {
+			if pathx.FileExists(filepath.Join(config.C.HomeDir(), ".jzero", "templates", version.Version)) {
+				config.C.Home = filepath.Join(config.C.HomeDir(), ".jzero", "templates", version.Version)
+				embeded.Home = config.C.Home
+			} else {
+				config.C.Home = ""
+			}
+		} else {
+			embeded.Home = config.C.Home
+		}
+
 		return hooks.Run(cmd, "Before", "global", config.C.Hooks.Before)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -105,13 +120,15 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(InitConfig)
 
-	rootCmd.Flags().BoolP("version", "v", false, "show version")
-	rootCmd.PersistentFlags().StringVarP(&WorkingDir, "working-dir", "w", "", "set working directory")
+	rootCmd.PersistentFlags().StringP("style", "", "gozero", "The file naming format, see [https://github.com/zeromicro/go-zero/blob/master/tools/goctl/config/readme.md]")
+	rootCmd.PersistentFlags().StringP("home", "", ".template", "set template home")
 	rootCmd.PersistentFlags().StringVarP(&config.CfgFile, "config", "f", ".jzero.yaml", "set config file")
 	rootCmd.PersistentFlags().StringVarP(&config.CfgEnvFile, "config-env", "", ".jzero.env.yaml", "set config env file")
-	rootCmd.PersistentFlags().StringSliceP("register-tpl-val", "", []string{}, "register tpl value, e.g. --register-tpl-val key=value")
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "debug mode")
 	rootCmd.PersistentFlags().IntP("debug-sleep-time", "", 0, "debug sleep time")
+	rootCmd.Flags().BoolP("version", "v", false, "show version")
+	rootCmd.PersistentFlags().StringVarP(&WorkingDir, "working-dir", "w", "", "set working directory")
+	rootCmd.PersistentFlags().StringSliceP("register-tpl-val", "", []string{}, "register tpl value, e.g. --register-tpl-val key=value")
 
 	rootCmd.AddCommand(check.GetCommand())
 	rootCmd.AddCommand(completion.GetCommand())

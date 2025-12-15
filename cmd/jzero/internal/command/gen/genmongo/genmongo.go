@@ -27,7 +27,7 @@ func (jm *JzeroMongo) Gen() error {
 
 	var goctlHome string
 
-	if !pathx.FileExists(filepath.Join(config.C.Gen.Home, "go-zero", "mongo")) {
+	if !pathx.FileExists(filepath.Join(config.C.Home, "go-zero", "mongo")) {
 		tempDir, err := os.MkdirTemp(os.TempDir(), "")
 		if err != nil {
 			return err
@@ -39,7 +39,7 @@ func (jm *JzeroMongo) Gen() error {
 		}
 		goctlHome = tempDir
 	} else {
-		goctlHome = filepath.Join(config.C.Gen.Home, "go-zero")
+		goctlHome = filepath.Join(config.C.Home, "go-zero")
 	}
 	logx.Debugf("goctl_home = %s", goctlHome)
 
@@ -71,7 +71,7 @@ func (jm *JzeroMongo) Gen() error {
 			"-t", goctlType,
 			"--dir", modelDir,
 			"--home", goctlHome,
-			"--style", config.C.Gen.Style,
+			"--style", config.C.Style,
 		}
 
 		var enableCache bool

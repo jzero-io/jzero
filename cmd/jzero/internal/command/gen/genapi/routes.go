@@ -29,7 +29,7 @@ func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {
 	}
 
 	if len(ja.ApiSpecMap[fp].Service.Routes()) > 0 {
-		routesGoBody, err := jgogen.GenRoutesString(rootPkg, projectPkg, &zeroconfig.Config{NamingFormat: config.C.Gen.Style}, ja.ApiSpecMap[fp])
+		routesGoBody, err := jgogen.GenRoutesString(rootPkg, projectPkg, &zeroconfig.Config{NamingFormat: config.C.Style}, ja.ApiSpecMap[fp])
 		if err != nil {
 			return "", err
 		}

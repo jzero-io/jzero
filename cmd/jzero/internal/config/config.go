@@ -32,16 +32,22 @@ var (
 	CfgEnvFile string
 )
 
+type HooksConfig struct {
+	Before []string `mapstructure:"before"`
+	After  []string `mapstructure:"after"`
+}
+
 type Config struct {
-	// global flags
-	Debug bool `mapstructure:"debug"`
-
-	// Register tpl val
-	RegisterTplVal []string `mapstructure:"register-tpl-val"`
-
+	// config file only
 	Hooks HooksConfig `mapstructure:"hooks"`
 
-	DebugSleepTime int `mapstructure:"debug-sleep-time"`
+	// root persistent flags
+	Debug bool `mapstructure:"debug"`
+
+	DebugSleepTime int      `mapstructure:"debug-sleep-time"`
+	RegisterTplVal []string `mapstructure:"register-tpl-val"`
+	Home           string   `mapstructure:"home"`
+	Style          string   `mapstructure:"style"`
 
 	// new command
 	New NewConfig `mapstructure:"new"`
@@ -70,7 +76,6 @@ type Config struct {
 
 type NewConfig struct {
 	Name                 string   `mapstructure:"name"`                  // 新建项目名称
-	Home                 string   `mapstructure:"home"`                  // 新建项目使用的模板文件目录
 	Module               string   `mapstructure:"module"`                // 新建的项目的 go module
 	Mono                 bool     `mapstructure:"mono"`                  // 是否是 mono 项目(即在一个mod项目之下, 但该项目本身无 go.mod 文件)
 	Serverless           bool     `mapstructure:"serverless"`            // 是否是 serverless 插件
@@ -82,7 +87,6 @@ type NewConfig struct {
 	RemoteAuthUsername   string   `mapstructure:"remote-auth-username"`  // 远程仓库的认证用户名
 	RemoteAuthPassword   string   `mapstructure:"remote-auth-password"`  // 远程仓库的认证密码
 	Frame                string   `mapstructure:"frame"`                 // 使用 jzero 内置的框架
-	Style                string   `mapstructure:"style"`                 // 代码风格
 	Branch               string   `mapstructure:"branch"`                // 使用远程模板仓库的某个分支
 	Local                string   `mapstructure:"local"`                 // 使用本地模板与 branch 对应
 	Features             []string `mapstructure:"features"`              // 新建项目使用哪些特性, 灵活构建模板
@@ -92,26 +96,22 @@ type NewConfig struct {
 }
 
 type GenConfig struct {
-	// Hooks
 	Hooks HooksConfig `mapstructure:"hooks"`
 
-	// gen global flags
-	Home string `mapstructure:"home"`
+	// gen persistent flags
+	// Style: code style
+	// Deprecated
+	Style string `mapstructure:"style"`
 
-	Style      string   `mapstructure:"style"`
 	Desc       []string `mapstructure:"desc"`
 	DescIgnore []string `mapstructure:"desc-ignore"`
 	GitChange  bool     `mapstructure:"git-change"`
 
-	// api flags
+	// flags mapping
 	Route2Code bool
 
-	// proto flags
-	ProtoInclude []string `mapstructure:"proto-include"`
-
-	// model flag
-	ModelDriver string `mapstructure:"model-driver"`
-
+	ProtoInclude            []string `mapstructure:"proto-include"`
+	ModelDriver             string   `mapstructure:"model-driver"`
 	ModelStrict             bool     `mapstructure:"model-strict"`
 	ModelIgnoreColumns      []string `mapstructure:"model-ignore-columns"`
 	ModelIgnoreColumnsTable []struct {
@@ -125,15 +125,14 @@ type GenConfig struct {
 	ModelCache           bool     `mapstructure:"model-cache"`
 	ModelCacheTable      []string `mapstructure:"model-cache-table"`
 	ModelCachePrefix     string   `mapstructure:"model-cache-prefix"`
+	MongoType            []string `mapstructure:"mongo-type"`
+	MongoCache           bool     `mapstructure:"mongo-cache"`
+	MongoCachePrefix     string   `mapstructure:"mongo-cache-prefix"`
+	MongoCacheType       []string `mapstructure:"mongo-cache-type"`
 
-	// mongo flags
-	MongoType []string `mapstructure:"mongo-type"`
+	// Gen Sub Command
+	Swagger GenSwaggerConfig `mapstructure:"swagger"`
 
-	MongoCache       bool     `mapstructure:"mongo-cache"`
-	MongoCachePrefix string   `mapstructure:"mongo-cache-prefix"`
-	MongoCacheType   []string `mapstructure:"mongo-cache-type"`
-
-	Swagger    GenSwaggerConfig    `mapstructure:"swagger"`
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`
 }
 
@@ -151,29 +150,18 @@ type GenSdkConfig struct {
 }
 
 type GenSwaggerConfig struct {
-	Desc       []string `mapstructure:"desc"`
-	DescIgnore []string `mapstructure:"desc-ignore"`
-	Output     string   `mapstructure:"output"`
-	Route2Code bool     `mapstructure:"route2code"`
-	Merge      bool     `mapstructure:"merge"`
+	Output     string `mapstructure:"output"`
+	Route2Code bool   `mapstructure:"route2code"`
+	Merge      bool   `mapstructure:"merge"`
 }
 
 type GenZrpcclientConfig struct {
-	Hooks      HooksConfig `mapstructure:"hooks"`
-	Desc       []string    `mapstructure:"desc"`
-	DescIgnore []string    `mapstructure:"desc-ignore"`
-	Output     string      `mapstructure:"output"`
-	GoVersion  string      `mapstructure:"goVersion"`
-	GoModule   string      `mapstructure:"goModule"`
-	GoPackage  string      `mapstructure:"goPackage"`
-	Mono       bool        `mapstructure:"mono"`
-}
-
-type GenDocsConfig struct {
-	Desc       []string `mapstructure:"desc"`
-	DescIgnore []string `mapstructure:"desc-ignore"`
-	Output     string   `mapstructure:"output"`
-	Format     string   `mapstructure:"format"`
+	Hooks     HooksConfig `mapstructure:"hooks"`
+	Output    string      `mapstructure:"output"`
+	GoVersion string      `mapstructure:"goVersion"`
+	GoModule  string      `mapstructure:"goModule"`
+	GoPackage string      `mapstructure:"goPackage"`
+	Mono      bool        `mapstructure:"mono"`
 }
 
 type TemplateConfig struct {
@@ -199,8 +187,6 @@ type UpgradeConfig struct {
 }
 
 type ServerlessConfig struct {
-	Home string `mapstructure:"home"` // 使用的模板文件目录
-
 	Delete ServerlessDeleteConfig `mapstructure:"delete"`
 }
 
@@ -238,11 +224,6 @@ type AddSqlConfig struct {
 }
 
 type AddSqlMigrationConfig struct{}
-
-type HooksConfig struct {
-	Before []string `mapstructure:"before"`
-	After  []string `mapstructure:"after"`
-}
 
 func (c *Config) HomeDir() string {
 	homeDir, _ := os.UserHomeDir()

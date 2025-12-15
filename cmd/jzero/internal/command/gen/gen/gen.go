@@ -26,11 +26,16 @@ import (
 
 func Run() error {
 	home, _ := os.UserHomeDir()
-	config.C.Gen.Home, _ = homedir.Expand(config.C.Gen.Home)
-	if !pathx.FileExists(config.C.Gen.Home) {
-		config.C.Gen.Home = filepath.Join(home, ".jzero", "templates", version.Version)
+	config.C.Home, _ = homedir.Expand(config.C.Home)
+	if !pathx.FileExists(config.C.Home) {
+		config.C.Home = filepath.Join(home, ".jzero", "templates", version.Version)
 	}
-	embeded.Home = config.C.Gen.Home
+	embeded.Home = config.C.Home
+
+	// 兼容之前的 gen style
+	if config.C.Gen.Style != "" && config.C.Gen.Style != "gozero" {
+		config.C.Style = config.C.Gen.Style
+	}
 
 	fmt.Printf("%s working dir %s\n", console.Green("Enter"), config.C.Wd())
 
@@ -50,7 +55,7 @@ func Run() error {
 	}
 
 	defer func() {
-		RemoveExtraFiles(config.C.Wd(), config.C.Gen.Style)
+		RemoveExtraFiles(config.C.Wd(), config.C.Style)
 	}()
 
 	jzeroModel := genmodel.JzeroModel{

@@ -1,2 +1,3 @@
-gen:
-    style: {{.Style}}
+{{ if ne .Style "gozero" }}style: {{.Style}}
+
+{{ end }}

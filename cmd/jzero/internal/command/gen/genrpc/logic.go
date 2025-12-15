@@ -40,7 +40,7 @@ func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Pr
 	var logicFiles []LogicFile
 	for _, service := range protoSpec.Service {
 		for _, rpc := range service.RPC {
-			namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, rpc.Name+"Logic")
+			namingFormat, err := format.FileNamingFormat(config.C.Style, rpc.Name+"Logic")
 			if err != nil {
 				return nil, err
 			}

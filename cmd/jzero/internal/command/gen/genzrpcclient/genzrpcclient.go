@@ -99,13 +99,13 @@ func (d DirContext) SetPbDir(pbDir, grpcDir string) {
 }
 
 func Generate(genModule bool) (err error) {
-	g := generator.NewGenerator(config.C.Gen.Style, false)
+	g := generator.NewGenerator(config.C.Style, false)
 
 	var files []string
 
 	switch {
-	case len(config.C.Gen.Zrpcclient.Desc) > 0:
-		for _, v := range config.C.Gen.Zrpcclient.Desc {
+	case len(config.C.Gen.Desc) > 0:
+		for _, v := range config.C.Gen.Desc {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".proto" {
 					files = append(files, v)
@@ -125,7 +125,7 @@ func Generate(genModule bool) (err error) {
 		}
 	}
 
-	for _, v := range config.C.Gen.Zrpcclient.DescIgnore {
+	for _, v := range config.C.Gen.DescIgnore {
 		if !osx.IsDir(v) {
 			if filepath.Ext(v) == ".proto" {
 				files = lo.Reject(files, func(item string, _ int) bool {
@@ -205,7 +205,7 @@ func Generate(genModule bool) (err error) {
 		}
 
 		err = g.GenCall(dirContext, parse, &conf.Config{
-			NamingFormat: config.C.Gen.Style,
+			NamingFormat: config.C.Style,
 		}, &generator.ZRpcContext{
 			Multiple:    true,
 			IsGenClient: true,
@@ -353,7 +353,7 @@ func generatePluginFiles(plugins []plugin.Plugin, goModule, output string) error
 		}
 
 		// 2. 为插件生成 typed 文件 (使用 go-zero 的生成器)
-		g := generator.NewGenerator(config.C.Gen.Style, false)
+		g := generator.NewGenerator(config.C.Style, false)
 
 		for _, fp := range pluginProtoFiles {
 			parser := rpcparser.NewDefaultProtoParser()
@@ -376,7 +376,7 @@ func generatePluginFiles(plugins []plugin.Plugin, goModule, output string) error
 
 			// 为整个 proto 文件生成客户端代码（类似主服务的处理方式）
 			err = g.GenCall(pluginDirContext, parse, &conf.Config{
-				NamingFormat: config.C.Gen.Style,
+				NamingFormat: config.C.Style,
 			}, &generator.ZRpcContext{
 				Multiple:    true,
 				IsGenClient: true,

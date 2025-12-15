@@ -104,7 +104,7 @@ func (jm *JzeroModel) Gen() error {
 	}
 
 	// 如果用户自定义了模板，则复制覆盖
-	customTemplatePath := filepath.Join(config.C.Gen.Home, "go-zero", "model")
+	customTemplatePath := filepath.Join(config.C.Home, "go-zero", "model")
 	if pathx.FileExists(customTemplatePath) {
 		err = filex.CopyDir(customTemplatePath, filepath.Join(tempDir, "model"))
 		if err != nil {
@@ -236,85 +236,11 @@ func (jm *JzeroModel) Gen() error {
 	eg.SetLimit(len(genCodeSqlFiles))
 	for _, f := range genCodeSqlFiles {
 		eg.Go(func() error {
-			fmt.Printf("%s sql file %s\n", console.Green("Using"), f)
 			tableParsers := genCodeSqlSpecMap[f]
-
 			for _, tp := range tableParsers {
 				genCodeTables = append(genCodeTables, tp.Name)
 			}
-
-			bf := strings.TrimSuffix(filepath.Base(f), ".sql")
-
-			var (
-				modelDir string
-				schema   = config.C.Gen.ModelSchema
-			)
-			if strings.Contains(bf, ".") {
-				split := strings.Split(bf, ".")
-				modelDir = filepath.Join("internal", "model", split[0], strings.ToLower(split[1]))
-			} else {
-				modelDir = filepath.Join("internal", "model", strings.ToLower(bf))
-			}
-
-			if config.C.Gen.ModelDriver == "pgx" {
-				if schema == "" {
-					schema = "public"
-				}
-			} else if config.C.Gen.ModelDriver == "mysql" {
-				if strings.Contains(bf, ".") {
-					schema = strings.Split(bf, ".")[0]
-				} else {
-					if schema == "" {
-						if len(config.C.Gen.ModelDatasourceUrl) >= 1 {
-							meta, err := dsn.ParseDSN("mysql", config.C.Gen.ModelDatasourceUrl[0])
-							if err != nil {
-								return err
-							}
-							schema = meta[dsn.Database]
-						}
-					}
-				}
-			}
-
-			if config.C.Gen.ModelDriver == "pgx" {
-				var datasourceUrl string
-				if strings.Contains(bf, ".") {
-					for _, v := range config.C.Gen.ModelDatasourceUrl {
-						meta, err := dsn.ParseDSN("pgx", v)
-						if err != nil {
-							return err
-						}
-						if meta[dsn.Database] == strings.Split(bf, ".")[0] {
-							datasourceUrl = v
-							break
-						}
-					}
-				} else {
-					datasourceUrl = config.C.Gen.ModelDatasourceUrl[0]
-				}
-
-				tableName := func() string {
-					if strings.Contains(bf, ".") {
-						return strings.Split(bf, ".")[1]
-					}
-					return bf
-				}()
-				cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", datasourceUrl, "--schema", schema, "-t", tableName, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(getIgnoreColumns(tableName), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
-				logx.Debug(cmd.String())
-				resp, err := cmd.CombinedOutput()
-				if err != nil {
-					return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
-				}
-			} else {
-				// For non-datasource mode, use SQL file
-				cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", schema, "--src", f, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
-				logx.Debug(cmd.String())
-				resp, err := cmd.CombinedOutput()
-				if err != nil {
-					return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
-				}
-			}
-			return nil
+			return generateModelFromSqlFile(f, goctlHome)
 		})
 	}
 
@@ -366,27 +292,6 @@ func getAllTables(conns []Conn, driver string) ([]string, error) {
 		}
 	}
 	return allTables, nil
-}
-
-type ShowCreateTableResult struct {
-	DDL string `db:"Create Table"`
-}
-
-func getTableDDL(sqlConn sqlx.SqlConn, driver, table string) (string, error) {
-	if driver == "pgx" {
-		return "-- todo", nil
-	}
-
-	var showCreateTableResult ShowCreateTableResult
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-
-	err := sqlConn.QueryRowCtx(ctx, &showCreateTableResult, "show create table "+table)
-	if err != nil {
-		return "", err
-	}
-	return showCreateTableResult.DDL, nil
 }
 
 func getIsCacheTable(t string) bool {
@@ -455,7 +360,7 @@ func generateModelFromDatasource(tableName, goctlHome string) error {
 			datasourceUrl = config.C.Gen.ModelDatasourceUrl[0]
 		}
 
-		cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", datasourceUrl, "--schema", schema, "-t", bf, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+		cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", datasourceUrl, "--schema", schema, "-t", bf, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 		logx.Debug(cmd.String())
 		resp, err := cmd.CombinedOutput()
 		if err != nil {
@@ -478,7 +383,7 @@ func generateModelFromDatasource(tableName, goctlHome string) error {
 			datasourceUrl = config.C.Gen.ModelDatasourceUrl[0]
 		}
 
-		cmd := exec.Command("goctl", "model", "mysql", "datasource", "--url", datasourceUrl, "-t", bf, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Gen.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+		cmd := exec.Command("goctl", "model", "mysql", "datasource", "--url", datasourceUrl, "-t", bf, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
 		logx.Debug(cmd.String())
 		resp, err := cmd.CombinedOutput()
 		if err != nil {
@@ -486,6 +391,51 @@ func generateModelFromDatasource(tableName, goctlHome string) error {
 		}
 	}
 
+	return nil
+}
+
+func generateModelFromSqlFile(sqlFile, goctlHome string) error {
+	fmt.Printf("%s sql file %s\n", console.Green("Using"), sqlFile)
+
+	bf := strings.TrimSuffix(filepath.Base(sqlFile), ".sql")
+
+	var (
+		modelDir string
+		schema   = config.C.Gen.ModelSchema
+	)
+	if strings.Contains(bf, ".") {
+		split := strings.Split(bf, ".")
+		modelDir = filepath.Join("internal", "model", split[0], strings.ToLower(split[1]))
+	} else {
+		modelDir = filepath.Join("internal", "model", strings.ToLower(bf))
+	}
+
+	if config.C.Gen.ModelDriver == "pgx" {
+		if schema == "" {
+			schema = "public"
+		}
+	} else if config.C.Gen.ModelDriver == "mysql" {
+		if strings.Contains(bf, ".") {
+			schema = strings.Split(bf, ".")[0]
+		} else {
+			if schema == "" {
+				if len(config.C.Gen.ModelDatasourceUrl) >= 1 {
+					meta, err := dsn.ParseDSN("mysql", config.C.Gen.ModelDatasourceUrl[0])
+					if err != nil {
+						return err
+					}
+					schema = meta[dsn.Database]
+				}
+			}
+		}
+	}
+
+	cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", schema, "--src", sqlFile, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
+	logx.Debug(cmd.String())
+	resp, err := cmd.CombinedOutput()
+	if err != nil {
+		return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
+	}
 	return nil
 }
 

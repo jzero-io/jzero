@@ -24,7 +24,7 @@ var serverlessBuildCmd = &cobra.Command{
 	Short: "jzero serverless build",
 	Long:  `jzero serverless build.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		embeded.Home = config.C.Serverless.Home
+		embeded.Home = config.C.Home
 		return serverlessbuild.Run()
 	},
 }
@@ -34,7 +34,7 @@ var serverlessDeleteCmd = &cobra.Command{
 	Short: "jzero serverless delete",
 	Long:  `jzero serverless delete.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		embeded.Home = config.C.Serverless.Home
+		embeded.Home = config.C.Home
 		return serverlessdelete.Run()
 	},
 }
@@ -43,7 +43,6 @@ func GetCommand() *cobra.Command {
 	serverlessCmd.AddCommand(serverlessBuildCmd)
 	serverlessCmd.AddCommand(serverlessDeleteCmd)
 
-	serverlessCmd.PersistentFlags().StringP("home", "", ".template", "set templates path")
 	serverlessDeleteCmd.Flags().StringSliceP("plugin", "p", nil, "plugin name")
 
 	return serverlessCmd

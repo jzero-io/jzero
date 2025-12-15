@@ -42,6 +42,8 @@ jzero check
 # 一键创建项目
 jzero new your_project
 cd your_project
+# 下载依赖
+go mod tidy
 # 启动服务端程序
 go run main.go server
 # 访问 swagger ui
@@ -54,6 +56,8 @@ http://localhost:8001/swagger
 # 一键创建项目
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project
 cd your_project 
+# 下载依赖
+go mod tidy
 # 启动服务端程序
 go run main.go server
 # 访问 swagger ui

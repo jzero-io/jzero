@@ -42,7 +42,7 @@ func (ja *JzeroApi) getAllHandlerFiles(apiFilepath string, apiSpec *spec.ApiSpec
 	for _, group := range apiSpec.Service.Groups {
 		for _, route := range group.Routes {
 			formatContent := strings.TrimSuffix(route.Handler, "Handler") + "Handler"
-			namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, formatContent)
+			namingFormat, err := format.FileNamingFormat(config.C.Style, formatContent)
 			if err != nil {
 				return nil, err
 			}
@@ -170,7 +170,7 @@ func (ja *JzeroApi) removeHandlerSuffix(f *ast.File) error {
 }
 
 func (ja *JzeroApi) compactHandler(f *dst.File, fset *token.FileSet, file HandlerFile) error {
-	namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, filepath.Base(file.Group))
+	namingFormat, err := format.FileNamingFormat(config.C.Style, filepath.Base(file.Group))
 	if err != nil {
 		return err
 	}

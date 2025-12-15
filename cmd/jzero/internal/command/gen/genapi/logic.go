@@ -38,7 +38,7 @@ func (ja *JzeroApi) getAllLogicFiles(apiFilepath string, apiSpec *spec.ApiSpec) 
 	var logicFiles []LogicFile
 	for _, group := range apiSpec.Service.Groups {
 		for _, route := range group.Routes {
-			namingFormat, err := format.FileNamingFormat(config.C.Gen.Style, strings.TrimSuffix(route.Handler, "Handler")+"Logic")
+			namingFormat, err := format.FileNamingFormat(config.C.Style, strings.TrimSuffix(route.Handler, "Handler")+"Logic")
 			if err != nil {
 				return nil, err
 			}

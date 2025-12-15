@@ -30,7 +30,6 @@ import (
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/check"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/gen"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
@@ -114,24 +113,13 @@ var newCmd = &cobra.Command{
 
 		var base string
 		switch {
-		// 指定特定路径作为模板
-		case config.C.New.Home != "":
-			embeded.Home = config.C.New.Home
-			if config.C.New.Frame != "" {
-				base = filepath.Join("frame", config.C.New.Frame, "app")
-			} else {
-				base = filepath.Join("app")
-				if !pathx.FileExists(base) && pathx.FileExists(filepath.Join(embeded.Home, "frame")) {
-					base = filepath.Join("frame", "api", "app")
-				}
-			}
+		// 使用内置模板
+		case config.C.New.Frame != "":
+			base = filepath.Join("frame", config.C.New.Frame, "app")
 		// 指定本地路径 ~/.jzero/templates/local 下的某文件夹作为模板
 		case config.C.New.Local != "":
 			embeded.Home = filepath.Join(home, ".jzero", "templates", "local", config.C.New.Local)
 			base = filepath.Join("app")
-		// 使用内置模板
-		case config.C.New.Frame != "":
-			base = filepath.Join("frame", config.C.New.Frame, "app")
 		// 使用远程仓库模板
 		case config.C.New.Remote != "" && config.C.New.Branch != "":
 			fp := filepath.Join(home, ".jzero", "templates", "remote", config.C.New.Branch)
@@ -172,16 +160,23 @@ var newCmd = &cobra.Command{
 			fmt.Println(console.Green("Done"))
 			embeded.Home = fp
 			base = filepath.Join("app")
+		// 指定特定路径作为模板
+		case config.C.Home != "":
+			embeded.Home = config.C.Home
+			if config.C.New.Frame != "" {
+				base = filepath.Join("frame", config.C.New.Frame, "app")
+			} else {
+				base = filepath.Join("app")
+				if !pathx.FileExists(base) && pathx.FileExists(filepath.Join(embeded.Home, "frame")) {
+					base = filepath.Join("frame", "api", "app")
+				}
+			}
 		default:
 			// 默认使用 api 模板
 			config.C.New.Frame = "api"
 			base = filepath.Join("frame", "api", "app")
 		}
 
-		// 没有设置 home，则使用内置模板持久化的默认路径 ~/.jzero/templates/$version
-		if !pathx.FileExists(embeded.Home) {
-			embeded.Home = filepath.Join(home, ".jzero", "templates", version.Version)
-		}
 		if err := Run(app, base); err != nil {
 			return err
 		}
@@ -223,11 +218,11 @@ var newCmd = &cobra.Command{
 		}
 
 		// for gen persistent flags
-		if config.C.Gen.Style == "" {
-			config.C.Gen.Style = "gozero"
+		if config.C.Style == "" {
+			config.C.Style = "gozero"
 		}
-		if config.C.Gen.Home == "" {
-			config.C.Gen.Home = filepath.Join(config.C.Wd(), ".template")
+		if config.C.Home == "" {
+			config.C.Home = filepath.Join(config.C.Wd(), ".template")
 		}
 
 		// run gen before hooks
@@ -263,7 +258,7 @@ func Run(appName, base string) error {
 	} else {
 		return err
 	}
-	templateData["Style"] = config.C.New.Style
+	templateData["Style"] = config.C.Style
 	templateData["Serverless"] = config.C.New.Serverless
 
 	jn := JzeroNew{
@@ -402,9 +397,7 @@ func GetCommand() *cobra.Command {
 	newCmd.Flags().StringP("name", "", "", "set project name")
 	newCmd.Flags().StringP("module", "m", "", "set go module")
 	newCmd.Flags().StringP("output", "o", "", "set output dir with project name")
-	newCmd.Flags().StringP("home", "", "", "use the specified template.")
 	newCmd.Flags().StringP("frame", "", "", "set frame")
-	newCmd.Flags().StringP("style", "", "gozero", "set style")
 	newCmd.Flags().StringP("remote", "r", "https://github.com/jzero-io/templates", "remote templates repo")
 	newCmd.Flags().IntP("remote-timeout", "", 30, "remote templates repo timeout")
 	newCmd.Flags().StringP("remote-auth-username", "", "", "remote templates repo auth username")

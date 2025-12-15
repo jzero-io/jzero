@@ -159,7 +159,7 @@ func (jr *JzeroRpc) Gen() error {
 	// }
 
 	// 如果用户自定义了模板，则复制覆盖
-	customTemplatePath := filepath.Join(config.C.Gen.Home, "go-zero", "rpc")
+	customTemplatePath := filepath.Join(config.C.Home, "go-zero", "rpc")
 	if pathx.FileExists(customTemplatePath) {
 		err = filex.CopyDir(customTemplatePath, filepath.Join(tempDir, "rpc"))
 		if err != nil {
@@ -192,7 +192,7 @@ func (jr *JzeroRpc) Gen() error {
 				filepath.Join("internal"),
 				zrpcOut,
 				goctlHome,
-				config.C.Gen.Style)
+				config.C.Style)
 
 			if len(config.C.Gen.ProtoInclude) > 0 {
 				command += fmt.Sprintf("-I%s ", strings.Join(config.C.Gen.ProtoInclude, " -I"))

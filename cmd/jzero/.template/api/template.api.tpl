@@ -9,7 +9,7 @@ type CreateRequest {}
 type CreateResponse {}
 
 @server (
-    prefix: /api
+    prefix: /api/{{ .Group }}
     group:  {{ .Group }}
 )
 service {{ .Service }} {

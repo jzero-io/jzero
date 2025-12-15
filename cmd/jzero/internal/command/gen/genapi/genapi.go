@@ -193,7 +193,7 @@ func (ja *JzeroApi) generateApiCode() error {
 	}
 
 	// 如果用户自定义了模板，则复制覆盖
-	customTemplatePath := filepath.Join(config.C.Gen.Home, "go-zero", "api")
+	customTemplatePath := filepath.Join(config.C.Home, "go-zero", "api")
 	if pathx.FileExists(customTemplatePath) {
 		err = filex.CopyDir(customTemplatePath, filepath.Join(tempDir, "api"))
 		if err != nil {
@@ -253,7 +253,7 @@ func (ja *JzeroApi) generateApiCode() error {
 				return errors.Wrapf(err, "format api file: %s", v)
 			}
 
-			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, config.C.Gen.Style)
+			command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", v, dir, goctlHome, config.C.Style)
 			logx.Debugf("command: %s", command)
 			if _, err := execx.Run(command, config.C.Wd()); err != nil {
 				return errors.Wrapf(err, "api file: %s", v)
