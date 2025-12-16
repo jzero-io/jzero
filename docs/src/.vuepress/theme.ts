@@ -53,9 +53,9 @@ export default hopeTheme({
   // 在这里配置主题提供的插件
   plugins: {
     blog: {
-      category: "category",
-      tag: "tag",
-      star: "star",
+      // category: "category",
+      // tag: "tag",
+      // star: "star",
     },
     comment: {
       provider: "Giscus",
@@ -75,30 +75,30 @@ export default hopeTheme({
       attrs: true,
       codetabs: true,
       component: true,
-      demo: true,
+      // demo: true,
       figure: true,
       imgLazyload: true,
       imgSize: true,
       include: true,
       mark: true,
-      stylize: [
-        {
-          matcher: "Recommended",
-          replacer: ({ tag }) => {
-            if (tag === "em")
-              return {
-                tag: "Badge",
-                attrs: { type: "tip" },
-                content: "Recommended",
-              };
-          },
-        },
-      ],
-      sub: true,
-      sup: true,
-      tabs: true,
-      tasklist: true,
-      vPre: true,
+      // stylize: [
+      //   {
+      //     matcher: "Recommended",
+      //     replacer: ({ tag }) => {
+      //       if (tag === "em")
+      //         return {
+      //           tag: "Badge",
+      //           attrs: { type: "tip" },
+      //           content: "Recommended",
+      //         };
+      //     },
+      //   },
+      // ],
+      // sub: true,
+      // sup: true,
+      // tabs: true,
+      // tasklist: true,
+      // vPre: true,
     },
   },
 });

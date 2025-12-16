@@ -3,9 +3,6 @@ title: 欢迎贡献👏
 icon: ooui:user-contributions-ltr
 star: true
 order: 30
-category: contribute
-tag:
-  - contribute
 ---
 
 欢迎参与 jzero 的开发以及维护, 这是一件非常有意义的事情, 让我们一起让 jzero 变得更好.

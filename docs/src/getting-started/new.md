@@ -113,7 +113,7 @@ http://localhost:8001/swagger
 ```
 :::
 
-### 可选特性 model/redis/model+redis
+## 可选特性 model/redis/model+redis
 
 基于可选特性, 提供了一整套使用 model/redis 的解决方案
 

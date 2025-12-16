@@ -21,6 +21,22 @@ export default sidebar({
         expanded: true,
     },
     {
+        text: "组件",
+        icon: "iconamoon:component-bold",
+        prefix: "component/",
+        children: "structure",
+        collapsible: true,
+        expanded: true,
+    },
+    {
+        text: "生态",
+        icon: "material-icon-theme:pm2-ecosystem",
+        prefix: "ecosystem/",
+        children: "structure",
+        collapsible: true,
+        expanded: true,
+    },
+    {
         text: "社区",
         icon: "iconoir:community",
         prefix: "community/",

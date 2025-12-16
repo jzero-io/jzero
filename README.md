@@ -30,6 +30,7 @@
 * **生态兼容**: 不修改 go-zero 和 go-zero/goctl, 保持生态兼容, 同时解决已有的痛点问题并扩展新的功能
 * **团队开发**: 通过模块**分层**, **插件**设计, 团队开发友好
 * **接口设计**: 不依赖特定数据库/缓存/配置中心等基础设施, 根据实际需求自由选择
+
 更多详情请参阅：https://docs.jzero.io
 
 ## 快速开始
@@ -66,10 +67,12 @@ http://localhost:8001/swagger
 
 更多示例代码请参阅: https://github.com/jzero-io/examples
 
-## 相关项目
+## 生态
 
 * jzero-intellij(jzero 的 goland 插件): https://github.com/jzero-io/jzero-intellij
 * jzero-admin(基于 jzero 的后台管理系统): https://github.com/jzero-io/jzero-admin
+
+更多生态请查阅: [https://docs.jzero.io/ecosystem](https://docs.jzero.io/ecosystem)
 
 ## 贡献者
 
