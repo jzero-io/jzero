@@ -43,10 +43,14 @@ func (jm *JzeroMongo) Gen() error {
 	}
 	logx.Debugf("goctl_home = %s", goctlHome)
 
-	fmt.Printf("%s to generate mongo model code from types.\n", console.Green("Start"))
+	if !config.C.Quiet {
+		fmt.Printf("%s to generate mongo model code from types.\n", console.Green("Start"))
+	}
 
 	for _, mongoType := range config.C.Gen.MongoType {
-		fmt.Printf("%s mongo type %s\n", console.Green("Using"), mongoType)
+		if !config.C.Quiet {
+			fmt.Printf("%s mongo type %s\n", console.Green("Using"), mongoType)
+		}
 
 		// Support MutiModel with dot notation like "ntls_log.user"
 		var typeName string
@@ -113,7 +117,9 @@ func (jm *JzeroMongo) Gen() error {
 		return err
 	}
 
-	fmt.Println(console.Green("Done"))
+	if !config.C.Quiet {
+		fmt.Println(console.Green("Done"))
+	}
 
 	return nil
 }

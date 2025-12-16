@@ -44,6 +44,7 @@ type Config struct {
 	// root persistent flags
 	Debug bool `mapstructure:"debug"`
 
+	Quiet          bool     `mapstructure:"quiet"`
 	DebugSleepTime int      `mapstructure:"debug-sleep-time"`
 	RegisterTplVal []string `mapstructure:"register-tpl-val"`
 	Home           string   `mapstructure:"home"`

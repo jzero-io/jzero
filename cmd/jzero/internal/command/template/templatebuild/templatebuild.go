@@ -40,7 +40,9 @@ func Run(tc config.TemplateConfig) error {
 	if pathx.FileExists(tc.Build.Output) {
 		return errors.New("template build output already exists")
 	}
-	fmt.Printf("%s your project to templates into '%s', please wait...\n", console.Green("Building"), tc.Build.Output)
+	if !config.C.Quiet {
+		fmt.Printf("%s your project to templates into '%s', please wait...\n", console.Green("Building"), tc.Build.Output)
+	}
 	tc.Build.Output = filepath.Join(tc.Build.Output, "app")
 	wd, _ := os.Getwd()
 
@@ -58,7 +60,9 @@ func Run(tc config.TemplateConfig) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(console.Green("Done"))
+	if !config.C.Quiet {
+		fmt.Println(console.Green("Done"))
+	}
 	return nil
 }
 

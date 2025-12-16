@@ -14,7 +14,7 @@ func TestGenRoutesString(t *testing.T) {
 	parse, err := parser.Parse(filepath.Join("testdata", "example.api"), nil)
 	assert.Nil(t, err)
 
-	routesString, err := GenRoutesString("example", &config.Config{
+	routesString, err := GenRoutesString("example", "example", &config.Config{
 		NamingFormat: "gozero",
 	}, parse)
 	assert.NotNil(t, routesString)

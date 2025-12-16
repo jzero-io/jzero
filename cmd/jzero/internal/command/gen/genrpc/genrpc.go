@@ -142,7 +142,9 @@ func (jr *JzeroRpc) Gen() error {
 		return nil
 	}
 
-	fmt.Printf("%s to generate rpc code from proto files\n", console.Green("Start"))
+	if config.C.Quiet {
+		fmt.Printf("%s to generate rpc code from proto files\n", console.Green("Start"))
+	}
 
 	// 处理模板
 	var goctlHome string
@@ -182,7 +184,9 @@ func (jr *JzeroRpc) Gen() error {
 		}
 
 		if lo.Contains(genCodeProtoFiles, v) {
-			fmt.Printf("%s proto file %s\n", console.Green("Using"), v)
+			if !config.C.Quiet {
+				fmt.Printf("%s proto file %s\n", console.Green("Using"), v)
+			}
 			zrpcOut := "."
 			command := fmt.Sprintf("goctl rpc protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s",
 				v,
@@ -266,7 +270,9 @@ func (jr *JzeroRpc) Gen() error {
 	}
 
 	if len(jr.GenCodeProtoFiles) > 0 {
-		fmt.Println(console.Green("Done"))
+		if !config.C.Quiet {
+			fmt.Println(console.Green("Done"))
+		}
 	}
 
 	if pathx.FileExists(config.C.ProtoDir()) {

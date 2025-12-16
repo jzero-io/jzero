@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -16,6 +17,8 @@ import (
 func Run(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error {
 	wd, _ := os.Getwd()
 
+	quiet, _ := strconv.ParseBool(cmd.Flags().Lookup("quiet").Value.String())
+
 	if os.Getenv("JZERO_HOOK_TRIGGERED") == "true" {
 		return nil
 	}
@@ -24,19 +27,21 @@ func Run(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error
 		return nil
 	}
 
-	if len(hooks) > 0 {
+	if len(hooks) > 0 && !quiet {
 		fmt.Printf("%s\n", console.Green(fmt.Sprintf("Start %s %s hooks", hookAction, hooksName)))
 	}
 
 	for _, v := range hooks {
-		fmt.Printf("%s command %s\n", console.Green("Run"), v)
+		if !quiet {
+			fmt.Printf("%s command %s\n", console.Green("Run"), v)
+		}
 		err := execx.Run(v, wd, "JZERO_HOOK_TRIGGERED=true")
 		if err != nil {
 			return err
 		}
 	}
 
-	if len(hooks) > 0 {
+	if len(hooks) > 0 && !quiet {
 		fmt.Printf("%s\n", console.Green("Done"))
 	}
 

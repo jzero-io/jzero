@@ -145,7 +145,9 @@ func (ja *JzeroApi) Gen() error {
 		return nil
 	}
 
-	fmt.Printf("%s to generate api code from api files\n", console.Green("Start"))
+	if !config.C.Quiet {
+		fmt.Printf("%s to generate api code from api files\n", console.Green("Start"))
+	}
 
 	err = ja.generateApiCode()
 	if err != nil {
@@ -158,7 +160,9 @@ func (ja *JzeroApi) Gen() error {
 		return err
 	}
 
-	fmt.Println(console.Green("Done"))
+	if !config.C.Quiet {
+		fmt.Println(console.Green("Done"))
+	}
 	return nil
 }
 
@@ -247,7 +251,9 @@ func (ja *JzeroApi) generateApiCode() error {
 			}
 
 			dir := "."
-			fmt.Printf("%s api file %s\n", console.Green("Using"), v)
+			if !config.C.Quiet {
+				fmt.Printf("%s api file %s\n", console.Green("Using"), v)
+			}
 
 			if err = format.ApiFormatByPath(v, false); err != nil {
 				return errors.Wrapf(err, "format api file: %s", v)
@@ -302,7 +308,9 @@ func (ja *JzeroApi) generateApiCode() error {
 	}
 
 	if config.C.Gen.Route2Code {
-		fmt.Printf("%s to generate internal/handler/route2code.go\n", console.Green("Start"))
+		if !config.C.Quiet {
+			fmt.Printf("%s to generate internal/handler/route2code.go\n", console.Green("Start"))
+		}
 		if route2CodeBytes, err := ja.genRoute2Code(); err != nil {
 			return err
 		} else {
@@ -310,7 +318,9 @@ func (ja *JzeroApi) generateApiCode() error {
 				return err
 			}
 		}
-		fmt.Printf("%s", console.Green("Done\n"))
+		if !config.C.Quiet {
+			fmt.Printf("%s", console.Green("Done\n"))
+		}
 	}
 	return nil
 }

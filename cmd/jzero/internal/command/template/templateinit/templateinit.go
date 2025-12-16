@@ -19,7 +19,9 @@ func Run() error {
 	if config.C.Template.Init.Remote != "" && config.C.Template.Init.Branch != "" {
 		target := filepath.Join(config.C.Template.Init.Output, config.C.Template.Init.Branch)
 		_ = os.MkdirAll(target, 0o755)
-		fmt.Printf("%s templates into '%s', please wait...\n", console.Green("Cloning"), target)
+		if !config.C.Quiet {
+			fmt.Printf("%s templates into '%s', please wait...\n", console.Green("Cloning"), target)
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
@@ -33,14 +35,20 @@ func Run() error {
 			return err
 		}
 		_ = os.RemoveAll(filepath.Join(target, ".git"))
-		fmt.Println(console.Green("Done"))
+		if !config.C.Quiet {
+			fmt.Println(console.Green("Done"))
+		}
 		return nil
 	}
-	fmt.Printf("%s templates into '%s', please wait...\n", console.Green("Initializing embedded"), config.C.Template.Init.Output)
+	if !config.C.Quiet {
+		fmt.Printf("%s templates into '%s', please wait...\n", console.Green("Initializing embedded"), config.C.Template.Init.Output)
+	}
 	err := embeded.WriteTemplateDir("", config.C.Template.Init.Output)
 	if err != nil {
 		return err
 	}
-	fmt.Println(console.Green("Done"))
+	if !config.C.Quiet {
+		fmt.Println(console.Green("Done"))
+	}
 	return nil
 }

@@ -82,7 +82,9 @@ func (jm *JzeroModel) Gen() error {
 			return errors.Errorf("model driver %s not support", config.C.Gen.ModelDriver)
 		}
 
-		fmt.Printf("%s to generate model from %s\n", console.Green("Start"), config.C.Gen.ModelDatasourceUrl)
+		if !config.C.Quiet {
+			fmt.Printf("%s to generate model from %s\n", console.Green("Start"), config.C.Gen.ModelDatasourceUrl)
+		}
 	}
 
 	if !pathx.FileExists(config.C.SqlDir()) && !config.C.Gen.ModelDatasource {
@@ -230,7 +232,9 @@ func (jm *JzeroModel) Gen() error {
 		return nil
 	}
 
-	fmt.Printf("%s to generate model code from sql files\n", console.Green("Start"))
+	if !config.C.Quiet {
+		fmt.Printf("%s to generate model code from sql files\n", console.Green("Start"))
+	}
 
 	var eg errgroup.Group
 	eg.SetLimit(len(genCodeSqlFiles))
@@ -253,7 +257,9 @@ func (jm *JzeroModel) Gen() error {
 		return err
 	}
 
-	fmt.Println(console.Green("Done"))
+	if !config.C.Quiet {
+		fmt.Println(console.Green("Done"))
+	}
 
 	return nil
 }
@@ -321,7 +327,9 @@ func getIgnoreColumns(tableName string) []string {
 }
 
 func generateModelFromDatasource(tableName, goctlHome string) error {
-	fmt.Printf("%s table %s from datasource\n", console.Green("Generating"), tableName)
+	if !config.C.Quiet {
+		fmt.Printf("%s table %s from datasource\n", console.Green("Generating"), tableName)
+	}
 
 	bf := tableName
 	if strings.Contains(tableName, ".") {
@@ -395,7 +403,9 @@ func generateModelFromDatasource(tableName, goctlHome string) error {
 }
 
 func generateModelFromSqlFile(sqlFile, goctlHome string) error {
-	fmt.Printf("%s sql file %s\n", console.Green("Using"), sqlFile)
+	if !config.C.Quiet {
+		fmt.Printf("%s sql file %s\n", console.Green("Using"), sqlFile)
+	}
 
 	bf := strings.TrimSuffix(filepath.Base(sqlFile), ".sql")
 

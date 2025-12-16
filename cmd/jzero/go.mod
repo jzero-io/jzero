@@ -16,7 +16,6 @@ require (
 	github.com/jzero-io/desc v1.1.0
 	github.com/jzero-io/go_fmt v0.0.0-20250905015347-1a45352494b7
 	github.com/mark3labs/mcp-go v0.43.0
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/rinchsan/gosimports v0.3.8

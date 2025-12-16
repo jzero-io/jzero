@@ -6,7 +6,6 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -16,28 +15,21 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genmodel"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genmongo"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genrpc"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 )
 
 func Run() error {
-	home, _ := os.UserHomeDir()
-	config.C.Home, _ = homedir.Expand(config.C.Home)
-	if !pathx.FileExists(config.C.Home) {
-		config.C.Home = filepath.Join(home, ".jzero", "templates", version.Version)
-	}
-	embeded.Home = config.C.Home
-
 	// 兼容之前的 gen style
 	if config.C.Gen.Style != "" && config.C.Gen.Style != "gozero" {
 		config.C.Style = config.C.Gen.Style
 	}
 
-	fmt.Printf("%s working dir %s\n", console.Green("Enter"), config.C.Wd())
+	if !config.C.Quiet {
+		fmt.Printf("%s working dir %s\n", console.Green("Enter"), config.C.Wd())
+	}
 
 	var module string
 	moduleStruct, err := mod.GetGoMod(config.C.Wd())

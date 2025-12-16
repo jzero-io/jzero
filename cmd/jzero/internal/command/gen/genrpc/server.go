@@ -28,7 +28,9 @@ type ServerFile struct {
 }
 
 func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServers RegisterLines) error {
-	fmt.Printf("%s to generate internal/server/server.go\n", console.Green("Start"))
+	if !config.C.Quiet {
+		fmt.Printf("%s to generate internal/server/server.go\n", console.Green("Start"))
+	}
 	serverFile, err := templatex.ParseTemplate(filepath.Join("rpc", "server.go.tpl"), map[string]any{
 		"Module":          jr.Module,
 		"ServerImports":   serverImports,
@@ -42,7 +44,9 @@ func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServ
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%s", console.Green("Done\n"))
+	if !config.C.Quiet {
+		fmt.Printf("%s", console.Green("Done\n"))
+	}
 	return nil
 }
 

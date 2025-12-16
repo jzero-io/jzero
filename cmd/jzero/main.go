@@ -125,6 +125,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&config.CfgFile, "config", "f", ".jzero.yaml", "set config file")
 	rootCmd.PersistentFlags().StringVarP(&config.CfgEnvFile, "config-env", "", ".jzero.env.yaml", "set config env file")
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "debug mode")
+	rootCmd.PersistentFlags().BoolP("quiet", "", false, "quiet mode")
 	rootCmd.PersistentFlags().IntP("debug-sleep-time", "", 0, "debug sleep time")
 	rootCmd.Flags().BoolP("version", "v", false, "show version")
 	rootCmd.PersistentFlags().StringVarP(&WorkingDir, "working-dir", "w", "", "set working directory")
