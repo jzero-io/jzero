@@ -2,7 +2,6 @@ package condition
 
 import (
 	"github.com/eddieowens/opts"
-	"github.com/huandu/go-sqlbuilder"
 )
 
 type UpdateFieldOperator string
@@ -134,34 +133,4 @@ func (u UpdateFieldChain) Build() map[string]any {
 		fieldMap[string(field.field)] = field
 	}
 	return fieldMap
-}
-
-func SetUpdateFields(builder sqlbuilder.UpdateBuilder, data map[string]any) sqlbuilder.UpdateBuilder {
-	return SetUpdateFieldsWithFlavor(sqlbuilder.DefaultFlavor, builder, data)
-}
-
-func SetUpdateFieldsWithFlavor(flavor sqlbuilder.Flavor, builder sqlbuilder.UpdateBuilder, data map[string]any) sqlbuilder.UpdateBuilder {
-	for key, value := range data {
-		if uf, ok := value.(UpdateField); ok {
-			switch uf.Operator {
-			case Assign:
-				builder.SetMore(builder.Assign(QuoteWithFlavor(flavor, key), uf.Value))
-			case Incr:
-				builder.SetMore(builder.Incr(QuoteWithFlavor(flavor, key)))
-			case Decr:
-				builder.SetMore(builder.Decr(QuoteWithFlavor(flavor, key)))
-			case Div:
-				builder.SetMore(builder.Div(QuoteWithFlavor(flavor, key), uf.Value))
-			case Add:
-				builder.SetMore(builder.Add(QuoteWithFlavor(flavor, key), uf.Value))
-			case Mul:
-				builder.SetMore(builder.Mul(QuoteWithFlavor(flavor, key), uf.Value))
-			case Sub:
-				builder.SetMore(builder.Sub(QuoteWithFlavor(flavor, key), uf.Value))
-			}
-		} else {
-			builder.SetMore(builder.Assign(QuoteWithFlavor(flavor, key), value))
-		}
-	}
-	return builder
 }

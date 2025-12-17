@@ -171,11 +171,11 @@ func whereClause(flavor sqlbuilder.Flavor, conditions ...Condition) *sqlbuilder.
 	return clause
 }
 
-func Select(builder sqlbuilder.SelectBuilder, conditions ...Condition) sqlbuilder.SelectBuilder {
-	return SelectWithFlavor(sqlbuilder.DefaultFlavor, builder, conditions...)
+func BuildSelect(builder *sqlbuilder.SelectBuilder, conditions ...Condition) (string, []any) {
+	return BuildSelectWithFlavor(sqlbuilder.DefaultFlavor, builder, conditions...)
 }
 
-func SelectWithFlavor(flavor sqlbuilder.Flavor, builder sqlbuilder.SelectBuilder, conditions ...Condition) sqlbuilder.SelectBuilder {
+func BuildSelectWithFlavor(flavor sqlbuilder.Flavor, builder *sqlbuilder.SelectBuilder, conditions ...Condition) (string, []any) {
 	builder.SetFlavor(flavor)
 	clause := whereClause(flavor, conditions...)
 	for _, c := range conditions {
@@ -211,16 +211,16 @@ func SelectWithFlavor(flavor sqlbuilder.Flavor, builder sqlbuilder.SelectBuilder
 		}
 	}
 	if clause != nil {
-		builder = *builder.AddWhereClause(clause)
+		builder = builder.AddWhereClause(clause)
 	}
-	return builder
+	return builder.Build()
 }
 
-func Update(builder sqlbuilder.UpdateBuilder, conditions ...Condition) sqlbuilder.UpdateBuilder {
-	return UpdateWithFlavor(sqlbuilder.DefaultFlavor, builder, conditions...)
+func BuildUpdate(builder *sqlbuilder.UpdateBuilder, data map[string]any, conditions ...Condition) (string, []any) {
+	return BuildUpdateWithFlavor(sqlbuilder.DefaultFlavor, builder, data, conditions...)
 }
 
-func UpdateWithFlavor(flavor sqlbuilder.Flavor, builder sqlbuilder.UpdateBuilder, conditions ...Condition) sqlbuilder.UpdateBuilder {
+func BuildUpdateWithFlavor(flavor sqlbuilder.Flavor, builder *sqlbuilder.UpdateBuilder, data map[string]any, conditions ...Condition) (string, []any) {
 	builder.SetFlavor(flavor)
 	clause := whereClause(flavor, conditions...)
 	for _, c := range conditions {
@@ -245,16 +245,40 @@ func UpdateWithFlavor(flavor sqlbuilder.Flavor, builder sqlbuilder.UpdateBuilder
 		}
 	}
 	if clause != nil {
-		builder = *builder.AddWhereClause(clause)
+		builder = builder.AddWhereClause(clause)
 	}
-	return builder
+
+	for key, value := range data {
+		if uf, ok := value.(UpdateField); ok {
+			switch uf.Operator {
+			case Assign:
+				builder.SetMore(builder.Assign(QuoteWithFlavor(flavor, key), uf.Value))
+			case Incr:
+				builder.SetMore(builder.Incr(QuoteWithFlavor(flavor, key)))
+			case Decr:
+				builder.SetMore(builder.Decr(QuoteWithFlavor(flavor, key)))
+			case Div:
+				builder.SetMore(builder.Div(QuoteWithFlavor(flavor, key), uf.Value))
+			case Add:
+				builder.SetMore(builder.Add(QuoteWithFlavor(flavor, key), uf.Value))
+			case Mul:
+				builder.SetMore(builder.Mul(QuoteWithFlavor(flavor, key), uf.Value))
+			case Sub:
+				builder.SetMore(builder.Sub(QuoteWithFlavor(flavor, key), uf.Value))
+			}
+		} else {
+			builder.SetMore(builder.Assign(QuoteWithFlavor(flavor, key), value))
+		}
+	}
+
+	return builder.Build()
 }
 
-func Delete(builder sqlbuilder.DeleteBuilder, conditions ...Condition) sqlbuilder.DeleteBuilder {
-	return DeleteWithFlavor(sqlbuilder.DefaultFlavor, builder, conditions...)
+func BuildDelete(builder *sqlbuilder.DeleteBuilder, conditions ...Condition) (string, []any) {
+	return BuildDeleteWithFlavor(sqlbuilder.DefaultFlavor, builder, conditions...)
 }
 
-func DeleteWithFlavor(flavor sqlbuilder.Flavor, builder sqlbuilder.DeleteBuilder, conditions ...Condition) sqlbuilder.DeleteBuilder {
+func BuildDeleteWithFlavor(flavor sqlbuilder.Flavor, builder *sqlbuilder.DeleteBuilder, conditions ...Condition) (string, []any) {
 	builder.SetFlavor(flavor)
 	clause := whereClause(flavor, conditions...)
 	for _, c := range conditions {
@@ -279,9 +303,9 @@ func DeleteWithFlavor(flavor sqlbuilder.Flavor, builder sqlbuilder.DeleteBuilder
 		}
 	}
 	if clause != nil {
-		builder = *builder.AddWhereClause(clause)
+		builder = builder.AddWhereClause(clause)
 	}
-	return builder
+	return builder.Build()
 }
 
 func ToSlice(i any) []any {

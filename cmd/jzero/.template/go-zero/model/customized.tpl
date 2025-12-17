@@ -12,7 +12,6 @@ func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, 
     }
 
     sb := sqlbuilder.InsertInto(m.table)
-    sb.SetFlavor(m.flavor)
     sb.Cols({{.lowerStartCamelObject}}RowsExpectAutoSet)
     for _, data := range datas {
         sb.Values({{.expressionValues}})
@@ -28,13 +27,12 @@ func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, 
     return err
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) FindSelectedColumnsByCondition(ctx context.Context, session sqlx.Session, columns []string, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
+func (m *custom{{.upperStartCamelObject}}Model) FindSelectedColumnsByCondition(ctx context.Context, session sqlx.Session, columns []string, conditions ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
     if len(columns) == 0 {
         columns = {{.lowerStartCamelObject}}FieldNames
     }
-    sb := sqlbuilder.Select(m.withTableColumns(columns...)...).From(m.table)
-	builder := condition.SelectWithFlavor(m.flavor, *sb, conds...)
-	statement, args := builder.BuildWithFlavor(m.flavor)
+
+	statement, args := condition.BuildSelectWithFlavor(m.flavor, sqlbuilder.Select(m.withTableColumns(columns...)...).From(m.table), conditions...)
 
 	var resp []*{{.upperStartCamelObject}}
 	var err error
@@ -50,26 +48,25 @@ func (m *custom{{.upperStartCamelObject}}Model) FindSelectedColumnsByCondition(c
 	return resp, nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
-   return m.FindSelectedColumnsByCondition(ctx, session, {{.lowerStartCamelObject}}FieldNames, conds...)
+func (m *custom{{.upperStartCamelObject}}Model) FindByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) ([]*{{.upperStartCamelObject}}, error) {
+   return m.FindSelectedColumnsByCondition(ctx, session, {{.lowerStartCamelObject}}FieldNames, conditions...)
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) CountByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) (int64, error) {
-   countsb := sqlbuilder.Select("count(*)").From(m.table)
-
-   var countConds []condition.Condition
-   for _, cond := range conds {
+func (m *custom{{.upperStartCamelObject}}Model) CountByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) (int64, error) {
+   var countconditions []condition.Condition
+   for _, cond := range conditions {
     if cond.Operator != condition.Limit && cond.Operator != condition.Offset && cond.Operator != condition.OrderBy && cond.Operator != condition.OrderByDesc && cond.Operator != condition.OrderByAsc {
-   	    countConds = append(countConds, cond)
+   	    countconditions = append(countconditions, cond)
     }
    }
-   countBuilder := condition.SelectWithFlavor(m.flavor, *countsb, countConds...)
+
+   statement, args := condition.BuildSelectWithFlavor(m.flavor, sqlbuilder.Select("count(*)").From(m.table), countconditions...)
 
    var (
     total int64
     err error
    )
-   statement, args := countBuilder.BuildWithFlavor(m.flavor)
+
    if session != nil {
     err = session.QueryRowCtx(ctx, &total, statement, args...)
    } else {
@@ -81,16 +78,12 @@ func (m *custom{{.upperStartCamelObject}}Model) CountByCondition(ctx context.Con
    return total, nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
-    return m.FindOneSelectedColumnsByCondition(ctx, session, {{.lowerStartCamelObject}}FieldNames, conds...)
+func (m *custom{{.upperStartCamelObject}}Model) FindOneByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
+    return m.FindOneSelectedColumnsByCondition(ctx, session, {{.lowerStartCamelObject}}FieldNames, conditions...)
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) FindOneSelectedColumnsByCondition(ctx context.Context, session sqlx.Session, columns []string, conds ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
-	sb := sqlbuilder.Select(m.withTableColumns(columns...)...).From(m.table)
-
-	builder := condition.SelectWithFlavor(m.flavor, *sb, conds...)
-	builder.Limit(1)
-	statement, args := builder.BuildWithFlavor(m.flavor)
+func (m *custom{{.upperStartCamelObject}}Model) FindOneSelectedColumnsByCondition(ctx context.Context, session sqlx.Session, columns []string, conditions ...condition.Condition) (*{{.upperStartCamelObject}}, error) {
+	statement, args := condition.BuildSelectWithFlavor(m.flavor, sqlbuilder.Select(m.withTableColumns(columns...)...).From(m.table).Limit(1), conditions...)
 
 	var resp {{.upperStartCamelObject}}
 	var err error
@@ -106,14 +99,11 @@ func (m *custom{{.upperStartCamelObject}}Model) FindOneSelectedColumnsByConditio
 	return &resp, nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) ([]*{{.upperStartCamelObject}}, int64 ,error) {
-	sb := sqlbuilder.Select(m.withTableColumns({{.lowerStartCamelObject}}FieldNames...)...).From(m.table)
-	builder := condition.SelectWithFlavor(m.flavor, *sb, conds...)
+func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) ([]*{{.upperStartCamelObject}}, int64 ,error) {
+	statement, args := condition.BuildSelectWithFlavor(m.flavor, sqlbuilder.Select(m.withTableColumns({{.lowerStartCamelObject}}FieldNames...)...).From(m.table), conditions...)
 
 	var resp []*{{.upperStartCamelObject}}
 	var err error
-
-	statement, args := builder.BuildWithFlavor(m.flavor)
 
 	if session != nil {
 		err = session.QueryRowsCtx(ctx, &resp, statement, args...)
@@ -124,7 +114,7 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 		return nil, 0, err
 	}
 
-	total, err := m.CountByCondition(ctx, session, conds...)
+	total, err := m.CountByCondition(ctx, session, conditions...)
 	if err != nil {
         return nil, 0, err
     }
@@ -132,14 +122,12 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 	return resp, total, nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx context.Context, session sqlx.Session, data map[string]any, conds ...condition.Condition) error {
+func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx context.Context, session sqlx.Session, data map[string]any, conditions ...condition.Condition) error {
     if data == nil {
         return nil
     }
 
-	sb := sqlbuilder.Update(m.table)
-	builder := condition.SetUpdateFieldsWithFlavor(m.flavor, condition.UpdateWithFlavor(m.flavor, *sb, conds...), data)
-	statement, args := builder.BuildWithFlavor(m.flavor)
+	statement, args := condition.BuildUpdateWithFlavor(m.flavor, sqlbuilder.Update(m.table), data, conditions...)
 
 	var err error
 	if session != nil {
@@ -153,13 +141,11 @@ func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx cont
 	return nil
 }
 
-func (m *custom{{.upperStartCamelObject}}Model) DeleteByCondition(ctx context.Context, session sqlx.Session, conds ...condition.Condition) error {
-    if len(conds) == 0 {
+func (m *custom{{.upperStartCamelObject}}Model) DeleteByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) error {
+    if len(conditions) == 0 {
 		return nil
 	}
-	sb := sqlbuilder.DeleteFrom(m.table)
-	builder := condition.DeleteWithFlavor(m.flavor, *sb, conds...)
-	statement, args := builder.BuildWithFlavor(m.flavor)
+	statement, args := condition.BuildDeleteWithFlavor(m.flavor, sqlbuilder.DeleteFrom(m.table), conditions...)
 
 	var err error
 	if session != nil {

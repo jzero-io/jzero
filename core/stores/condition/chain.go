@@ -139,7 +139,6 @@ func (c Chain) Or(fields []Field, operators []Operator, values []any, op ...opts
 	return c
 }
 
-// Deprecated: Use OrderByDesc or OrderByAsc instead
 func (c Chain) OrderBy(value any, op ...opts.Opt[ChainOperatorOpts]) Chain {
 	return c.addChain("", OrderBy, value, op...)
 }

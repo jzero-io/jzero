@@ -7,8 +7,8 @@ import (
 	"github.com/huandu/go-sqlbuilder"
 )
 
-func TestSetUpdateFields(t *testing.T) {
-	builder := SetUpdateFieldsWithFlavor(sqlbuilder.MySQL, *sqlbuilder.NewUpdateBuilder().Update("users"), map[string]any{
+func TestUpdateFields(t *testing.T) {
+	sql, args := BuildUpdateWithFlavor(sqlbuilder.MySQL, sqlbuilder.NewUpdateBuilder().Update("users"), map[string]any{
 		"age": UpdateField{
 			Operator: Add,
 			Value:    12,
@@ -17,23 +17,21 @@ func TestSetUpdateFields(t *testing.T) {
 			Operator: Incr,
 		},
 		"name": "jaronnie",
-	})
+	}, NewChain().Equal("id", 1).Build()...)
 
-	sql, args := builder.Build()
 	fmt.Println(sql)
 	fmt.Println(args)
 }
 
-func TestSetUpdateFieldChain(t *testing.T) {
-	builder := SetUpdateFieldsWithFlavor(sqlbuilder.MySQL, *sqlbuilder.NewUpdateBuilder().Update("users"), NewUpdateFieldChain().
+func TestUpdateFieldChain(t *testing.T) {
+	sql, args := BuildUpdateWithFlavor(sqlbuilder.MySQL, sqlbuilder.NewUpdateBuilder().Update("users"), NewUpdateFieldChain().
 		Assign("name", "jaronnie", WithUpdateFieldSkip(true)).
 		Incr("version").
 		Add("age", 12, WithUpdateFieldValueFunc(func() any {
 			return 15
 		})).
-		Build())
+		Build(), NewChain().Equal("id", 1).Build()...)
 
-	sql, args := builder.Build()
 	fmt.Println(sql)
 	fmt.Println(args)
 }

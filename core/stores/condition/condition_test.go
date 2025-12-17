@@ -25,9 +25,8 @@ func TestSelectWithCondition(t *testing.T) {
 	})
 
 	sb := sqlbuilder.NewSelectBuilder().Select("name", "age", "height").From("user")
-	builder := Select(*sb, cds...)
+	sql, args := BuildSelect(sb, cds...)
 
-	sql, args := builder.Build()
 	assert.Equal(t, `SELECT name, age, height FROM user WHERE `+"`name`"+` = ? AND (`+"`age`"+` BETWEEN ? AND ? OR `+"`height`"+` BETWEEN ? AND ?)`, sql)
 	assert.Equal(t, []any{"jaronnie", 24, 48, 170, 175}, args)
 }
@@ -50,19 +49,16 @@ func TestUpdateWithCondition(t *testing.T) {
 	})
 
 	sb := sqlbuilder.NewUpdateBuilder().Update("user")
-	builder := Update(*sb, cds...)
-	builder.SetMore(sb.Equal("name", "gocloudcoder"))
+	sql, args := BuildUpdate(sb.Clone(), map[string]any{}, cds...)
 
-	sql, args := builder.Build()
-	assert.Equal(t, `UPDATE user SET name = ? WHERE `+"`name`"+` = ? AND (`+"`age`"+` BETWEEN ? AND ? OR `+"`height`"+` BETWEEN ? AND ?)`, sql)
-	assert.Equal(t, []any{"gocloudcoder", "jaronnie", 24, 48, 170, 175}, args)
+	assert.Equal(t, `UPDATE user WHERE `+"`name`"+` = ? AND (`+"`age`"+` BETWEEN ? AND ? OR `+"`height`"+` BETWEEN ? AND ?)`, sql)
+	assert.Equal(t, []any{"jaronnie", 24, 48, 170, 175}, args)
 
-	builder = Update(*sb, Condition{
+	sql, args = BuildUpdate(sb.Clone(), map[string]any{}, Condition{
 		Field:    "age",
 		Operator: Equal,
 		Value:    30,
 	})
-	sql, args = builder.Build()
 	assert.Equal(t, `UPDATE user WHERE `+"`age`"+` = ?`, sql)
 	assert.Equal(t, []any{30}, args)
 }
@@ -94,9 +90,8 @@ func TestDeleteWithCondition(t *testing.T) {
 	})
 
 	sb := sqlbuilder.NewDeleteBuilder().DeleteFrom("user")
-	builder := Delete(*sb, cds...)
+	sql, args := BuildDelete(sb, cds...)
 
-	sql, args := builder.Build()
 	assert.Equal(t, `DELETE FROM user WHERE (`+"`age`"+` BETWEEN ? AND ? OR `+"`height`"+` BETWEEN ? AND ?)`, sql)
 	assert.Equal(t, []any{24, 49, 170, 176}, args)
 }
@@ -165,9 +160,7 @@ func TestRawWhereClause(t *testing.T) {
 	})
 
 	sb := sqlbuilder.NewSelectBuilder().Select("name", "age", "height").From("user")
-	builder := Select(*sb, cds...)
-
-	sql, args := builder.Build()
+	sql, args := BuildSelect(sb, cds...)
 	assert.Equal(t, "SELECT name, age, height FROM user WHERE ((a = ? AND b = ?) OR (c = ? AND d = ?)) AND `field_with_jzero` = ?", sql)
 	assert.Equal(t, []any{1, 2, 3, 4, 123}, args)
 }
@@ -176,13 +169,12 @@ func TestChain_In(t *testing.T) {
 	t.Run("test", func(t *testing.T) {
 		sqlbuilder.DefaultFlavor = sqlbuilder.MySQL
 		sb := sqlbuilder.NewSelectBuilder().Select("id").From("users")
-		builder := Select(*sb, Condition{
+		sql, args := BuildSelect(sb, Condition{
 			Field:    "id",
 			Operator: In,
 			Value:    []int{1},
 		})
 
-		sql, args := builder.Build()
 		assert.Equal(t, "SELECT id FROM users WHERE `id` IN (?)", sql)
 		assert.Equal(t, []any{1}, args)
 	})
@@ -190,13 +182,12 @@ func TestChain_In(t *testing.T) {
 	t.Run("test2", func(t *testing.T) {
 		sqlbuilder.DefaultFlavor = sqlbuilder.MySQL
 		sb := sqlbuilder.NewSelectBuilder().Select("id").From("users")
-		builder := Select(*sb, Condition{
+		sql, args := BuildSelect(sb, Condition{
 			Field:    "id",
 			Operator: In,
 			Value:    []int{},
 		})
 
-		sql, args := builder.Build()
 		assert.Equal(t, "SELECT id FROM users WHERE `id` IN (?)", sql)
 		assert.Equal(t, []any{nil}, args)
 	})

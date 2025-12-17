@@ -88,16 +88,6 @@ func RemoveIgnoreColumnsWithFlavor(flavor sqlbuilder.Flavor, columns []string, i
 	return out
 }
 
-// AdaptTable Deprecated use Quote instead
-func AdaptTable(table string) string {
-	return QuoteWithFlavor(sqlbuilder.DefaultFlavor, table)
-}
-
-// AdaptField Deprecated use Quote instead
-func AdaptField(field string) string {
-	return QuoteWithFlavor(sqlbuilder.DefaultFlavor, field)
-}
-
 func QuoteWithFlavor(flavor sqlbuilder.Flavor, str string) string {
 	split := strings.Split(str, ".")
 
