@@ -1,5 +1,5 @@
 ---
-title: jzero 指南
+title: 玩转 jzero
 icon: catppuccin:astro-config
 star: true
 order: 0.1

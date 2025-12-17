@@ -1,5 +1,5 @@
 ---
-title: api 指南
+title: 保姆级 api 教程
 icon: eos-icons:api
 star: true
 order: 0.2
@@ -55,7 +55,7 @@ info (
 )
 service simpleapi {
 	@handler GetUserHandler
-	get /system/user/getUser (GetUser2Request) returns (GetUserResponse)
+	get /system/user/getUser (GetUserRequest) returns (GetUserResponse)
 
 	@handler DeleteUserHandler
 	get /system/user/deleteUser (DeleteUserRequest) returns (DeleteUserResponse)

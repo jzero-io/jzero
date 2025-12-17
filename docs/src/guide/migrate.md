@@ -1,5 +1,5 @@
 ---
-title: 数据库迁移指南
+title: 数据库版本自动迁移
 icon: carbon:migrate
 star: true
 order: 5.5

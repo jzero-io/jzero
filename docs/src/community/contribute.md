@@ -61,10 +61,10 @@ cd jzero
 go install
 ```
 
-2. new project with branch, e.g. `api`
+2. new project with frame, e.g. `api`
 
 ```shell
-jzero new your_project --branch api
+jzero new your_project --frame api
 ```
 
 3. run jzero gen with debug mode

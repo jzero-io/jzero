@@ -24,6 +24,8 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 ```
 :::
 
+**Swagger 文件**: `desc/swagger`
+
 **Swagger UI 地址**: `localhost:8001/swagger`
 
 ## 生成 Zrpc 客户端
@@ -40,7 +42,7 @@ jzero gen zrpcclient --name simplerpcclient
 @tab Docker
 ```bash
 cd your_project
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen zrpcclient
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen zrpcclient --name simplerpcclient
 ```
 :::
 

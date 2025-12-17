@@ -1,8 +1,19 @@
 ---
-title: 新增 api/proto/sql 文件
+title: 新增可描述文件
 icon: proicons:tag-add
 order: 3.1
 ---
+
+jzero 根据可描述文件(desc)生成代码:
+
+* desc/api: api 可描述语言, 生成 http 服务端/客户端代码. [使用指南](../guide/api.md)
+* desc/proto: proto 可描述语言, 生成 grpc 服务端/客户端代码. [使用指南](../guide/proto.md)
+* desc/sql: sql 可描述语言, 生成数据库代码. [使用指南](../guide/model.md)
+
+亦可基于配置生成 model 代码:
+
+* model datasource: 通过远程数据源生成数据库代码. [使用指南](../guide/model.md)
+* mongo type: 通过指定 mongo type 生成 mongodb 代码. [使用指南](../guide/mongo.md)
 
 ## 新增 api 文件
 

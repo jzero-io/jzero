@@ -320,6 +320,7 @@ jzero gen
 * FindByCondition: 条件查询
 * FindSelectedColumnsByCondition: 条件查询(指定查询字段)
 * FindOneByCondition: 条件查询单条数据
+* FindOneSelectedColumnsByCondition: 条件查询单条数据(指定查询字段)
 * CountByCondition: 条件查询总数
 * PageByCondition: 条件分页查询
 * UpdateFieldsByCondition: 条件更新指定字段

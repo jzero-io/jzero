@@ -13,7 +13,7 @@ jzero 支持通过指定 mongo type 将代码到 `internal/mongo` 下.
 
 ## 特性
 
-* 支持 redis/sync_map 缓存
+* 支持 redis 和自定义缓存
 
 ## 生成代码
 

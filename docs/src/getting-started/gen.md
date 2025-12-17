@@ -4,12 +4,9 @@ icon: vscode-icons:folder-type-api-opened
 order: 4
 ---
 
-jzero 根据可描述语言生成代码:
-* desc/api: api 可描述语言, 生成 http 服务端/客户端代码. [使用指南](../guide/api.md)
-* desc/proto: proto 可描述语言, 生成 grpc 服务端/客户端代码. [使用指南](../guide/proto.md)
-* desc/sql: sql 可描述语言, 生成数据库代码. [使用指南](../guide/model.md)
-* model datasource: 通过远程数据源生成数据库代码. [使用指南](../guide/model.md)
-* mongo: 通过指定 mongo type 生成 mongo 代码. [使用指南](../guide/mongo.md)
+jzero 生成代码命令及其精简, 仅需 `jzero gen` 就能自动识别所有的可描述文件/配置, 完成代码的生成.
+
+通过上一篇文档的 `jzero add` 命令添加可描述文件后, 执行 `jzero gen` 即可看到生成的文件了.
 
 ## 生成代码
 
@@ -31,6 +28,9 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
 :::
 
 ## 基于 git 变动生成代码
+
+::: tip 基于 git status -su 获取新增/改动的可描述文件
+:::
 
 ```shell
 jzero gen --git-change

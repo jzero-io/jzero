@@ -4,37 +4,71 @@ icon: catppuccin:astro-config
 order: 1
 ---
 
-## 基于 fsnotify(默认)
+## fsnotify 实现
 
-* 支持动态加载配置并能设置回调
-* 支持环境变量(参考 [envsubst](https://github.com/a8m/envsubst))
+::: code-tabs#shell
 
-### 1. 初始化 configcenter
-
-```go
-cc := configcenter.MustNewConfigCenter[config.Config](
-	   configcenter.Config{Type: "yaml"}, 
-     subscriber.MustNewFsnotifySubscriber("etc/etc.yaml"),
-	 )
-
-// 支持环境变量
-cc := configcenter.MustNewConfigCenter[config.Config](
-     configcenter.Config{Type: "yaml"},
-     subscriber.MustNewFsnotifySubscriber("etc/etc.yaml", subscriber.WithUseEnv(true)),
-   )
-```
-
-### 2. 获取配置
+@tab main.go
 
 ```go
-// 获取配置
-cfg, err := cc.GetConfig()
+package main
 
-// 必须获取配置
-cfg := cc.MustGetConfig()
+import (
+	"fmt"
+
+	"github.com/jzero-io/jzero/core/configcenter"
+	"github.com/jzero-io/jzero/core/configcenter/subscriber"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+)
+
+type Config struct {
+	Sqlx sqlx.SqlConf
+}
+
+func main() {
+	cc := configcenter.MustNewConfigCenter[Config](
+		configcenter.Config{Type: "yaml"},
+		subscriber.MustNewFsnotifySubscriber("etc/etc.yaml"),
+	)
+
+	// 支持环境变量
+	cc = configcenter.MustNewConfigCenter[Config](
+		configcenter.Config{Type: "yaml"},
+		subscriber.MustNewFsnotifySubscriber("etc/etc.yaml", subscriber.WithUseEnv(true)),
+	)
+
+	// 设置配置变更回调
+	cc.AddListener(func() {})
+
+	// 获取配置
+	cfg, err := cc.GetConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	// 必须获取配置
+	cfg = cc.MustGetConfig()
+
+	fmt.Println(cfg)
+}
+
 ```
 
-### 3. 设置环境变量
+@tab etc/etc.yaml
+
+```yaml
+sqlx:
+    datasource: "jzero-admin.db"
+    driverName: "sqlite"
+```
+
+:::
+
+### 使用环境变量
+
+:::tip
+参考 [envsubst](https://github.com/a8m/envsubst) 查看更多环境变量的设置方法
+:::
 
 ```yaml
 sqlx:
@@ -44,8 +78,51 @@ sqlx:
     driverName: "${DRIVER_NAME:-sqlite}"
 ```
 
-### 4. 设置动态配置回调
+## etcd 实现
+
+::: code-tabs#shell
+
+@tab main.go
 
 ```go
-cc.AddListener(func() {})
+package main
+
+import (
+	"fmt"
+
+	"github.com/jzero-io/jzero/core/configcenter"
+	"github.com/jzero-io/jzero/core/configcenter/subscriber"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+)
+
+type Config struct {
+	Sqlx sqlx.SqlConf
+}
+
+func main() {
+	cc := configcenter.MustNewConfigCenter[Config](
+		configcenter.Config{Type: "yaml"},
+		subscriber.MustNewEtcdSubscriber(subscriber.EtcdConf{
+			Hosts: []string{"127.0.0.1:2379"},
+			Key:   "jzero-admin",
+		}),
+	)
+
+	// 设置配置变更回调
+	cc.AddListener(func() {})
+
+	// 获取配置
+	cfg, err := cc.GetConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	// 必须获取配置
+	cfg = cc.MustGetConfig()
+
+	fmt.Println(cfg)
+}
+
 ```
+
+:::
