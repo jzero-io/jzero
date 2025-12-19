@@ -4,6 +4,10 @@ icon: oui:vis-query-sql
 order: 2
 ---
 
+## 特性
+
+* 适配 mysql/postgres/sqlite, 无需导入驱动
+
 ::: code-tabs#shell
 
 @tab main.go
@@ -33,9 +37,8 @@ func main() {
 
 	sqlConn := modelx.MustNewConn(cc.MustGetConfig().Sqlx)
 
-	// 连接 mysql 并返回 flavor
-	sqlConn, flavor := modelx.MustNewConnAndSqlbuilderFlavor(cc.MustGetConfig().Sqlx)
-	fmt.Println(flavor)
+	// 连接数据库
+	sqlConn := modelx.MustNewConn(cc.MustGetConfig().Sqlx)
 
 	// 执行 sql
 	result, err := sqlConn.ExecCtx(context.Background(), "select 1")
