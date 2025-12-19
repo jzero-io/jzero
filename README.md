@@ -8,7 +8,7 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/jzero-io/jzero)
 
 <p align="center">
-<img align="center" width="150px" src="https://oss.jaronnie.com/hiking.svg">
+<img align="center" width="150px" src="https://oss.jaronnie.com/jzero.svg">
 </p>
 
 ## 简介

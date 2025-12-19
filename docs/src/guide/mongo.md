@@ -1,6 +1,6 @@
 ---
 title: mongodb 指南
-icon: logos:mongodb
+icon: devicon-plain:mongodb-wordmark
 star: true
 order: 5
 ---
