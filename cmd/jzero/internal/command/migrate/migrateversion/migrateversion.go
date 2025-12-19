@@ -3,10 +3,10 @@ package migrateversion
 import (
 	"fmt"
 
+	"github.com/jzero-io/jzero/core/stores/migrate"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/migrate"
 )
 
 func Run(args []string) error {

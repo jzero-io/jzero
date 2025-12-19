@@ -33,6 +33,15 @@ jobs:
         run: |
           go install github.com/jaronnie/grum@latest
           GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum
+          
+          git config user.name "dependabot[bot]"
+          git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
+          
+          cd cmd/jzero
+          go get github.com/jzero-io/jzero@${{ steps.get_version.outputs.VERSION }}
+          go mod tidy
+          git diff-index --quiet HEAD || git commit -m "chore(jzero): update jzero version"
+          git push
           git tag cmd/jzero/${{ steps.get_version.outputs.VERSION }}
           git push origin cmd/jzero/${{ steps.get_version.outputs.VERSION }}
 
