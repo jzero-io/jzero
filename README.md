@@ -13,7 +13,7 @@
 
 ## 简介
 
-基于 [go-zero框架](https://github.com/zeromicro/go-zero) 以及 [go-zero/goctl工具](https://github.com/zeromicro/go-zero/tree/master/tools/goctl) 开发的 [jzero](https://github.com/jzero-io/jzero) 框架, 可一键新增 api/gateway/rpc 项目, 并基于可描述文件(**api/proto/sql**)自动生成**服务端和客户端代码**代码, 降低开发心智, 解放双手!
+基于 [go-zero框架](https://github.com/zeromicro/go-zero) 以及 [go-zero/goctl工具](https://github.com/zeromicro/go-zero/tree/master/tools/goctl) 开发的 [jzero](https://github.com/jzero-io/jzero) 框架, 可一键初始化 api/gateway/rpc 项目, 并基于可描述文件(**api/proto/sql**)自动生成**服务端和客户端代码**代码, 降低开发心智, 解放双手!
 
 具备以下特点:
 
