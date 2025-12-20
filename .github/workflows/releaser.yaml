@@ -29,22 +29,6 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
-      - name: release jzero cmd
-        run: |
-          go install github.com/jaronnie/grum@latest
-          GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum
-          
-          git config user.name "dependabot[bot]"
-          git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
-          
-          cd cmd/jzero
-          go get github.com/jzero-io/jzero@${{ steps.get_version.outputs.VERSION }}
-          go mod tidy
-          git diff-index --quiet HEAD || git commit -m "chore(jzero): update jzero version"
-          git push
-          git tag cmd/jzero/${{ steps.get_version.outputs.VERSION }}
-          git push origin cmd/jzero/${{ steps.get_version.outputs.VERSION }}
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -101,3 +85,36 @@ jobs:
           platforms: linux/amd64, linux/arm64
           push: true
           tags: ghcr.io/jzero-io/jzero:latest,ghcr.io/jzero-io/jzero:${{ steps.get_version.outputs.VERSION }}
+
+  tag_cmd_jzero:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.24.3'
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: release jzero cmd
+        run: |
+          go install github.com/jaronnie/grum@latest
+          GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum
+  
+          git config user.name "dependabot[bot]"
+          git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
+  
+          cd cmd/jzero
+          go get github.com/jzero-io/jzero@${{ steps.get_version.outputs.VERSION }}
+          go mod tidy
+          sed -i 's/version = ".*"/version = "${{ steps.get_version.outputs.VERSION }}"/g' main.go
+          git add go.mod go.sum main.go
+          git diff-index --quiet HEAD || git commit -m "chore(jzero): update jzero version"
+          git push origin main
+          git tag cmd/jzero/${{ steps.get_version.outputs.VERSION }}
+          git push origin cmd/jzero/${{ steps.get_version.outputs.VERSION }}

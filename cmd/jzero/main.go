@@ -27,7 +27,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/serverless"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/template"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/upgrade"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
+	versioncmd "github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
@@ -45,16 +45,16 @@ var (
 
 // ldflags
 var (
-	Version = "1.0.0-beta9"
-	Commit  string
-	Date    string
+	version = "1.0.0-beta9"
+	commit  string
+	date    string
 )
 
 func main() {
 	embeded.Template = Template
-	version.Version = Version
-	version.Date = Date
-	version.Commit = Commit
+	versioncmd.Version = version
+	versioncmd.Date = date
+	versioncmd.Commit = commit
 
 	os.Args = mcppkg.ProcessOsArgs()
 
@@ -68,7 +68,7 @@ var rootCmd = &cobra.Command{
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// Run environment check first
-		if cmd.Name() != check.GetCommand().Use && cmd.Name() != version.GetCommand().Use {
+		if cmd.Name() != check.GetCommand().Use && cmd.Name() != versioncmd.GetCommand().Use {
 			frameType, err := desc.GetFrameType()
 			if err != nil {
 				return err
@@ -82,8 +82,8 @@ var rootCmd = &cobra.Command{
 
 		// Check home
 		if !pathx.FileExists(config.C.Home) {
-			if pathx.FileExists(filepath.Join(config.C.HomeDir(), ".jzero", "templates", version.Version)) {
-				config.C.Home = filepath.Join(config.C.HomeDir(), ".jzero", "templates", version.Version)
+			if pathx.FileExists(filepath.Join(config.C.HomeDir(), ".jzero", "templates", versioncmd.Version)) {
+				config.C.Home = filepath.Join(config.C.HomeDir(), ".jzero", "templates", versioncmd.Version)
 				embeded.Home = config.C.Home
 			} else {
 				config.C.Home = ""
@@ -96,7 +96,7 @@ var rootCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if parseBool, err := strconv.ParseBool(cmd.Flags().Lookup("version").Value.String()); err == nil && parseBool {
-			version.GetVersion()
+			versioncmd.GetVersion()
 			return
 		}
 		if err := cmd.Help(); err != nil {
@@ -142,13 +142,13 @@ func init() {
 	rootCmd.AddCommand(serverless.GetCommand())
 	rootCmd.AddCommand(template.GetCommand())
 	rootCmd.AddCommand(upgrade.GetCommand())
-	rootCmd.AddCommand(version.GetCommand())
+	rootCmd.AddCommand(versioncmd.GetCommand())
 }
 
 // InitConfig reads in config file and ENV variables if set.
 func InitConfig() {
 	if len(os.Args) >= 2 {
-		if os.Args[1] == version.GetCommand().Use {
+		if os.Args[1] == versioncmd.GetCommand().Use {
 			return
 		}
 	}
