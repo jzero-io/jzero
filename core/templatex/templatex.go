@@ -31,10 +31,15 @@ func WithOptions(options ...string) opts.Opt[TemplateOpts] {
 
 // ParseTemplate template
 func ParseTemplate(data any, tplT []byte, op ...opts.Opt[TemplateOpts]) ([]byte, error) {
+	return ParseTemplateWithName("production", data, tplT, op...)
+}
+
+// ParseTemplate template
+func ParseTemplateWithName(name string, data any, tplT []byte, op ...opts.Opt[TemplateOpts]) ([]byte, error) {
 	o := opts.DefaultApply(op...)
 
 	var err error
-	t := template.New("production").Funcs(sprig.TxtFuncMap())
+	t := template.New(name).Funcs(sprig.TxtFuncMap())
 	for _, funcMap := range o.FuncMaps {
 		t = t.Funcs(funcMap)
 	}
