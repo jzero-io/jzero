@@ -3,7 +3,6 @@ module github.com/jzero-io/jzero/cmd/jzero
 go 1.24.3
 
 require (
-	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
 	github.com/go-git/go-git/v5 v5.16.3
@@ -14,7 +13,7 @@ require (
 	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v1.1.0
 	github.com/jzero-io/go_fmt v0.0.0-20250905015347-1a45352494b7
-	github.com/jzero-io/jzero v1.0.0-beta10
+	github.com/jzero-io/jzero v1.0.0-beta9.0.20251221022329-3da57feb7a9b
 	github.com/mark3labs/mcp-go v0.43.0
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1
@@ -41,6 +40,7 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
+	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/antlr/antlr4/runtime/Go/antlr v0.0.0-20210521184019-c5ad59b459ec // indirect
