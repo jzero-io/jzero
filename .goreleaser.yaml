@@ -17,6 +17,8 @@ builds:
     dir: ./cmd/jzero
     id: jzero
     binary: jzero
+    tags:
+      - no_k8s
 
 archives:
   - formats: [tar.gz]
