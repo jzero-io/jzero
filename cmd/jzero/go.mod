@@ -5,16 +5,16 @@ go 1.24.3
 require (
 	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
-	github.com/go-git/go-git/v5 v5.16.3
+	github.com/go-git/go-git/v5 v5.16.4
 	github.com/golang-migrate/migrate/v4 v4.19.1
-	github.com/hashicorp/go-version v1.7.0
+	github.com/hashicorp/go-version v1.8.0
 	github.com/iancoleman/orderedmap v0.3.0
 	github.com/jaronnie/genius v0.6.1
 	github.com/jhump/protoreflect v1.17.0
-	github.com/jzero-io/desc v1.1.0
+	github.com/jzero-io/desc v1.2.0
 	github.com/jzero-io/go_fmt v0.0.0-20250905015347-1a45352494b7
 	github.com/jzero-io/jzero v1.0.0-beta9.0.20251221022329-3da57feb7a9b
-	github.com/mark3labs/mcp-go v0.43.0
+	github.com/mark3labs/mcp-go v0.43.2
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/rinchsan/gosimports v0.3.8
