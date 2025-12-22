@@ -2,12 +2,10 @@ package filex
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 // FileExists check file exist
@@ -25,28 +23,6 @@ func DirExists(path string) bool {
 		return false
 	}
 	return info.IsDir()
-}
-
-// IsYamlFile check YAML file
-func IsYamlFile(path string) bool {
-	ext := strings.ToLower(filepath.Ext(path))
-	return ext == ".yaml" || ext == ".yml"
-}
-
-// EnsureDirExists create dir with check
-func EnsureDirExists(dirPath string) error {
-	info, err := os.Stat(dirPath)
-	if errors.Is(err, fs.ErrNotExist) {
-		err = os.MkdirAll(dirPath, 0o755)
-		if err != nil {
-			return fmt.Errorf("failed to create directory: %w", err)
-		}
-	} else if err != nil {
-		return fmt.Errorf("failed to check directory: %w", err)
-	} else if !info.IsDir() {
-		return fmt.Errorf("path exists but is not a directory: %s", dirPath)
-	}
-	return nil
 }
 
 // copyDir 递归复制目录，将 src 目录下的所有文件复制到 dst 目录，已存在的文件会被覆盖
@@ -84,7 +60,7 @@ func CopyFile(src, dst string) error {
 	defer sourceFile.Close()
 
 	// 确保目标目录存在
-	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+	if err = os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 		return err
 	}
 
