@@ -192,3 +192,8 @@ func TestChain_In(t *testing.T) {
 		assert.Equal(t, []any{nil}, args)
 	})
 }
+
+func TestToFieldSlice(t *testing.T) {
+	slice := ToFieldSlice([]string{"age", "height"})
+	assert.Equal(t, []Field{"age", "height"}, slice)
+}
