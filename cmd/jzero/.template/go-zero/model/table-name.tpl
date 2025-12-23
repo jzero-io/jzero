@@ -1,11 +1,11 @@
-func (m *default{{.upperStartCamelObject}}Model)withTableColumns(columns ...string) []string {
-    var withTableColumns []string
-    for _, col := range columns {
+func (m *default{{.upperStartCamelObject}}Model)withTableFields(fields ...string) []string {
+    var withTableFields []string
+    for _, col := range fields {
         if strings.Contains(col, ".") {
-            withTableColumns = append(withTableColumns, condition.QuoteWithFlavor(m.flavor, col))
+            withTableFields = append(withTableFields, condition.QuoteWithFlavor(m.flavor, col))
         } else {
-            withTableColumns = append(withTableColumns, m.table + "." + condition.QuoteWithFlavor(m.flavor, col))
+            withTableFields = append(withTableFields, m.table + "." + condition.QuoteWithFlavor(m.flavor, col))
         }
     }
-    return withTableColumns
+    return withTableFields
 }

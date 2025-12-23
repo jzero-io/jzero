@@ -10,6 +10,7 @@ import (
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/jzero-io/jzero/core/stores/condition"
 	"github.com/jzero-io/jzero/core/stores/modelx"
+	"github.com/spf13/cast"
     "github.com/eddieowens/opts"
 
 	{{.third}}

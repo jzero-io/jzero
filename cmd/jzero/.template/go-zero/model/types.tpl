@@ -6,9 +6,12 @@ type (
 		WithTable(f func(table string) string) {{.lowerStartCamelObject}}Model
 	    BulkInsert(ctx context.Context, session sqlx.Session, datas []*{{.upperStartCamelObject}}) error
         FindByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) ([]*{{.upperStartCamelObject}}, error)
+        // FindSelectedColumnsByCondition: return selected fields by condition
+        // Deprecated: Use FindFieldsByCondition
         FindSelectedColumnsByCondition(ctx context.Context, session sqlx.Session, columns []string, conditions ...condition.Condition) ([]*{{.upperStartCamelObject}}, error)
+        FindFieldsByCondition(ctx context.Context, session sqlx.Session, fields []condition.Field, conditions ...condition.Condition) ([]*{{.upperStartCamelObject}}, error)
         FindOneByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) (*{{.upperStartCamelObject}}, error)
-        FindOneSelectedColumnsByCondition(ctx context.Context, session sqlx.Session, columns []string, conditions ...condition.Condition) (*{{.upperStartCamelObject}}, error)
+        FindOneFieldsByCondition(ctx context.Context, session sqlx.Session, fields []condition.Field, conditions ...condition.Condition) (*{{.upperStartCamelObject}}, error)
         CountByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) (int64, error)
         PageByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) ([]*{{.upperStartCamelObject}}, int64 ,error)
         UpdateFieldsByCondition(ctx context.Context, session sqlx.Session, field map[string]any, conditions ...condition.Condition) error

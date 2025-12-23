@@ -1,5 +1,7 @@
 {{if .withCache}}
 func (m *default{{.upperStartCamelObject}}Model) Update(ctx context.Context, session sqlx.Session, {{if .containsIndexCache}}newData{{else}}data{{end}} *{{.upperStartCamelObject}}) error {
+	var err error
+
 	{{if .containsIndexCache}}data, err := m.FindOne(ctx, session, newData.{{.upperStartCamelPrimaryKey}})
 	if err != nil {
 		return err
