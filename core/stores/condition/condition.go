@@ -308,6 +308,14 @@ func BuildDeleteWithFlavor(flavor sqlbuilder.Flavor, builder *sqlbuilder.DeleteB
 	return builder.Build()
 }
 
+func ToFieldSlice(fields []string) []Field {
+	fs := make([]Field, len(fields))
+	for i, field := range fields {
+		fs[i] = Field(field)
+	}
+	return fs
+}
+
 func ToSlice(i any) []any {
 	if i == nil {
 		return []any{}
