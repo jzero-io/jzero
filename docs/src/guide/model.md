@@ -318,10 +318,12 @@ jzero gen
 * Delete: 根据主键删除单条数据
 * FindOne: 根据主键查询单条数据
 * FindByCondition: 条件查询
-* FindSelectedColumnsByCondition: 条件查询(指定查询字段)
+* FindFieldsByCondition: 条件查询(指定查询字段)
 * FindOneByCondition: 条件查询单条数据
-* FindOneSelectedColumnsByCondition: 条件查询单条数据(指定查询字段)
+* FindOneFieldsByCondition: 条件查询单条数据(指定查询字段)
 * CountByCondition: 条件查询总数
 * PageByCondition: 条件分页查询
 * UpdateFieldsByCondition: 条件更新指定字段
 * DeleteByCondition: 条件删除
+
+具体使用请参阅: [condition组件](../component/condition.md)
