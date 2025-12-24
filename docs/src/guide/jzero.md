@@ -33,3 +33,19 @@ gen:
 ```yaml
 JZERO_GEN_STYLE=go_zero
 ```
+
+### 子命令
+
+对于子命令的配置, 如: `jzero gen zrpcclient --name simplerpcclient` 对应 `.jzero.yaml` 内容
+
+```yaml
+gen:
+  zrpcclient:
+    name: simplerpcclient
+```
+
+即 `jzero gen zrpcclient` + `.jzero.yaml` = `jzero gen zrpcclient --name simplerpcclient`
+
+同样支持环境变量的配置, `JZERO_GEN_ZRPCCLIENT_NAME`
+
+即 `JZERO_GEN_ZRPCCLIENT_NAME=simplerpcclient jzero gen zrpcclient` = `jzero gen zrpcclient --name simplerpcclient`
