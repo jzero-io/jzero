@@ -104,8 +104,8 @@ func Generate(genModule bool) (err error) {
 	var files []string
 
 	switch {
-	case len(config.C.Gen.Desc) > 0:
-		for _, v := range config.C.Gen.Desc {
+	case len(config.C.Gen.Zrpcclient.Desc) > 0:
+		for _, v := range config.C.Gen.Zrpcclient.Desc {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".proto" {
 					files = append(files, v)
@@ -125,7 +125,7 @@ func Generate(genModule bool) (err error) {
 		}
 	}
 
-	for _, v := range config.C.Gen.DescIgnore {
+	for _, v := range config.C.Gen.Zrpcclient.DescIgnore {
 		if !osx.IsDir(v) {
 			if filepath.Ext(v) == ".proto" {
 				files = lo.Reject(files, func(item string, _ int) bool {

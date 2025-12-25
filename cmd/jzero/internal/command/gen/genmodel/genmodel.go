@@ -118,13 +118,13 @@ func (jm *JzeroModel) Gen() error {
 	logx.Debugf("goctl_home = %s", goctlHome)
 
 	var (
-		allSqlFiles     []string
+		sqlFiles        []string
 		genCodeSqlFiles []string
 	)
 	genCodeSqlSpecMap := make(map[string][]*ddlparser.Table)
 
 	if !config.C.Gen.ModelDatasource {
-		allSqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
+		sqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
 		if err != nil {
 			return err
 		}
@@ -161,7 +161,10 @@ func (jm *JzeroModel) Gen() error {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".sql" {
 					genCodeSqlFiles = lo.Reject(genCodeSqlFiles, func(item string, _ int) bool {
-						return item == v
+						return item == filepath.Clean(v)
+					})
+					sqlFiles = lo.Reject(sqlFiles, func(item string, _ int) bool {
+						return item == filepath.Clean(v)
 					})
 				}
 			} else {
@@ -171,6 +174,9 @@ func (jm *JzeroModel) Gen() error {
 				}
 				for _, saf := range specifiedSqlFiles {
 					genCodeSqlFiles = lo.Reject(genCodeSqlFiles, func(item string, _ int) bool {
+						return item == saf
+					})
+					sqlFiles = lo.Reject(sqlFiles, func(item string, _ int) bool {
 						return item == saf
 					})
 				}
@@ -203,7 +209,7 @@ func (jm *JzeroModel) Gen() error {
 		return jm.GenRegister(allTables)
 	} else if len(genCodeSqlFiles) != 0 {
 		var eg errgroup.Group
-		for _, f := range allSqlFiles {
+		for _, f := range sqlFiles {
 			eg.Go(func() error {
 				tableParsers, err := ParseSql(filepath.Join(config.C.Wd(), f))
 				if err != nil {

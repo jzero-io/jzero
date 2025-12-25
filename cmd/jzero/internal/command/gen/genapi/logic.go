@@ -65,7 +65,7 @@ func (ja *JzeroApi) getAllLogicFiles(apiFilepath string, apiSpec *spec.ApiSpec) 
 	return logicFiles, nil
 }
 
-func (ja *JzeroApi) patchLogic(file LogicFile) error {
+func (ja *JzeroApi) patchLogic(file LogicFile, genCodeApiSpecMap map[string]*spec.ApiSpec) error {
 	// Get the new file name of the file (without the 5 characters(Logic or logic) before the ".go" extension)
 	newFilePath := file.Path[:len(file.Path)-8]
 	// patch style
@@ -95,14 +95,14 @@ func (ja *JzeroApi) patchLogic(file LogicFile) error {
 	}
 
 	// change logic types
-	if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
+	if _, ok := genCodeApiSpecMap[file.DescFilepath]; ok {
 		if err = ja.changeLogicTypes(f, fset, file); err != nil {
 			console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
 		}
 	}
 
 	if file.Package != "" {
-		for _, g := range ja.GenCodeApiSpecMap[file.DescFilepath].Service.Groups {
+		for _, g := range genCodeApiSpecMap[file.DescFilepath].Service.Groups {
 			if g.GetAnnotation("group") == file.Group {
 				if err := ja.updateLogicImportedTypesPath(f, fset, file); err != nil {
 					return err

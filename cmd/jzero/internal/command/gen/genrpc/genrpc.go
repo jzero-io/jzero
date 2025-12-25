@@ -24,11 +24,6 @@ import (
 
 type JzeroRpc struct {
 	Module string
-
-	ProtoFiles          []string
-	GenCodeProtoFiles   []string
-	ProtoSpecMap        map[string]rpcparser.Proto
-	GenCodeProtoSpecMap map[string]rpcparser.Proto
 }
 
 type (
@@ -58,12 +53,11 @@ func (jr *JzeroRpc) Gen() error {
 		return err
 	}
 
-	jr.ProtoFiles = protoFiles
-	if len(jr.ProtoFiles) == 0 {
+	if len(protoFiles) == 0 {
 		return nil
 	}
 
-	jr.ProtoSpecMap = make(map[string]rpcparser.Proto, len(protoFiles))
+	protoSpecMap := make(map[string]rpcparser.Proto, len(protoFiles))
 	for _, v := range protoFiles {
 		// parse proto
 		protoParser := rpcparser.NewDefaultProtoParser()
@@ -72,12 +66,12 @@ func (jr *JzeroRpc) Gen() error {
 		if err != nil {
 			return err
 		}
-		jr.ProtoSpecMap[v] = parse
+		protoSpecMap[v] = parse
 	}
 
 	// 获取需要生成代码的proto 文件
 	var genCodeProtoFiles []string
-	jr.GenCodeProtoSpecMap = make(map[string]rpcparser.Proto, len(protoFiles))
+	genCodeProtoSpecMap := make(map[string]rpcparser.Proto, len(protoFiles))
 
 	switch {
 	case config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0:
@@ -85,7 +79,7 @@ func (jr *JzeroRpc) Gen() error {
 		if err == nil {
 			genCodeProtoFiles = append(genCodeProtoFiles, m...)
 			for _, file := range m {
-				jr.GenCodeProtoSpecMap[file] = jr.ProtoSpecMap[file]
+				genCodeProtoSpecMap[file] = protoSpecMap[file]
 			}
 		}
 	case len(config.C.Gen.Desc) > 0:
@@ -93,7 +87,7 @@ func (jr *JzeroRpc) Gen() error {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".proto" {
 					genCodeProtoFiles = append(genCodeProtoFiles, filepath.Join(strings.Split(filepath.ToSlash(v), "/")...))
-					jr.GenCodeProtoSpecMap[filepath.Clean(v)] = jr.ProtoSpecMap[filepath.Clean(v)]
+					genCodeProtoSpecMap[filepath.Clean(v)] = protoSpecMap[filepath.Clean(v)]
 				}
 			} else {
 				specifiedProtoFiles, err := jzerodesc.GetProtoFilepath(v)
@@ -102,43 +96,50 @@ func (jr *JzeroRpc) Gen() error {
 				}
 				genCodeProtoFiles = append(genCodeProtoFiles, specifiedProtoFiles...)
 				for _, saf := range specifiedProtoFiles {
-					jr.GenCodeProtoSpecMap[filepath.Clean(saf)] = jr.ProtoSpecMap[filepath.Clean(saf)]
+					genCodeProtoSpecMap[filepath.Clean(saf)] = protoSpecMap[filepath.Clean(saf)]
 				}
 			}
 		}
 	default:
 		// 否则生成代码的 proto 文件为全量 proto 文件
-		genCodeProtoFiles = jr.ProtoFiles
-		jr.GenCodeProtoSpecMap = jr.ProtoSpecMap
+		genCodeProtoFiles = protoFiles
+		genCodeProtoSpecMap = protoSpecMap
 	}
-	jr.GenCodeProtoFiles = genCodeProtoFiles
 
 	// ignore proto desc
 	for _, v := range config.C.Gen.DescIgnore {
 		if !osx.IsDir(v) {
 			if filepath.Ext(v) == ".proto" {
 				// delete item in genCodeApiFiles by filename
-				jr.GenCodeProtoFiles = lo.Reject(jr.GenCodeProtoFiles, func(item string, _ int) bool {
-					return item == v
+				genCodeProtoFiles = lo.Reject(genCodeProtoFiles, func(item string, _ int) bool {
+					return item == filepath.Clean(v)
+				})
+				protoFiles = lo.Reject(protoFiles, func(item string, _ int) bool {
+					return item == filepath.Clean(v)
 				})
 				// delete map key
-				delete(jr.GenCodeProtoSpecMap, v)
+				delete(genCodeProtoSpecMap, filepath.Clean(v))
+				delete(protoSpecMap, filepath.Clean(v))
 			}
 		} else {
-			specifiedApiFiles, err := jzerodesc.GetProtoFilepath(v)
+			specifiedProtoFiles, err := jzerodesc.GetProtoFilepath(v)
 			if err != nil {
 				return err
 			}
-			for _, saf := range specifiedApiFiles {
-				jr.GenCodeProtoFiles = lo.Reject(jr.GenCodeProtoFiles, func(item string, _ int) bool {
+			for _, saf := range specifiedProtoFiles {
+				genCodeProtoFiles = lo.Reject(genCodeProtoFiles, func(item string, _ int) bool {
 					return item == saf
 				})
-				delete(jr.GenCodeProtoSpecMap, saf)
+				protoFiles = lo.Reject(protoFiles, func(item string, _ int) bool {
+					return item == saf
+				})
+				delete(genCodeProtoSpecMap, saf)
+				delete(protoSpecMap, saf)
 			}
 		}
 	}
 
-	if len(jr.GenCodeProtoFiles) == 0 {
+	if len(genCodeProtoFiles) == 0 {
 		return nil
 	}
 
@@ -172,13 +173,13 @@ func (jr *JzeroRpc) Gen() error {
 	goctlHome = tempDir
 	logx.Debugf("goctl_home = %s", goctlHome)
 
-	for _, v := range jr.ProtoFiles {
-		allLogicFiles, err := jr.GetAllLogicFiles(v, jr.ProtoSpecMap[v])
+	for _, v := range protoFiles {
+		allLogicFiles, err := jr.GetAllLogicFiles(v, protoSpecMap[v])
 		if err != nil {
 			return err
 		}
 
-		allServerFiles, err := jr.GetAllServerFiles(v, jr.ProtoSpecMap[v])
+		allServerFiles, err := jr.GetAllServerFiles(v, protoSpecMap[v])
 		if err != nil {
 			return err
 		}
@@ -212,8 +213,8 @@ func (jr *JzeroRpc) Gen() error {
 
 		for _, file := range allServerFiles {
 			if filepath.Clean(file.DescFilepath) == filepath.Clean(v) {
-				if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
-					if err := jr.removeServerSuffix(file.Path); err != nil {
+				if _, ok := genCodeProtoSpecMap[file.DescFilepath]; ok {
+					if err = jr.removeServerSuffix(file.Path); err != nil {
 						goctlconsole.Warning("[warning]: remove server suffix %s meet error %v", file.Path, err)
 						continue
 					}
@@ -222,7 +223,7 @@ func (jr *JzeroRpc) Gen() error {
 		}
 
 		for _, file := range allLogicFiles {
-			if _, ok := jr.GenCodeProtoSpecMap[file.DescFilepath]; ok {
+			if _, ok := genCodeProtoSpecMap[file.DescFilepath]; ok {
 				if err := jr.removeLogicSuffix(file.Path); err != nil {
 					goctlconsole.Warning("[warning]: remove logic suffix %s meet error %v", file.Path, err)
 					continue
@@ -241,7 +242,7 @@ func (jr *JzeroRpc) Gen() error {
 
 		// # gen proto descriptor
 		if lo.Contains(genCodeProtoFiles, v) {
-			if jzerodesc.IsNeedGenProtoDescriptor(jr.ProtoSpecMap[v]) {
+			if jzerodesc.IsNeedGenProtoDescriptor(protoSpecMap[v]) {
 				if !pathx.FileExists(jzerodesc.GetProtoDescriptorPath(v)) {
 					_ = os.MkdirAll(filepath.Dir(jzerodesc.GetProtoDescriptorPath(v)), 0o755)
 				}
@@ -262,14 +263,14 @@ func (jr *JzeroRpc) Gen() error {
 			}
 		}
 
-		for _, s := range jr.ProtoSpecMap[v].Service {
+		for _, s := range protoSpecMap[v].Service {
 			serverImports = append(serverImports, fmt.Sprintf(`%ssvr "%s/internal/server/%s"`, strings.ToLower(s.Name), jr.Module, strings.ToLower(s.Name)))
-			registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%s(ctx))", filepath.Base(jr.ProtoSpecMap[v].GoPackage), stringx.FirstUpper(s.Name), strings.ToLower(s.Name), stringx.FirstUpper(stringx.ToCamel(s.Name))))
+			registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%s(ctx))", filepath.Base(protoSpecMap[v].GoPackage), stringx.FirstUpper(s.Name), strings.ToLower(s.Name), stringx.FirstUpper(stringx.ToCamel(s.Name))))
 		}
-		pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(jr.ProtoSpecMap[v].GoPackage, "./")))
+		pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(protoSpecMap[v].GoPackage, "./")))
 	}
 
-	if len(jr.GenCodeProtoFiles) > 0 {
+	if len(genCodeProtoFiles) > 0 {
 		if !config.C.Quiet {
 			fmt.Println(console.Green("Done"))
 		}
@@ -279,7 +280,7 @@ func (jr *JzeroRpc) Gen() error {
 		if err = jr.genServer(serverImports, pbImports, registerServers); err != nil {
 			return err
 		}
-		if err = jr.genApiMiddlewares(); err != nil {
+		if err = jr.genApiMiddlewares(protoFiles); err != nil {
 			return err
 		}
 	}

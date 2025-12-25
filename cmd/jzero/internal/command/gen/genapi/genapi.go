@@ -31,11 +31,6 @@ import (
 
 type JzeroApi struct {
 	Module string
-
-	ApiFiles          []string
-	GenCodeApiFiles   []string
-	ApiSpecMap        map[string]*spec.ApiSpec
-	GenCodeApiSpecMap map[string]*spec.ApiSpec
 }
 
 type (
@@ -62,16 +57,15 @@ func (ja *JzeroApi) Gen() error {
 		return err
 	}
 
-	ja.ApiFiles = apiFiles
-	ja.ApiSpecMap = make(map[string]*spec.ApiSpec, len(apiFiles))
-	ja.GenCodeApiSpecMap = make(map[string]*spec.ApiSpec, len(apiFiles))
+	apiSpecMap := make(map[string]*spec.ApiSpec, len(apiFiles))
+	genCodeApiSpecMap := make(map[string]*spec.ApiSpec, len(apiFiles))
 
 	for _, v := range apiFiles {
 		apiSpec, err := parser.Parse(v, nil)
 		if err != nil {
 			return errors.Wrapf(err, "parse %s", v)
 		}
-		ja.ApiSpecMap[v] = apiSpec
+		apiSpecMap[v] = apiSpec
 	}
 
 	var genCodeApiFiles []string
@@ -84,7 +78,7 @@ func (ja *JzeroApi) Gen() error {
 			// 获取变动的 api 文件
 			genCodeApiFiles = append(genCodeApiFiles, m...)
 			for _, file := range m {
-				ja.GenCodeApiSpecMap[file] = ja.ApiSpecMap[file]
+				genCodeApiSpecMap[file] = apiSpecMap[file]
 			}
 		}
 	case len(config.C.Gen.Desc) > 0:
@@ -93,7 +87,7 @@ func (ja *JzeroApi) Gen() error {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".api" {
 					genCodeApiFiles = append(genCodeApiFiles, filepath.Join(strings.Split(filepath.ToSlash(filepath.Clean(v)), "/")...))
-					ja.GenCodeApiSpecMap[filepath.Clean(v)] = ja.ApiSpecMap[filepath.Clean(v)]
+					genCodeApiSpecMap[filepath.Clean(v)] = apiSpecMap[filepath.Clean(v)]
 				}
 			} else {
 				specifiedApiFiles, err := desc.FindApiFiles(v)
@@ -102,30 +96,33 @@ func (ja *JzeroApi) Gen() error {
 				}
 				genCodeApiFiles = append(genCodeApiFiles, specifiedApiFiles...)
 				for _, saf := range specifiedApiFiles {
-					ja.GenCodeApiSpecMap[filepath.Clean(saf)] = ja.ApiSpecMap[filepath.Clean(saf)]
+					genCodeApiSpecMap[filepath.Clean(saf)] = apiSpecMap[filepath.Clean(saf)]
 				}
 			}
 		}
 	default:
 		// 否则就是全量的 api 文件
-		genCodeApiFiles = ja.ApiFiles
+		genCodeApiFiles = apiFiles
 		// clone 一份 gen code api spec map
-		for k, v := range ja.ApiSpecMap {
-			ja.GenCodeApiSpecMap[k] = v
+		for k, v := range apiSpecMap {
+			genCodeApiSpecMap[k] = v
 		}
 	}
-	ja.GenCodeApiFiles = genCodeApiFiles
 
 	// ignore api desc
 	for _, v := range config.C.Gen.DescIgnore {
 		if !osx.IsDir(v) {
 			if filepath.Ext(v) == ".api" {
 				// delete item in genCodeApiFiles by filename
-				ja.GenCodeApiFiles = lo.Reject(ja.GenCodeApiFiles, func(item string, _ int) bool {
-					return item == v
+				genCodeApiFiles = lo.Reject(genCodeApiFiles, func(item string, _ int) bool {
+					return item == filepath.Clean(v)
+				})
+				apiFiles = lo.Reject(apiFiles, func(item string, _ int) bool {
+					return item == filepath.Clean(v)
 				})
 				// delete map key
-				delete(ja.GenCodeApiSpecMap, v)
+				delete(genCodeApiSpecMap, filepath.Clean(v))
+				delete(apiSpecMap, filepath.Clean(v))
 			}
 		} else {
 			specifiedApiFiles, err := desc.FindApiFiles(v)
@@ -133,15 +130,19 @@ func (ja *JzeroApi) Gen() error {
 				return err
 			}
 			for _, saf := range specifiedApiFiles {
-				ja.GenCodeApiFiles = lo.Reject(ja.GenCodeApiFiles, func(item string, _ int) bool {
+				genCodeApiFiles = lo.Reject(genCodeApiFiles, func(item string, _ int) bool {
 					return item == saf
 				})
-				delete(ja.GenCodeApiSpecMap, saf)
+				apiFiles = lo.Reject(apiFiles, func(item string, _ int) bool {
+					return item == saf
+				})
+				delete(genCodeApiSpecMap, saf)
+				delete(apiSpecMap, saf)
 			}
 		}
 	}
 
-	if len(ja.GenCodeApiFiles) == 0 {
+	if len(genCodeApiFiles) == 0 {
 		return nil
 	}
 
@@ -149,13 +150,13 @@ func (ja *JzeroApi) Gen() error {
 		fmt.Printf("%s to generate api code from api files\n", console.Green("Start"))
 	}
 
-	err = ja.generateApiCode()
+	err = ja.generateApiCode(apiFiles, apiSpecMap, genCodeApiFiles, genCodeApiSpecMap)
 	if err != nil {
 		return err
 	}
 
 	// 将 types.go 分 group 或者分 dir
-	err = ja.separateTypesGo()
+	err = ja.separateTypesGo(apiFiles, apiSpecMap)
 	if err != nil {
 		return err
 	}
@@ -166,9 +167,9 @@ func (ja *JzeroApi) Gen() error {
 	return nil
 }
 
-func (ja *JzeroApi) generateApiCode() error {
-	for _, file := range ja.GenCodeApiFiles {
-		if parse, ok := ja.GenCodeApiSpecMap[file]; ok {
+func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*spec.ApiSpec, genCodeApiFiles []string, genCodeApiSpecMap map[string]*spec.ApiSpec) error {
+	for _, file := range genCodeApiFiles {
+		if parse, ok := genCodeApiSpecMap[file]; ok {
 			for _, group := range parse.Service.Groups {
 				dirFile, err := os.ReadDir(filepath.Join(config.C.Wd(), "internal", "handler", group.GetAnnotation("group")))
 				if err == nil {
@@ -213,11 +214,11 @@ func (ja *JzeroApi) generateApiCode() error {
 	var allRoutesGoBodyMap sync.Map
 
 	var eg errgroup.Group
-	eg.SetLimit(len(ja.ApiFiles))
-	for _, v := range ja.ApiFiles {
+	eg.SetLimit(len(apiFiles))
+	for _, v := range apiFiles {
 		cv := v
 		eg.Go(func() error {
-			routesGoBody, err := ja.getRoutesGoBody(cv)
+			routesGoBody, err := ja.getRoutesGoBody(cv, apiSpecMap)
 			if err != nil {
 				return err
 			}
@@ -232,20 +233,20 @@ func (ja *JzeroApi) generateApiCode() error {
 		return err
 	}
 
-	for _, v := range ja.ApiFiles {
+	for _, v := range apiFiles {
 		if s, ok := allRoutesGoBodyMap.Load(v); ok {
 			allRoutesGoBody += cast.ToString(s) + "\n"
 		}
 	}
 
-	for _, v := range ja.GenCodeApiFiles {
-		if len(ja.ApiSpecMap[v].Service.Routes()) > 0 {
-			logicFiles, err := ja.getAllLogicFiles(v, ja.ApiSpecMap[v])
+	for _, v := range genCodeApiFiles {
+		if len(apiSpecMap[v].Service.Routes()) > 0 {
+			logicFiles, err := ja.getAllLogicFiles(v, apiSpecMap[v])
 			if err != nil {
 				return err
 			}
 
-			handlerFiles, err := ja.getAllHandlerFiles(v, ja.ApiSpecMap[v])
+			handlerFiles, err := ja.getAllHandlerFiles(v, apiSpecMap[v])
 			if err != nil {
 				return err
 			}
@@ -267,15 +268,15 @@ func (ja *JzeroApi) generateApiCode() error {
 
 			// patch handler
 			for _, file := range handlerFiles {
-				if _, ok := ja.GenCodeApiSpecMap[file.ApiFilepath]; ok {
-					if err = ja.patchHandler(file); err != nil {
+				if _, ok := genCodeApiSpecMap[file.ApiFilepath]; ok {
+					if err = ja.patchHandler(file, genCodeApiSpecMap); err != nil {
 						return errors.Wrapf(err, "rewrite %s", file.Path)
 					}
 				}
 			}
 			for _, file := range logicFiles {
-				if _, ok := ja.GenCodeApiSpecMap[file.DescFilepath]; ok {
-					if err = ja.patchLogic(file); err != nil {
+				if _, ok := genCodeApiSpecMap[file.DescFilepath]; ok {
+					if err = ja.patchLogic(file, genCodeApiSpecMap); err != nil {
 						return errors.Wrapf(err, "rewrite %s", file.Path)
 					}
 				}
@@ -283,8 +284,8 @@ func (ja *JzeroApi) generateApiCode() error {
 		}
 	}
 
-	for _, v := range ja.ApiFiles {
-		for _, g := range ja.ApiSpecMap[v].Service.Groups {
+	for _, v := range apiFiles {
+		for _, g := range apiSpecMap[v].Service.Groups {
 			if g.GetAnnotation("group") != "" {
 				handlerImports = append(handlerImports, fmt.Sprintf(`%s "%s/internal/handler/%s"`, strings.ReplaceAll(g.GetAnnotation("group"), "/", ""), ja.Module, g.GetAnnotation("group")))
 			}
@@ -311,7 +312,7 @@ func (ja *JzeroApi) generateApiCode() error {
 		if !config.C.Quiet {
 			fmt.Printf("%s to generate internal/handler/route2code.go\n", console.Green("Start"))
 		}
-		if route2CodeBytes, err := ja.genRoute2Code(); err != nil {
+		if route2CodeBytes, err := ja.genRoute2Code(apiSpecMap); err != nil {
 			return err
 		} else {
 			if err = os.WriteFile(filepath.Join("internal", "handler", "route2code.go"), route2CodeBytes, 0o644); err != nil {

@@ -22,14 +22,14 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
-func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {
+func (ja *JzeroApi) getRoutesGoBody(fp string, apiSpecMap map[string]*spec.ApiSpec) (string, error) {
 	rootPkg, projectPkg, err := golang.GetParentPackageWithModule(config.C.Wd(), ja.Module)
 	if err != nil {
 		return "", err
 	}
 
-	if len(ja.ApiSpecMap[fp].Service.Routes()) > 0 {
-		routesGoBody, err := jgogen.GenRoutesString(rootPkg, projectPkg, &zeroconfig.Config{NamingFormat: config.C.Style}, ja.ApiSpecMap[fp])
+	if len(apiSpecMap[fp].Service.Routes()) > 0 {
+		routesGoBody, err := jgogen.GenRoutesString(rootPkg, projectPkg, &zeroconfig.Config{NamingFormat: config.C.Style}, apiSpecMap[fp])
 		if err != nil {
 			return "", err
 		}
@@ -38,7 +38,7 @@ func (ja *JzeroApi) getRoutesGoBody(fp string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		for _, g := range ja.ApiSpecMap[fp].Service.Groups {
+		for _, g := range apiSpecMap[fp].Service.Groups {
 			for _, route := range g.Routes {
 				ast.Inspect(f, func(node ast.Node) bool {
 					switch n := node.(type) {
@@ -88,9 +88,9 @@ type Route struct {
 	spec.Route
 }
 
-func (ja *JzeroApi) genRoute2Code() ([]byte, error) {
+func (ja *JzeroApi) genRoute2Code(apiSpecMap map[string]*spec.ApiSpec) ([]byte, error) {
 	var routes []Route
-	for _, s := range ja.ApiSpecMap {
+	for _, s := range apiSpecMap {
 		for _, g := range s.Service.Groups {
 			for _, r := range g.Routes {
 				route := Route{

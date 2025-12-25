@@ -80,14 +80,11 @@ var genSwaggerCmd = &cobra.Command{
 
 func GetCommand() *cobra.Command {
 	{
-		genCmd.PersistentFlags().StringSliceP("desc", "", []string{}, "set desc path")
-		genCmd.PersistentFlags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
-
+		genCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
+		genCmd.Flags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
 		genCmd.Flags().BoolP("git-change", "", false, "set is git change, if changes then generate code")
 		genCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
 		genCmd.Flags().StringSliceP("proto-include", "", []string{}, "proto include path")
-
-		// common model, support more db
 		genCmd.Flags().StringP("model-driver", "", "mysql", "goctl model driver. mysql or postgres")
 		genCmd.Flags().BoolP("model-strict", "", false, "goctl model strict mode, see [https://go-zero.dev/docs/tutorials/cli/model]")
 		genCmd.Flags().StringSliceP("model-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
@@ -98,20 +95,17 @@ func GetCommand() *cobra.Command {
 		genCmd.Flags().BoolP("model-cache", "", false, "goctl model cache")
 		genCmd.Flags().StringSliceP("model-cache-table", "", []string{"*"}, "goctl model cache tables")
 		genCmd.Flags().StringP("model-cache-prefix", "", "cache", "goctl model cache prefix")
-
-		// mongo type strings
 		genCmd.Flags().StringSliceP("mongo-type", "", []string{}, "mongo type name")
-		// mongo cache bool
 		genCmd.Flags().BoolP("mongo-cache", "", false, " Generate code with cache prefix [optional]")
-		// mongo cache prefix
 		genCmd.Flags().StringP("mongo-cache-prefix", "", "cache", "mongo cache prefix")
-		// mongo cache type
 		genCmd.Flags().StringSliceP("mongo-cache-type", "", []string{"*"}, "mongo cache type names to enable caching")
 	}
 
 	{
 		genCmd.AddCommand(genSwaggerCmd)
 
+		genSwaggerCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
+		genSwaggerCmd.Flags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
 		genSwaggerCmd.Flags().StringP("output", "o", filepath.Join("desc", "swagger"), "set swagger output dir")
 		genSwaggerCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
 		genSwaggerCmd.Flags().BoolP("merge", "", true, "is merge muti swagger to one file")
@@ -120,6 +114,8 @@ func GetCommand() *cobra.Command {
 	{
 		genCmd.AddCommand(genZRpcClientCmd)
 
+		genZRpcClientCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
+		genZRpcClientCmd.Flags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
 		genZRpcClientCmd.Flags().StringP("output", "o", "zrpcclient-go", "generate rpcclient code")
 		genZRpcClientCmd.Flags().StringP("goModule", "", "", "set go module name")
 		genZRpcClientCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")

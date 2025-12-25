@@ -104,13 +104,10 @@ type GenConfig struct {
 	// Deprecated
 	Style string `mapstructure:"style"`
 
-	Desc       []string `mapstructure:"desc"`
-	DescIgnore []string `mapstructure:"desc-ignore"`
-	GitChange  bool     `mapstructure:"git-change"`
-
-	// flags mapping
-	Route2Code bool
-
+	Desc                    []string `mapstructure:"desc"`
+	DescIgnore              []string `mapstructure:"desc-ignore"`
+	GitChange               bool     `mapstructure:"git-change"`
+	Route2Code              bool
 	ProtoInclude            []string `mapstructure:"proto-include"`
 	ModelDriver             string   `mapstructure:"model-driver"`
 	ModelStrict             bool     `mapstructure:"model-strict"`
@@ -137,32 +134,24 @@ type GenConfig struct {
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`
 }
 
-type GenSdkConfig struct {
+type GenSwaggerConfig struct {
+	Desc       []string `mapstructure:"desc"`
+	DescIgnore []string `mapstructure:"desc-ignore"`
+	Output     string   `mapstructure:"output"`
+	Route2Code bool     `mapstructure:"route2code"`
+	Merge      bool     `mapstructure:"merge"`
+}
+
+type GenZrpcclientConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
 	Desc       []string `mapstructure:"desc"`
 	DescIgnore []string `mapstructure:"desc-ignore"`
 	Output     string   `mapstructure:"output"`
-	Language   string   `mapstructure:"language"`
 	GoVersion  string   `mapstructure:"goVersion"`
 	GoModule   string   `mapstructure:"goModule"`
 	GoPackage  string   `mapstructure:"goPackage"`
 	Mono       bool     `mapstructure:"mono"`
-}
-
-type GenSwaggerConfig struct {
-	Output     string `mapstructure:"output"`
-	Route2Code bool   `mapstructure:"route2code"`
-	Merge      bool   `mapstructure:"merge"`
-}
-
-type GenZrpcclientConfig struct {
-	Hooks     HooksConfig `mapstructure:"hooks"`
-	Output    string      `mapstructure:"output"`
-	GoVersion string      `mapstructure:"goVersion"`
-	GoModule  string      `mapstructure:"goModule"`
-	GoPackage string      `mapstructure:"goPackage"`
-	Mono      bool        `mapstructure:"mono"`
 }
 
 type TemplateConfig struct {
@@ -221,8 +210,7 @@ type AddApiConfig struct{}
 
 type AddProtoConfig struct{}
 
-type AddSqlConfig struct {
-}
+type AddSqlConfig struct{}
 
 type AddSqlMigrationConfig struct{}
 

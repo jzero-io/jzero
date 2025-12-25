@@ -37,8 +37,8 @@ func Gen() (err error) {
 		var files []string
 
 		switch {
-		case len(config.C.Gen.Desc) > 0:
-			for _, v := range config.C.Gen.Desc {
+		case len(config.C.Gen.Swagger.Desc) > 0:
+			for _, v := range config.C.Gen.Swagger.Desc {
 				if !osx.IsDir(v) {
 					if filepath.Ext(v) == ".api" {
 						files = append(files, v)
@@ -72,7 +72,7 @@ func Gen() (err error) {
 			}
 		}
 
-		for _, v := range config.C.Gen.DescIgnore {
+		for _, v := range config.C.Gen.Swagger.DescIgnore {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".api" {
 					files = lo.Reject(files, func(item string, _ int) bool {
@@ -337,8 +337,8 @@ func Gen() (err error) {
 		var files []string
 
 		switch {
-		case len(config.C.Gen.Desc) > 0:
-			for _, v := range config.C.Gen.Desc {
+		case len(config.C.Gen.Swagger.Desc) > 0:
+			for _, v := range config.C.Gen.Swagger.Desc {
 				if !osx.IsDir(v) {
 					if filepath.Ext(v) == ".proto" {
 						files = append(files, v)
@@ -372,7 +372,7 @@ func Gen() (err error) {
 			}
 		}
 
-		for _, v := range config.C.Gen.DescIgnore {
+		for _, v := range config.C.Gen.Swagger.DescIgnore {
 			if !osx.IsDir(v) {
 				if filepath.Ext(v) == ".proto" {
 					files = lo.Reject(files, func(item string, _ int) bool {

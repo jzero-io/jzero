@@ -18,15 +18,15 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
-func (ja *JzeroApi) separateTypesGo() error {
+func (ja *JzeroApi) separateTypesGo(apiFiles []string, apiSpecMap map[string]*spec.ApiSpec) error {
 	var allTypes []spec.Type
 
-	for _, apiFile := range ja.ApiFiles {
-		typesGoString, err := gogen.BuildTypes(ja.ApiSpecMap[apiFile].Types)
+	for _, apiFile := range apiFiles {
+		typesGoString, err := gogen.BuildTypes(apiSpecMap[apiFile].Types)
 		if err != nil {
 			return err
 		}
-		goPackage, ok := ja.ApiSpecMap[apiFile].Info.Properties["go_package"]
+		goPackage, ok := apiSpecMap[apiFile].Info.Properties["go_package"]
 		if ok && goPackage != "" {
 			typesGoBytes, err := templatex.ParseTemplate("inner_types.go", map[string]any{
 				"Types":   typesGoString,
@@ -56,7 +56,7 @@ var (
 				return err
 			}
 		} else {
-			allTypes = append(allTypes, ja.ApiSpecMap[apiFile].Types...)
+			allTypes = append(allTypes, apiSpecMap[apiFile].Types...)
 		}
 	}
 

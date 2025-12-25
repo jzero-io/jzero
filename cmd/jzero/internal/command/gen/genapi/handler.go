@@ -64,7 +64,7 @@ func (ja *JzeroApi) getAllHandlerFiles(apiFilepath string, apiSpec *spec.ApiSpec
 	return handlerFiles, nil
 }
 
-func (ja *JzeroApi) patchHandler(file HandlerFile) error {
+func (ja *JzeroApi) patchHandler(file HandlerFile, genCodeApiSpecMap map[string]*spec.ApiSpec) error {
 	// Get the new file name of the file (without the 7 characters(Handler) before the ".go" extension)
 	newFilePath := file.Path[:len(file.Path)-10]
 	// patch style
@@ -95,7 +95,7 @@ func (ja *JzeroApi) patchHandler(file HandlerFile) error {
 
 	// split api types dir
 	if file.Package != "" {
-		for _, g := range ja.GenCodeApiSpecMap[file.ApiFilepath].Service.Groups {
+		for _, g := range genCodeApiSpecMap[file.ApiFilepath].Service.Groups {
 			if g.GetAnnotation("group") == file.Group {
 				if err = ja.updateHandlerImportedTypesPath(f, fset, file); err != nil {
 					return err
