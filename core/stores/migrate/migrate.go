@@ -44,6 +44,9 @@ type (
 		// Version returns the currently active migration version.
 		// If no migration has been applied, yet, it will return ErrNilVersion.
 		Version() (version uint, dirty bool, err error)
+
+		// Close source and database, return source error and database error
+		Close() (error, error)
 	}
 
 	MigrateOpts struct {
@@ -56,6 +59,10 @@ type (
 		migrate *migrate.Migrate
 	}
 )
+
+func (d *defaultMigrate) Close() (error, error) {
+	return d.migrate.Close()
+}
 
 func WithSource(source string) opts.Opt[MigrateOpts] {
 	return func(d *MigrateOpts) {
@@ -83,11 +90,11 @@ func (d MigrateOpts) DefaultOptions() MigrateOpts {
 	}
 }
 
-func NewMigrate(conf sqlx.SqlConf, op ...opts.Opt[MigrateOpts]) (Migrate, error) {
+func NewMigrate(sqlConf sqlx.SqlConf, op ...opts.Opt[MigrateOpts]) (Migrate, error) {
 	ops := opts.DefaultApply(op...)
 
 	var (
-		dataSource     = conf.DataSource
+		dataSource     = sqlConf.DataSource
 		source         = ops.Source
 		paramConnector string
 	)
@@ -98,7 +105,7 @@ func NewMigrate(conf sqlx.SqlConf, op ...opts.Opt[MigrateOpts]) (Migrate, error)
 		paramConnector = "?"
 	}
 
-	switch Driver(conf.DriverName) {
+	switch Driver(sqlConf.DriverName) {
 	case MySQL:
 		dataSource = "mysql://" + dataSource
 	case Pgx:
@@ -106,11 +113,11 @@ func NewMigrate(conf sqlx.SqlConf, op ...opts.Opt[MigrateOpts]) (Migrate, error)
 	case Sqlite:
 		dataSource = "sqlite://" + dataSource
 	default:
-		return nil, fmt.Errorf("unsupported driver: %s", conf.DriverName)
+		return nil, fmt.Errorf("unsupported driver: %s", sqlConf.DriverName)
 	}
 
 	if ops.SourceAppendDriver {
-		source = fmt.Sprintf("%s/%s", source, conf.DriverName)
+		source = fmt.Sprintf("%s/%s", source, sqlConf.DriverName)
 	}
 
 	dataSource = fmt.Sprintf("%s%sx-migrations-table=%s", dataSource, paramConnector, ops.XMigrationsTable)
