@@ -42,7 +42,7 @@ jzero gen zrpcclient --output simplerpcclient
 @tab Docker
 ```bash
 cd your_project
-docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen zrpcclient --name simplerpcclient
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen zrpcclient --output simplerpcclient
 ```
 :::
 
@@ -76,3 +76,38 @@ func main() {
 	fmt.Println(versionResponse)
 }
 ```
+
+### 服务端调用其他 zrpcclient 场景
+
+推荐将生成的 zrpcclient 放在 third_party 下, 并且为了区分服务端和客户端, 建议使用单独的 .jzero.yaml 生成 zrpcclient
+
+如:
+
+`third_party/matchingclient/.jzero.yaml`
+
+```yaml
+gen:
+  zrpcclient:
+    output: .
+```
+
+在 `third_party/matchingclient` 下执行 `jzero gen zrpcclient`
+
+```shell
+$ tree third_party/matchingclient -a
+third_party/matchingclient
+├── .jzero.yaml
+├── clientset.go
+├── desc
+│   └── proto
+│       └── matching.proto
+├── model
+│   └── types
+│       └── matching
+│           ├── matching.pb.go
+│           └── matching_grpc.pb.go
+└── typed
+    └── matching
+        └── matching.go
+```
+
