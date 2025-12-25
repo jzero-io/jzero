@@ -43,7 +43,17 @@ var genZRpcClientCmd = &cobra.Command{
 		var genModule bool
 		if config.C.Gen.Zrpcclient.GoModule == "" {
 			// module 为空, zrpcclient 作为服务端的一个 package
-			config.C.Gen.Zrpcclient.GoModule = filepath.ToSlash(filepath.Join(mod.Path, config.C.Gen.Zrpcclient.Output))
+			output := config.C.Gen.Zrpcclient.Output
+
+			// 计算输出路径的绝对路径
+			absOutput, err := filepath.Abs(output)
+			cobra.CheckErr(err)
+
+			// 计算相对于 go.mod 所在目录的相对路径
+			relPath, err := filepath.Rel(mod.Dir, absOutput)
+			cobra.CheckErr(err)
+
+			config.C.Gen.Zrpcclient.GoModule = filepath.ToSlash(filepath.Join(mod.Path, relPath))
 		} else {
 			// module 不为空, 则生成 go.mod 文件
 			if !config.C.Gen.Zrpcclient.Mono {
