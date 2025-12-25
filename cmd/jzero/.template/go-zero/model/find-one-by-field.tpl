@@ -29,6 +29,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 	}
 }
 
+{{if .withCacheEnabled}}
 func (m *default{{.upperStartCamelObject}}Model) FindOneNoCacheBy{{.upperField}}(ctx context.Context, session sqlx.Session, {{.in}}) (*{{.upperStartCamelObject}}, error) {
 	var resp {{.upperStartCamelObject}}
     var err error
@@ -53,7 +54,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneNoCacheBy{{.upperField}}
 	default:
 		return nil, err
 	}
-}
+}{{end}}
 {{else}}
 func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx context.Context, session sqlx.Session, {{.in}}) (*{{.upperStartCamelObject}}, error) {
 	var resp {{.upperStartCamelObject}}

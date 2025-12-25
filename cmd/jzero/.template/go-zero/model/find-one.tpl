@@ -21,6 +21,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOne(ctx context.Context, se
 	}
 }
 
+{{if .withCacheEnabled}}
 func (m *default{{.upperStartCamelObject}}Model) FindOneNoCache(ctx context.Context, session sqlx.Session, {{.lowerStartCamelPrimaryKey}} {{.dataType}}) (*{{.upperStartCamelObject}}, error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
 	sb.Where(sb.EQ(condition.QuoteWithFlavor(m.flavor, "{{.originalPrimaryKey}}"), {{.lowerStartCamelPrimaryKey}}))
@@ -41,7 +42,7 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneNoCache(ctx context.Cont
 	default:
 		return nil, err
 	}
-}
+}{{end}}
 {{else}}
 func (m *default{{.upperStartCamelObject}}Model) FindOne(ctx context.Context, session sqlx.Session, {{.lowerStartCamelPrimaryKey}} {{.dataType}}) (*{{.upperStartCamelObject}}, error) {
 	sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
