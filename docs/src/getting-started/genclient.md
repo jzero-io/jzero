@@ -36,7 +36,7 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 
 ```bash
 cd your_project
-jzero gen zrpcclient --name simplerpcclient
+jzero gen zrpcclient --output simplerpcclient
 ```
 
 @tab Docker
