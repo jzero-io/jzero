@@ -2,6 +2,7 @@ package genapi
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	goparser "go/parser"
 	"go/printer"
@@ -89,7 +90,10 @@ type Route struct {
 }
 
 func (ja *JzeroApi) genRoute2Code(apiSpecMap map[string]*spec.ApiSpec) ([]byte, error) {
-	var routes []Route
+	// Use map to deduplicate routes by Method+Path+Group
+	// This handles the case where an api file imports another api file with routes,
+	// which would otherwise cause duplicate map keys
+	routeMap := make(map[string]Route)
 	for _, s := range apiSpecMap {
 		for _, g := range s.Service.Groups {
 			for _, r := range g.Routes {
@@ -101,9 +105,19 @@ func (ja *JzeroApi) genRoute2Code(apiSpecMap map[string]*spec.ApiSpec) ([]byte, 
 					route.Path = g.GetAnnotation("prefix") + r.Path
 				}
 				route.Handler = strings.TrimSuffix(r.Handler, "Handler")
-				routes = append(routes, route)
+
+				// Create unique key for deduplication
+				// Method, Path, and Group together form a unique route identifier
+				routeKey := fmt.Sprintf("%s:%s:%s", route.Method, route.Path, route.Group)
+				routeMap[routeKey] = route
 			}
 		}
+	}
+
+	// Convert map to slice
+	var routes []Route
+	for _, route := range routeMap {
+		routes = append(routes, route)
 	}
 
 	// 先按 group 分组排序
