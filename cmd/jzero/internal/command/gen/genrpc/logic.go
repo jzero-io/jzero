@@ -219,11 +219,6 @@ func (jr *JzeroRpc) removeLogicSuffix(fp string) error {
 		return err
 	}
 
-	// remove logic suffix from package name
-	if f.Name.Name != "logic" && strings.HasSuffix(f.Name.Name, "logic") {
-		f.Name.Name = strings.TrimSuffix(f.Name.Name, "logic")
-	}
-
 	ast.Inspect(f, func(n ast.Node) bool {
 		if fn, ok := n.(*ast.FuncDecl); ok && strings.HasSuffix(fn.Name.Name, "Logic") {
 			fn.Name.Name = strings.TrimSuffix(fn.Name.Name, "Logic")

@@ -105,7 +105,7 @@ func RemoveExtraFiles(wd, style string) {
 	}
 
 	if pathx.FileExists(filepath.Join("desc", "proto")) {
-		protoFilenames, err := desc.GetProtoFilepath(filepath.Join("desc", "proto"))
+		protoFilenames, err := desc.FindRpcServiceProtoFiles(filepath.Join("desc", "proto"))
 		if err == nil {
 			for _, v := range protoFilenames {
 				v = filepath.Base(v)
