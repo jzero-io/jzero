@@ -212,13 +212,15 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*sp
 	var handlerImports ImportLines
 	var allRoutesGoBody string
 	var allRoutesGoBodyMap sync.Map
+	generatedRoutes := make(map[string]bool)
+	var generatedRoutesMutex sync.Mutex
 
 	var eg errgroup.Group
 	eg.SetLimit(len(apiFiles))
 	for _, v := range apiFiles {
 		cv := v
 		eg.Go(func() error {
-			routesGoBody, err := ja.getRoutesGoBody(cv, apiSpecMap)
+			routesGoBody, err := ja.getRoutesGoBody(cv, apiSpecMap, generatedRoutes, &generatedRoutesMutex)
 			if err != nil {
 				return err
 			}

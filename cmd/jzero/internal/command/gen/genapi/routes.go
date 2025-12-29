@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
@@ -23,13 +24,33 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
-func (ja *JzeroApi) getRoutesGoBody(fp string, apiSpecMap map[string]*spec.ApiSpec) (string, error) {
+func (ja *JzeroApi) getRoutesGoBody(fp string, apiSpecMap map[string]*spec.ApiSpec, generatedRoutes map[string]bool, mutex *sync.Mutex) (string, error) {
 	rootPkg, projectPkg, err := golang.GetParentPackageWithModule(config.C.Wd(), ja.Module)
 	if err != nil {
 		return "", err
 	}
 
 	if len(apiSpecMap[fp].Service.Routes()) > 0 {
+		// Check if all routes in this file have already been generated
+		mutex.Lock()
+		allRoutesGenerated := true
+		for _, g := range apiSpecMap[fp].Service.Groups {
+			for _, route := range g.Routes {
+				routeKey := fmt.Sprintf("%s:%s", route.Method, route.Path)
+				if !generatedRoutes[routeKey] {
+					allRoutesGenerated = false
+					// Mark this route as generated
+					generatedRoutes[routeKey] = true
+				}
+			}
+		}
+		mutex.Unlock()
+
+		// If all routes have been generated, skip this file
+		if allRoutesGenerated {
+			return "", nil
+		}
+
 		routesGoBody, err := jgogen.GenRoutesString(rootPkg, projectPkg, &zeroconfig.Config{NamingFormat: config.C.Style}, apiSpecMap[fp])
 		if err != nil {
 			return "", err
