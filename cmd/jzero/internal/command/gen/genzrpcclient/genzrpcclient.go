@@ -7,9 +7,11 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
+	"github.com/zeromicro/go-zero/core/logx"
 	conf "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/generator"
@@ -197,8 +199,53 @@ func Generate(genModule bool) (err error) {
 			protocolIncludePaths = append(protocolIncludePaths, fmt.Sprintf("-I%s", path))
 		}
 
-		protocCmd := fmt.Sprintf("protoc %s --go_out=%s --go-grpc_out=%s %s",
-			strings.Join(protocolIncludePaths, " "), pbDir, pbDir, fp)
+		// 获取非 RPC service 的排除第三方的 proto 文件，用于 --go_opt 参数
+		excludeThirdPartyProtoFiles, err := desc.FindNoRpcServiceExcludeThirdPartyProtoFiles(config.C.ProtoDir())
+		if err != nil {
+			return err
+		}
+
+		// 获取 proto 的 go_package
+		var protoParser protoparse.Parser
+		protoParser.InferImportPaths = false
+
+		protoDir := filepath.Join("desc", "proto")
+		thirdPartyProtoDir := filepath.Join("desc", "proto", "third_party")
+		protoParser.ImportPaths = []string{protoDir, thirdPartyProtoDir}
+		protoParser.IncludeSourceCodeInfo = true
+
+		// 构建 protoc 命令基础部分
+		protocCmd := fmt.Sprintf("protoc %s --go_out=%s --go-grpc_out=%s",
+			strings.Join(protocolIncludePaths, " "), pbDir, pbDir)
+
+		// 添加 --go_opt 和 --go-grpc_opt 参数
+		for _, exp := range excludeThirdPartyProtoFiles {
+			rel, err := filepath.Rel(config.C.ProtoDir(), exp)
+			if err != nil {
+				return err
+			}
+
+			fds, err := protoParser.ParseFiles(rel)
+			if err != nil {
+				return err
+			}
+
+			if len(fds) == 0 {
+				continue
+			}
+
+			goPackage := fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
+
+			protocCmd += fmt.Sprintf(" --go_opt=M%s=%s", rel, func() string {
+				if strings.HasPrefix(goPackage, config.C.Gen.Zrpcclient.GoModule) {
+					return goPackage
+				}
+				return filepath.ToSlash(filepath.Join(config.C.Gen.Zrpcclient.GoModule, "model", goPackage))
+			}())
+		}
+
+		protocCmd += fmt.Sprintf(" %s", fp)
+		logx.Debugf(protocCmd)
 		resp, err := execx.Run(protocCmd, wd)
 		if err != nil {
 			return errors.Errorf("err: [%v], resp: [%s]", err, resp)
@@ -277,6 +324,11 @@ func Generate(genModule bool) (err error) {
 		return err
 	}
 
+	err = genNoRpcServiceExcludeThirdPartyProto(genModule, config.C.Gen.Zrpcclient.GoModule)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -331,8 +383,6 @@ func generatePluginFiles(plugins []plugin.Plugin, goModule, output string) error
 			var importPaths []string
 			importPaths = append(importPaths, config.C.ProtoDir())
 			importPaths = append(importPaths, filepath.Join(config.C.ProtoDir(), "third_party"))
-			importPaths = append(importPaths, filepath.Join(p.Path, "desc", "proto"))
-			importPaths = append(importPaths, filepath.Join(p.Path, "desc", "proto", "third_party"))
 
 			// 构建 -I 参数
 			var protocolIncludePaths []string
@@ -340,8 +390,62 @@ func generatePluginFiles(plugins []plugin.Plugin, goModule, output string) error
 				protocolIncludePaths = append(protocolIncludePaths, fmt.Sprintf("-I%s", path))
 			}
 
-			protocCmd := fmt.Sprintf("protoc %s --go_out=%s --go-grpc_out=%s %s",
-				strings.Join(protocolIncludePaths, " "), pluginModelDir, pluginModelDir, fp)
+			// 获取非 RPC service 的排除第三方的 proto 文件，用于 --go_opt 参数
+			excludeThirdPartyProtoFiles, err := desc.FindNoRpcServiceExcludeThirdPartyProtoFiles(config.C.ProtoDir())
+			if err != nil {
+				return err
+			}
+
+			// 获取插件的非 RPC service proto 文件
+			pluginExcludeThirdPartyProtoFiles, err := desc.FindNoRpcServiceExcludeThirdPartyProtoFiles(filepath.Join(p.Path, "desc", "proto"))
+			if err == nil {
+				excludeThirdPartyProtoFiles = append(excludeThirdPartyProtoFiles, pluginExcludeThirdPartyProtoFiles...)
+			}
+
+			// 获取 proto 的 go_package
+			var protoParser protoparse.Parser
+			protoParser.InferImportPaths = false
+
+			protoDir := filepath.Join("desc", "proto")
+			thirdPartyProtoDir := filepath.Join("desc", "proto", "third_party")
+			protoParser.ImportPaths = []string{protoDir, thirdPartyProtoDir}
+			protoParser.IncludeSourceCodeInfo = true
+
+			// 构建 protoc 命令基础部分
+			protocCmd := fmt.Sprintf("protoc %s --go_out=%s --go-grpc_out=%s",
+				strings.Join(protocolIncludePaths, " "), pluginModelDir, pluginModelDir)
+
+			// 添加 --go_opt 参数
+			for _, exp := range excludeThirdPartyProtoFiles {
+				rel, err := filepath.Rel(config.C.ProtoDir(), exp)
+				if err != nil {
+					// 尝试从插件目录计算相对路径
+					rel, err = filepath.Rel(filepath.Join(p.Path, "desc", "proto"), exp)
+					if err != nil {
+						continue
+					}
+				}
+
+				fds, err := protoParser.ParseFiles(rel)
+				if err != nil {
+					continue
+				}
+
+				if len(fds) == 0 {
+					continue
+				}
+
+				goPackage := fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
+
+				protocCmd += fmt.Sprintf(" --go_opt=M%s=%s", rel, func() string {
+					if strings.HasPrefix(goPackage, goModule) {
+						return goPackage
+					}
+					return filepath.ToSlash(filepath.Join(goModule, "plugins", p.Name, "model", goPackage))
+				}())
+			}
+
+			protocCmd += fmt.Sprintf(" %s", fp)
 			resp, err := execx.Run(protocCmd, wd)
 			if err != nil {
 				return errors.Errorf("err: [%v], resp: [%s]", err, resp)
@@ -440,5 +544,88 @@ func generatePluginFiles(plugins []plugin.Plugin, goModule, output string) error
 		return err
 	}
 
+	return nil
+}
+
+func genNoRpcServiceExcludeThirdPartyProto(genModule bool, module string) error {
+	excludeThirdPartyProtoFiles, err := desc.FindNoRpcServiceExcludeThirdPartyProtoFiles(config.C.ProtoDir())
+	if err != nil {
+		return err
+	}
+
+	// 获取 proto 的 go_package
+	var protoParser protoparse.Parser
+	protoParser.InferImportPaths = false
+
+	protoDir := filepath.Join("desc", "proto")
+	thirdPartyProtoDir := filepath.Join("desc", "proto", "third_party")
+	protoParser.ImportPaths = []string{protoDir, thirdPartyProtoDir}
+	protoParser.IncludeSourceCodeInfo = true
+
+	pbDir := filepath.Join(config.C.Gen.Zrpcclient.Output, "model")
+	err = os.MkdirAll(pbDir, 0o755)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range excludeThirdPartyProtoFiles {
+		rel, err := filepath.Rel(config.C.ProtoDir(), v)
+		if err != nil {
+			return err
+		}
+
+		fds, err := protoParser.ParseFiles(rel)
+		if err != nil {
+			return err
+		}
+
+		if len(fds) == 0 {
+			continue
+		}
+
+		goPackage := fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
+
+		getMod, err := mod.GetGoMod(config.C.Wd())
+		if err != nil {
+			return err
+		}
+
+		if !genModule {
+			module = getMod.Path
+		} else {
+			module = config.C.Gen.Zrpcclient.GoModule
+		}
+
+		command := fmt.Sprintf("protoc %s -I%s -I%s --go_out=%s --go_opt=module=%s --go_opt=M%s=%s --go-grpc_out=%s --go-grpc_opt=module=%s --go-grpc_opt=M%s=%s",
+			v,
+			config.C.ProtoDir(),
+			filepath.Join(config.C.ProtoDir(), "third_party"),
+			".",
+			module,
+			rel,
+			func() string {
+				if strings.HasPrefix(goPackage, module) {
+					return goPackage
+				}
+				return filepath.ToSlash(filepath.Join(module, config.C.Gen.Zrpcclient.Output, "model", goPackage))
+			}(),
+			".",
+			module,
+			rel,
+			func() string {
+				if strings.HasPrefix(goPackage, module) {
+					return goPackage
+				}
+				return filepath.ToSlash(filepath.Join(module, config.C.Gen.Zrpcclient.Output, "model", goPackage))
+			}(),
+		)
+
+		logx.Debug(command)
+
+		_, err = execx.Run(command, config.C.Wd())
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
