@@ -111,7 +111,7 @@ func Generate(genModule bool) (err error) {
 					files = append(files, v)
 				}
 			} else {
-				specifiedProtoFiles, err := desc.GetProtoFilepath(v)
+				specifiedProtoFiles, err := desc.FindRpcServiceProtoFiles(v)
 				if err != nil {
 					return err
 				}
@@ -119,7 +119,7 @@ func Generate(genModule bool) (err error) {
 			}
 		}
 	default:
-		files, err = desc.GetProtoFilepath(config.C.ProtoDir())
+		files, err = desc.FindRpcServiceProtoFiles(config.C.ProtoDir())
 		if err != nil {
 			return err
 		}
@@ -133,7 +133,7 @@ func Generate(genModule bool) (err error) {
 				})
 			}
 		} else {
-			specifiedProtoFiles, err := desc.GetProtoFilepath(v)
+			specifiedProtoFiles, err := desc.FindRpcServiceProtoFiles(v)
 			if err != nil {
 				return err
 			}
@@ -219,7 +219,7 @@ func Generate(genModule bool) (err error) {
 	hasPlugins := len(plugins) > 0
 	for _, p := range plugins {
 		if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
-			pluginProtoFiles, err := desc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
+			pluginProtoFiles, err := desc.FindRpcServiceProtoFiles(filepath.Join(p.Path, "desc", "proto"))
 			if err == nil && len(pluginProtoFiles) > 0 {
 				hasPlugins = true
 				break
@@ -299,7 +299,7 @@ func generatePluginFiles(plugins []plugin.Plugin, goModule, output string) error
 		}
 
 		// 获取插件的 proto 文件
-		pluginProtoFiles, err := desc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
+		pluginProtoFiles, err := desc.FindRpcServiceProtoFiles(filepath.Join(p.Path, "desc", "proto"))
 		if err != nil || len(pluginProtoFiles) == 0 {
 			continue
 		}

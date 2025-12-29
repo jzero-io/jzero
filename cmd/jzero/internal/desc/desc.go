@@ -28,7 +28,7 @@ func GetFrameType() (string, error) {
 		frameType = "rpc"
 
 		// 获取全量 proto 文件
-		protoFiles, err := GetProtoFilepath(config.C.ProtoDir())
+		protoFiles, err := FindRpcServiceProtoFiles(config.C.ProtoDir())
 		if err != nil {
 			return "", err
 		}
@@ -73,7 +73,7 @@ func IsNeedGenProtoDescriptor(proto rpcparser.Proto) bool {
 	return false
 }
 
-func GetProtoFilepath(protoDirPath string) ([]string, error) {
+func FindRpcServiceProtoFiles(protoDirPath string) ([]string, error) {
 	var protoFilenames []string
 
 	protoDir, err := os.ReadDir(protoDirPath)
@@ -83,7 +83,7 @@ func GetProtoFilepath(protoDirPath string) ([]string, error) {
 
 	for _, protoFile := range protoDir {
 		if protoFile.IsDir() {
-			filenames, err := GetProtoFilepath(filepath.Join(protoDirPath, protoFile.Name()))
+			filenames, err := FindRpcServiceProtoFiles(filepath.Join(protoDirPath, protoFile.Name()))
 			if err != nil {
 				return nil, err
 			}
@@ -91,6 +91,37 @@ func GetProtoFilepath(protoDirPath string) ([]string, error) {
 		} else {
 			if strings.HasSuffix(protoFile.Name(), ".proto") {
 				if b, err := protoHasService(filepath.Join(protoDirPath, protoFile.Name())); err == nil && b {
+					protoFilenames = append(protoFilenames, filepath.Join(protoDirPath, protoFile.Name()))
+				} else if err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+	return protoFilenames, nil
+}
+
+func FindNoRpcServiceExcludeThirdPartyProtoFiles(protoDirPath string) ([]string, error) {
+	var protoFilenames []string
+
+	protoDir, err := os.ReadDir(protoDirPath)
+	if err != nil {
+		return nil, nil
+	}
+
+	for _, protoFile := range protoDir {
+		if protoFile.IsDir() {
+			if protoFile.Name() == "third_party" {
+				continue
+			}
+			filenames, err := FindNoRpcServiceExcludeThirdPartyProtoFiles(filepath.Join(protoDirPath, protoFile.Name()))
+			if err != nil {
+				return nil, err
+			}
+			protoFilenames = append(protoFilenames, filenames...)
+		} else {
+			if strings.HasSuffix(protoFile.Name(), ".proto") {
+				if b, err := protoHasService(filepath.Join(protoDirPath, protoFile.Name())); err == nil && !b {
 					protoFilenames = append(protoFilenames, filepath.Join(protoDirPath, protoFile.Name()))
 				} else if err != nil {
 					return nil, err
