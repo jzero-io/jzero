@@ -240,7 +240,7 @@ func (jr *JzeroRpc) Gen() error {
 			}
 
 			if len(config.C.Gen.ProtoInclude) > 0 {
-				command += fmt.Sprintf("-I%s ", strings.Join(config.C.Gen.ProtoInclude, " -I"))
+				command += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.ProtoInclude, " -I"))
 			}
 
 			logx.Debug(command)
