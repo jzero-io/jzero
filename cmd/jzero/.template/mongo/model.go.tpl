@@ -6,12 +6,12 @@ import (
 	"github.com/jzero-io/jzero/core/stores/monx"
     "github.com/eddieowens/opts"
 
-	{{range $v := .Imports}}{{$v | base}} "{{$v}}"
+	{{range $v := .ImportsWithAlias}}{{if $v.Alias}}{{$v.Alias}}{{end}} "{{$v.Path}}"
 	{{end}}
 )
 
-{{range $k,$v := .MutiModels}} type {{$k | FirstUpper | ToCamel}}Model struct {
-    {{range $vv := $v}}{{$vv | FirstUpper | ToCamel}} {{$vv}}.{{$vv | FirstUpper |ToCamel}}Model
+{{range $k,$v := .MutiModelsWithAlias}} type {{$k | FirstUpper | ToCamel}}Model struct {
+    {{range $vv := $v}}{{$vv.Name | FirstUpper | ToCamel}} {{$vv.Alias}}.{{$vv.Name | FirstUpper |ToCamel}}Model
     {{end}}
 }
 {{end}}
@@ -28,9 +28,9 @@ func NewModel(url, db string, op ...opts.Opt[monx.MonOpts]) Model {
 	}
 }
 
-{{range $k,$v := .MutiModels}} func New{{$k | FirstUpper | ToCamel}}Model(url, db string, op ...opts.Opt[monx.MonOpts]) {{$k | FirstUpper | ToCamel}}Model {
+{{range $k,$v := .MutiModelsWithAlias}} func New{{$k | FirstUpper | ToCamel}}Model(url, db string, op ...opts.Opt[monx.MonOpts]) {{$k | FirstUpper | ToCamel}}Model {
 	return {{$k | FirstUpper | ToCamel}}Model{
-        {{range $vv := $v}}{{$vv | FirstUpper | ToCamel}}: {{$vv}}.New{{ $vv | FirstUpper | ToCamel }}Model(url, db, op...),
+        {{range $vv := $v}}{{$vv.Name | FirstUpper | ToCamel}}: {{$vv.Alias}}.New{{ $vv.Name | FirstUpper | ToCamel }}Model(url, db, op...),
         {{end}}
 	}
 }

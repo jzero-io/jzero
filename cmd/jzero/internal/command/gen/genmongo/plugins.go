@@ -15,34 +15,59 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
+type ImportWithAlias struct {
+	Alias string
+	Path  string
+}
+
+type NameWithAlias struct {
+	Alias string
+	Name  string
+}
+
 func (jm *JzeroMongo) GenRegister(types []string) error {
 	logx.Debugf("get register tables: %v", types)
 
 	slices.Sort(types)
 
 	var imports []string
+	var importsWithAlias []ImportWithAlias
 	var typePackages []string
 
 	mutiModels := make(map[string][]string)
+	mutiModelsWithAlias := make(map[string][]NameWithAlias)
 
 	for _, t := range types {
 		var isMutiModel bool
+		tf := t
 		if strings.Contains(t, ".") {
-			t = filepath.Join(strings.Split(t, ".")...)
+			tf = filepath.Join(strings.Split(t, ".")...)
 			isMutiModel = true
 		}
-		mf := filepath.Join("internal", "mongo", strings.ToLower(t))
+		mf := filepath.Join("internal", "mongo", strings.ToLower(tf))
 		if !pathx.FileExists(mf) {
 			logx.Debugf("%s mongo model generated code not exists, skip", t)
 			continue
 		}
 
-		imports = append(imports, fmt.Sprintf("%s/internal/mongo/%s", jm.Module, strings.ToLower(filepath.ToSlash(t))))
-
 		if isMutiModel {
-			mutiModels[filepath.Dir(t)] = append(mutiModels[filepath.Dir(t)], strings.ToLower(filepath.Base(t)))
+			imports = append(imports, fmt.Sprintf("%s/internal/mongo/%s", jm.Module, strings.ToLower(filepath.ToSlash(tf))))
+			importsWithAlias = append(importsWithAlias, ImportWithAlias{
+				Alias: strings.ReplaceAll(strings.ReplaceAll(t, ".", "_"), "-", "_"),
+				Path:  fmt.Sprintf("%s/internal/mongo/%s", jm.Module, strings.ToLower(filepath.ToSlash(tf))),
+			})
+			mutiModels[filepath.Dir(tf)] = append(mutiModels[filepath.Dir(tf)], strings.ToLower(filepath.Base(tf)))
+			mutiModelsWithAlias[filepath.Dir(tf)] = append(mutiModelsWithAlias[filepath.Dir(tf)], NameWithAlias{
+				Alias: strings.ReplaceAll(strings.ReplaceAll(t, ".", "_"), "-", "_"),
+				Name:  strings.ToLower(filepath.Base(tf)),
+			})
 		} else {
-			typePackages = append(typePackages, strings.ToLower(t))
+			imports = append(imports, fmt.Sprintf("%s/internal/mongo/%s", jm.Module, strings.ToLower(filepath.ToSlash(tf))))
+			importsWithAlias = append(importsWithAlias, ImportWithAlias{
+				Alias: filepath.Base(tf),
+				Path:  fmt.Sprintf("%s/internal/mongo/%s", jm.Module, strings.ToLower(filepath.ToSlash(tf))),
+			})
+			typePackages = append(typePackages, strings.ToLower(tf))
 		}
 	}
 
@@ -51,9 +76,11 @@ func (jm *JzeroMongo) GenRegister(types []string) error {
 	logx.Debugf("get register muti models: %v", mutiModels)
 
 	template, err := templatex.ParseTemplate(filepath.Join("mongo", "model.go.tpl"), map[string]any{
-		"Imports":      imports,
-		"TypePackages": typePackages,
-		"MutiModels":   mutiModels,
+		"Imports":             imports,
+		"ImportsWithAlias":    importsWithAlias,
+		"TypePackages":        typePackages,
+		"MutiModels":          mutiModels,          // 兼容
+		"MutiModelsWithAlias": mutiModelsWithAlias, // 兼容
 	}, embeded.ReadTemplateFile(filepath.Join("mongo", "model.go.tpl")))
 	if err != nil {
 		return err
