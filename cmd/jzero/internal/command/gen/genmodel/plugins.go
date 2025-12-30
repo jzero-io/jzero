@@ -16,35 +16,58 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
+type ImportWithAlias struct {
+	Alias string
+	Path  string
+}
+
+type NameWithAlias struct {
+	Alias string
+	Name  string
+}
+
 func (jm *JzeroModel) GenRegister(tables []string) error {
 	logx.Debugf("get register tables: %v", tables)
 
 	slices.Sort(tables)
 
 	var imports []string
+	var importsWithAlias []ImportWithAlias
 	var tablePackages []string
 
 	mutiModels := make(map[string][]string)
+	mutiModelsWithAlias := make(map[string][]NameWithAlias)
 
 	for _, t := range tables {
 		var isMutiModel bool
+		tf := t
 		if strings.Contains(t, ".") {
-			t = filepath.Join(strings.Split(t, ".")...)
+			tf = filepath.Join(strings.Split(t, ".")...)
 			isMutiModel = true
 		}
-		mf := filepath.Join("internal", "model", strings.ToLower(t))
+		mf := filepath.Join("internal", "model", strings.ToLower(tf))
 		if !pathx.FileExists(mf) {
-			logx.Debugf("%s table generated code not exists, skip", t)
+			logx.Debugf("%s table generated code not exists, skip", tf)
 			continue
 		}
 
-		imports = append(imports, fmt.Sprintf("%s/internal/model/%s", jm.Module, strings.ToLower(filepath.ToSlash(t))))
-
 		if isMutiModel {
-			imports = append(imports, fmt.Sprintf("%s/internal/model/%s", jm.Module, strings.ToLower(filepath.ToSlash(t))))
-			mutiModels[filepath.Dir(t)] = append(mutiModels[filepath.Dir(t)], strings.ToLower(filepath.Base(t)))
+			imports = append(imports, fmt.Sprintf("%s/internal/model/%s", jm.Module, strings.ToLower(filepath.ToSlash(tf))))
+			importsWithAlias = append(importsWithAlias, ImportWithAlias{
+				Alias: strings.ReplaceAll(strings.ReplaceAll(t, ".", "_"), "-", "_"),
+				Path:  fmt.Sprintf("%s/internal/model/%s", jm.Module, strings.ToLower(filepath.ToSlash(tf))),
+			})
+			mutiModels[filepath.Dir(tf)] = append(mutiModels[filepath.Dir(tf)], strings.ToLower(filepath.Base(tf)))
+			mutiModelsWithAlias[filepath.Dir(tf)] = append(mutiModelsWithAlias[filepath.Dir(tf)], NameWithAlias{
+				Alias: strings.ReplaceAll(strings.ReplaceAll(t, ".", "_"), "-", "_"),
+				Name:  strings.ToLower(filepath.Base(tf)),
+			})
 		} else {
-			tablePackages = append(tablePackages, strings.ToLower(t))
+			imports = append(imports, fmt.Sprintf("%s/internal/model/%s", jm.Module, strings.ToLower(filepath.ToSlash(tf))))
+			importsWithAlias = append(importsWithAlias, ImportWithAlias{
+				Path: fmt.Sprintf("%s/internal/model/%s", jm.Module, strings.ToLower(filepath.ToSlash(tf))),
+			})
+			tablePackages = append(tablePackages, strings.ToLower(tf))
 		}
 	}
 
@@ -53,9 +76,11 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 	logx.Debugf("get register muti models: %v", mutiModels)
 
 	template, err := templatex.ParseTemplate(filepath.Join("model", "model.go.tpl"), map[string]any{
-		"Imports":       imports,
-		"TablePackages": tablePackages,
-		"MutiModels":    mutiModels,
+		"Imports":             imports,
+		"ImportsWithAlias":    importsWithAlias,
+		"TablePackages":       tablePackages,
+		"MutiModels":          mutiModels,          // 兼容
+		"MutiModelsWithAlias": mutiModelsWithAlias, // 兼容
 	}, lo.If(
 		// 兼容老版本 model 路径
 		// TODO: wait to remove
