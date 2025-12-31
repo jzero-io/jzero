@@ -1,6 +1,7 @@
 package desc
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -352,11 +353,11 @@ func ResolveImportPath(currentFile, importPath, apiDir string) string {
 	importAbsPath = filepath.Clean(importAbsPath)
 
 	// 检查文件是否存在
-	if _, err := os.Stat(importAbsPath); os.IsNotExist(err) {
+	if _, err := os.Stat(importAbsPath); errors.Is(err, fs.ErrNotExist) {
 		// 尝试添加 .api 后缀
 		if !strings.HasSuffix(importAbsPath, ".api") {
 			importAbsPath += ".api"
-			if _, err := os.Stat(importAbsPath); os.IsNotExist(err) {
+			if _, err := os.Stat(importAbsPath); errors.Is(err, fs.ErrNotExist) {
 				return ""
 			}
 		}
