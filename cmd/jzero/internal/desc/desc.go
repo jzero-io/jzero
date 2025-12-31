@@ -1,12 +1,16 @@
 package desc
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
+	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/ast"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
+	apiparser "github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/format"
 	"google.golang.org/genproto/googleapis/api/annotations"
@@ -302,4 +306,62 @@ func GetProtoFrameEtcFilename(source, style string) string {
 		return ""
 	}
 	return filename + ".yaml"
+}
+
+// ParseCurrentFileRoutes 只解析当前文件的路由，不处理 import
+func ParseCurrentFileRoutes(filename string) ([]spec.Route, error) {
+	p := apiparser.New(filename, "")
+	astAST := p.Parse()
+	if err := p.CheckErrors(); err != nil {
+		return nil, err
+	}
+
+	var routes []spec.Route
+	// 只遍历当前文件的 ServiceStmt，不递归处理 import
+	for _, stmt := range astAST.Stmts {
+		serviceStmt, ok := stmt.(*ast.ServiceStmt)
+		if !ok {
+			continue
+		}
+
+		for _, r := range serviceStmt.Routes {
+			// 构建 spec.Route，只设置用于过滤的字段
+			route := spec.Route{
+				Method:  r.Route.Method.Token.Text,
+				Path:    r.Route.Path.Value.Token.Text,
+				Handler: r.AtHandler.Name.Token.Text,
+				// RequestType 和 ResponseType 对于过滤不是必需的，可以不设置
+			}
+			routes = append(routes, route)
+		}
+	}
+
+	return routes, nil
+}
+
+// ResolveImportPath 解析 import 路径为绝对路径
+func ResolveImportPath(currentFile, importPath, apiDir string) string {
+	// 跳过远程 import
+	if strings.Contains(importPath, "github.com") ||
+		strings.HasPrefix(importPath, "http") ||
+		strings.HasPrefix(importPath, "git") {
+		return ""
+	}
+
+	// 处理相对路径
+	importAbsPath := filepath.Join(filepath.Dir(currentFile), importPath)
+	importAbsPath = filepath.Clean(importAbsPath)
+
+	// 检查文件是否存在
+	if _, err := os.Stat(importAbsPath); errors.Is(err, fs.ErrNotExist) {
+		// 尝试添加 .api 后缀
+		if !strings.HasSuffix(importAbsPath, ".api") {
+			importAbsPath += ".api"
+			if _, err := os.Stat(importAbsPath); errors.Is(err, fs.ErrNotExist) {
+				return ""
+			}
+		}
+	}
+
+	return importAbsPath
 }

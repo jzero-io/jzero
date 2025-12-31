@@ -68,6 +68,27 @@ func (ja *JzeroApi) Gen() error {
 		apiSpecMap[v] = apiSpec
 	}
 
+	// 收集当前文件的路由（不包含 import）
+	currentRoutesMap := make(map[string][]spec.Route, len(apiFiles))
+	for _, v := range apiFiles {
+		routes, err := desc.ParseCurrentFileRoutes(v)
+		if err != nil {
+			return errors.Wrapf(err, "parse current routes %s", v)
+		}
+		currentRoutesMap[v] = routes
+	}
+
+	// 记录哪些文件被其他文件 import 了
+	importedFiles := make(map[string]bool)
+	for _, v := range apiFiles {
+		for _, imp := range apiSpecMap[v].Imports {
+			importPath := desc.ResolveImportPath(v, imp.Value, config.C.ApiDir())
+			if importPath != "" {
+				importedFiles[importPath] = true
+			}
+		}
+	}
+
 	var genCodeApiFiles []string
 
 	switch {
@@ -150,7 +171,7 @@ func (ja *JzeroApi) Gen() error {
 		fmt.Printf("%s to generate api code from api files\n", console.Green("Start"))
 	}
 
-	err = ja.generateApiCode(apiFiles, apiSpecMap, genCodeApiFiles, genCodeApiSpecMap)
+	err = ja.generateApiCode(apiFiles, apiSpecMap, genCodeApiFiles, genCodeApiSpecMap, currentRoutesMap, importedFiles)
 	if err != nil {
 		return err
 	}
@@ -167,7 +188,7 @@ func (ja *JzeroApi) Gen() error {
 	return nil
 }
 
-func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*spec.ApiSpec, genCodeApiFiles []string, genCodeApiSpecMap map[string]*spec.ApiSpec) error {
+func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*spec.ApiSpec, genCodeApiFiles []string, genCodeApiSpecMap map[string]*spec.ApiSpec, currentRoutesMap map[string][]spec.Route, importedFiles map[string]bool) error {
 	for _, file := range genCodeApiFiles {
 		if parse, ok := genCodeApiSpecMap[file]; ok {
 			for _, group := range parse.Service.Groups {
@@ -216,9 +237,14 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*sp
 	var eg errgroup.Group
 	eg.SetLimit(len(apiFiles))
 	for _, v := range apiFiles {
+		// 跳过被 import 的文件
+		if importedFiles[v] {
+			continue
+		}
+
 		cv := v
 		eg.Go(func() error {
-			routesGoBody, err := ja.getRoutesGoBody(cv, apiSpecMap)
+			routesGoBody, err := ja.getRoutesGoBody(cv, apiSpecMap, currentRoutesMap)
 			if err != nil {
 				return err
 			}
@@ -240,6 +266,11 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*sp
 	}
 
 	for _, v := range genCodeApiFiles {
+		// 跳过被 import 的文件
+		if importedFiles[v] {
+			continue
+		}
+
 		if len(apiSpecMap[v].Service.Routes()) > 0 {
 			logicFiles, err := ja.getAllLogicFiles(v, apiSpecMap[v])
 			if err != nil {
@@ -285,6 +316,11 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*sp
 	}
 
 	for _, v := range apiFiles {
+		// 跳过被 import 的文件
+		if importedFiles[v] {
+			continue
+		}
+
 		for _, g := range apiSpecMap[v].Service.Groups {
 			if g.GetAnnotation("group") != "" {
 				handlerImports = append(handlerImports, fmt.Sprintf(`%s "%s/internal/handler/%s"`, strings.ReplaceAll(g.GetAnnotation("group"), "/", ""), ja.Module, g.GetAnnotation("group")))
@@ -312,7 +348,7 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*sp
 		if !config.C.Quiet {
 			fmt.Printf("%s to generate internal/handler/route2code.go\n", console.Green("Start"))
 		}
-		if route2CodeBytes, err := ja.genRoute2Code(apiSpecMap); err != nil {
+		if route2CodeBytes, err := ja.genRoute2Code(apiSpecMap, currentRoutesMap, importedFiles); err != nil {
 			return err
 		} else {
 			if err = os.WriteFile(filepath.Join("internal", "handler", "route2code.go"), route2CodeBytes, 0o644); err != nil {
