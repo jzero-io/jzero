@@ -174,7 +174,7 @@ func (jr *JzeroRpc) Gen() error {
 	goctlHome = tempDir
 	logx.Debugf("goctl_home = %s", goctlHome)
 
-	excludeThirdPartyProtoFiles, err := jzerodesc.FindNoRpcServiceExcludeThirdPartyProtoFiles(config.C.ProtoDir())
+	excludeThirdPartyProtoFiles, err := jzerodesc.FindExcludeThirdPartyProtoFiles(config.C.ProtoDir())
 	if err != nil {
 		return err
 	}
@@ -204,23 +204,56 @@ func (jr *JzeroRpc) Gen() error {
 				fmt.Printf("%s proto file %s\n", console.Green("Using"), v)
 			}
 			zrpcOut := "."
-			command := fmt.Sprintf("goctl rpc protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=false --home %s -m --style %s",
+
+			rel, err := filepath.Rel(protoDir, v)
+			if err != nil {
+				return err
+			}
+
+			fds, err := protoParser.ParseFiles(rel)
+			if err != nil {
+				return err
+			}
+
+			if len(fds) == 0 {
+				continue
+			}
+
+			goPackage := fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
+
+			command := fmt.Sprintf("goctl rpc protoc %s -I%s -I%s --go_out=%s --go_opt=module=%s --go_opt=M%s=%s --go-grpc_out=%s --go-grpc_opt=module=%s --go-grpc_opt=M%s=%s --zrpc_out=%s --client=false --home %s -m --style %s",
 				v,
 				config.C.ProtoDir(),
 				filepath.Join(config.C.ProtoDir(), "third_party"),
-				filepath.Join("internal"),
-				filepath.Join("internal"),
+				filepath.Join("."),
+				jr.Module,
+				rel,
+				func() string {
+					if strings.HasPrefix(goPackage, jr.Module) {
+						return goPackage
+					}
+					return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
+				}(),
+				filepath.Join("."),
+				jr.Module,
+				rel,
+				func() string {
+					if strings.HasPrefix(goPackage, jr.Module) {
+						return goPackage
+					}
+					return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
+				}(),
 				zrpcOut,
 				goctlHome,
 				config.C.Style)
 
 			for _, exp := range excludeThirdPartyProtoFiles {
-				rel, err := filepath.Rel(config.C.ProtoDir(), exp)
+				rel, err = filepath.Rel(config.C.ProtoDir(), exp)
 				if err != nil {
 					return err
 				}
 
-				fds, err := protoParser.ParseFiles(rel)
+				fds, err = protoParser.ParseFiles(rel)
 				if err != nil {
 					return err
 				}
@@ -229,7 +262,7 @@ func (jr *JzeroRpc) Gen() error {
 					continue
 				}
 
-				goPackage := fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
+				goPackage = fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
 
 				command += fmt.Sprintf(" --go_opt=M%s=%s", rel, func() string {
 					if strings.HasPrefix(goPackage, jr.Module) {

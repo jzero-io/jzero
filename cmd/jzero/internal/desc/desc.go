@@ -105,6 +105,33 @@ func FindRpcServiceProtoFiles(protoDirPath string) ([]string, error) {
 	return protoFilenames, nil
 }
 
+func FindExcludeThirdPartyProtoFiles(protoDirPath string) ([]string, error) {
+	var protoFilenames []string
+
+	protoDir, err := os.ReadDir(protoDirPath)
+	if err != nil {
+		return nil, nil
+	}
+
+	for _, protoFile := range protoDir {
+		if protoFile.IsDir() {
+			if protoFile.Name() == "third_party" {
+				continue
+			}
+			filenames, err := FindNoRpcServiceExcludeThirdPartyProtoFiles(filepath.Join(protoDirPath, protoFile.Name()))
+			if err != nil {
+				return nil, err
+			}
+			protoFilenames = append(protoFilenames, filenames...)
+		} else {
+			if strings.HasSuffix(protoFile.Name(), ".proto") {
+				protoFilenames = append(protoFilenames, filepath.Join(protoDirPath, protoFile.Name()))
+			}
+		}
+	}
+	return protoFilenames, nil
+}
+
 func FindNoRpcServiceExcludeThirdPartyProtoFiles(protoDirPath string) ([]string, error) {
 	var protoFilenames []string
 
