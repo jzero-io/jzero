@@ -12,6 +12,7 @@ import (
 	"github.com/jzero-io/jzero/core/stores/condition"
 	"github.com/jzero-io/jzero/core/stores/modelx"
 	"github.com/spf13/cast"
+	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/eddieowens/opts"
 
 	{{.third}}
