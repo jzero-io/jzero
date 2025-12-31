@@ -344,7 +344,7 @@ func Gen() (err error) {
 						files = append(files, v)
 					}
 				} else {
-					specifiedProtoFiles, err := desc.GetProtoFilepath(v)
+					specifiedProtoFiles, err := desc.FindRpcServiceProtoFiles(v)
 					if err != nil {
 						return err
 					}
@@ -352,7 +352,7 @@ func Gen() (err error) {
 				}
 			}
 		default:
-			files, err = desc.GetProtoFilepath(config.C.ProtoDir())
+			files, err = desc.FindRpcServiceProtoFiles(config.C.ProtoDir())
 			if err != nil {
 				return err
 			}
@@ -362,7 +362,7 @@ func Gen() (err error) {
 			if err == nil {
 				for _, p := range plugins {
 					if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
-						pluginFiles, err := desc.GetProtoFilepath(filepath.Join(p.Path, "desc", "proto"))
+						pluginFiles, err := desc.FindRpcServiceProtoFiles(filepath.Join(p.Path, "desc", "proto"))
 						if err != nil {
 							return err
 						}
@@ -380,7 +380,7 @@ func Gen() (err error) {
 					})
 				}
 			} else {
-				specifiedProtoFiles, err := desc.GetProtoFilepath(v)
+				specifiedProtoFiles, err := desc.FindRpcServiceProtoFiles(v)
 				if err != nil {
 					return err
 				}

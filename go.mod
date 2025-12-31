@@ -9,7 +9,7 @@ require (
 	github.com/eddieowens/opts v0.1.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
-	github.com/huandu/go-sqlbuilder v1.38.1
+	github.com/huandu/go-sqlbuilder v1.38.2
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/jaronnie/genius v0.6.1
 	github.com/json-iterator/go v1.1.12
@@ -20,7 +20,7 @@ require (
 	github.com/spf13/cast v1.10.0
 	github.com/stretchr/testify v1.11.1
 	github.com/zeromicro/go-zero v1.9.3
-	modernc.org/sqlite v1.41.0
+	modernc.org/sqlite v1.42.2
 )
 
 require (

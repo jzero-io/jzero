@@ -7,12 +7,12 @@ import (
 	"github.com/jzero-io/jzero/core/stores/modelx"
     "github.com/eddieowens/opts"
 
-	{{range $v := .Imports}}"{{$v}}"
+	{{range $v := .ImportsWithAlias}}{{if $v.Alias}}{{$v.Alias}}{{end}} "{{$v.Path}}"
 	{{end}}
 )
 
-{{range $k,$v := .MutiModels}} type {{$k | FirstUpper | ToCamel}}Model struct {
-    {{range $vv := $v}}{{$vv | FirstUpper | ToCamel}} {{$vv}}.{{$vv | FirstUpper |ToCamel}}Model
+{{range $k,$v := .MutiModelsWithAlias}} type {{$k | FirstUpper | ToCamel}}Model struct {
+    {{range $vv := $v}}{{$vv.Name | FirstUpper | ToCamel}} {{$vv.Alias}}.{{$vv.Name | FirstUpper |ToCamel}}Model
     {{end}}
 }
 {{end}}
@@ -29,9 +29,9 @@ func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
 	}
 }
 
-{{range $k,$v := .MutiModels}} func New{{$k | FirstUpper | ToCamel}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) {{$k | FirstUpper | ToCamel}}Model {
+{{range $k,$v := .MutiModelsWithAlias}} func New{{$k | FirstUpper | ToCamel}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) {{$k | FirstUpper | ToCamel}}Model {
 	return {{$k | FirstUpper | ToCamel}}Model{
-        {{range $vv := $v}}{{$vv | FirstUpper | ToCamel}}: {{$vv}}.New{{ $vv | FirstUpper | ToCamel }}Model(conn, op...),
+        {{range $vv := $v}}{{$vv.Name | FirstUpper | ToCamel}}: {{$vv.Alias}}.New{{ $vv.Name | FirstUpper | ToCamel }}Model(conn, op...),
         {{end}}
 	}
 }

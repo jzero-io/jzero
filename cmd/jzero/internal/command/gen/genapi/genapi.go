@@ -52,7 +52,7 @@ func (ja *JzeroApi) Gen() error {
 		return nil
 	}
 
-	apiFiles, err := desc.FindApiFiles(config.C.ApiDir())
+	apiFiles, err := desc.FindRouteApiFiles(config.C.ApiDir())
 	if err != nil {
 		return err
 	}

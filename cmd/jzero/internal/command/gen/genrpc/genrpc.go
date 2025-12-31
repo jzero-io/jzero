@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/samber/lo"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
@@ -48,7 +49,7 @@ func (jr *JzeroRpc) Gen() error {
 	)
 
 	// 获取全量 proto 文件
-	protoFiles, err := jzerodesc.GetProtoFilepath(config.C.ProtoDir())
+	protoFiles, err := jzerodesc.FindRpcServiceProtoFiles(config.C.ProtoDir())
 	if err != nil {
 		return err
 	}
@@ -90,7 +91,7 @@ func (jr *JzeroRpc) Gen() error {
 					genCodeProtoSpecMap[filepath.Clean(v)] = protoSpecMap[filepath.Clean(v)]
 				}
 			} else {
-				specifiedProtoFiles, err := jzerodesc.GetProtoFilepath(v)
+				specifiedProtoFiles, err := jzerodesc.FindRpcServiceProtoFiles(v)
 				if err != nil {
 					return err
 				}
@@ -122,7 +123,7 @@ func (jr *JzeroRpc) Gen() error {
 				delete(protoSpecMap, filepath.Clean(v))
 			}
 		} else {
-			specifiedProtoFiles, err := jzerodesc.GetProtoFilepath(v)
+			specifiedProtoFiles, err := jzerodesc.FindRpcServiceProtoFiles(v)
 			if err != nil {
 				return err
 			}
@@ -173,6 +174,20 @@ func (jr *JzeroRpc) Gen() error {
 	goctlHome = tempDir
 	logx.Debugf("goctl_home = %s", goctlHome)
 
+	excludeThirdPartyProtoFiles, err := jzerodesc.FindNoRpcServiceExcludeThirdPartyProtoFiles(config.C.ProtoDir())
+	if err != nil {
+		return err
+	}
+
+	// 获取 proto 的 go_package
+	var protoParser protoparse.Parser
+	protoParser.InferImportPaths = false
+
+	protoDir := filepath.Join("desc", "proto")
+	thirdPartyProtoDir := filepath.Join("desc", "proto", "third_party")
+	protoParser.ImportPaths = []string{protoDir, thirdPartyProtoDir}
+	protoParser.IncludeSourceCodeInfo = true
+
 	for _, v := range protoFiles {
 		allLogicFiles, err := jr.GetAllLogicFiles(v, protoSpecMap[v])
 		if err != nil {
@@ -199,8 +214,33 @@ func (jr *JzeroRpc) Gen() error {
 				goctlHome,
 				config.C.Style)
 
+			for _, exp := range excludeThirdPartyProtoFiles {
+				rel, err := filepath.Rel(config.C.ProtoDir(), exp)
+				if err != nil {
+					return err
+				}
+
+				fds, err := protoParser.ParseFiles(rel)
+				if err != nil {
+					return err
+				}
+
+				if len(fds) == 0 {
+					continue
+				}
+
+				goPackage := fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
+
+				command += fmt.Sprintf(" --go_opt=M%s=%s", rel, func() string {
+					if strings.HasPrefix(goPackage, jr.Module) {
+						return goPackage
+					}
+					return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
+				}())
+			}
+
 			if len(config.C.Gen.ProtoInclude) > 0 {
-				command += fmt.Sprintf("-I%s ", strings.Join(config.C.Gen.ProtoInclude, " -I"))
+				command += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.ProtoInclude, " -I"))
 			}
 
 			logx.Debug(command)
@@ -278,6 +318,10 @@ func (jr *JzeroRpc) Gen() error {
 
 	if pathx.FileExists(config.C.ProtoDir()) {
 		if err = jr.genServer(serverImports, pbImports, registerServers); err != nil {
+			return err
+		}
+		// gen common proto pb
+		if err = jr.genNoRpcServiceExcludeThirdPartyProto(config.C.ProtoDir()); err != nil {
 			return err
 		}
 		if err = jr.genApiMiddlewares(protoFiles); err != nil {
