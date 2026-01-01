@@ -55,10 +55,7 @@ var genZRpcClientCmd = &cobra.Command{
 
 			config.C.Gen.Zrpcclient.GoModule = filepath.ToSlash(filepath.Join(mod.Path, relPath))
 		} else {
-			// module 不为空, 则生成 go.mod 文件
-			if !config.C.Gen.Zrpcclient.Mono {
-				genModule = true
-			}
+			genModule = true
 		}
 		gosimports.LocalPrefix = config.C.Gen.Zrpcclient.GoModule
 
@@ -121,7 +118,6 @@ func GetCommand() *cobra.Command {
 		genZRpcClientCmd.Flags().StringP("goModule", "", "", "set go module name")
 		genZRpcClientCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")
 		genZRpcClientCmd.Flags().StringP("goPackage", "", "", "set package name")
-		genZRpcClientCmd.Flags().BoolP("mono", "", false, "mono zrpcclient project under go mod project")
 	}
 
 	return genCmd
