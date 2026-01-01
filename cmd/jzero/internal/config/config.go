@@ -109,6 +109,7 @@ type GenConfig struct {
 	GitChange               bool     `mapstructure:"git-change"`
 	Route2Code              bool
 	ProtoInclude            []string `mapstructure:"proto-include"`
+	RpcClient               bool     `mapstructure:"rpc-client"`
 	ModelDriver             string   `mapstructure:"model-driver"`
 	ModelStrict             bool     `mapstructure:"model-strict"`
 	ModelIgnoreColumns      []string `mapstructure:"model-ignore-columns"`
