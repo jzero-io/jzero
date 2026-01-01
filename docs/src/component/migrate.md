@@ -39,6 +39,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	
+	defer m.Close()
 
 	if err = m.Up(); err != nil {
 		panic(err)
@@ -125,6 +127,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	
+	defer m.Close()
 
 	if err = m.Up(); err != nil {
 		panic(err)
