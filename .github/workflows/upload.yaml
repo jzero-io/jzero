@@ -37,8 +37,14 @@ jobs:
           rm -rf simpleapi
           jzero new simpleapi
           cd simpleapi
+          jzero add api user
+          jzero add sql user
+          jzero gen
           jzero new helloworld --serverless
           cd plugins/helloworld
+          jzero add api helloworld
+          jzero add sql helloworld
+          jzero gen
           go mod tidy
           cd ../..
           jzero serverless build
