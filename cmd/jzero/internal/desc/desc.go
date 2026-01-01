@@ -283,7 +283,7 @@ func FindRouteApiFiles(dir string) ([]string, error) {
 	for _, f := range files {
 		parse, err := parser.Parse(f, "")
 		if err != nil {
-			return nil, errors.Errorf("parse api file: %s", f)
+			return nil, errors.Errorf("parse api file: %s, err: %v", f, err)
 		}
 		if len(parse.Service.Routes()) > 0 {
 			routeFiles = append(routeFiles, f)
