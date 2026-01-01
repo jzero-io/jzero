@@ -36,6 +36,11 @@ var serverCmd = &cobra.Command{
 		// print version
 		printVersion()
 
+		{{ if has "model" .Features }}m, err := migrate.NewMigrate(cc.MustGetConfig().Sqlx.SqlConf)
+        logx.Must(err)
+        defer m.Close()
+        logx.Must(m.Up()){{end}}
+
 		// create service context
 		svcCtx := svc.NewServiceContext(cc)
 

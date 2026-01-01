@@ -35,6 +35,11 @@ var serverCmd = &cobra.Command{
 	    printBanner(cc.MustGetConfig().Banner)
 	    printVersion()
 
+		{{ if has "model" .Features }}m, err := migrate.NewMigrate(cc.MustGetConfig().Sqlx.SqlConf)
+        logx.Must(err)
+        defer m.Close()
+        logx.Must(m.Up()){{end}}
+
         // create service context
     	svcCtx := svc.NewServiceContext(cc)
         // create zrpc server

@@ -34,27 +34,27 @@ jobs:
           rm -rf examples
           GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum clone https://github.com/jzero-io/examples
           cd examples
+          git config user.name "dependabot[bot]"
+          git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
           rm -rf simpleapi
           jzero new simpleapi
           cd simpleapi
           jzero add api user
-          jzero add sql user
           jzero gen
+          go get github.com/jzero-io/jzero@${{ github.sha }}
+          go mod tidy
           jzero new helloworld --serverless
           cd plugins/helloworld
           jzero add api helloworld
-          jzero add sql helloworld
           jzero gen
+          go get github.com/jzero-io/jzero@${{ github.sha }}
           go mod tidy
           cd ../..
           jzero serverless build
           go mod tidy
           jzero gen swagger
           jzero format --git-change=false
-          go mod tidy && go mod download
           go run main.go version
-          git config user.name "dependabot[bot]"
-          git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
           git add .
           git diff-index --quiet HEAD || git commit -m "chore(simpleapi): update simpleapi"
           git push -f
@@ -64,10 +64,13 @@ jobs:
           rm -rf simpleapi-with-model-redis
           jzero new simpleapi-with-model-redis --features model,redis
           cd simpleapi-with-model-redis
+          jzero add api user
+          jzero add sql user
+          jzero gen
+          go get github.com/jzero-io/jzero@${{ github.sha }}
           go mod tidy
           jzero gen swagger
           jzero format --git-change=false
-          go mod tidy && go mod download
           go run main.go version
           git add .
           git diff-index --quiet HEAD || git commit -m "chore(simpleapi-with-model-redis): update simpleapi-with-model-redis"
@@ -78,8 +81,15 @@ jobs:
           rm -rf simplegateway
           jzero new simplegateway --frame gateway
           cd simplegateway
+          jzero add proto user
+          jzero gen
+          go get github.com/jzero-io/jzero@${{ github.sha }}
+          go mod tidy
           jzero new helloworld --frame gateway --serverless
           cd plugins/helloworld
+          jzero add proto helloworld
+          jzero gen
+          go get github.com/jzero-io/jzero@${{ github.sha }}
           go mod tidy
           cd ../..
           jzero serverless build
@@ -87,7 +97,6 @@ jobs:
           jzero gen swagger
           jzero gen zrpcclient
           jzero format --git-change=false
-          go mod tidy && go mod download
           go run main.go version
           git add .
           git diff-index --quiet HEAD || git commit -m "chore(simplegateway): update simplegateway"
@@ -98,11 +107,14 @@ jobs:
           rm -rf simplegateway-with-model-redis
           jzero new simplegateway-with-model-redis --frame gateway --features model,redis
           cd simplegateway-with-model-redis
+          jzero add proto user
+          jzero add sql user
+          jzero gen
+          go get github.com/jzero-io/jzero@${{ github.sha }}
           go mod tidy
           jzero gen swagger
           jzero gen zrpcclient
           jzero format --git-change=false
-          go mod tidy && go mod download
           go run main.go version
           git add .
           git diff-index --quiet HEAD || git commit -m "chore(simplegateway-with-model-redis): update simplegateway-with-model-redis"
@@ -113,8 +125,14 @@ jobs:
           rm -rf simplerpc
           jzero new simplerpc --frame rpc
           cd simplerpc
+          jzero add proto user
+          go get github.com/jzero-io/jzero@${{ github.sha }}
+          go mod tidy
           jzero new helloworld --frame rpc --serverless
           cd plugins/helloworld
+          jzero add proto helloworld
+          jzero gen
+          go get github.com/jzero-io/jzero@${{ github.sha }}
           go mod tidy
           cd ../..
           jzero serverless build
@@ -122,7 +140,6 @@ jobs:
           jzero gen swagger
           jzero gen zrpcclient
           jzero format --git-change=false
-          go mod tidy && go mod download
           go run main.go version
           git add .
           git diff-index --quiet HEAD || git commit -m "chore(simplerpc): update simplerpc"
@@ -133,11 +150,14 @@ jobs:
           rm -rf simplerpc-with-model-redis
           jzero new simplerpc-with-model-redis --frame rpc --features model,redis
           cd simplerpc-with-model-redis
+          jzero add proto user
+          jzero add sql user
+          jzero gen
+          go get github.com/jzero-io/jzero@${{ github.sha }}
           go mod tidy
           jzero gen swagger
           jzero gen zrpcclient
           jzero format --git-change=false
-          go mod tidy && go mod download
           go run main.go version
           git add .
           git diff-index --quiet HEAD || git commit -m "chore(simplerpc-with-model-redis): update simplerpc-with-model-redis"
