@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/zeromicro/go-zero/tools/goctl/api/format"
 
@@ -20,6 +21,14 @@ func Run(args []string) error {
 	service := desc.GetApiServiceName(filepath.Join("desc", "api"))
 
 	apiName := args[0]
+
+	if strings.HasSuffix(apiName, ".api") {
+		apiName = strings.TrimSuffix(apiName, ".api")
+	}
+
+	if service == "" {
+		service = apiName
+	}
 
 	template, err := templatex.ParseTemplate(filepath.Join("api", "template.api.tpl"), map[string]any{
 		"Service": service,
