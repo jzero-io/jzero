@@ -13,9 +13,11 @@ func (m *custom{{.upperStartCamelObject}}Model) BulkInsert(ctx context.Context, 
 
     sb := sqlbuilder.InsertInto(m.table)
     sb.Cols({{.lowerStartCamelObject}}RowsExpectAutoSet)
-    for _, data := range datas {
-        sb.Values({{.expressionValues}})
-    }
+
+    {{if $.expressionValues}}for _, data := range datas {
+            sb.Values({{.expressionValues}})
+        }{{end}}
+
     statement, args := sb.BuildWithFlavor(m.flavor)
 
     var err error
