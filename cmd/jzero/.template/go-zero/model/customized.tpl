@@ -128,6 +128,50 @@ func (m *custom{{.upperStartCamelObject}}Model) PageByCondition(ctx context.Cont
 	return resp, total, nil
 }
 
+{{if .withCache}}
+func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx context.Context, session sqlx.Session, dataMap map[string]any, conditions ...condition.Condition) error {
+    if dataMap == nil {
+        return nil
+    }
+
+    var fields []condition.Field
+    fields = append(fields, {{.data.PrimaryKey.Name.ToCamel}}){{range $ui := .data.UniqueIndex}}
+        {{range $uif := $ui}}fields = append(fields, {{$uif.Name.ToCamel}})
+        {{end}}
+    {{end}}
+    fields = lo.Uniq(fields)
+
+    datas, err := m.FindFieldsByCondition(ctx, session, fields, conditions...)
+    if err != nil {
+    	return err
+    }
+
+    var cacheKeys []string
+
+    for _, data := range datas {
+        cacheKeys = append(cacheKeys, {{.data.PrimaryCacheKey.DataKeyRight}}){{range $index, $uck := .data.UniqueCacheKey}}
+        cacheKeys = append(cacheKeys, {{$uck.DataKeyRight}}){{end}}
+    }
+
+	_, err = m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		statement, args := condition.BuildUpdateWithFlavor(m.flavor, sqlbuilder.Update(m.table), dataMap, conditions...)
+
+		if session != nil {
+			_, err = session.ExecCtx(ctx, statement, args...)
+		} else {
+			_, err = m.conn.ExecCtx(ctx, statement, args...)
+		}
+		if err != nil {
+			return nil,err
+		}
+		if session != nil {
+			return session.ExecCtx(ctx, statement, args...)
+		}
+		return conn.ExecCtx(ctx, statement, args...)
+	}, cacheKeys...)
+	return err
+}
+{{else}}
 func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx context.Context, session sqlx.Session, data map[string]any, conditions ...condition.Condition) error {
     if data == nil {
         return nil
@@ -146,7 +190,52 @@ func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx cont
 	}
 	return nil
 }
+{{end}}
 
+{{if .withCache}}
+func (m *custom{{.upperStartCamelObject}}Model) DeleteByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) error {
+    if len(conditions) == 0 {
+		return nil
+	}
+
+    var fields []condition.Field
+    fields = append(fields, {{.data.PrimaryKey.Name.ToCamel}}){{range $ui := .data.UniqueIndex}}
+        {{range $uif := $ui}}fields = append(fields, {{$uif.Name.ToCamel}})
+        {{end}}
+    {{end}}
+    fields = lo.Uniq(fields)
+
+    datas, err := m.FindFieldsByCondition(ctx, session, fields, conditions...)
+    if err != nil {
+    	return err
+    }
+
+    var cacheKeys []string
+
+    for _, data := range datas {
+        cacheKeys = append(cacheKeys, {{.data.PrimaryCacheKey.DataKeyRight}}){{range $index, $uck := .data.UniqueCacheKey}}
+        cacheKeys = append(cacheKeys, {{$uck.DataKeyRight}}){{end}}
+    }
+
+	_, err = m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
+		statement, args := condition.BuildDeleteWithFlavor(m.flavor, sqlbuilder.DeleteFrom(m.table), conditions...)
+
+		if session != nil {
+			_, err = session.ExecCtx(ctx, statement, args...)
+		} else {
+			_, err = m.conn.ExecCtx(ctx, statement, args...)
+		}
+		if err != nil {
+			return nil,err
+		}
+		if session != nil {
+			return session.ExecCtx(ctx, statement, args...)
+		}
+		return conn.ExecCtx(ctx, statement, args...)
+	}, cacheKeys...)
+	return err
+}
+{{else}}
 func (m *custom{{.upperStartCamelObject}}Model) DeleteByCondition(ctx context.Context, session sqlx.Session, conditions ...condition.Condition) error {
     if len(conditions) == 0 {
 		return nil
@@ -161,3 +250,4 @@ func (m *custom{{.upperStartCamelObject}}Model) DeleteByCondition(ctx context.Co
 	}
 	return err
 }
+{{end}}
