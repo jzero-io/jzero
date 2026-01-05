@@ -37,38 +37,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Docker build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64, linux/arm64
-          push: true
-          tags: jaronnie/jzero:latest,jaronnie/jzero:${{ steps.get_version.outputs.VERSION }}
-
-      - name: Log in to ALIYUN
-        uses: docker/login-action@v3
-        with:
-          registry: registry.cn-hangzhou.aliyuncs.com
-          username: ${{ secrets.ALIYUNHUB_USERNAME }}
-          password: ${{ secrets.ALIYUNHUB_TOKEN }}
-
-      - name: Docker build and push
-        uses: docker/build-push-action@v6
-        with:
-          registry: registry.cn-hangzhou.aliyuncs.com
-          context: .
-          platforms: linux/amd64, linux/arm64
-          push: true
-          tags: registry.cn-hangzhou.aliyuncs.com/jaronnie/jzero:latest,registry.cn-hangzhou.aliyuncs.com/jaronnie/jzero:${{ steps.get_version.outputs.VERSION }}
 
       - name: Log in to ghcr
         uses: docker/login-action@v3
