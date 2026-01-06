@@ -43,7 +43,7 @@ func Run(args []string) error {
 			return fmt.Errorf("%s already exists", protoName)
 		}
 
-		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, protoName)), 0755)
+		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, protoName)), 0o755)
 
 		err = os.WriteFile(filepath.Join(baseDir, protoName+".proto"), template, 0o644)
 		if err != nil {

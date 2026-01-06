@@ -33,7 +33,7 @@ func Run(args []string) error {
 			return fmt.Errorf("%s already exists", sqlName)
 		}
 
-		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, sqlName)), 0755)
+		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, sqlName)), 0o755)
 
 		err = os.WriteFile(filepath.Join(baseDir, sqlName+".sql"), template, 0o644)
 		if err != nil {

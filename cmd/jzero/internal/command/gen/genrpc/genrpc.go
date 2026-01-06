@@ -41,7 +41,7 @@ func (l RegisterLines) String() string {
 	return "\n\t\t" + strings.Join(l, "\n\t\t")
 }
 
-func (jr *JzeroRpc) Gen() error {
+func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 	var (
 		serverImports   ImportLines
 		pbImports       ImportLines
@@ -51,11 +51,11 @@ func (jr *JzeroRpc) Gen() error {
 	// 获取全量 proto 文件
 	protoFiles, err := jzerodesc.FindRpcServiceProtoFiles(config.C.ProtoDir())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(protoFiles) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	protoSpecMap := make(map[string]rpcparser.Proto, len(protoFiles))
@@ -65,7 +65,7 @@ func (jr *JzeroRpc) Gen() error {
 		var parse rpcparser.Proto
 		parse, err = protoParser.Parse(v, true)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		protoSpecMap[v] = parse
 	}
@@ -93,7 +93,7 @@ func (jr *JzeroRpc) Gen() error {
 			} else {
 				specifiedProtoFiles, err := jzerodesc.FindRpcServiceProtoFiles(v)
 				if err != nil {
-					return err
+					return nil, err
 				}
 				genCodeProtoFiles = append(genCodeProtoFiles, specifiedProtoFiles...)
 				for _, saf := range specifiedProtoFiles {
@@ -125,7 +125,7 @@ func (jr *JzeroRpc) Gen() error {
 		} else {
 			specifiedProtoFiles, err := jzerodesc.FindRpcServiceProtoFiles(v)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			for _, saf := range specifiedProtoFiles {
 				genCodeProtoFiles = lo.Reject(genCodeProtoFiles, func(item string, _ int) bool {
@@ -141,7 +141,7 @@ func (jr *JzeroRpc) Gen() error {
 	}
 
 	if len(genCodeProtoFiles) == 0 {
-		return nil
+		return protoSpecMap, nil
 	}
 
 	if config.C.Quiet {
@@ -152,14 +152,14 @@ func (jr *JzeroRpc) Gen() error {
 	var goctlHome string
 	tempDir, err := os.MkdirTemp(os.TempDir(), "")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer os.RemoveAll(tempDir)
 
 	// // 先写入内置模板
 	// err = embeded.WriteTemplateDir(filepath.Join("go-zero", "rpc"), filepath.Join(tempDir, "rpc"))
 	// if err != nil {
-	//	return err
+	//	return nil, err
 	// }
 
 	// 如果用户自定义了模板，则复制覆盖
@@ -167,7 +167,7 @@ func (jr *JzeroRpc) Gen() error {
 	if pathx.FileExists(customTemplatePath) {
 		err = filex.CopyDir(customTemplatePath, filepath.Join(tempDir, "rpc"))
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -176,7 +176,7 @@ func (jr *JzeroRpc) Gen() error {
 
 	excludeThirdPartyProtoFiles, err := jzerodesc.FindExcludeThirdPartyProtoFiles(config.C.ProtoDir())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// 获取 proto 的 go_package
@@ -191,12 +191,12 @@ func (jr *JzeroRpc) Gen() error {
 	for _, v := range protoFiles {
 		allLogicFiles, err := jr.GetAllLogicFiles(v, protoSpecMap[v])
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		allServerFiles, err := jr.GetAllServerFiles(v, protoSpecMap[v])
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if lo.Contains(genCodeProtoFiles, v) {
@@ -207,12 +207,12 @@ func (jr *JzeroRpc) Gen() error {
 
 			rel, err := filepath.Rel(protoDir, v)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			fds, err := protoParser.ParseFiles(rel)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			if len(fds) == 0 {
@@ -251,12 +251,12 @@ func (jr *JzeroRpc) Gen() error {
 			for _, exp := range excludeThirdPartyProtoFiles {
 				rel, err = filepath.Rel(config.C.ProtoDir(), exp)
 				if err != nil {
-					return err
+					return nil, err
 				}
 
 				fds, err = protoParser.ParseFiles(rel)
 				if err != nil {
-					return err
+					return nil, err
 				}
 
 				if len(fds) == 0 {
@@ -281,7 +281,7 @@ func (jr *JzeroRpc) Gen() error {
 
 			_, err = execx.Run(command, config.C.Wd())
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 
@@ -332,7 +332,7 @@ func (jr *JzeroRpc) Gen() error {
 				logx.Debug(protocCommand)
 				_, err = execx.Run(protocCommand, config.C.Wd())
 				if err != nil {
-					return err
+					return nil, err
 				}
 			}
 		}
@@ -352,16 +352,16 @@ func (jr *JzeroRpc) Gen() error {
 
 	if pathx.FileExists(config.C.ProtoDir()) {
 		if err = jr.genServer(serverImports, pbImports, registerServers); err != nil {
-			return err
+			return nil, err
 		}
 		// gen common proto pb
 		if err = jr.genNoRpcServiceExcludeThirdPartyProto(config.C.ProtoDir()); err != nil {
-			return err
+			return nil, err
 		}
 		if err = jr.genApiMiddlewares(protoFiles); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return protoSpecMap, nil
 }
