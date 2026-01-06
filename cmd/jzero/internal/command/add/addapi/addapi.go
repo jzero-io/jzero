@@ -43,7 +43,7 @@ func Run(args []string) error {
 			return fmt.Errorf("%s already exists", apiName)
 		}
 
-		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, apiName)), 0755)
+		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, apiName)), 0o755)
 
 		err = os.WriteFile(filepath.Join(baseDir, apiName+".api"), template, 0o644)
 		if err != nil {
