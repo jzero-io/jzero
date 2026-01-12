@@ -3,7 +3,8 @@ package cmd
 import (
 	"github.com/common-nighthawk/go-figure"
     "github.com/jzero-io/jzero/core/configcenter"
-	"github.com/jzero-io/jzero/core/configcenter/subscriber"
+	"github.com/jzero-io/jzero/core/configcenter/subscriber"{{ if has "model" .Features }}
+	"github.com/jzero-io/jzero/core/stores/migrate"{{end}}
 	"github.com/spf13/cobra"
     "github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
@@ -34,6 +35,11 @@ var serverCmd = &cobra.Command{
 
 	    printBanner(cc.MustGetConfig().Banner)
 	    printVersion()
+
+		{{ if has "model" .Features }}m, err := migrate.NewMigrate(cc.MustGetConfig().Sqlx.SqlConf)
+        logx.Must(err)
+        defer m.Close()
+        logx.Must(m.Up()){{end}}
 
         // create service context
     	svcCtx := svc.NewServiceContext(cc)

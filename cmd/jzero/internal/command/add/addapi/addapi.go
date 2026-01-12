@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/zeromicro/go-zero/tools/goctl/api/format"
 
@@ -21,6 +22,14 @@ func Run(args []string) error {
 
 	apiName := args[0]
 
+	if strings.HasSuffix(apiName, ".api") {
+		apiName = strings.TrimSuffix(apiName, ".api")
+	}
+
+	if service == "" {
+		service = apiName
+	}
+
 	template, err := templatex.ParseTemplate(filepath.Join("api", "template.api.tpl"), map[string]any{
 		"Service": service,
 		"Group":   apiName,
@@ -34,7 +43,7 @@ func Run(args []string) error {
 			return fmt.Errorf("%s already exists", apiName)
 		}
 
-		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, apiName)), 0755)
+		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, apiName)), 0o755)
 
 		err = os.WriteFile(filepath.Join(baseDir, apiName+".api"), template, 0o644)
 		if err != nil {

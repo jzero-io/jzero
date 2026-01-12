@@ -4,7 +4,7 @@ icon: vscode-icons:folder-type-api-opened
 order: 4
 ---
 
-jzero 生成代码命令及其精简, 仅需 `jzero gen` 就能自动识别所有的可描述文件/配置, 完成代码的生成.
+jzero 生成代码命令极其精简, 仅需 `jzero gen` 就能自动识别所有的可描述文件/配置, 完成代码的生成.
 
 通过上一篇文档的 `jzero add` 命令添加可描述文件后, 执行 `jzero gen` 即可看到生成的文件了.
 

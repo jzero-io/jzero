@@ -44,5 +44,13 @@ export default sidebar({
         collapsible: true,
         expanded: true,
     },
+    {
+          text: "release",
+          icon: "catppuccin:release",
+          prefix: "release/",
+          children: "structure",
+          collapsible: true,
+          expanded: true,
+    },
   ],
 });

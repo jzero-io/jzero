@@ -9,6 +9,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
+	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genapi"
@@ -61,7 +63,7 @@ func Run() error {
 	jzeroApi := genapi.JzeroApi{
 		Module: module,
 	}
-	err = jzeroApi.Gen()
+	apiSpecMap, err := jzeroApi.Gen()
 	if err != nil {
 		return err
 	}
@@ -69,7 +71,7 @@ func Run() error {
 	jzeroRpc := genrpc.JzeroRpc{
 		Module: module,
 	}
-	err = jzeroRpc.Gen()
+	protoSpecMap, err := jzeroRpc.Gen()
 	if err != nil {
 		return err
 	}
@@ -80,6 +82,42 @@ func Run() error {
 	err = jzeroMongo.Gen()
 	if err != nil {
 		return err
+	}
+
+	// 收集并保存元数据（复用已解析的数据）
+	if err = collectAndSaveMetadata(apiSpecMap, protoSpecMap); err != nil {
+		logx.Debugf("collect and save metadata error: %s", err.Error())
+	}
+
+	return nil
+}
+
+// collectAndSaveMetadata 收集并保存项目元数据（复用已解析的数据）
+func collectAndSaveMetadata(apiSpecMap map[string]*spec.ApiSpec, protoSpecMap map[string]rpcparser.Proto) error {
+	if len(apiSpecMap) == 0 && len(protoSpecMap) == 0 {
+		return nil
+	}
+
+	var md desc.Metadata
+
+	if len(apiSpecMap) > 0 {
+		apiMetadata, err := desc.CollectFromAPI(apiSpecMap)
+		if err != nil {
+			return errors.Wrapf(err, "collect api metadata")
+		}
+		md.API = apiMetadata
+	}
+
+	if len(protoSpecMap) > 0 {
+		protoMetadata, err := desc.CollectFromProto(protoSpecMap)
+		if err != nil {
+			return errors.Wrapf(err, "collect proto metadata")
+		}
+		md.Proto = protoMetadata
+	}
+
+	if err := desc.Save(&md); err != nil {
+		return errors.Wrapf(err, "save metadata")
 	}
 
 	return nil

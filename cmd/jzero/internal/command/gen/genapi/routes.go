@@ -22,64 +22,120 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
-func (ja *JzeroApi) getRoutesGoBody(fp string, apiSpecMap map[string]*spec.ApiSpec) (string, error) {
+func (ja *JzeroApi) getRoutesGoBody(fp string, apiSpecMap map[string]*spec.ApiSpec, currentRoutesMap map[string][]spec.Route) (string, error) {
 	rootPkg, projectPkg, err := golang.GetParentPackageWithModule(config.C.Wd(), ja.Module)
 	if err != nil {
 		return "", err
 	}
 
-	if len(apiSpecMap[fp].Service.Routes()) > 0 {
-		routesGoBody, err := jgogen.GenRoutesString(rootPkg, projectPkg, &zeroconfig.Config{NamingFormat: config.C.Style}, apiSpecMap[fp])
-		if err != nil {
-			return "", err
+	// 获取当前文件的路由（不包含 import）
+	currentRoutes := currentRoutesMap[fp]
+	if len(currentRoutes) == 0 {
+		return "", nil
+	}
+
+	// 创建过滤后的 ApiSpec，只包含当前文件的路由
+	apiSpec := apiSpecMap[fp]
+	filteredSpec := &spec.ApiSpec{
+		Info:    apiSpec.Info,
+		Syntax:  apiSpec.Syntax,
+		Imports: apiSpec.Imports,
+		Types:   apiSpec.Types, // 保留所有 types（包括 import 的）
+		Service: spec.Service{
+			Name:   apiSpec.Service.Name,
+			Groups: []spec.Group{},
+		},
+	}
+
+	// 按路由路径和方法创建映射，用于快速查找
+	routeKeyMap := make(map[string]bool)
+	for _, r := range currentRoutes {
+		key := r.Path + ":" + r.Method
+		routeKeyMap[key] = true
+	}
+
+	// 过滤路由，只保留当前文件的
+	for _, g := range apiSpec.Service.Groups {
+		filteredGroup := spec.Group{
+			Annotation: g.Annotation,
+			Routes:     []spec.Route{},
 		}
-		fset := token.NewFileSet()
-		f, err := goparser.ParseFile(fset, "", strings.NewReader(routesGoBody), goparser.ParseComments)
-		if err != nil {
-			return "", err
+		for _, r := range g.Routes {
+			key := r.Path + ":" + r.Method
+			if routeKeyMap[key] {
+				filteredGroup.Routes = append(filteredGroup.Routes, r)
+			}
 		}
-		for _, g := range apiSpecMap[fp].Service.Groups {
-			for _, route := range g.Routes {
-				ast.Inspect(f, func(node ast.Node) bool {
-					switch n := node.(type) {
-					case *ast.CallExpr:
-						if sel, ok := n.Fun.(*ast.SelectorExpr); ok {
-							if _, ok := sel.X.(*ast.Ident); ok {
-								if util.Title(sel.Sel.Name) == util.Title(strings.TrimSuffix(route.Handler, "Handler"))+"Handler" {
-									sel.Sel.Name = strings.TrimSuffix(route.Handler, "Handler")
-									if g.GetAnnotation("group") != "" {
+		if len(filteredGroup.Routes) > 0 {
+			filteredSpec.Service.Groups = append(filteredSpec.Service.Groups, filteredGroup)
+		}
+	}
+
+	// 使用过滤后的 ApiSpec 生成路由代码
+	routesGoBody, err := jgogen.GenRoutesString(rootPkg, projectPkg, &zeroconfig.Config{NamingFormat: config.C.Style}, filteredSpec)
+	if err != nil {
+		return "", err
+	}
+
+	fset := token.NewFileSet()
+	f, err := goparser.ParseFile(fset, "", strings.NewReader(routesGoBody), goparser.ParseComments)
+	if err != nil {
+		return "", err
+	}
+
+	// 只处理当前文件的路由
+	for _, route := range currentRoutes {
+		ast.Inspect(f, func(node ast.Node) bool {
+			switch n := node.(type) {
+			case *ast.CallExpr:
+				if sel, ok := n.Fun.(*ast.SelectorExpr); ok {
+					if _, ok := sel.X.(*ast.Ident); ok {
+						if util.Title(sel.Sel.Name) == util.Title(strings.TrimSuffix(route.Handler, "Handler"))+"Handler" {
+							sel.Sel.Name = strings.TrimSuffix(route.Handler, "Handler")
+							// 查找对应的 group
+							for _, g := range filteredSpec.Service.Groups {
+								for _, gr := range g.Routes {
+									if gr.Handler == route.Handler && g.GetAnnotation("group") != "" {
 										sel.Sel.Name = util.Title(strings.TrimSuffix(route.Handler, "Handler"))
+										break
 									}
-								}
-							}
-						} else if indent, ok := n.Fun.(*ast.Ident); ok {
-							if util.Title(indent.Name) == util.Title(strings.TrimSuffix(route.Handler, "Handler"))+"Handler" {
-								indent.Name = strings.TrimSuffix(route.Handler, "Handler")
-								if g.GetAnnotation("group") != "" {
-									indent.Name = util.Title(strings.TrimSuffix(route.Handler, "Handler"))
 								}
 							}
 						}
 					}
-					return true
-				})
-			}
-		}
-		// 遍历 AST 节点
-		for _, decl := range f.Decls {
-			// 查找函数声明
-			if funcDecl, ok := decl.(*ast.FuncDecl); ok {
-				if funcDecl.Name.Name == "RegisterHandlers" {
-					// 提取函数体
-					var buf bytes.Buffer
-					if err = printer.Fprint(&buf, fset, funcDecl.Body); err != nil {
-						return "", err
+				} else if indent, ok := n.Fun.(*ast.Ident); ok {
+					if util.Title(indent.Name) == util.Title(strings.TrimSuffix(route.Handler, "Handler"))+"Handler" {
+						indent.Name = strings.TrimSuffix(route.Handler, "Handler")
+						for _, g := range filteredSpec.Service.Groups {
+							for _, gr := range g.Routes {
+								if gr.Handler == route.Handler && g.GetAnnotation("group") != "" {
+									indent.Name = util.Title(strings.TrimSuffix(route.Handler, "Handler"))
+									break
+								}
+							}
+						}
 					}
-					return buf.String(), nil
 				}
+			}
+			return true
+		})
+	}
+
+	// 遍历 AST 节点
+	for _, decl := range f.Decls {
+		// 查找函数声明
+		if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+			if funcDecl.Name.Name == "RegisterHandlers" {
+				// 提取函数体
+				var buf bytes.Buffer
+				if err = printer.Fprint(&buf, fset, funcDecl.Body); err != nil {
+					return "", err
+				}
+				return buf.String(), nil
 			}
 		}
 	}
+
 	return "", nil
 }
 
@@ -88,11 +144,36 @@ type Route struct {
 	spec.Route
 }
 
-func (ja *JzeroApi) genRoute2Code(apiSpecMap map[string]*spec.ApiSpec) ([]byte, error) {
+func (ja *JzeroApi) genRoute2Code(apiSpecMap map[string]*spec.ApiSpec, currentRoutesMap map[string][]spec.Route, importedFiles map[string]bool) ([]byte, error) {
 	var routes []Route
-	for _, s := range apiSpecMap {
+
+	for fp, s := range apiSpecMap {
+		// 跳过被 import 的文件
+		if importedFiles[fp] {
+			continue
+		}
+
+		// 获取当前文件的路由
+		currentRoutes := currentRoutesMap[fp]
+		if len(currentRoutes) == 0 {
+			continue
+		}
+
+		// 为当前文件的路由创建映射
+		routeKeyMap := make(map[string]bool)
+		for _, r := range currentRoutes {
+			key := r.Path + ":" + r.Method
+			routeKeyMap[key] = true
+		}
+
+		// 只添加当前文件的路由
 		for _, g := range s.Service.Groups {
 			for _, r := range g.Routes {
+				key := r.Path + ":" + r.Method
+				if !routeKeyMap[key] {
+					continue
+				}
+
 				route := Route{
 					Group: g.GetAnnotation("group"),
 					Route: r,

@@ -14,6 +14,8 @@ export default hopeTheme({
 
   iconAssets: "iconify",
 
+  copyright: 'Copyright © 2024-2026 jzero-io',
+
   // made by https://gopherize.me
   // favicon.ico made by https://www.bitbug.net
   logo: "https://oss.jaronnie.com/jzero.svg",

@@ -4,7 +4,7 @@ icon: clarity:thin-client-line
 order: 5
 ---
 
-## 生成 Swagger 文档
+## 生成 Swagger
 
 ### 使用方法
 
@@ -15,12 +15,16 @@ order: 5
 ```bash
 cd your_project
 jzero gen swagger
+# 合并成一个 swagger.json 文件
+jzero gen swagger --merge
 ```
 
 @tab jzero Docker
 ```bash
 cd your_project
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
+# 合并成一个 swagger.json 文件
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger --merge
 ```
 :::
 
@@ -30,6 +34,12 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 
 ## 生成 Zrpc 客户端
 
+生成 zrpc 客户端存在以下场景:
+
+* 直接对服务端的 proto 文件生成客户端代码, 与主服务共用一个 go module, 其他服务要引用时, 需要引用整个源码才能使用(不推荐)
+* 将服务端的 proto 文件复制到要引用的服务, 使用 `jzero gen zrpcclient` 生成到当前项目中(简单场景下推荐使用)
+* 直接对服务端的 proto 文件生成客户端代码, 有独立的 go module, 通过 ci 流程推送到单独的远程仓库, 其他服务引用时直接 go get 引入(大型项目推荐)
+
 ::: code-tabs#shell
 
 @tab jzero
@@ -37,12 +47,16 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
 ```bash
 cd your_project
 jzero gen zrpcclient --output simplerpcclient
+# 设置 zrpcclient 为独立 go module
+jzero gen zrpcclient --output simplerpcclient --goModule gitlab.xx.com/xx/simplerpcclient
 ```
 
 @tab Docker
 ```bash
 cd your_project
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen zrpcclient --output simplerpcclient
+# 设置 zrpcclient 为独立 go module
+docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen zrpcclient --output simplerpcclient --goModule gitlab.xx.com/xx/simplerpcclient
 ```
 :::
 
