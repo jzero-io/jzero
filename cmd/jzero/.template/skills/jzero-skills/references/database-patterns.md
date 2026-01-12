@@ -322,10 +322,10 @@ The `condition` package provides a fluent, type-safe way to build database query
 
 ### ✅ Use Generated Field Constants
 
-jzero automatically generates field constants for each model in `internal/model/<table>/vars.go`:
+jzero automatically generates field constants for each model in `internal/model/<table>/<table>model_gen.go`:
 
 ```go
-// internal/model/users/vars.go
+// internal/model/users/usersmodel_gen.go
 package users
 
 const (
