@@ -21,10 +21,10 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/completion"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/format"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/command/mcp"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/migrate"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/new"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/serverless"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/command/skills"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/template"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/upgrade"
 	versioncmd "github.com/jzero-io/jzero/cmd/jzero/internal/command/version"
@@ -32,7 +32,6 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
-	mcppkg "github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mcp"
 )
 
 var WorkingDir string
@@ -55,8 +54,6 @@ func main() {
 	versioncmd.Version = version
 	versioncmd.Date = date
 	versioncmd.Commit = commit
-
-	os.Args = mcppkg.ProcessOsArgs()
 
 	Execute()
 }
@@ -136,10 +133,10 @@ func init() {
 	rootCmd.AddCommand(format.GetCommand())
 	rootCmd.AddCommand(add.GetCommand())
 	rootCmd.AddCommand(gen.GetCommand())
-	rootCmd.AddCommand(mcp.GetCommand())
 	rootCmd.AddCommand(migrate.GetCommand())
 	rootCmd.AddCommand(new.GetCommand())
 	rootCmd.AddCommand(serverless.GetCommand())
+	rootCmd.AddCommand(skills.GetCommand())
 	rootCmd.AddCommand(template.GetCommand())
 	rootCmd.AddCommand(upgrade.GetCommand())
 	rootCmd.AddCommand(versioncmd.GetCommand())
