@@ -33,6 +33,8 @@ jzero is an enhancement framework built on [go-zero](https://github.com/zeromicr
 When helping with jzero development:
 
 1. **For specific patterns**: Reference the appropriate pattern guide
+2. **⚠️ CRITICAL for database operations**: Always consult [references/condition-builder.md](references/condition-builder.md) before writing any query conditions
+3. **⚠️ CRITICAL for CRUD operations**: Follow best practices in [references/best-practices.md](references/best-practices.md) and [references/crud-operations.md](references/crud-operations.md)
 
 ## Core Patterns
 
@@ -51,12 +53,47 @@ Reference: [references/rest-api-patterns.md](references/rest-api-patterns.md)
 Reference: [references/database-patterns.md](references/database-patterns.md)
 
 - SQL operations with sqlx (CRUD, transactions, batch operations)
-- MongoDB integration patterns
 - Redis caching strategies
 - Connection pooling and performance optimization
 - Enhanced model generation with jzero
 
 **When to use**: Implementing data persistence, caching, or database queries
+
+### ⚠️ CRITICAL: Condition Package Usage
+
+Reference: [references/condition-builder.md](references/condition-builder.md)
+
+**‼️ MOST IMPORTANT RULE**: **ALWAYS use `condition.NewChain()` API for building query conditions**
+
+The condition package provides two ways to build queries, but you MUST use the chain API:
+
+```go
+// ✅ CORRECT - ALWAYS use this pattern
+import (
+    "github.com/jzero-io/jzero/core/stores/condition"
+    "github.com/yourproject/internal/model/user"
+)
+
+conditions := condition.NewChain().
+    Equal(user.Username, req.Username).
+    Greater(user.Age, 18).
+    Build()
+
+// Use with any *ByCondition method
+result, err := model.FindOneByCondition(ctx, nil, conditions...)
+
+// ❌ WRONG - NEVER use this pattern
+conditions := condition.New(
+    condition.Condition{Field: user.Username, Operator: condition.Equal, Value: req.Username},
+)
+```
+
+**Key Points**:
+- ✅ Use `condition.NewChain()` - Fluent, type-safe API
+- ✅ Use generated field constants (e.g., `user.Username`, `user.Email`)
+- ✅ Chain multiple conditions: `Equal().Like().In().Build()`
+
+**When to use**: Writing ANY database query with conditions (filters, searches, pagination)
 
 ## jzero-Specific Features
 
@@ -144,8 +181,13 @@ jzero provides enhanced AI tooling:
 jzero-skills/
 ├── SKILL.md                    # This file - skill entry point
 ├── references/                 # Detailed pattern documentation
-│   ├── rest-api-patterns.md
-│   ├── database-patterns.md
+│   ├── rest-api-patterns.md    # REST API best practices
+│   ├── database-patterns.md    # Database operation patterns
+│   ├── condition-builder.md    # ⚠️ CRITICAL: Condition package usage
+│   ├── best-practices.md       # Database best practices
+│   ├── crud-operations.md      # CRUD operation examples
+│   ├── model-generation.md     # Model generation guide
+│   └── database-connection.md  # Database connection setup
 ```
 
 ## Common Workflows
@@ -166,21 +208,10 @@ See complete workflow in [references/rest-api-patterns.md](references/rest-api-p
 1. Design database schema
 2. Add SQL file with `jzero add sql user.sql`
 3. Generate model with `jzero gen`
-4. Inject model into ServiceContext
-5. Use sqlx for queries in logic layer
-6. Handle transactions and errors properly
+4. Use sqlx for queries in logic layer
+5. Handle transactions and errors properly
 
 See complete patterns in [references/database-patterns.md](references/database-patterns.md)
-
-### Working with Git Changes
-
-1. Make changes to description files
-2. Check what changed with `jzero gen --git-change`
-3. Generate code for only changed files
-4. Review generated code
-5. Commit changes
-
-This workflow is ideal for large projects with many services.
 
 ### Adding Middleware
 
@@ -202,6 +233,9 @@ See middleware patterns in [references/rest-api-patterns.md](references/rest-api
 - **Context propagation**: Pass `ctx` through all layers
 - **Type safety**: Define types in `.api` files, generate with jzero
 - **Use jzero commands**: Prefer `jzero` over `goctl` for enhanced features
+- **⚠️ Condition queries**: ALWAYS use `condition.NewChain()` API (see [condition-builder.md](references/condition-builder.md))
+- **Field constants**: Use generated constants (e.g., `user.Username`) not hardcoded strings
+- **References**: Consult [references/](references/) before implementing patterns
 
 ### ❌ Never Do
 
@@ -211,6 +245,9 @@ See middleware patterns in [references/rest-api-patterns.md](references/rest-api
 - Skip validation of user inputs
 - Bypass the three-layer architecture
 - Use `goctl` directly when jzero provides enhanced alternatives
+- **‼️ Use `condition.New()` instead of `condition.NewChain()`** - This is critical!
+- Use hardcoded strings for database field names
+- Skip reading reference documentation before implementing database operations
 
 ## Progressive Learning
 

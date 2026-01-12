@@ -15,22 +15,33 @@ This guide outlines best practices for working with databases in jzero applicati
 
 ### Field Constants
 
-- **Use generated field constants (e.g., `users.Id`) instead of hardcoded strings**
+- **✅ Use generated field constants (e.g., `users.Id`) instead of hardcoded strings**
   ```go
-  // ✅ CORRECT
-  conditions := condition.New(
-      condition.Condition{Field: users.Id, Operator: condition.Equal, Value: req.Id},
-  )
+  // ✅ CORRECT - Use chain API with generated constants
+  conditions := condition.NewChain().
+      Equal(users.Id, req.Id).
+      Build()
 
-  // ❌ WRONG
-  conditions := condition.New(
-      condition.Condition{Field: "id", Operator: condition.Equal, Value: req.Id},
-  )
+  // ❌ WRONG - Don't use hardcoded strings
+  conditions := condition.NewChain().
+      Equal("id", req.Id).  // Hardcoded string
+      Build()
   ```
 
 ### Query Building
 
-- **Use condition builder for complex queries** - Provides type-safe, fluent API
+- **✅ Use condition chain API for ALL query building** - Provides fluent, type-safe API
+  ```go
+  // ✅ CORRECT - ALWAYS use condition.NewChain()
+  conditions := condition.NewChain().
+      Equal(users.Status, "active").
+      Build()
+
+  // ❌ WRONG - NEVER use condition.New()
+  conditions := condition.New(
+      condition.Condition{Field: users.Status, Operator: condition.Equal, Value: "active"},
+  )
+  ```
 - **Always pass `context.Context` to database operations** - Enables cancellation and timeout
 - **Use transactions for atomic operations** - Maintain data consistency
 
@@ -62,6 +73,7 @@ This guide outlines best practices for working with databases in jzero applicati
 
 ### Code Quality
 
+- **‼️ Use `condition.New()` instead of `condition.NewChain()`** - ALWAYS use chain API
 - **Use hardcoded strings for field names** - Use generated constants
 - **Use `_` to discard errors** - Always handle errors
 - **Create database connections in handlers/logic** - Use service context
@@ -83,7 +95,7 @@ This guide outlines best practices for working with databases in jzero applicati
 ### Proper Error Handling
 
 ```go
-func (l *GetUser) GetUser(req *types.GetUserRequest) (*types.GetUserResponse, error) {
+func (l *Get) Get(req *types.GetRequest) (*types.GetResponse, error) {
     user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
     if err != nil {
         if errors.Is(err, users.ErrNotFound) {
@@ -93,25 +105,32 @@ func (l *GetUser) GetUser(req *types.GetUserRequest) (*types.GetUserResponse, er
         l.Logger.Errorf("failed to find user %d: %v", req.Id, err)
         return nil, err
     }
-    return &types.GetUserResponse{...}, nil
+    return &types.GetResponse{...}, nil
 }
 ```
 
 ### Pagination with Conditions
 
 ```go
-func (l *ListUsers) ListUsers(req *types.ListUsersRequest) (*types.ListUsersResponse, error) {
-    conditions := condition.New(
-        condition.Condition{Operator: condition.Limit, Value: req.Size},
-        condition.Condition{Operator: condition.Offset, Value: (req.Page - 1) * req.Size},
-        condition.Condition{Operator: condition.OrderBy, Value: []string{"id DESC"}},
-    )
+func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
+    // ✅ Build conditions with chain
+    chain := condition.NewChain()
 
+    // Add filter conditions dynamically
     if req.Status != "" {
-        conditions = append(conditions, condition.Condition{
-            Field: users.Status, Operator: condition.Equal, Value: req.Status,
-        })
+        chain = chain.Equal(users.Status, req.Status)
     }
+
+    if req.Name != "" {
+        chain = chain.Like(users.Name, "%"+req.Name+"%")
+    }
+
+    // Add pagination and ordering
+    conditions := chain.
+        Limit(req.Size).
+        Offset((req.Page - 1) * req.Size).
+        OrderBy("id DESC").
+        Build()
 
     users, total, err := l.svcCtx.Model.Users.PageByCondition(l.ctx, nil, conditions...)
     if err != nil {
@@ -119,17 +138,18 @@ func (l *ListUsers) ListUsers(req *types.ListUsersRequest) (*types.ListUsersResp
         return nil, err
     }
 
-    return &types.ListUsersResponse{List: users, Total: total}, nil
+    return &types.ListResponse{List: users, Total: total}, nil
 }
 ```
 
 ### Batch Operations
 
 ```go
-func (l *UpdateUsersStatus) UpdateUsersStatus(userIds []int64, status string) error {
-    conditions := condition.New(
-        condition.Condition{Field: users.Id, Operator: condition.In, Value: userIds},
-    )
+func (l *UpdateStatus) UpdateStatus(userIds []int64, status string) error {
+    // ✅ Build conditions with chain
+    conditions := condition.NewChain().
+        In(users.Id, userIds).
+        Build()
 
     updateData := map[string]any{string(users.Status): status}
 
@@ -171,5 +191,5 @@ func (l *GetOrder) GetOrder(userId, orderId int64) (*orders.Orders, error) {
 
 - [Database Connection](./database-connection.md) - Setting up database connections
 - [Model Generation](./model-generation.md) - Generating models with field constants
-- [Condition Builder](./condition-builder.md) - Building query conditions
+- [Condition Builder](./condition-builder.md) - Building query conditions (MUST read)
 - [CRUD Operations](./crud-operations.md) - Using generated methods

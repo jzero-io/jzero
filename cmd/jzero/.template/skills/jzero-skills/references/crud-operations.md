@@ -38,14 +38,14 @@ func (l *Create) Create(req *types.CreateRequest) (*types.CreateResponse, error)
         Age:   int64(req.Age),
     }
 
-    // Use InsertV2 to get auto-increment ID
+    // ✅ Use InsertV2 to get auto-increment ID
     userId, err := l.svcCtx.Model.Users.InsertV2(l.ctx, nil, user)
     if err != nil {
         l.Logger.Errorf("failed to insert user: %v", err)
         return nil, err
     }
 
-    return &types.CreateUserResponse{
+    return &types.CreateResponse{
         Id: userId,
     }, nil
 }
@@ -78,7 +78,7 @@ func (l *Get) Get(req *types.GetRequest) (*types.GetResponse, error) {
         return nil, err
     }
 
-    return &types.GetUserResponse{
+    return &types.GetResponse{
         Id:    user.Id,
         Name:  user.Name,
         Email: user.Email,
@@ -98,30 +98,29 @@ import (
 )
 
 func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
-    // Build conditions including pagination
-    conditions := condition.New(
-        condition.Condition{Operator: condition.Limit, Value: req.Size},
-        condition.Condition{Operator: condition.Offset, Value: (req.Page - 1) * req.Size},
-        condition.Condition{Operator: condition.OrderBy, Value: []string{"id DESC"}},
-    )
+    // ✅ Build conditions with chain
+    chain := condition.NewChain()
 
-    // Add filter conditions
+    // Add filter conditions dynamically
     if req.Age > 0 {
-        conditions = append(conditions, condition.Condition{
-            Field: users.Age, Operator: condition.Equal, Value: req.Age,
-        })
+        chain = chain.Equal(users.Age, req.Age)
     }
 
     if req.Name != "" {
-        conditions = append(conditions, condition.Condition{
-            Field: users.Name, Operator: condition.Like, Value: "%" + req.Name + "%",
-        })
+        chain = chain.Like(users.Name, "%"+req.Name+"%")
     }
+
+    // Add pagination and ordering
+    conditions := chain.
+        Limit(req.Size).
+        Offset((req.Page - 1) * req.Size).
+        OrderBy("id DESC").
+        Build()
 
     // Use generated PageByCondition method
     users, total, err := l.svcCtx.Model.Users.PageByCondition(l.ctx, nil, conditions...)
 
-    return &types.ListUsersResponse{List: users, Total: total}, err
+    return &types.ListResponse{List: users, Total: total}, err
 }
 ```
 
@@ -136,9 +135,10 @@ import (
 )
 
 func (l *Update) Update(req *types.UpdateRequest) error {
-    conditions := condition.New(
-        condition.Condition{Field: users.Id, Operator: condition.Equal, Value: req.Id},
-    )
+    // ✅ Build conditions with chain
+    conditions := condition.NewChain().
+        Equal(users.Id, req.Id).
+        Build()
 
     updateData := map[string]any{
         string(users.Name): req.Name,
@@ -166,9 +166,10 @@ import (
 )
 
 func (l *Delete) Delete(ids []int64) error {
-    conditions := condition.New(
-        condition.Condition{Field: users.Id, Operator: condition.In, Value: ids},
-    )
+    // ✅ Build conditions with chain
+    conditions := condition.NewChain().
+        In(users.Id, ids).
+        Build()
 
     _, err := l.svcCtx.Model.Users.DeleteByCondition(l.ctx, nil, conditions...)
     if err != nil {
@@ -196,6 +197,7 @@ import (
 )
 
 func (l *GetSalesReport) GetSalesReport(req *types.SalesReportRequest) (*types.SalesReportResponse, error) {
+    // ✅ Build date range conditions with chain
     chain := condition.NewChain().
         GreaterOrEqual(orders.CreatedAt, req.StartDate).
         Less(orders.CreatedAt, req.EndDate)
@@ -235,9 +237,7 @@ func (l *GetOrder) GetOrder(userId, orderId int64) (*orders.Orders, error) {
     // Calculate shard based on user_id
     shardId := userId % 10
 
-    // Use WithTable to specify sharded table
-    // WithTable takes a function that receives the original table name
-    // and returns the modified table name
+    // ✅ Use WithTable to specify sharded table
     order, err := l.svcCtx.Model.Orders.
         WithTable(func(table string) string {
             return fmt.Sprintf("orders_%d", shardId)

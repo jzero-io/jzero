@@ -2,7 +2,9 @@
 
 ## Overview
 
-The `condition` package provides a fluent, type-safe way to build database query conditions. It's used with all `*ByCondition` generated methods and supports complex queries with a clean API.
+The `condition` package provides a fluent, type-safe way to build database query conditions using the **chain API**.
+
+‼️ **IMPORTANT: You MUST use the `condition.NewChain()` API for all query conditions. Do NOT use `condition.New()`.**
 
 ## Import
 
@@ -13,28 +15,36 @@ import (
 )
 ```
 
-## Use Generated Field Constants
+## ✅ Use Condition Chain API
 
-**Always use generated field constants instead of hardcoded strings:**
+**‼️ ALWAYS use `condition.NewChain()` for building conditions - this is the ONLY supported approach.**
 
 ```go
-// ✅ CORRECT - Use generated constants
+// ✅ CORRECT - Use chain API
+conditions := condition.NewChain().
+    Equal(users.Id, req.Id).
+    Build()
+
+// ❌ WRONG - NEVER use condition.New()
 conditions := condition.New(
-    condition.Condition{
-        Field:    users.Id,
-        Operator: condition.Equal,
-        Value:    req.Id,
-    },
+    condition.Condition{Field: users.Id, Operator: condition.Equal, Value: req.Id},
 )
+```
+
+## Use Generated Field Constants
+
+**‼️ ALWAYS use generated field constants instead of hardcoded strings:**
+
+```go
+// ✅ CORRECT - Use generated constants with chain
+conditions := condition.NewChain().
+    Equal(users.Id, req.Id).
+    Build()
 
 // ❌ WRONG - Don't use hardcoded strings
-conditions := condition.New(
-    condition.Condition{
-        Field:    "id",  // Hardcoded string
-        Operator: condition.Equal,
-        Value:    req.Id,
-    },
-)
+conditions := condition.NewChain().
+    Equal("id", req.Id).  // Hardcoded string
+    Build()
 ```
 
 **Benefits:**
@@ -46,97 +56,55 @@ conditions := condition.New(
 ## Basic Syntax
 
 ```go
-conditions := condition.New(
-    condition.Condition{
-        Field:    users.Id,
-        Operator: condition.Equal,
-        Value:    value,
-    },
-)
-```
+// ✅ Build conditions with chain API
+chain := condition.NewChain().
+    Equal(users.Id, value)
 
-## Comparison Operators
-
-| Operator | Description | Example |
-|----------|-------------|---------|
-| `condition.Equal` | `=` | `{Field: users.Id, Operator: condition.Equal, Value: 123}` |
-| `condition.NotEqual` | `!=` / `<>` | `{Field: users.Status, Operator: condition.NotEqual, Value: "deleted"}` |
-| `condition.Greater` | `>` | `{Field: users.Age, Operator: condition.Greater, Value: 18}` |
-| `condition.GreaterOrEqual` | `>=` | `{Field: users.Age, Operator: condition.GreaterOrEqual, Value: 18}` |
-| `condition.Less` | `<` | `{Field: users.Age, Operator: condition.Less, Value: 65}` |
-| `condition.LessOrEqual` | `<=` | `{Field: users.Age, Operator: condition.LessOrEqual, Value: 10}` |
-
-## Pattern Matching Operators
-
-| Operator | Description | Example |
-|----------|-------------|---------|
-| `condition.Like` | `LIKE` | `{Field: users.Name, Operator: condition.Like, Value: "%john%"}` |
-| `condition.In` | `IN` | `{Field: users.Id, Operator: condition.In, Value: []int64{1,2,3}}` |
-| `condition.NotIn` | `NOT IN` | `{Field: users.Status, Operator: condition.NotIn, Value: []string{"deleted", "banned"}}` |
-| `condition.IsNull` | `IS NULL` | `{Field: users.DeletedAt, Operator: condition.IsNull}` |
-| `condition.IsNotNull` | `IS NOT NULL` | `{Field: users.Email, Operator: condition.IsNotNull}` |
-| `condition.Between` | `BETWEEN` | `{Field: users.CreatedAt, Operator: condition.Between, Value: []any{start, end}}` |
-
-## Pagination & Sorting Operators
-
-| Operator | Description | Example |
-|----------|-------------|---------|
-| `condition.Limit` | `LIMIT n` | `{Operator: condition.Limit, Value: 20}` |
-| `condition.Offset` | `OFFSET n` | `{Operator: condition.Offset, Value: 0}` |
-| `condition.OrderBy` | `ORDER BY` | `{Operator: condition.OrderBy, Value: []string{"id DESC", "created_at ASC"}}` |
-
-**Note**: Pagination operators are specified as conditions, not as method parameters.
-
-## Building Complex Conditions
-
-### Dynamic Condition Building
-
-```go
-// Build conditions dynamically
-conditions := condition.New(
-    // Pagination
-    condition.Condition{Operator: condition.Limit, Value: 20},
-    condition.Condition{Operator: condition.Offset, Value: 0},
-    condition.Condition{Operator: condition.OrderBy, Value: []string{"id DESC"}},
-)
-
-// Add filter conditions conditionally
-if ageFilter > 0 {
-    conditions = append(conditions, condition.Condition{
-        Field:    users.Age,
-        Operator: condition.Equal,
-        Value:    ageFilter,
-    })
-}
-
-if nameSearch != "" {
-    conditions = append(conditions, condition.Condition{
-        Field:    users.Name,
-        Operator: condition.Like,
-        Value:    "%" + nameSearch + "%",
-    })
-}
-
-if len(statusList) > 0 {
-    conditions = append(conditions, condition.Condition{
-        Field:    users.Status,
-        Operator: condition.In,
-        Value:    statusList,
-    })
-}
+// Convert to conditions slice
+conditions := chain.Build()
 
 // Use with any *ByCondition method
-users, total, err := model.PageByCondition(ctx, nil, conditions...)
+usersList, err := model.FindByCondition(ctx, nil, conditions...)
 ```
 
-## Using Condition Chain
+## Chain Methods
 
-For a more fluent API when building complex conditions, use `condition.NewChain()`:
+### Comparison Operators
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `Equal(field, value)` | `=` | `chain.Equal(users.Id, 123)` |
+| `NotEqual(field, value)` | `!=` / `<>` | `chain.NotEqual(users.Status, "deleted")` |
+| `Greater(field, value)` | `>` | `chain.Greater(users.Age, 18)` |
+| `GreaterOrEqual(field, value)` | `>=` | `chain.GreaterOrEqual(users.Age, 18)` |
+| `Less(field, value)` | `<` | `chain.Less(users.Age, 65)` |
+| `LessOrEqual(field, value)` | `<=` | `chain.LessOrEqual(users.Age, 10)` |
+
+### Pattern Matching Operators
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `Like(field, value)` | `LIKE` | `chain.Like(users.Name, "%john%")` |
+| `In(field, values)` | `IN` | `chain.In(users.Id, []int64{1,2,3})` |
+| `NotIn(field, values)` | `NOT IN` | `chain.NotIn(users.Status, []string{"deleted", "banned"})` |
+| `IsNull(field)` | `IS NULL` | `chain.IsNull(users.DeletedAt)` |
+| `IsNotNull(field)` | `IS NOT NULL` | `chain.IsNotNull(users.Email)` |
+| `Between(field, min, max)` | `BETWEEN` | `chain.Between(users.CreatedAt, start, end)` |
+
+### Pagination & Sorting
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `Limit(n)` | `LIMIT n` | `chain.Limit(20)` |
+| `Offset(n)` | `OFFSET n` | `chain.Offset(0)` |
+| `OrderBy(fields ...string)` | `ORDER BY` | `chain.OrderBy("id DESC", "created_at ASC")` |
+
+## Building Complex Conditions
 
 ### Basic Chain Usage
 
 ```go
-// Build conditions with chain API
+// ✅ Build multiple conditions with chain API
 chain := condition.NewChain().
     Equal(users.Status, "active").
     GreaterOrEqual(users.Age, 18).
@@ -150,27 +118,10 @@ conditions := chain.Build()
 usersList, err := model.FindByCondition(ctx, nil, conditions...)
 ```
 
-### Chain Methods
-
-| Method | Description | Example |
-|--------|-------------|---------|
-| `Equal(field, value)` | `=` | `chain.Equal(users.Id, 123)` |
-| `NotEqual(field, value)` | `!=` | `chain.NotEqual(users.Status, "deleted")` |
-| `Greater(field, value)` | `>` | `chain.Greater(users.Age, 18)` |
-| `GreaterOrEqual(field, value)` | `>=` | `chain.GreaterOrEqual(users.Age, 18)` |
-| `Less(field, value)` | `<` | `chain.Less(users.Age, 65)` |
-| `LessOrEqual(field, value)` | `<=` | `chain.LessOrEqual(users.Age, 100)` |
-| `Like(field, value)` | `LIKE` | `chain.Like(users.Name, "%john%")` |
-| `In(field, values)` | `IN` | `chain.In(users.Id, []int64{1,2,3})` |
-| `NotIn(field, values)` | `NOT IN` | `chain.NotIn(users.Status, []string{"deleted"})` |
-| `Between(field, min, max)` | `BETWEEN` | `chain.Between(users.CreatedAt, start, end)` |
-| `IsNull(field)` | `IS NULL` | `chain.IsNull(users.DeletedAt)` |
-| `IsNotNull(field)` | `IS NOT NULL` | `chain.IsNotNull(users.Email)` |
-
-### Conditional Building with Chain
+### Dynamic Condition Building
 
 ```go
-// Start with base conditions
+// ✅ Start with base conditions
 chain := condition.NewChain().
     Equal(users.Status, "active")
 
@@ -187,38 +138,105 @@ if searchQuery != "" {
     chain = chain.Like(users.Name, "%"+searchQuery+"%")
 }
 
-// Build and use
-conditions := chain.Build()
+if len(statusList) > 0 {
+    chain = chain.In(users.Status, statusList)
+}
+
+// Build and use with pagination
+conditions := chain.Limit(20).Offset(0).OrderBy("id DESC").Build()
 usersList, total, err := model.PageByCondition(ctx, nil, conditions...)
 ```
 
-## Combining Chain and New
-
-You can combine both approaches for maximum flexibility:
+### Pagination Example
 
 ```go
-// Use chain for filters
-filters := condition.NewChain().
-    Equal(users.Status, "active").
-    GreaterOrEqual(users.Age, 18).
-    Build()
+func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
+    // ✅ Build conditions with pagination using chain
+    chain := condition.NewChain()
 
-// Combine with pagination
-conditions := condition.New(
-    condition.Condition{Operator: condition.Limit, Value: 20},
-    condition.Condition{Operator: condition.Offset, Value: 0},
-)
-conditions = append(conditions, filters...)
+    // Add filter conditions dynamically
+    if req.Age > 0 {
+        chain = chain.Equal(users.Age, req.Age)
+    }
 
-// Use combined conditions
-usersList, total, err := model.PageByCondition(ctx, nil, conditions...)
+    if req.Name != "" {
+        chain = chain.Like(users.Name, "%"+req.Name+"%")
+    }
+
+    // Add pagination and ordering
+    conditions := chain.
+        Limit(req.Size).
+        Offset((req.Page - 1) * req.Size).
+        OrderBy("id DESC").
+        Build()
+
+    // Use generated PageByCondition method
+    users, total, err := l.svcCtx.Model.Users.PageByCondition(l.ctx, nil, conditions...)
+
+    return &types.ListResponse{List: users, Total: total}, err
+}
 ```
 
-## When to Use Chain vs. New
+## Complete Example
 
-- Use `condition.New()` when you need special operators like `Limit`, `Offset`, `OrderBy`
-- Use `condition.NewChain()` for cleaner syntax when building filter conditions
-- Combine both approaches for complex queries with filters and pagination
+```go
+import (
+    "github.com/jzero-io/jzero/core/stores/condition"
+    "github.com/yourproject/internal/model/users"
+)
+
+func (l *SearchUsers) SearchUsers(req *types.SearchRequest) error {
+    // ✅ Build all conditions with chain
+    chain := condition.NewChain()
+
+    // Status filter
+    if req.Status != "" {
+        chain = chain.Equal(users.Status, req.Status)
+    }
+
+    // Age range
+    if req.MinAge > 0 {
+        chain = chain.GreaterOrEqual(users.Age, req.MinAge)
+    }
+    if req.MaxAge > 0 {
+        chain = chain.LessOrEqual(users.Age, req.MaxAge)
+    }
+
+    // Name search
+    if req.Name != "" {
+        chain = chain.Like(users.Name, "%"+req.Name+"%")
+    }
+
+    // Email verification
+    if req.EmailVerified {
+        chain = chain.IsNotNull(users.EmailVerifiedAt)
+    }
+
+    // Role filtering
+    if len(req.Roles) > 0 {
+        chain = chain.In(users.Role, req.Roles)
+    }
+
+    // Created date range
+    if !req.StartDate.IsZero() {
+        chain = chain.GreaterOrEqual(users.CreatedAt, req.StartDate)
+    }
+    if !req.EndDate.IsZero() {
+        chain = chain.Less(users.CreatedAt, req.EndDate)
+    }
+
+    // Add pagination and sort
+    conditions := chain.
+        Limit(req.Size).
+        Offset((req.Page - 1) * req.Size).
+        OrderBy("created_at DESC").
+        Build()
+
+    // Execute query
+    usersList, total, err := l.svcCtx.Model.Users.PageByCondition(l.ctx, nil, conditions...)
+    // ...
+}
+```
 
 ## Related Documentation
 
