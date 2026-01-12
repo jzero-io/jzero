@@ -155,15 +155,6 @@ func (m *custom{{.upperStartCamelObject}}Model) UpdateFieldsByCondition(ctx cont
 
 	_, err = m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		statement, args := condition.BuildUpdateWithFlavor(m.flavor, sqlbuilder.Update(m.table), dataMap, conditions...)
-
-		if session != nil {
-			_, err = session.ExecCtx(ctx, statement, args...)
-		} else {
-			_, err = m.conn.ExecCtx(ctx, statement, args...)
-		}
-		if err != nil {
-			return nil,err
-		}
 		if session != nil {
 			return session.ExecCtx(ctx, statement, args...)
 		}
@@ -219,15 +210,6 @@ func (m *custom{{.upperStartCamelObject}}Model) DeleteByCondition(ctx context.Co
 
 	_, err = m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		statement, args := condition.BuildDeleteWithFlavor(m.flavor, sqlbuilder.DeleteFrom(m.table), conditions...)
-
-		if session != nil {
-			_, err = session.ExecCtx(ctx, statement, args...)
-		} else {
-			_, err = m.conn.ExecCtx(ctx, statement, args...)
-		}
-		if err != nil {
-			return nil,err
-		}
 		if session != nil {
 			return session.ExecCtx(ctx, statement, args...)
 		}
