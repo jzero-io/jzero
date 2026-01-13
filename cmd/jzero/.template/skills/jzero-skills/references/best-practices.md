@@ -116,9 +116,47 @@ updateData := map[string]any{
 _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
 ```
 
+#### ✅ CORRECT - Real-world pattern for optional fields
+```go
+// For API handlers with optional fields (json:",optional"):
+func (l *Update) Update(req *types.UpdateRequest) error {
+    // 1. Check existence
+    _, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
+    if err != nil {
+        return err
+    }
+
+    // 2. Business validation (e.g., email uniqueness)
+    if req.Email != "" {
+        conditions := condition.NewChain().
+            Equal(usersmodel.Email, req.Email).
+            NotEqual(usersmodel.Id, req.Id). // Exclude current user
+            Build()
+        // ... check if email exists
+    }
+
+    // 3. Build updateData manually - only include non-empty fields
+    updateData := make(map[string]any)
+    if req.Name != "" {
+        updateData[string(usersmodel.Name)] = req.Name
+    }
+    if req.Email != "" {
+        updateData[string(usersmodel.Email)] = req.Email
+    }
+
+    // 4. Execute partial update
+    conditions := condition.NewChain().
+        Equal(usersmodel.Id, req.Id).
+        Build()
+
+    return l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
+}
+```
+
 **Summary:**
 - `Update(ctx, session, data)` - Full object update (ALL fields including zero values)
 - `UpdateFieldsByCondition(ctx, session, data, conditions...)` - Partial field update (only specified fields)
+- **For optional fields**: Use map-based approach with manual empty checks - do NOT use UpdateFieldChain (it doesn't support WithSkipFunc)
 
 ---
 

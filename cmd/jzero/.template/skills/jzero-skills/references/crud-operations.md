@@ -26,6 +26,9 @@ jzero automatically generates comprehensive CRUD methods for your models. **Use 
 
 ## Basic CRUD Operations
 
+> **⚠️ CRITICAL:** All database operations below MUST follow the critical rules in [Best Practices](./best-practices.md#-critical-rules), including:
+> See [Best Practices → Critical Rules](./best-practices.md#-critical-rules) for detailed examples.
+
 ### Insert
 
 Use `InsertV2` when you need the auto-increment ID:
@@ -125,10 +128,6 @@ func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
 ```
 
 ### Update by Primary Key
-
-> **⚠️ WARNING: `Update()` method performs FULL object update - ALL fields will be updated including zero values**
-
-The `Update(ctx, session, data)` method updates the entire record. It does NOT support partial updates. If you only want to update specific fields, use `UpdateFieldsByCondition()` instead.
 
 #### ❌ WRONG - Using Update() for partial field update
 ```go
@@ -336,7 +335,7 @@ func (l *GetOrder) GetOrder(userId, orderId int64) (*ordersmodel.Orders, error) 
 
 ## Related Documentation
 
+- [Best Practices](./best-practices.md) - Database usage guidelines
 - [Model Generation](./model-generation.md) - Generating models with CRUD methods
 - [Condition Builder](./condition-builder.md) - Building query conditions
 - [Database Connection](./database-connection.md) - Setting up database connections
-- [Best Practices](./best-practices.md) - Database usage guidelines
