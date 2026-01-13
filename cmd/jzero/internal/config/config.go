@@ -146,12 +146,13 @@ type GenSwaggerConfig struct {
 type GenZrpcclientConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
-	Desc       []string `mapstructure:"desc"`
-	DescIgnore []string `mapstructure:"desc-ignore"`
-	Output     string   `mapstructure:"output"`
-	GoVersion  string   `mapstructure:"goVersion"`
-	GoModule   string   `mapstructure:"goModule"`
-	GoPackage  string   `mapstructure:"goPackage"`
+	Desc         []string `mapstructure:"desc"`
+	DescIgnore   []string `mapstructure:"desc-ignore"`
+	ProtoInclude []string `mapstructure:"proto-include"`
+	Output       string   `mapstructure:"output"`
+	GoVersion    string   `mapstructure:"goVersion"`
+	GoModule     string   `mapstructure:"goModule"`
+	GoPackage    string   `mapstructure:"goPackage"`
 }
 
 type TemplateConfig struct {
