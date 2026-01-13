@@ -1,5 +1,78 @@
 # REST API Patterns
 
+## ⚠️ Critical API File Rules
+
+**‼️ EVERY `.api` file MUST follow these rules:**
+
+### 1. MUST Set `go_package` Option
+
+```api
+info(
+    title: "User API"
+    desc: "User management API"
+    author: "jzero"
+    version: "v1"
+    go_package: "user"  // ‼️ REQUIRED - MUST set go_package
+)
+```
+
+### 2. MUST Set `group` in @server Block
+
+```api
+@server(
+    prefix: /api/v1
+    group: user  // ‼️ REQUIRED - MUST set group
+    middleware: Auth
+)
+service user-api {
+    @handler Create  // ✅ No group prefix needed
+    post /users (CreateRequest) returns (CreateResponse)
+}
+```
+
+### 3. Benefits of Using `group`
+
+When `group` is set in `@server`:
+
+- ✅ **Handler names don't need group prefix**
+  - ❌ Wrong: `@handler UserCreate`, `@handler UserGet`
+  - ✅ Correct: `@handler Create`, `@handler Get`
+
+- ✅ **Type names don't need group prefix**
+  - ❌ Wrong: `UserCreateRequest`, `UserGetResponse`
+  - ✅ Correct: `CreateRequest`, `GetResponse`
+
+- ✅ **Cleaner, simpler naming** - No repetitive prefixes
+
+### ❌ WRONG - Without group
+
+```api
+// No group set in @server
+@server(
+    prefix: /api/v1
+)
+service user-api {
+    @handler UserCreate  // ❌ Needs group prefix
+    post /users (UserCreateRequest) returns (UserCreateResponse)
+}
+```
+
+### ✅ CORRECT - With group
+
+```api
+// group set in @server
+@server(
+    prefix: /api/v1
+    group: user  // ‼️ REQUIRED
+)
+service user-api {
+    @handler Create  // ✅ No group prefix needed
+    post /users (CreateRequest) returns (CreateResponse)
+}
+```
+
+---
+
 ## Core Architecture
 
 ### Three-Layer Pattern
@@ -20,46 +93,46 @@ HTTP Request → Handler → Logic → External Services/Database
 
 ### ✅ Correct Pattern
 
-Define clear types with proper validation tags:
+Define clear types with proper validation tags. **Note: With `group` set in `@server`, type names don't need group prefix:**
 
 ```go
 // API definition (.api file)
 type (
-    CreateUserRequest {
+    CreateRequest {      // ✅ No "User" prefix when group is set
         Name     string `json:"name" validate:"required,min=2,max=50"`
         Email    string `json:"email" validate:"required,email"`
         Age      int    `json:"age" validate:"required,gte=18,lte=120"`
         Password string `json:"password" validate:"required,min=8"`
     }
 
-    CreateUserResponse {
+    CreateResponse {
         Id      int64  `json:"id"`
         Message string `json:"message"`
     }
 
-    GetUserRequest {
+    GetRequest {          // ✅ No "User" prefix when group is set
         Id int64 `path:"id" validate:"required,gt=0"`
     }
 
-    GetUserResponse {
+    GetResponse {
         Id    int64  `json:"id"`
         Name  string `json:"name"`
         Email string `json:"email"`
         Age   int    `json:"age"`
     }
 
-    ListUsersRequest {
+    ListRequest {         // ✅ No "User" prefix when group is set
         Page     int    `form:"page,default=1" validate:"gte=1"`
         PageSize int    `form:"page_size,default=10" validate:"gte=1,lte=100"`
         Keyword  string `form:"keyword,optional"`
     }
 
-    ListUsersResponse {
-        Total int64       `json:"total"`
-        Users []UserInfo  `json:"users"`
+    ListResponse {
+        Total int64        `json:"total"`
+        List []Info  `json:"users"`
     }
 
-    UserInfo {
+    Info {
         Id    int64  `json:"id"`
         Name  string `json:"name"`
         Email string `json:"email"`
@@ -85,60 +158,65 @@ info(
     desc: "User management API"
     author: "jzero"
     version: "v1"
+    go_package: "user"  // ‼️ REQUIRED
 )
 
 type (
-    CreateUserRequest {
+    CreateRequest {      // ✅ No "User" suffix needed
         Name     string `json:"name" validate:"required"`
         Email    string `json:"email" validate:"required,email"`
         Password string `json:"password" validate:"required,min=8"`
     }
 
-    CreateUserResponse {
+    CreateResponse {
         Id int64 `json:"id"`
     }
 
-    GetUserRequest {
+    GetRequest {          // ✅ No "User" suffix needed
         Id int64 `path:"id"`
     }
 
-    GetUserResponse {
+    GetResponse {
         Id    int64  `json:"id"`
         Name  string `json:"name"`
         Email string `json:"email"`
     }
 
-    UpdateUserRequest {
+    UpdateRequest {       // ✅ No "User" suffix needed
         Id   int64  `path:"id"`
         Name string `json:"name,optional"`
     }
 
-    DeleteUserRequest {
+    UpdateResponse {}
+
+    DeleteRequest {       // ✅ No "User" suffix needed
         Id int64 `path:"id"`
     }
+
+    DeleteResponse {}
 )
 
 @server(
     prefix: /api/v1
-    group: user
+    group: user          // ‼️ REQUIRED
     middleware: Auth
 )
 service user-api {
     @doc "Create a new user"
-    @handler CreateUser
-    post /users (CreateUserRequest) returns (CreateUserResponse)
+    @handler Create      // ✅ No "User" suffix needed
+    post /users (CreateRequest) returns (CreateResponse)
 
     @doc "Get user by ID"
-    @handler GetUser
-    get /users/:id (GetUserRequest) returns (GetUserResponse)
+    @handler Get         // ✅ No "User" suffix needed
+    get /users/:id (GetRequest) returns (GetResponse)
 
     @doc "Update user"
-    @handler UpdateUser
-    put /users/:id (UpdateUserRequest)
+    @handler Update      // ✅ No "User" suffix needed
+    put /users/:id (UpdateRequest) returns (UpdateResponse)
 
     @doc "Delete user"
-    @handler DeleteUser
-    delete /users/:id (DeleteUserRequest)
+    @handler Delete      // ✅ No "User" suffix needed
+    delete /users/:id (DeleteRequest) returns (DeleteResponse)
 }
 ```
 

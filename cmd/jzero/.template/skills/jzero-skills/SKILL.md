@@ -71,12 +71,12 @@ The condition package provides two ways to build queries, but you MUST use the c
 // ✅ CORRECT - ALWAYS use this pattern
 import (
     "github.com/jzero-io/jzero/core/stores/condition"
-    "github.com/yourproject/internal/model/user"
+    usermodel "github.com/yourproject/internal/model/user"
 )
 
 conditions := condition.NewChain().
-    Equal(user.Username, req.Username).
-    Greater(user.Age, 18).
+    Equal(usermodel.Username, req.Username).
+    Greater(usermodel.Age, 18).
     Build()
 
 // Use with any *ByCondition method
@@ -84,13 +84,13 @@ result, err := model.FindOneByCondition(ctx, nil, conditions...)
 
 // ❌ WRONG - NEVER use this pattern
 conditions := condition.New(
-    condition.Condition{Field: user.Username, Operator: condition.Equal, Value: req.Username},
+    condition.Condition{Field: usermodel.Username, Operator: condition.Equal, Value: req.Username},
 )
 ```
 
 **Key Points**:
 - ✅ Use `condition.NewChain()` - Fluent, type-safe API
-- ✅ Use generated field constants (e.g., `user.Username`, `user.Email`)
+- ✅ Use generated field constants (e.g., `usermodel.Username`, `usermodel.Email`)
 - ✅ Chain multiple conditions: `Equal().Like().In().Build()`
 
 **When to use**: Writing ANY database query with conditions (filters, searches, pagination)
