@@ -4,6 +4,34 @@
 
 This guide outlines best practices for working with databases in jzero applications to ensure security, performance, and maintainability.
 
+## ⚠️ Critical Import Rule
+
+**‼️ ALL `internal/model/xx` imports MUST use alias `xxmodel`**
+
+### ❌ WRONG - Direct import without alias
+```go
+import "github.com/yourproject/internal/model/users"
+
+// ❌ Don't use users.Id
+conditions := condition.NewChain().
+    Equal(users.Id, req.Id).
+    Build()
+```
+
+### ✅ CORRECT - Import with alias
+```go
+import usersmodel "github.com/yourproject/internal/model/users"
+
+// ✅ Use usersmodel.Id
+conditions := condition.NewChain().
+    Equal(usersmodel.Id, req.Id).
+    Build()
+```
+
+**This applies to ALL model imports:** `usersmodel`, `ordersmodel`, `productmodel`, etc.
+
+---
+
 ## DO ✅
 
 ### Model Generation
@@ -15,11 +43,11 @@ This guide outlines best practices for working with databases in jzero applicati
 
 ### Field Constants
 
-- **✅ Use generated field constants (e.g., `users.Id`) instead of hardcoded strings**
+- **✅ Use generated field constants (e.g., `usersmodel.Id`) instead of hardcoded strings**
   ```go
   // ✅ CORRECT - Use chain API with generated constants
   conditions := condition.NewChain().
-      Equal(users.Id, req.Id).
+      Equal(usersmodel.Id, req.Id).
       Build()
 
   // ❌ WRONG - Don't use hardcoded strings
@@ -34,12 +62,12 @@ This guide outlines best practices for working with databases in jzero applicati
   ```go
   // ✅ CORRECT - ALWAYS use condition.NewChain()
   conditions := condition.NewChain().
-      Equal(users.Status, "active").
+      Equal(usersmodel.Status, "active").
       Build()
 
   // ❌ WRONG - NEVER use condition.New()
   conditions := condition.New(
-      condition.Condition{Field: users.Status, Operator: condition.Equal, Value: "active"},
+      condition.Condition{Field: usersmodel.Status, Operator: condition.Equal, Value: "active"},
   )
   ```
 - **Always pass `context.Context` to database operations** - Enables cancellation and timeout
@@ -62,6 +90,7 @@ This guide outlines best practices for working with databases in jzero applicati
 - **Log database errors with context** - Include relevant information for debugging
 - **Handle `ErrNotFound` appropriately** - Return meaningful errors to users
 - **Never ignore errors** - Always check and handle database errors
+- **`FindOne`/`FindOneByXx` only need `err` check** - No need to check if result is `nil` since it's guaranteed valid when `err == nil`
 
 ## DON'T ❌
 
@@ -77,6 +106,7 @@ This guide outlines best practices for working with databases in jzero applicati
 - **Use hardcoded strings for field names** - Use generated constants
 - **Use `_` to discard errors** - Always handle errors
 - **Create database connections in handlers/logic** - Use service context
+- **Check if `FindOne`/`FindOneByXx` result is `nil`** - Only check `err`, result is valid when `err == nil`
 
 ### Performance
 
@@ -94,17 +124,20 @@ This guide outlines best practices for working with databases in jzero applicati
 
 ### Proper Error Handling
 
+> **Note:** `FindOne`/`FindOneByXx` methods only need to check `err`. When `err == nil`, the result is guaranteed to be valid, so no need to check for `nil`.
+
 ```go
 func (l *Get) Get(req *types.GetRequest) (*types.GetResponse, error) {
     user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
     if err != nil {
-        if errors.Is(err, users.ErrNotFound) {
+        if errors.Is(err, usersmodel.ErrNotFound) {
             return nil, errors.New("user not found")
         }
         // Log unexpected errors with context
         l.Logger.Errorf("failed to find user %d: %v", req.Id, err)
         return nil, err
     }
+    // ✅ No nil check needed - user is valid when err == nil
     return &types.GetResponse{...}, nil
 }
 ```
@@ -115,12 +148,12 @@ func (l *Get) Get(req *types.GetRequest) (*types.GetResponse, error) {
 func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
     // ✅ Build conditions with condition options
     conditions := condition.NewChain().
-        Equal(users.Status, req.Status,
+        Equal(usersmodel.Status, req.Status,
             condition.WithSkipFunc(func() bool {
                 return req.Status == ""  // Skip if Status empty
             }),
         ).
-        Like(users.Name, "%"+req.Name+"%",
+        Like(usersmodel.Name, "%"+req.Name+"%",
             condition.WithSkipFunc(func() bool {
                 return req.Name == ""  // Skip if Name empty
             }),
@@ -145,10 +178,10 @@ func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
 func (l *UpdateStatus) UpdateStatus(userIds []int64, status string) error {
     // ✅ Build conditions with chain
     conditions := condition.NewChain().
-        In(users.Id, userIds).
+        In(usersmodel.Id, userIds).
         Build()
 
-    updateData := map[string]any{string(users.Status): status}
+    updateData := map[string]any{string(usersmodel.Status): status}
 
     _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
     if err != nil {
@@ -163,17 +196,17 @@ func (l *UpdateStatus) UpdateStatus(userIds []int64, status string) error {
 Alternatively, you can use `UpdateFieldsByCondition` with `UpdateFieldChain` for more complex update operations:
 
 ```go
-func (l *UpdateUser) UpdateUser(userId int64, req *types.UpdateUserRequest) error {
+func (l *Update) Update(userId int64, req *types.UpdateRequest) error {
     // ✅ Build conditions with chain
     conditions := condition.NewChain().
-        Equal(users.Id, userId).
+        Equal(usersmodel.Id, userId).
         Build()
 
     // ✅ Build update fields with UpdateFieldChain
     updateFields := condition.NewUpdateFieldChain().
-        Assign(users.Name, req.Name).
-        Assign(users.Email, req.Email).
-        Incr(users.Version).              // Increment version
+        Assign(usersmodel.Name, req.Name).
+        Assign(usersmodel.Email, req.Email).
+        Incr(usersmodel.Version).              // Increment version
         Build()
 
     _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateFields, conditions...)
@@ -189,7 +222,11 @@ func (l *UpdateUser) UpdateUser(userId int64, req *types.UpdateUserRequest) erro
 ### Table Sharding
 
 ```go
-func (l *GetOrder) GetOrder(userId, orderId int64) (*orders.Orders, error) {
+import (
+    ordersmodel "github.com/yourproject/internal/model/orders"
+)
+
+func (l *GetOrder) GetOrder(userId, orderId int64) (*ordersmodel.Orders, error) {
     shardId := userId % 10
 
     order, err := l.svcCtx.Model.Orders.
@@ -199,13 +236,14 @@ func (l *GetOrder) GetOrder(userId, orderId int64) (*orders.Orders, error) {
         FindOne(l.ctx, nil, orderId)
 
     if err != nil {
-        if errors.Is(err, orders.ErrNotFound) {
+        if errors.Is(err, ordersmodel.ErrNotFound) {
             return nil, errors.New("order not found")
         }
         l.Logger.Errorf("failed to find order %d for user %d: %v", orderId, userId, err)
         return nil, err
     }
 
+    // ✅ No nil check needed - order is valid when err == nil
     return order, nil
 }
 ```

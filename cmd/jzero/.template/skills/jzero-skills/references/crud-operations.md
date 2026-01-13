@@ -4,6 +4,40 @@
 
 jzero automatically generates comprehensive CRUD methods for your models. **Use these generated methods for basic operations** - only write custom SQL for advanced scenarios that generated methods can't handle.
 
+## ⚠️ Critical Import Rule
+
+**‼️ ALL `internal/model/xx` imports MUST use alias `xxmodel`**
+
+### ❌ WRONG - Direct import without alias
+```go
+import "github.com/yourproject/internal/model/users"
+
+user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
+if err != nil {
+    if errors.Is(err, users.ErrNotFound) {  // ❌ WRONG
+        return nil, errors.New("user not found")
+    }
+    return nil, err
+}
+```
+
+### ✅ CORRECT - Import with alias
+```go
+import usersmodel "github.com/yourproject/internal/model/users"
+
+user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
+if err != nil {
+    if errors.Is(err, usersmodel.ErrNotFound) {  // ✅ CORRECT
+        return nil, errors.New("user not found")
+    }
+    return nil, err
+}
+```
+
+**This applies to ALL model imports:** `usersmodel`, `ordersmodel`, `productmodel`, etc.
+
+---
+
 ## Generated Methods Overview
 
 | Method | Description | When to Use |
@@ -32,7 +66,7 @@ Use `InsertV2` when you need the auto-increment ID:
 
 ```go
 func (l *Create) Create(req *types.CreateRequest) (*types.CreateResponse, error) {
-    user := &users.Users{
+    user := &usersmodel.Users{
         Name:  req.Name,
         Email: req.Email,
         Age:   int64(req.Age),
@@ -56,7 +90,7 @@ func (l *Create) Create(req *types.CreateRequest) (*types.CreateResponse, error)
 Use `BulkInsert` for batch operations:
 
 ```go
-func (l *Import) Import(users []*users.UsersModel) error {
+func (l *Import) Import(users []*usersmodel.UsersModel) error {
     err := l.svcCtx.Model.Users.BulkInsert(l.ctx, nil, users)
     if err != nil {
         l.Logger.Errorf("failed to bulk insert users: %v", err)
@@ -68,16 +102,19 @@ func (l *Import) Import(users []*users.UsersModel) error {
 
 ### Find by Primary Key
 
+> **Note:** `FindOne`/`FindOneByXx` methods only need to check `err`, no need to check if the result is `nil`. When `err == nil`, the result is guaranteed to be valid.
+
 ```go
 func (l *Get) Get(req *types.GetRequest) (*types.GetResponse, error) {
     user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
     if err != nil {
-        if errors.Is(err, users.ErrNotFound) {
+        if errors.Is(err, usersmodel.ErrNotFound) {
             return nil, errors.New("user not found")
         }
         return nil, err
     }
 
+    // ✅ No nil check needed - user is valid when err == nil
     return &types.GetResponse{
         Id:    user.Id,
         Name:  user.Name,
@@ -94,18 +131,18 @@ func (l *Get) Get(req *types.GetRequest) (*types.GetResponse, error) {
 ```go
 import (
     "github.com/jzero-io/jzero/core/stores/condition"
-    "github.com/yourproject/internal/model/users"
+    usersmodel "github.com/yourproject/internal/model/users"
 )
 
 func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
     // ✅ Build conditions with condition options
     conditions := condition.NewChain().
-        Equal(users.Age, req.Age,
+        Equal(usersmodel.Age, req.Age,
             condition.WithSkipFunc(func() bool {
                 return req.Age <= 0  // Skip if Age not set
             }),
         ).
-        Like(users.Name, "%"+req.Name+"%",
+        Like(usersmodel.Name, "%"+req.Name+"%",
             condition.WithSkipFunc(func() bool {
                 return req.Name == ""  // Skip if Name empty
             }),
@@ -130,18 +167,18 @@ func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
 ```go
 import (
     "github.com/jzero-io/jzero/core/stores/condition"
-    "github.com/yourproject/internal/model/users"
+    usersmodel "github.com/yourproject/internal/model/users"
 )
 
 func (l *Update) Update(req *types.UpdateRequest) error {
     // ✅ Build conditions with chain
     conditions := condition.NewChain().
-        Equal(users.Id, req.Id).
+        Equal(usersmodel.Id, req.Id).
         Build()
 
     updateData := map[string]any{
-        string(users.Name): req.Name,
-        string(users.Age):  req.Age,
+        string(usersmodel.Name): req.Name,
+        string(usersmodel.Age):  req.Age,
     }
 
     _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
@@ -159,20 +196,20 @@ func (l *Update) Update(req *types.UpdateRequest) error {
 ```go
 import (
     "github.com/jzero-io/jzero/core/stores/condition"
-    "github.com/yourproject/internal/model/users"
+    usersmodel "github.com/yourproject/internal/model/users"
 )
 
 func (l *Update) Update(req *types.UpdateRequest) error {
     // ✅ Build conditions with chain
     conditions := condition.NewChain().
-        Equal(users.Id, req.Id).
+        Equal(usersmodel.Id, req.Id).
         Build()
 
     // ✅ Build update fields with UpdateFieldChain
     updateFields := condition.NewUpdateFieldChain().
-        Assign(users.Name, req.Name).
-        Assign(users.Email, req.Email).
-        Incr(users.Version).              // Increment version
+        Assign(usersmodel.Name, req.Name).
+        Assign(usersmodel.Email, req.Email).
+        Incr(usersmodel.Version).              // Increment version
         Build()
 
     _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateFields, conditions...)
@@ -192,13 +229,13 @@ func (l *Update) Update(req *types.UpdateRequest) error {
 ```go
 import (
     "github.com/jzero-io/jzero/core/stores/condition"
-    "github.com/yourproject/internal/model/users"
+    usersmodel "github.com/yourproject/internal/model/users"
 )
 
 func (l *Delete) Delete(ids []int64) error {
     // ✅ Build conditions with chain
     conditions := condition.NewChain().
-        In(users.Id, ids).
+        In(usersmodel.Id, ids).
         Build()
 
     _, err := l.svcCtx.Model.Users.DeleteByCondition(l.ctx, nil, conditions...)
@@ -222,15 +259,15 @@ Only write custom SQL for complex queries that generated methods can't handle:
 ```go
 import (
     "github.com/jzero-io/jzero/core/stores/condition"
-    "github.com/yourproject/internal/model/orders"
+    ordersmodel "github.com/yourproject/internal/model/orders"
     "github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 func (l *GetSalesReport) GetSalesReport(req *types.SalesReportRequest) (*types.SalesReportResponse, error) {
     // ✅ Build date range conditions with chain
     chain := condition.NewChain().
-        GreaterOrEqual(orders.CreatedAt, req.StartDate).
-        Less(orders.CreatedAt, req.EndDate)
+        GreaterThanOrEqual(ordersmodel.CreatedAt, req.StartDate).
+        Less(ordersmodel.CreatedAt, req.EndDate)
 
     // Build aggregation query
     stmt, args := condition.BuildSelect(
@@ -263,7 +300,7 @@ func (l *GetSalesReport) GetSalesReport(req *types.SalesReportRequest) (*types.S
 `WithTable` allows you to dynamically change the table name for sharding scenarios. It accepts a function that receives the original table name and returns the modified one.
 
 ```go
-func (l *GetOrder) GetOrder(userId, orderId int64) (*orders.Orders, error) {
+func (l *GetOrder) GetOrder(userId, orderId int64) (*ordersmodel.Orders, error) {
     // Calculate shard based on user_id
     shardId := userId % 10
 
@@ -278,6 +315,7 @@ func (l *GetOrder) GetOrder(userId, orderId int64) (*orders.Orders, error) {
         return nil, err
     }
 
+    // ✅ No nil check needed - order is valid when err == nil
     return order, nil
 }
 ```

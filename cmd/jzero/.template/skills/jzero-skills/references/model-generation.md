@@ -4,6 +4,40 @@
 
 jzero supports multiple ways to generate models from SQL schemas. The generated models provide comprehensive CRUD methods with type-safe field constants and caching support.
 
+## ⚠️ Critical Import Rule
+
+**‼️ ALL `internal/model/xx` imports MUST use alias `xxmodel`**
+
+### ❌ WRONG - Direct import without alias
+```go
+import "github.com/yourproject/internal/model/users"
+
+conditions := condition.New(
+    condition.Condition{
+        Field: users.Id,  // ❌ WRONG
+        Operator: condition.Equal,
+        Value: req.Id,
+    },
+)
+```
+
+### ✅ CORRECT - Import with alias
+```go
+import usersmodel "github.com/yourproject/internal/model/users"
+
+conditions := condition.New(
+    condition.Condition{
+        Field: usersmodel.Id,  // ✅ CORRECT
+        Operator: condition.Equal,
+        Value: req.Id,
+    },
+)
+```
+
+**This applies to ALL model imports:** `usersmodel`, `ordersmodel`, `productmodel`, etc.
+
+---
+
 ## Method 1: From Local SQL Files (Recommended)
 
 Place SQL DDL files in `desc/sql/` directory:
@@ -133,12 +167,12 @@ const (
 **Always use these constants instead of hardcoded strings:**
 
 ```go
-import "github.com/yourproject/internal/model/users"
+import usersmodel "github.com/yourproject/internal/model/users"
 
 // ✅ CORRECT - Use generated constants
 conditions := condition.New(
     condition.Condition{
-        Field:    users.Id,
+        Field:    usersmodel.Id,
         Operator: condition.Equal,
         Value:    req.Id,
     },

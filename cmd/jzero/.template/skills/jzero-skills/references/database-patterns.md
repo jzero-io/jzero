@@ -1,5 +1,23 @@
 # Database Patterns
 
+## ⚠️ Critical Rule
+
+**‼️ ALL `internal/model/xx` imports MUST use alias `xxmodel`**
+
+### ❌ WRONG
+```go
+import "github.com/yourproject/internal/model/users"
+// 使用 users.Id ❌
+```
+
+### ✅ CORRECT
+```go
+import usersmodel "github.com/yourproject/internal/model/users"
+// 使用 usersmodel.Id ✅
+```
+
+---
+
 This section has been reorganized into focused guides for better maintainability and clarity.
 
 ## Guides

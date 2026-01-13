@@ -4,14 +4,42 @@
 
 The `condition` package provides a fluent, type-safe way to build database query conditions using the **chain API**.
 
+## ⚠️ Critical Rules
+
+### 1. Use Chain API Only
+
 ‼️ **IMPORTANT: You MUST use the `condition.NewChain()` API for all query conditions. Do NOT use `condition.New()`.**
+
+### 2. Import Models with Alias
+
+**‼️ ALL `internal/model/xx` imports MUST use alias `xxmodel`**
+
+#### ❌ WRONG - Direct import without alias
+```go
+import "github.com/yourproject/internal/model/users"
+
+conditions := condition.NewChain().
+    Equal(users.Id, req.Id).  // ❌ WRONG
+    Build()
+```
+
+#### ✅ CORRECT - Import with alias
+```go
+import usersmodel "github.com/yourproject/internal/model/users"
+
+conditions := condition.NewChain().
+    Equal(usersmodel.Id, req.Id).  // ✅ CORRECT
+    Build()
+```
+
+---
 
 ## Import
 
 ```go
 import (
     "github.com/jzero-io/jzero/core/stores/condition"
-    "github.com/yourproject/internal/model/users"  // Import model for field constants
+    usersmodel "github.com/yourproject/internal/model/users"  // Import model for field constants with alias
 )
 ```
 
@@ -22,12 +50,12 @@ import (
 ```go
 // ✅ CORRECT - Use chain API
 conditions := condition.NewChain().
-    Equal(users.Id, req.Id).
+    Equal(usersmodel.Id, req.Id).
     Build()
 
 // ❌ WRONG - NEVER use condition.New()
 conditions := condition.New(
-    condition.Condition{Field: users.Id, Operator: condition.Equal, Value: req.Id},
+    condition.Condition{Field: usersmodel.Id, Operator: condition.Equal, Value: req.Id},
 )
 ```
 
@@ -38,7 +66,7 @@ conditions := condition.New(
 ```go
 // ✅ CORRECT - Use generated constants with chain
 conditions := condition.NewChain().
-    Equal(users.Id, req.Id).
+    Equal(usersmodel.Id, req.Id).
     Build()
 
 // ❌ WRONG - Don't use hardcoded strings
@@ -58,7 +86,7 @@ conditions := condition.NewChain().
 ```go
 // ✅ Build conditions with chain API
 conditions := condition.NewChain().
-    Equal(users.Id, value).
+    Equal(usersmodel.Id, value).
 	Build()
 
 // Use with any *ByCondition method
@@ -71,23 +99,23 @@ usersList, err := model.FindByCondition(ctx, nil, conditions...)
 
 | Method                             | Description | Example                                   |
 |------------------------------------|-------------|-------------------------------------------|
-| `Equal(field, value)`              | `=` | `chain.Equal(users.Id, 123)`              |
-| `NotEqual(field, value)`           | `!=` / `<>` | `chain.NotEqual(users.Status, "deleted")` |
-| `GreaterThan(field, value)`        | `>` | `chain.GreaterThan(users.Age, 18)`        |
-| `GreaterThanOrEqual(field, value)` | `>=` | `chain.GreaterThanOrEqual(users.Age, 18)` |
-| `LessThan(field, value)`           | `<` | `chain.LessThan(users.Age, 65)`           |
-| `LessThanOrEqual(field, value)`    | `<=` | `chain.LessThanOrEqual(users.Age, 10)`    |
+| `Equal(field, value)`              | `=` | `chain.Equal(usersmodel.Id, 123)`              |
+| `NotEqual(field, value)`           | `!=` / `<>` | `chain.NotEqual(usersmodel.Status, "deleted")` |
+| `GreaterThan(field, value)`        | `>` | `chain.GreaterThan(usersmodel.Age, 18)`        |
+| `GreaterThanOrEqual(field, value)` | `>=` | `chain.GreaterThanOrEqual(usersmodel.Age, 18)` |
+| `LessThan(field, value)`           | `<` | `chain.LessThan(usersmodel.Age, 65)`           |
+| `LessThanOrEqual(field, value)`    | `<=` | `chain.LessThanOrEqual(usersmodel.Age, 10)`    |
 
 ### Pattern Matching Operators
 
 | Method | Description | Example |
 |--------|-------------|---------|
-| `Like(field, value)` | `LIKE` | `chain.Like(users.Name, "%john%")` |
-| `In(field, values)` | `IN` | `chain.In(users.Id, []int64{1,2,3})` |
-| `NotIn(field, values)` | `NOT IN` | `chain.NotIn(users.Status, []string{"deleted", "banned"})` |
-| `IsNull(field)` | `IS NULL` | `chain.IsNull(users.DeletedAt)` |
-| `IsNotNull(field)` | `IS NOT NULL` | `chain.IsNotNull(users.Email)` |
-| `Between(field, min, max)` | `BETWEEN` | `chain.Between(users.CreatedAt, start, end)` |
+| `Like(field, value)` | `LIKE` | `chain.Like(usersmodel.Name, "%john%")` |
+| `In(field, values)` | `IN` | `chain.In(usersmodel.Id, []int64{1,2,3})` |
+| `NotIn(field, values)` | `NOT IN` | `chain.NotIn(usersmodel.Status, []string{"deleted", "banned"})` |
+| `IsNull(field)` | `IS NULL` | `chain.IsNull(usersmodel.DeletedAt)` |
+| `IsNotNull(field)` | `IS NOT NULL` | `chain.IsNotNull(usersmodel.Email)` |
+| `Between(field, min, max)` | `BETWEEN` | `chain.Between(usersmodel.CreatedAt, start, end)` |
 
 ### Pagination & Sorting
 
@@ -105,10 +133,10 @@ usersList, err := model.FindByCondition(ctx, nil, conditions...)
 ```go
 // ✅ Build multiple conditions with chain API
 conditions := condition.NewChain().
-    Equal(users.Status, "active").
-    GreaterThanOrEqual(users.Age, 18).
-    LessThan(users.Age, 65).
-    In(users.Role, []string{"admin", "user"}).
+    Equal(usersmodel.Status, "active").
+    GreaterThanOrEqual(usersmodel.Age, 18).
+    LessThan(usersmodel.Age, 65).
+    In(usersmodel.Role, []string{"admin", "user"}).
     Build()
 
 // Use with *ByCondition methods
@@ -122,23 +150,23 @@ usersList, err := model.FindByCondition(ctx, nil, conditions...)
 ```go
 // ✅ Build dynamic conditions with condition options
 conditions := condition.NewChain().
-    Equal(users.Status, "active").
-    GreaterThanOrEqual(users.Age, minAge,
+    Equal(usersmodel.Status, "active").
+    GreaterThanOrEqual(usersmodel.Age, minAge,
         condition.WithSkipFunc(func() bool {
             return minAge <= 0  // Skip if minAge not set
         }),
     ).
-    LessThanOrEqual(users.Age, maxAge,
+    LessThanOrEqual(usersmodel.Age, maxAge,
         condition.WithSkipFunc(func() bool {
             return maxAge <= 0  // Skip if maxAge not set
         }),
     ).
-    Like(users.Name, "%"+searchQuery+"%",
+    Like(usersmodel.Name, "%"+searchQuery+"%",
         condition.WithSkipFunc(func() bool {
             return searchQuery == ""  // Skip if searchQuery empty
         }),
     ).
-    In(users.Status, statusList,
+    In(usersmodel.Status, statusList,
         condition.WithSkipFunc(func() bool {
             return len(statusList) == 0  // Skip if statusList empty
         }),
@@ -157,12 +185,12 @@ usersList, total, err := model.PageByCondition(ctx, nil, conditions...)
 func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
     // ✅ Build conditions with pagination using condition options
     conditions := condition.NewChain().
-        Equal(users.Age, req.Age,
+        Equal(usersmodel.Age, req.Age,
             condition.WithSkipFunc(func() bool {
                 return req.Age <= 0  // Skip if Age not set
             }),
         ).
-        Like(users.Name, "%"+req.Name+"%",
+        Like(usersmodel.Name, "%"+req.Name+"%",
             condition.WithSkipFunc(func() bool {
                 return req.Name == ""  // Skip if Name empty
             }),
@@ -183,48 +211,48 @@ func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
 ```go
 import (
     "github.com/jzero-io/jzero/core/stores/condition"
-    "github.com/yourproject/internal/model/users"
+    usersmodel "github.com/yourproject/internal/model/users"
 )
 
 func (l *SearchUsers) SearchUsers(req *types.SearchRequest) error {
     // ✅ Build all conditions with condition options
     conditions := condition.NewChain().
-        Equal(users.Status, req.Status,
+        Equal(usersmodel.Status, req.Status,
             condition.WithSkipFunc(func() bool {
                 return req.Status == ""  // Skip if Status empty
             }),
         ).
-        GreaterThanOrEqual(users.Age, req.MinAge,
+        GreaterThanOrEqual(usersmodel.Age, req.MinAge,
             condition.WithSkipFunc(func() bool {
                 return req.MinAge <= 0  // Skip if MinAge not set
             }),
         ).
-        LessThanOrEqual(users.Age, req.MaxAge,
+        LessThanOrEqual(usersmodel.Age, req.MaxAge,
             condition.WithSkipFunc(func() bool {
                 return req.MaxAge <= 0  // Skip if MaxAge not set
             }),
         ).
-        Like(users.Name, "%"+req.Name+"%",
+        Like(usersmodel.Name, "%"+req.Name+"%",
             condition.WithSkipFunc(func() bool {
                 return req.Name == ""  // Skip if Name empty
             }),
         ).
-        IsNotNull(users.EmailVerifiedAt,
+        IsNotNull(usersmodel.EmailVerifiedAt,
             condition.WithSkipFunc(func() bool {
                 return !req.EmailVerified  // Skip if not verified
             }),
         ).
-        In(users.Role, req.Roles,
+        In(usersmodel.Role, req.Roles,
             condition.WithSkipFunc(func() bool {
                 return len(req.Roles) == 0  // Skip if Roles empty
             }),
         ).
-        GreaterThanOrEqual(users.CreatedAt, req.StartDate,
+        GreaterThanOrEqual(usersmodel.CreatedAt, req.StartDate,
             condition.WithSkipFunc(func() bool {
                 return req.StartDate.IsZero()  // Skip if StartDate not set
             }),
         ).
-        LessThan(users.CreatedAt, req.EndDate,
+        LessThan(usersmodel.CreatedAt, req.EndDate,
             condition.WithSkipFunc(func() bool {
                 return req.EndDate.IsZero()  // Skip if EndDate not set
             }),
