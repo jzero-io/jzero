@@ -39,14 +39,14 @@ func (l *Create) Create(req *types.CreateRequest) (*types.CreateResponse, error)
     }
 
     // ✅ Use InsertV2 to get auto-increment ID
-    userId, err := l.svcCtx.Model.Users.InsertV2(l.ctx, nil, user)
+    err := l.svcCtx.Model.Users.InsertV2(l.ctx, nil, user)
     if err != nil {
         l.Logger.Errorf("failed to insert user: %v", err)
         return nil, err
     }
 
     return &types.CreateResponse{
-        Id: userId,
+        Id: user.Id,
     }, nil
 }
 ```
@@ -98,22 +98,19 @@ import (
 )
 
 func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
-    // ✅ Build conditions with chain
-    chain := condition.NewChain()
-
-    // Add filter conditions dynamically
-    if req.Age > 0 {
-        chain = chain.Equal(users.Age, req.Age)
-    }
-
-    if req.Name != "" {
-        chain = chain.Like(users.Name, "%"+req.Name+"%")
-    }
-
-    // Add pagination and ordering
-    conditions := chain.
-        Limit(req.Size).
-        Offset((req.Page - 1) * req.Size).
+    // ✅ Build conditions with condition options
+    conditions := condition.NewChain().
+        Equal(users.Age, req.Age,
+            condition.WithSkipFunc(func() bool {
+                return req.Age <= 0  // Skip if Age not set
+            }),
+        ).
+        Like(users.Name, "%"+req.Name+"%",
+            condition.WithSkipFunc(func() bool {
+                return req.Name == ""  // Skip if Name empty
+            }),
+        ).
+        Page(req.Page, req.Size).
         OrderBy("id DESC").
         Build()
 
@@ -127,6 +124,8 @@ func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
 ### Update by Conditions
 
 > **Note:** For detailed information on building conditions, see [Condition Builder](./condition-builder.md).
+
+**Method 1: Using map for simple updates**
 
 ```go
 import (
@@ -146,6 +145,37 @@ func (l *Update) Update(req *types.UpdateRequest) error {
     }
 
     _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
+    if err != nil {
+        l.Logger.Errorf("failed to update user: %v", err)
+        return err
+    }
+
+    return nil
+}
+```
+
+**Method 2: Using UpdateFieldChain for complex updates**
+
+```go
+import (
+    "github.com/jzero-io/jzero/core/stores/condition"
+    "github.com/yourproject/internal/model/users"
+)
+
+func (l *Update) Update(req *types.UpdateRequest) error {
+    // ✅ Build conditions with chain
+    conditions := condition.NewChain().
+        Equal(users.Id, req.Id).
+        Build()
+
+    // ✅ Build update fields with UpdateFieldChain
+    updateFields := condition.NewUpdateFieldChain().
+        Assign(users.Name, req.Name).
+        Assign(users.Email, req.Email).
+        Incr(users.Version).              // Increment version
+        Build()
+
+    _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateFields, conditions...)
     if err != nil {
         l.Logger.Errorf("failed to update user: %v", err)
         return err

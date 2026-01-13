@@ -57,11 +57,9 @@ conditions := condition.NewChain().
 
 ```go
 // ✅ Build conditions with chain API
-chain := condition.NewChain().
-    Equal(users.Id, value)
-
-// Convert to conditions slice
-conditions := chain.Build()
+conditions := condition.NewChain().
+    Equal(users.Id, value).
+	Build()
 
 // Use with any *ByCondition method
 usersList, err := model.FindByCondition(ctx, nil, conditions...)
@@ -71,14 +69,14 @@ usersList, err := model.FindByCondition(ctx, nil, conditions...)
 
 ### Comparison Operators
 
-| Method | Description | Example |
-|--------|-------------|---------|
-| `Equal(field, value)` | `=` | `chain.Equal(users.Id, 123)` |
-| `NotEqual(field, value)` | `!=` / `<>` | `chain.NotEqual(users.Status, "deleted")` |
-| `Greater(field, value)` | `>` | `chain.Greater(users.Age, 18)` |
-| `GreaterOrEqual(field, value)` | `>=` | `chain.GreaterOrEqual(users.Age, 18)` |
-| `Less(field, value)` | `<` | `chain.Less(users.Age, 65)` |
-| `LessOrEqual(field, value)` | `<=` | `chain.LessOrEqual(users.Age, 10)` |
+| Method                             | Description | Example                                   |
+|------------------------------------|-------------|-------------------------------------------|
+| `Equal(field, value)`              | `=` | `chain.Equal(users.Id, 123)`              |
+| `NotEqual(field, value)`           | `!=` / `<>` | `chain.NotEqual(users.Status, "deleted")` |
+| `GreaterThan(field, value)`        | `>` | `chain.GreaterThan(users.Age, 18)`        |
+| `GreaterThanOrEqual(field, value)` | `>=` | `chain.GreaterThanOrEqual(users.Age, 18)` |
+| `LessThan(field, value)`           | `<` | `chain.LessThan(users.Age, 65)`           |
+| `LessThanOrEqual(field, value)`    | `<=` | `chain.LessThanOrEqual(users.Age, 10)`    |
 
 ### Pattern Matching Operators
 
@@ -95,6 +93,7 @@ usersList, err := model.FindByCondition(ctx, nil, conditions...)
 
 | Method | Description | Example |
 |--------|-------------|---------|
+| `Page(page, size)` | `LIMIT/OFFSET` | `chain.Page(1, 20)` |
 | `Limit(n)` | `LIMIT n` | `chain.Limit(20)` |
 | `Offset(n)` | `OFFSET n` | `chain.Offset(0)` |
 | `OrderBy(fields ...string)` | `ORDER BY` | `chain.OrderBy("id DESC", "created_at ASC")` |
@@ -105,14 +104,12 @@ usersList, err := model.FindByCondition(ctx, nil, conditions...)
 
 ```go
 // ✅ Build multiple conditions with chain API
-chain := condition.NewChain().
+conditions := condition.NewChain().
     Equal(users.Status, "active").
-    GreaterOrEqual(users.Age, 18).
-    Less(users.Age, 65).
-    In(users.Role, []string{"admin", "user"})
-
-// Convert to conditions slice
-conditions := chain.Build()
+    GreaterThanOrEqual(users.Age, 18).
+    LessThan(users.Age, 65).
+    In(users.Role, []string{"admin", "user"}).
+    Build()
 
 // Use with *ByCondition methods
 usersList, err := model.FindByCondition(ctx, nil, conditions...)
@@ -120,30 +117,37 @@ usersList, err := model.FindByCondition(ctx, nil, conditions...)
 
 ### Dynamic Condition Building
 
+> **✅ RECOMMENDED: Use condition options for dynamic conditions** - This provides a cleaner, more maintainable approach compared to if statements.
+
 ```go
-// ✅ Start with base conditions
-chain := condition.NewChain().
-    Equal(users.Status, "active")
+// ✅ Build dynamic conditions with condition options
+conditions := condition.NewChain().
+    Equal(users.Status, "active").
+    GreaterThanOrEqual(users.Age, minAge,
+        condition.WithSkipFunc(func() bool {
+            return minAge <= 0  // Skip if minAge not set
+        }),
+    ).
+    LessThanOrEqual(users.Age, maxAge,
+        condition.WithSkipFunc(func() bool {
+            return maxAge <= 0  // Skip if maxAge not set
+        }),
+    ).
+    Like(users.Name, "%"+searchQuery+"%",
+        condition.WithSkipFunc(func() bool {
+            return searchQuery == ""  // Skip if searchQuery empty
+        }),
+    ).
+    In(users.Status, statusList,
+        condition.WithSkipFunc(func() bool {
+            return len(statusList) == 0  // Skip if statusList empty
+        }),
+    ).
+    Page(1, 20).
+    OrderBy("id DESC").
+    Build()
 
-// Add conditions dynamically
-if minAge > 0 {
-    chain = chain.GreaterOrEqual(users.Age, minAge)
-}
-
-if maxAge > 0 {
-    chain = chain.LessOrEqual(users.Age, maxAge)
-}
-
-if searchQuery != "" {
-    chain = chain.Like(users.Name, "%"+searchQuery+"%")
-}
-
-if len(statusList) > 0 {
-    chain = chain.In(users.Status, statusList)
-}
-
-// Build and use with pagination
-conditions := chain.Limit(20).Offset(0).OrderBy("id DESC").Build()
+// Use with *ByCondition methods
 usersList, total, err := model.PageByCondition(ctx, nil, conditions...)
 ```
 
@@ -151,22 +155,19 @@ usersList, total, err := model.PageByCondition(ctx, nil, conditions...)
 
 ```go
 func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
-    // ✅ Build conditions with pagination using chain
-    chain := condition.NewChain()
-
-    // Add filter conditions dynamically
-    if req.Age > 0 {
-        chain = chain.Equal(users.Age, req.Age)
-    }
-
-    if req.Name != "" {
-        chain = chain.Like(users.Name, "%"+req.Name+"%")
-    }
-
-    // Add pagination and ordering
-    conditions := chain.
-        Limit(req.Size).
-        Offset((req.Page - 1) * req.Size).
+    // ✅ Build conditions with pagination using condition options
+    conditions := condition.NewChain().
+        Equal(users.Age, req.Age,
+            condition.WithSkipFunc(func() bool {
+                return req.Age <= 0  // Skip if Age not set
+            }),
+        ).
+        Like(users.Name, "%"+req.Name+"%",
+            condition.WithSkipFunc(func() bool {
+                return req.Name == ""  // Skip if Name empty
+            }),
+        ).
+        Page(req.Page, req.Size).
         OrderBy("id DESC").
         Build()
 
@@ -186,49 +187,49 @@ import (
 )
 
 func (l *SearchUsers) SearchUsers(req *types.SearchRequest) error {
-    // ✅ Build all conditions with chain
-    chain := condition.NewChain()
-
-    // Status filter
-    if req.Status != "" {
-        chain = chain.Equal(users.Status, req.Status)
-    }
-
-    // Age range
-    if req.MinAge > 0 {
-        chain = chain.GreaterOrEqual(users.Age, req.MinAge)
-    }
-    if req.MaxAge > 0 {
-        chain = chain.LessOrEqual(users.Age, req.MaxAge)
-    }
-
-    // Name search
-    if req.Name != "" {
-        chain = chain.Like(users.Name, "%"+req.Name+"%")
-    }
-
-    // Email verification
-    if req.EmailVerified {
-        chain = chain.IsNotNull(users.EmailVerifiedAt)
-    }
-
-    // Role filtering
-    if len(req.Roles) > 0 {
-        chain = chain.In(users.Role, req.Roles)
-    }
-
-    // Created date range
-    if !req.StartDate.IsZero() {
-        chain = chain.GreaterOrEqual(users.CreatedAt, req.StartDate)
-    }
-    if !req.EndDate.IsZero() {
-        chain = chain.Less(users.CreatedAt, req.EndDate)
-    }
-
-    // Add pagination and sort
-    conditions := chain.
-        Limit(req.Size).
-        Offset((req.Page - 1) * req.Size).
+    // ✅ Build all conditions with condition options
+    conditions := condition.NewChain().
+        Equal(users.Status, req.Status,
+            condition.WithSkipFunc(func() bool {
+                return req.Status == ""  // Skip if Status empty
+            }),
+        ).
+        GreaterThanOrEqual(users.Age, req.MinAge,
+            condition.WithSkipFunc(func() bool {
+                return req.MinAge <= 0  // Skip if MinAge not set
+            }),
+        ).
+        LessThanOrEqual(users.Age, req.MaxAge,
+            condition.WithSkipFunc(func() bool {
+                return req.MaxAge <= 0  // Skip if MaxAge not set
+            }),
+        ).
+        Like(users.Name, "%"+req.Name+"%",
+            condition.WithSkipFunc(func() bool {
+                return req.Name == ""  // Skip if Name empty
+            }),
+        ).
+        IsNotNull(users.EmailVerifiedAt,
+            condition.WithSkipFunc(func() bool {
+                return !req.EmailVerified  // Skip if not verified
+            }),
+        ).
+        In(users.Role, req.Roles,
+            condition.WithSkipFunc(func() bool {
+                return len(req.Roles) == 0  // Skip if Roles empty
+            }),
+        ).
+        GreaterThanOrEqual(users.CreatedAt, req.StartDate,
+            condition.WithSkipFunc(func() bool {
+                return req.StartDate.IsZero()  // Skip if StartDate not set
+            }),
+        ).
+        LessThan(users.CreatedAt, req.EndDate,
+            condition.WithSkipFunc(func() bool {
+                return req.EndDate.IsZero()  // Skip if EndDate not set
+            }),
+        ).
+        Page(req.Page, req.Size).
         OrderBy("created_at DESC").
         Build()
 

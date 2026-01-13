@@ -113,22 +113,19 @@ func (l *Get) Get(req *types.GetRequest) (*types.GetResponse, error) {
 
 ```go
 func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
-    // ✅ Build conditions with chain
-    chain := condition.NewChain()
-
-    // Add filter conditions dynamically
-    if req.Status != "" {
-        chain = chain.Equal(users.Status, req.Status)
-    }
-
-    if req.Name != "" {
-        chain = chain.Like(users.Name, "%"+req.Name+"%")
-    }
-
-    // Add pagination and ordering
-    conditions := chain.
-        Limit(req.Size).
-        Offset((req.Page - 1) * req.Size).
+    // ✅ Build conditions with condition options
+    conditions := condition.NewChain().
+        Equal(users.Status, req.Status,
+            condition.WithSkipFunc(func() bool {
+                return req.Status == ""  // Skip if Status empty
+            }),
+        ).
+        Like(users.Name, "%"+req.Name+"%",
+            condition.WithSkipFunc(func() bool {
+                return req.Name == ""  // Skip if Name empty
+            }),
+        ).
+        Page(req.Page, req.Size).
         OrderBy("id DESC").
         Build()
 
@@ -163,6 +160,32 @@ func (l *UpdateStatus) UpdateStatus(userIds []int64, status string) error {
 }
 ```
 
+Alternatively, you can use `UpdateFieldsByCondition` with `UpdateFieldChain` for more complex update operations:
+
+```go
+func (l *UpdateUser) UpdateUser(userId int64, req *types.UpdateUserRequest) error {
+    // ✅ Build conditions with chain
+    conditions := condition.NewChain().
+        Equal(users.Id, userId).
+        Build()
+
+    // ✅ Build update fields with UpdateFieldChain
+    updateFields := condition.NewUpdateFieldChain().
+        Assign(users.Name, req.Name).
+        Assign(users.Email, req.Email).
+        Incr(users.Version).              // Increment version
+        Build()
+
+    _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateFields, conditions...)
+    if err != nil {
+        l.Logger.Errorf("failed to update user: %v", err)
+        return err
+    }
+
+    return nil
+}
+```
+
 ### Table Sharding
 
 ```go
@@ -176,7 +199,7 @@ func (l *GetOrder) GetOrder(userId, orderId int64) (*orders.Orders, error) {
         FindOne(l.ctx, nil, orderId)
 
     if err != nil {
-        if errors.Is(err, modelx.ErrNotFound) {
+        if errors.Is(err, orders.ErrNotFound) {
             return nil, errors.New("order not found")
         }
         l.Logger.Errorf("failed to find order %d for user %d: %v", orderId, userId, err)
