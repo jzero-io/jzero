@@ -1,23 +1,5 @@
 # Database Patterns
 
-## ⚠️ Critical Rule
-
-**‼️ ALL `internal/model/xx` imports MUST use alias `xxmodel`**
-
-### ❌ WRONG
-```go
-import "github.com/yourproject/internal/model/users"
-// 使用 users.Id ❌
-```
-
-### ✅ CORRECT
-```go
-import usersmodel "github.com/yourproject/internal/model/users"
-// 使用 usersmodel.Id ✅
-```
-
----
-
 This section has been reorganized into focused guides for better maintainability and clarity.
 
 ## Guides
@@ -38,6 +20,15 @@ This section has been reorganized into focused guides for better maintainability
 - Multiple datasources support
 - Generated field constants and methods
 
+### [Best Practices](./best-practices.md)
+**Database usage guidelines**
+
+- Security practices
+- Performance optimization
+- Error handling patterns
+- Common code patterns
+- Anti-patterns to avoid
+
 ### [Condition Builder](./condition-builder.md)
 **Building type-safe query conditions**
 
@@ -56,22 +47,9 @@ This section has been reorganized into focused guides for better maintainability
 - Complex aggregation queries
 - Table sharding patterns
 
-### [Best Practices](./best-practices.md)
-**Database usage guidelines**
-
-- Security practices
-- Performance optimization
-- Error handling patterns
-- Common code patterns
-- Anti-patterns to avoid
-
 ## Quick Start
 
 1. **Configure your database** in `etc/etc.yaml` - See [Database Connection](./database-connection.md)
 2. **Place SQL files** in `desc/sql/` directory - See [Model Generation](./model-generation.md)
 3. **Run `jzero gen`** to generate models
 4. **Use generated methods** with condition builder - See [CRUD Operations](./crud-operations.md)
-
-## External Resources
-
-- [modelx Documentation](https://docs.jzero.io/component/modelx) - Complete modelx API reference

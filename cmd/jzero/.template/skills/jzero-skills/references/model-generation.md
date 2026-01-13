@@ -4,40 +4,6 @@
 
 jzero supports multiple ways to generate models from SQL schemas. The generated models provide comprehensive CRUD methods with type-safe field constants and caching support.
 
-## ⚠️ Critical Import Rule
-
-**‼️ ALL `internal/model/xx` imports MUST use alias `xxmodel`**
-
-### ❌ WRONG - Direct import without alias
-```go
-import "github.com/yourproject/internal/model/users"
-
-conditions := condition.New(
-    condition.Condition{
-        Field: users.Id,  // ❌ WRONG
-        Operator: condition.Equal,
-        Value: req.Id,
-    },
-)
-```
-
-### ✅ CORRECT - Import with alias
-```go
-import usersmodel "github.com/yourproject/internal/model/users"
-
-conditions := condition.New(
-    condition.Condition{
-        Field: usersmodel.Id,  // ✅ CORRECT
-        Operator: condition.Equal,
-        Value: req.Id,
-    },
-)
-```
-
-**This applies to ALL model imports:** `usersmodel`, `ordersmodel`, `productmodel`, etc.
-
----
-
 ## Method 1: From Local SQL Files (Recommended)
 
 Place SQL DDL files in `desc/sql/` directory:
@@ -143,56 +109,6 @@ func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
     }
 }
 ```
-
-## Generated Field Constants
-
-jzero automatically generates field constants for each model in `internal/model/<table>/<table>model_gen.go`:
-
-```go
-// internal/model/users/usersmodel_gen.go
-package users
-
-const (
-    Id        condition.Field = "id"
-    Name      condition.Field = "name"
-    Email     condition.Field = "email"
-    Age       condition.Field = "age"
-    Phone     condition.Field = "phone"
-    Status    condition.Field = "status"
-    CreatedAt condition.Field = "created_at"
-    UpdatedAt condition.Field = "updated_at"
-)
-```
-
-**Always use these constants instead of hardcoded strings:**
-
-```go
-import usersmodel "github.com/yourproject/internal/model/users"
-
-// ✅ CORRECT - Use generated constants
-conditions := condition.New(
-    condition.Condition{
-        Field:    usersmodel.Id,
-        Operator: condition.Equal,
-        Value:    req.Id,
-    },
-)
-
-// ❌ WRONG - Don't use hardcoded strings
-conditions := condition.New(
-    condition.Condition{
-        Field:    "id",  // Hardcoded string
-        Operator: condition.Equal,
-        Value:    req.Id,
-    },
-)
-```
-
-**Benefits of using constants:**
-- Type-safe - IDE can validate and autocomplete
-- Refactor-friendly - Rename-safe across the codebase
-- Prevents typos - Catch errors at compile time
-- Consistent naming - Follows jzero conventions
 
 ## Generated Model Methods
 

@@ -4,11 +4,17 @@
 
 This guide outlines best practices for working with databases in jzero applications to ensure security, performance, and maintainability.
 
-## ⚠️ Critical Import Rule
+## ⚠️ Critical Rules
+
+These rules are critical and MUST be followed to avoid common bugs and security issues.
+
+### 1. Model Import Rule
 
 **‼️ ALL `internal/model/xx` imports MUST use alias `xxmodel`**
 
-### ❌ WRONG - Direct import without alias
+This prevents naming conflicts and makes code more maintainable.
+
+#### ❌ WRONG - Direct import without alias
 ```go
 import "github.com/yourproject/internal/model/users"
 
@@ -18,7 +24,7 @@ conditions := condition.NewChain().
     Build()
 ```
 
-### ✅ CORRECT - Import with alias
+#### ✅ CORRECT - Import with alias
 ```go
 import usersmodel "github.com/yourproject/internal/model/users"
 
@@ -32,7 +38,174 @@ conditions := condition.NewChain().
 
 ---
 
-## DO ✅
+### 2. Error Handling Rule
+
+**‼️ Always use `errors.Is()` to check errors, never use `==` comparison**
+
+**Requirements:**
+- Import `errors` from `github.com/pkg/errors` (NOT the standard library)
+- Use `errors.Is(err, xxxmodel.ErrNotFound)` for error comparison
+
+#### ❌ WRONG - Direct equality comparison
+```go
+import "errors"  // ❌ WRONG - standard library
+
+// ❌ WRONG - Direct comparison
+if err == usermodel.ErrNotFound {
+    return nil, errors.New("用户不存在")
+}
+```
+
+#### ✅ CORRECT - Use errors.Is with pkg/errors
+```go
+import "github.com/pkg/errors"  // ✅ CORRECT
+
+// ✅ CORRECT - Use errors.Is()
+if errors.Is(err, usermodel.ErrNotFound) {
+    return nil, errors.New("用户不存在")
+}
+```
+
+---
+
+### 3. Update Method Rule
+
+**‼️ `Update()` method requires FULL object update - partial updates NOT supported**
+
+The generated `Update()` method performs a complete update of all fields in the model. It does NOT support optional field updates.
+
+#### ❌ WRONG - Trying to update only some fields with Update()
+```go
+// ❌ WRONG - This will update ALL fields including zero values!
+user := &usersmodel.Users{
+    Id:   req.Id,
+    Name: req.Name,
+    // Email and Age will be set to zero values!
+}
+err := l.svcCtx.Model.Users.Update(l.ctx, nil, user)
+```
+
+#### ✅ CORRECT - Use Update() when you have the complete object
+```go
+// ✅ CORRECT - Update when you have the full object (e.g., after modification)
+user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
+if err != nil {
+    return err
+}
+
+// Modify fields
+user.Name = req.NewName
+user.Age = req.NewAge
+
+// Update the entire object
+err = l.svcCtx.Model.Users.Update(l.ctx, nil, user)
+```
+
+#### ✅ CORRECT - Use UpdateFieldsByCondition for partial updates
+```go
+// ✅ CORRECT - Update specific fields only
+conditions := condition.NewChain().
+    Equal(usersmodel.Id, req.Id).
+    Build()
+
+updateData := map[string]any{
+    string(usersmodel.Name): req.Name,
+    // Only Name field will be updated
+}
+
+_, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
+```
+
+**Summary:**
+- `Update(ctx, session, data)` - Full object update (ALL fields including zero values)
+- `UpdateFieldsByCondition(ctx, session, data, conditions...)` - Partial field update (only specified fields)
+
+---
+
+### 4. Condition Builder Rule
+
+**‼️ ALWAYS use `condition.NewChain()` instead of `condition.New()`**
+
+The chain API provides a fluent, type-safe interface for building conditions.
+
+#### ❌ WRONG - Using condition.New()
+```go
+// ❌ WRONG - Verbose and error-prone
+conditions := condition.New(
+    condition.Condition{Field: usersmodel.Status, Operator: condition.Equal, Value: "active"},
+)
+```
+
+#### ✅ CORRECT - Using condition.NewChain()
+```go
+// ✅ CORRECT - Clean and fluent API
+conditions := condition.NewChain().
+    Equal(usersmodel.Status, "active").
+    Build()
+```
+
+---
+
+### 5. Field Constants Rule
+
+**‼️ ALWAYS use generated field constants (e.g., `usersmodel.Id`) instead of hardcoded strings**
+
+Generated constants provide type safety and prevent typos.
+
+#### ❌ WRONG - Hardcoded strings
+```go
+// ❌ WRONG - Hardcoded string (typo-prone)
+conditions := condition.NewChain().
+    Equal("id", req.Id).
+    Equal("name", req.Name).
+    Build()
+```
+
+#### ✅ CORRECT - Generated constants
+```go
+// ✅ CORRECT - Type-safe constants
+conditions := condition.NewChain().
+    Equal(usersmodel.Id, req.Id).
+    Equal(usersmodel.Name, req.Name).
+    Build()
+```
+
+---
+
+### 6. FindOne Result Rule
+
+**‼️ `FindOne`/`FindOneByXx` methods only need `err` check - no need to check for `nil`**
+
+When `err == nil`, the result is guaranteed to be valid.
+
+#### ❌ WRONG - Unnecessary nil check
+```go
+user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
+if err != nil {
+    return nil, err
+}
+// ❌ WRONG - Unnecessary check
+if user == nil {
+    return nil, errors.New("user not found")
+}
+```
+
+#### ✅ CORRECT - Only check err
+```go
+user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
+if err != nil {
+    if errors.Is(err, usersmodel.ErrNotFound) {
+        return nil, errors.New("user not found")
+    }
+    return nil, err
+}
+// ✅ CORRECT - user is valid when err == nil, no nil check needed
+return &types.GetResponse{...}, nil
+```
+
+---
+
+## Additional Best Practices
 
 ### Model Generation
 
@@ -41,212 +214,34 @@ conditions := condition.NewChain().
 - **Use `.jzero.yaml` for generation configuration** - Centralize your generation settings
 - **Enable caching for read-heavy models** - Use `model-cache: true` and `model-cache-table` for appropriate tables
 
-### Field Constants
-
-- **✅ Use generated field constants (e.g., `usersmodel.Id`) instead of hardcoded strings**
-  ```go
-  // ✅ CORRECT - Use chain API with generated constants
-  conditions := condition.NewChain().
-      Equal(usersmodel.Id, req.Id).
-      Build()
-
-  // ❌ WRONG - Don't use hardcoded strings
-  conditions := condition.NewChain().
-      Equal("id", req.Id).  // Hardcoded string
-      Build()
-  ```
-
-### Query Building
-
-- **✅ Use condition chain API for ALL query building** - Provides fluent, type-safe API
-  ```go
-  // ✅ CORRECT - ALWAYS use condition.NewChain()
-  conditions := condition.NewChain().
-      Equal(usersmodel.Status, "active").
-      Build()
-
-  // ❌ WRONG - NEVER use condition.New()
-  conditions := condition.New(
-      condition.Condition{Field: usersmodel.Status, Operator: condition.Equal, Value: "active"},
-  )
-  ```
-- **Always pass `context.Context` to database operations** - Enables cancellation and timeout
-- **Use transactions for atomic operations** - Maintain data consistency
-
 ### Performance
 
 - **Use `InsertV2` to get auto-increment IDs** - Avoids additional query
 - **Use `BulkInsert` for batch operations** - More efficient than individual inserts
 - **Query selected columns only** - Avoid `SELECT *` in production
 - **Use batch operations instead of querying in loops** - Reduce database round-trips
+- **Minimize transaction scope** - Keep transactions open only as long as necessary
+- **Consider cache invalidation costs** - Don't cache write-heavy data unnecessarily
+
+### Security
+
+- **Always use parameterized queries** - Never execute raw SQL without parameterization
+- **Encrypt sensitive data** - Protect passwords, tokens, etc.
+- **Validate and sanitize user input** - Never trust user input directly
+
+### Code Quality
+
+- **Never ignore errors** - Always handle errors properly
+- **Use service context for database connections** - Don't create connections in handlers/logic
+- **Log database errors with context** - Include relevant information for debugging
+- **Always pass `context.Context` to database operations** - Enables cancellation and timeout
 
 ### Database Support
 
 - **Support multiple databases with dynamic configuration** - Make your app flexible
 - **Use `WithTable` for table sharding** - Scale your data horizontally
 
-### Error Handling
-
-- **Log database errors with context** - Include relevant information for debugging
-- **Handle `ErrNotFound` appropriately** - Return meaningful errors to users
-- **Never ignore errors** - Always check and handle database errors
-- **`FindOne`/`FindOneByXx` only need `err` check** - No need to check if result is `nil` since it's guaranteed valid when `err == nil`
-
-## DON'T ❌
-
-### Security
-
-- **Execute raw SQL without parameterization** - Always use parameterized queries
-- **Store sensitive data unencrypted** - Encrypt passwords, tokens, etc.
-- **Trust user input directly** - Always validate and sanitize
-
-### Code Quality
-
-- **‼️ Use `condition.New()` instead of `condition.NewChain()`** - ALWAYS use chain API
-- **Use hardcoded strings for field names** - Use generated constants
-- **Use `_` to discard errors** - Always handle errors
-- **Create database connections in handlers/logic** - Use service context
-- **Check if `FindOne`/`FindOneByXx` result is `nil`** - Only check `err`, result is valid when `err == nil`
-
-### Performance
-
-- **Keep transactions open longer than necessary** - Minimize transaction scope
-- **Query in loops** - Use batch operations
-- **Use `SELECT *` in production code** - Query only needed columns
-- **Cache write-heavy data unnecessarily** - Consider cache invalidation costs
-
-### Resource Management
-
-- **Forget to close result sets/cursors** - Let jzero handle this with generated methods
-- **Create too many connections** - Use connection pooling
-
-## Common Patterns
-
-### Proper Error Handling
-
-> **Note:** `FindOne`/`FindOneByXx` methods only need to check `err`. When `err == nil`, the result is guaranteed to be valid, so no need to check for `nil`.
-
-```go
-func (l *Get) Get(req *types.GetRequest) (*types.GetResponse, error) {
-    user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
-    if err != nil {
-        if errors.Is(err, usersmodel.ErrNotFound) {
-            return nil, errors.New("user not found")
-        }
-        // Log unexpected errors with context
-        l.Logger.Errorf("failed to find user %d: %v", req.Id, err)
-        return nil, err
-    }
-    // ✅ No nil check needed - user is valid when err == nil
-    return &types.GetResponse{...}, nil
-}
-```
-
-### Pagination with Conditions
-
-```go
-func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
-    // ✅ Build conditions with condition options
-    conditions := condition.NewChain().
-        Equal(usersmodel.Status, req.Status,
-            condition.WithSkipFunc(func() bool {
-                return req.Status == ""  // Skip if Status empty
-            }),
-        ).
-        Like(usersmodel.Name, "%"+req.Name+"%",
-            condition.WithSkipFunc(func() bool {
-                return req.Name == ""  // Skip if Name empty
-            }),
-        ).
-        Page(req.Page, req.Size).
-        OrderBy("id DESC").
-        Build()
-
-    users, total, err := l.svcCtx.Model.Users.PageByCondition(l.ctx, nil, conditions...)
-    if err != nil {
-        l.Logger.Errorf("failed to list users: %v", err)
-        return nil, err
-    }
-
-    return &types.ListResponse{List: users, Total: total}, nil
-}
-```
-
-### Batch Operations
-
-```go
-func (l *UpdateStatus) UpdateStatus(userIds []int64, status string) error {
-    // ✅ Build conditions with chain
-    conditions := condition.NewChain().
-        In(usersmodel.Id, userIds).
-        Build()
-
-    updateData := map[string]any{string(usersmodel.Status): status}
-
-    _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
-    if err != nil {
-        l.Logger.Errorf("failed to update users status: %v", err)
-        return err
-    }
-
-    return nil
-}
-```
-
-Alternatively, you can use `UpdateFieldsByCondition` with `UpdateFieldChain` for more complex update operations:
-
-```go
-func (l *Update) Update(userId int64, req *types.UpdateRequest) error {
-    // ✅ Build conditions with chain
-    conditions := condition.NewChain().
-        Equal(usersmodel.Id, userId).
-        Build()
-
-    // ✅ Build update fields with UpdateFieldChain
-    updateFields := condition.NewUpdateFieldChain().
-        Assign(usersmodel.Name, req.Name).
-        Assign(usersmodel.Email, req.Email).
-        Incr(usersmodel.Version).              // Increment version
-        Build()
-
-    _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateFields, conditions...)
-    if err != nil {
-        l.Logger.Errorf("failed to update user: %v", err)
-        return err
-    }
-
-    return nil
-}
-```
-
-### Table Sharding
-
-```go
-import (
-    ordersmodel "github.com/yourproject/internal/model/orders"
-)
-
-func (l *GetOrder) GetOrder(userId, orderId int64) (*ordersmodel.Orders, error) {
-    shardId := userId % 10
-
-    order, err := l.svcCtx.Model.Orders.
-        WithTable(func(table string) string {
-            return fmt.Sprintf("orders_%d", shardId)
-        }).
-        FindOne(l.ctx, nil, orderId)
-
-    if err != nil {
-        if errors.Is(err, ordersmodel.ErrNotFound) {
-            return nil, errors.New("order not found")
-        }
-        l.Logger.Errorf("failed to find order %d for user %d: %v", orderId, userId, err)
-        return nil, err
-    }
-
-    // ✅ No nil check needed - order is valid when err == nil
-    return order, nil
-}
-```
+---
 
 ## Related Documentation
 

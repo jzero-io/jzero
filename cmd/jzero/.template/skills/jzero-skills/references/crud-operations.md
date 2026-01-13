@@ -4,40 +4,6 @@
 
 jzero automatically generates comprehensive CRUD methods for your models. **Use these generated methods for basic operations** - only write custom SQL for advanced scenarios that generated methods can't handle.
 
-## ⚠️ Critical Import Rule
-
-**‼️ ALL `internal/model/xx` imports MUST use alias `xxmodel`**
-
-### ❌ WRONG - Direct import without alias
-```go
-import "github.com/yourproject/internal/model/users"
-
-user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
-if err != nil {
-    if errors.Is(err, users.ErrNotFound) {  // ❌ WRONG
-        return nil, errors.New("user not found")
-    }
-    return nil, err
-}
-```
-
-### ✅ CORRECT - Import with alias
-```go
-import usersmodel "github.com/yourproject/internal/model/users"
-
-user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
-if err != nil {
-    if errors.Is(err, usersmodel.ErrNotFound) {  // ✅ CORRECT
-        return nil, errors.New("user not found")
-    }
-    return nil, err
-}
-```
-
-**This applies to ALL model imports:** `usersmodel`, `ordersmodel`, `productmodel`, etc.
-
----
-
 ## Generated Methods Overview
 
 | Method | Description | When to Use |
@@ -52,8 +18,8 @@ if err != nil {
 | `FindOneFieldsByCondition(ctx, session, ...)` | Find one with fields | Single record + selected columns |
 | `CountByCondition(ctx, session, ...)` | Count by conditions | Get total count |
 | `PageByCondition(ctx, session, ...)` | Paginated query | Pagination with conditions |
-| `Update(ctx, session, data)` | Update by primary key | Update known record |
-| `UpdateFieldsByCondition(ctx, session, data, ...)` | Update fields by conditions | Conditional update |
+| `Update(ctx, session, data)` | **Full object update by primary key** | Update entire record (ALL fields) |
+| `UpdateFieldsByCondition(ctx, session, data, ...)` | Update fields by conditions | Partial/conditional update |
 | `Delete(ctx, session, id)` | Delete by primary key | Delete known record |
 | `DeleteByCondition(ctx, session, ...)` | Delete by conditions | Conditional delete |
 | `WithTable(func(table) string).Method(...)` | Specify table name | Table sharding |
@@ -90,7 +56,7 @@ func (l *Create) Create(req *types.CreateRequest) (*types.CreateResponse, error)
 Use `BulkInsert` for batch operations:
 
 ```go
-func (l *Import) Import(users []*usersmodel.UsersModel) error {
+func (l *Import) Import(users []*usersmodel.Users) error {
     err := l.svcCtx.Model.Users.BulkInsert(l.ctx, nil, users)
     if err != nil {
         l.Logger.Errorf("failed to bulk insert users: %v", err)
@@ -156,6 +122,54 @@ func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
 
     return &types.ListResponse{List: users, Total: total}, err
 }
+```
+
+### Update by Primary Key
+
+> **⚠️ WARNING: `Update()` method performs FULL object update - ALL fields will be updated including zero values**
+
+The `Update(ctx, session, data)` method updates the entire record. It does NOT support partial updates. If you only want to update specific fields, use `UpdateFieldsByCondition()` instead.
+
+#### ❌ WRONG - Using Update() for partial field update
+```go
+// ❌ WRONG - This will update ALL fields, setting Email and Age to zero values!
+user := &usersmodel.Users{
+    Id:   req.Id,
+    Name: req.Name,
+    // Email and Age will be set to "" and 0
+}
+err := l.svcCtx.Model.Users.Update(l.ctx, nil, user)
+```
+
+#### ✅ CORRECT - Use Update() when you have the complete object
+```go
+// ✅ CORRECT - Update when you have the full object (e.g., after modification)
+user, err := l.svcCtx.Model.Users.FindOne(l.ctx, nil, req.Id)
+if err != nil {
+    return err
+}
+
+// Modify fields
+user.Name = req.NewName
+user.Age = req.NewAge
+
+// Update the entire object
+err = l.svcCtx.Model.Users.Update(l.ctx, nil, user)
+```
+
+#### ✅ CORRECT - Use UpdateFieldsByCondition for partial updates
+```go
+// ✅ CORRECT - Update only specific fields
+conditions := condition.NewChain().
+    Equal(usersmodel.Id, req.Id).
+    Build()
+
+updateData := map[string]any{
+    string(usersmodel.Name): req.Name,
+    // Only Name field will be updated, other fields remain unchanged
+}
+
+_, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
 ```
 
 ### Update by Conditions
