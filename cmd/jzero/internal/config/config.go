@@ -59,6 +59,9 @@ type Config struct {
 	// gen command
 	Gen GenConfig `mapstructure:"gen"`
 
+	// skills command
+	Skills SkillsConfig `mapstructure:"skills"`
+
 	// template command
 	Template TemplateConfig `mapstructure:"template"`
 
@@ -133,6 +136,14 @@ type GenConfig struct {
 	Swagger GenSwaggerConfig `mapstructure:"swagger"`
 
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`
+}
+
+type SkillsConfig struct {
+	Init SkillsInitConfig `mapstructure:"init"`
+}
+
+type SkillsInitConfig struct {
+	Output string `mapstructure:"output"`
 }
 
 type GenSwaggerConfig struct {

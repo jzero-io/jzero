@@ -4,171 +4,96 @@ description: Comprehensive knowledge base for jzero framework (enhanced go-zero)
 license: Apache-2.0
 ---
 
-# jzero Skills
+# jzero Skills for AI Agents
 
-> [jzero](https://github.com/jzero-io/jzero) - Enhanced go-zero framework with AI-friendly development experience.
+Structured knowledge base optimized for AI agents to help developers work effectively with the [jzero](https://github.com/jzero-io/jzero) framework (enhanced go-zero).
 
-## Quick Reference
+## Overview
 
-### Critical Rules (MUST Follow)
+This skill provides AI agents with comprehensive jzero knowledge to:
+- Generate accurate code following jzero conventions
+- Understand the three-layer architecture (Handler → Logic → Model)
+- Apply best practices for microservices development
+- Use jzero-specific features (git-aware generation, flexible config)
+- Build production-ready applications
 
-| Area | Rule | Reference |
-|------|------|-----------|
-| **`.api` files** | Set `go_package` in `info()`, `group` + `compact_handler: true` in `@server` | [REST API Patterns](#rest-api-development) |
-| **Database queries** | Use `condition.NewChain()` API, never `condition.New()` | [Database Operations](#database-operations) |
-| **Model imports** | Use alias: `xxmodel "project/internal/model/xx"` | [Best Practices](references/best-practices.md) |
-| **Error handling** | Use `errors.Is(err, model.ErrNotFound)` from `github.com/pkg/errors` | [Best Practices](references/best-practices.md) |
-| **Code generation** | Run `jzero gen --desc` BEFORE implementing business logic | [Workflow](#code-generation-workflow) |
+## Quick Start
 
----
+When helping with jzero development:
 
-## REST API Development
+1. **For new projects**: Start with [Code Generation Workflow](#code-generation-workflow)
+2. **For REST APIs**: Check [REST API File Structure](references/rest-api-patterns/api-file-structure.md) - ⚠️ Critical rules
+3. **For databases**: Review [Database Best Practices](references/database-patterns/best-practices.md) - ⚠️ Must read
+4. **For specific operations**: Reference the appropriate pattern guide below
 
-### File Structure Rules
+## Core Patterns
 
-```api
-// ✅ CORRECT
-info(
-    title: "User API"
-    desc: "User management"
-    author: "jzero"
-    version: "v1"
-    go_package: "user"              // ‼️ REQUIRED
-)
+### REST API Development
+**Reference**: [references/rest-api-patterns/api-file-structure.md](references/rest-api-patterns/api-file-structure.md)
 
-@server(
-    prefix: /api/v1
-    group: user                      // ‼️ REQUIRED - removes prefix need
-    compact_handler: true            // ‼️ REQUIRED - one file per group
-    middleware: Auth
-)
-service user-api {
-    @handler Create                  // ✅ Clean name (no User prefix)
-    post /users (CreateRequest) returns (CreateResponse)
-}
+- API file structure with required settings (`go_package`, `group`, `compact_handler`)
+- Three-layer architecture (Handler → Logic → Model)
+- Request/response type definitions with validation
+- Handler patterns and HTTP concerns
+- Logic patterns and business implementation
+- ✅ Correct vs ❌ incorrect patterns with examples
 
-type (
-    CreateRequest {                  // ✅ Clean name (no User prefix)
-        Name  string `json:"name" validate:"required"`
-        Email string `json:"email" validate:"required,email"`
-    }
-)
-```
+**When to use**: Creating or modifying REST API services, implementing HTTP endpoints
 
-### Common Mistakes
+### Database Operations
 
-```api
-// ❌ WRONG
-info(
-    title: "User API"
-    // Missing go_package
-)
-@server(
-    prefix: /api/v1
-    // Missing group
-    // Missing compact_handler
-)
-service user-api {
-    @handler CreateUser              // ❌ Unnecessary prefix
-    post /users (CreateUserRequest) returns (CreateUserResponse)
-}
-```
+- **[Best Practices](references/database-patterns/best-practices.md)**: Model import rules, error handling, field constants ⚠️
+- **[Model Generation](references/database-patterns/model-generation.md)**: From SQL files or remote datasource
+- **[Database Connection](references/database-patterns/database-connection.md)**: MySQL, PostgreSQL, SQLite, Redis configuration
+- **[Condition Builder](references/database-patterns/condition-builder.md)**: Type-safe query building with `condition.NewChain()` API
+- **[CRUD Operations](references/database-patterns/crud-operations.md)**: Generated methods (Insert, FindOne, Update, Delete, etc.)
 
-### Three-Layer Architecture
+**When to use**: Implementing data persistence, queries, or database operations
 
-```
-HTTP Request
-    ↓
-Handler (internal/handler/)  - HTTP concerns, validation
-    ↓
-Logic (internal/logic/)      - Business logic
-    ↓
-Model (internal/model/)      - Data access
-```
+### Code Generation Workflow
+**Reference**: [Project Structure](#project-structure)
 
-**Detailed guide**: [references/rest-api-patterns.md](references/rest-api-patterns.md)
+jzero uses git-aware code generation - only changed files are regenerated
 
----
+**Workflow**:
+1. **Modify description file** (`desc/api/*.api`, `desc/sql/*.sql`, `desc/proto/*.proto`)
+2. **Generate code**: `jzero gen --desc <file>`
+3. **Implement business logic** in generated files
 
-## Database Operations
+⚠️ Skipping step 2 causes compilation errors
 
-### Condition Builder (CRITICAL)
+**When to use**: Creating new features, modifying API definitions, adding database models
 
-**‼️ ALWAYS use `condition.NewChain()` API**
+### Configuration Management
+**Reference**: [Configuration](#configuration)
 
-```go
-// ✅ CORRECT
-import (
-    "github.com/jzero-io/jzero/core/stores/condition"
-    usersmodel "github/yourproject/internal/model/users"
-)
+jzero supports flexible configuration with priority: `Environment Variables` > `CLI Flags` > `Config File`
 
-conditions := condition.NewChain().
-    Equal(usersmodel.Id, req.Id).
-    Like(usersmodel.Name, "%"+req.Name+"%",
-        condition.WithSkipFunc(func() bool {
-            return req.Name == ""  // Skip when empty
-        }),
-    ).
-    Page(req.Page, req.Size).
-    OrderBy("id DESC").
-    Build()
+- **CLI config** (`.jzero.yaml`): Code generation settings, git-change mode
+- **App config** (`etc/etc.yaml`): REST, RPC, database, Redis settings
+- **Environment overrides**: `export JZERO_GEN_GIT_CHANGE=true`
 
-users, total, err := l.svcCtx.Model.Users.PageByCondition(l.ctx, nil, conditions...)
-```
-
-```go
-// ❌ WRONG - Never use this
-conditions := condition.New(
-    condition.Condition{Field: "id", Operator: condition.Equal, Value: req.Id},
-)
-```
-
-### Database Best Practices
-
-| Rule | Description |
-|------|-------------|
-| **Model alias** | `xxmodel "project/internal/model/xx"` |
-| **Field constants** | Use `usersmodel.Id`, not `"id"` |
-| **Error check** | `errors.Is(err, usersmodel.ErrNotFound)` |
-| **FindOne result** | Only check `err`, no `nil` check needed |
-| **Update method** | `Update()` = full object, `UpdateFieldsByCondition()` = partial |
-
-**Detailed guides**:
-- [references/best-practices.md](references/best-practices.md) - Critical rules with ✅/❌ examples
-- [references/crud-operations.md](references/crud-operations.md) - CRUD method reference
-- [references/condition-builder.md](references/condition-builder.md) - Condition builder API
-
----
-
-## Code Generation Workflow
-
-### Always Follow This Order
-
-```bash
-# 1. Modify description file
-# Edit desc/api/*.api or desc/sql/*.sql or desc/proto/*.proto
-
-# 2. Generate code (MUST DO THIS BEFORE IMPLEMENTING LOGIC)
-jzero gen --desc desc/api/your_file.api
-jzero gen --desc desc/sql/your_file.sql
-jzero gen --desc desc/proto/your_file.proto
-
-# 3. Now implement business logic in generated files
-```
-
-### Why This Order Matters
-
-- Generates Handler/Logic/Model skeleton code
-- Creates type definitions and interfaces
-- Skipping this causes compilation errors
-
----
+**When to use**: Setting up projects, configuring databases, adjusting generation behavior
 
 ## Project Structure
 
-### Directory Layout
+```
+jzero-skills/
+├── SKILL.md                           # This file - skill entry point
+├── references/                        # Detailed pattern documentation
+│   ├── rest-api-patterns/            # REST API guides
+│   │   ├── README.md                 # Navigation index
+│   │   └── api-file-structure.md     # ⚠️ Critical rules for .api files
+│   └── database-patterns/            # Database operation guides
+│       ├── README.md                 # Navigation index
+│       ├── best-practices.md         # ⚠️ Critical rules with examples
+│       ├── database-connection.md    # DB & Redis setup
+│       ├── model-generation.md       # Generate models from SQL
+│       ├── condition-builder.md      # Type-safe query building
+│       └── crud-operations.md        # CRUD methods reference
+```
 
+**Typical jzero project structure**:
 ```
 myproject/
 ├── desc/
@@ -187,129 +112,98 @@ myproject/
 └── .jzero.yaml       # jzero CLI config
 ```
 
-### Creating Projects
+## Common Workflows
 
-```bash
-# API project
-jzero new myapi --frame api
+### Creating a New REST API Endpoint
 
-# RPC project
-jzero new myrpc --frame rpc
+1. **Define API specification** in `.api` file with required settings:
+   ```api
+   info() { go_package: "user" }
+   @server(group: user, compact_handler: true)
+   ```
+2. **Generate code**: `jzero gen --desc desc/api/user.api`
+3. **Implement logic** in `internal/logic/` following three-layer architecture
+4. **Test**: Use Swagger UI at `http://localhost:8000/swagger`
 
-# Gateway project
-jzero new mygateway --frame gateway
-```
+See detailed patterns: [REST API File Structure](references/rest-api-patterns/api-file-structure.md)
 
----
+### Implementing Database Operations
 
-## Configuration
+1. **Create SQL schema** in `desc/sql/*.sql`
+2. **Generate model**: `jzero gen --desc desc/sql/users.sql`
+3. **Inject model** into ServiceContext
+4. **Use condition builder** in logic layer
+5. **Handle errors**
 
-### Priority Order
+See detailed patterns: [Database Best Practices](references/database-patterns/best-practices.md)
 
-`Environment Variables` > `CLI Flags` > `Config File`
+### Setting Up Database Connection
 
-### Example Configuration
+1. **Configure in `etc/etc.yaml`**:
+   ```yaml
+   sqlx:
+     driverName: mysql
+     dataSource: "root:pass@tcp(127.0.0.1:3306)/mydb"
+   redis:
+     host: "127.0.0.1:6379"
+     type: node
+   ```
+2. **Initialize in ServiceContext** with modelx.MustNewConn
+3. **Register models** in Model struct
 
-**`.jzero.yaml`** (CLI config):
-```yaml
-gen:
-  git-change: true              # Only generate changed files
-  zrpcclient:
-    output: client
-```
+See detailed guide: [Database Connection](references/database-patterns/database-connection.md)
 
-**`etc/etc.yaml`** (App config):
-```yaml
-rest:
-  name: myapi
-  host: 0.0.0.0
-  port: 8000
+## Key Principles
 
-sqlx:
-  driverName: mysql
-  dataSource: "root:pass@tcp(127.0.0.1:3306)/mydb"
+### ✅ Always Follow
 
-redis:
-  host: "127.0.0.1:6379"
-  type: node
-  pass: ""
-```
+- **Three-layer architecture**: Handler → Logic → Model separation
+- **API file requirements**: Set `go_package`, `group`, `compact_handler: true`
+- **Condition builder**: Use `condition.NewChain()`, never `condition.New()`
+- **Model imports**: Use alias `xxmodel "project/internal/model/xx"`
+- **Error handling**: Use `errors.Is(err, model.ErrNotFound)` from `github.com/pkg/errors`
+- **Code generation**: Run `jzero gen --desc` before implementing logic
+- **Type safety**: Use generated field constants (e.g., `usersmodel.Id`)
 
-**Override with environment**:
-```bash
-export JZERO_GEN_GIT_CHANGE=true
-jzero gen
-```
+### ❌ Never Do
 
----
+- Put business logic in handlers (belongs in logic layer)
+- Skip `go_package`, `group`, or `compact_handler` in `.api` files
+- Use `condition.New()` instead of `condition.NewChain()`
+- Import models without alias: `"project/internal/model/users"` (wrong)
+- Use `==` for error comparison: `if err == ErrNotFound` (wrong)
+- Hard-code configuration values
+- Implement logic before generating code
 
-## Common Tasks
+## Progressive Learning
 
-### Create REST API Endpoint
+**New to jzero?**
+1. Read this file (SKILL.md) for overview
+2. Create a project: `jzero new myapi --frame api`
+3. Follow [Code Generation Workflow](#code-generation-workflow)
+4. Study [REST API File Structure](references/rest-api-patterns/api-file-structure.md)
 
-```bash
-# 1. Create/edit .api file
-jzero add api user
+**Building REST APIs?**
+1. Master API file requirements (critical for avoiding regeneration issues)
+2. Learn three-layer architecture patterns
+3. Study [Database Best Practices](references/database-patterns/best-practices.md)
+4. Reference [Condition Builder](references/database-patterns/condition-builder.md) for queries
 
-# 2. Generate code
-jzero gen --desc desc/api/user.api
+**Working with databases?**
+1. ⚠️ **Must read**: [Database Best Practices](references/database-patterns/best-practices.md)
+2. Set up connection: [Database Connection](references/database-patterns/database-connection.md)
+3. Generate models: [Model Generation](references/database-patterns/model-generation.md)
+4. Learn CRUD operations: [CRUD Operations](references/database-patterns/crud-operations.md)
 
-# 3. Implement logic in internal/logic/
-```
-
-### Add Database Model
-
-```bash
-# 1. Create SQL file
-jzero add sql users.sql
-
-# 2. Generate model
-jzero gen --desc desc/sql/users.sql
-
-# 3. Use generated methods in logic layer
-```
-
-### Test API
-
-Built-in Swagger UI available at: `http://localhost:8000/swagger`
-
----
-
-## jzero vs go-zero
-
-| Feature | jzero | go-zero |
-|---------|-------|---------|
-| CLI command | `jzero` | `goctl` |
-| Configuration | YAML + ENV + CLI | YAML only |
-| Code generation | Git-aware (only changed files) | All files |
-| Templates | Custom `.tpl` support | Limited |
-| Project types | API, RPC, Gateway | API, RPC |
-| Serverless | Built-in | Manual |
-| **Recommendation** | ✅ Use `jzero` | Consider `jzero` first |
-
----
-
-## Reference Documentation
-
-| Topic | File |
-|-------|------|
-| REST API patterns | [references/rest-api-patterns.md](references/rest-api-patterns.md) |
-| Database best practices | [references/best-practices.md](references/best-practices.md) |
-| CRUD operations | [references/crud-operations.md](references/crud-operations.md) |
-| Condition builder | [references/condition-builder.md](references/condition-builder.md) |
-| Model generation | [references/model-generation.md](references/model-generation.md) |
-| Database connection | [references/database-connection.md](references/database-connection.md) |
-
----
+**Production deployment?**
+1. Review all best practices in reference guides
+2. Configure proper error handling and logging
+3. Set up caching strategies with Redis
+4. Implement resilience patterns (circuit breaker, rate limiting)
 
 ## Resources
 
-- **Documentation**: [docs.jzero.io](https://docs.jzero.io)
-- **GitHub**: [jzero-io/jzero](https://github.com/jzero-io/jzero)
+- **Official documentation**: [docs.jzero.io](https://docs.jzero.io)
+- **GitHub repository**: [jzero-io/jzero](https://github.com/jzero-io/jzero)
 - **Examples**: [jzero-io/examples](https://github.com/jzero-io/examples)
-
----
-
-## Version
-
-Target: **jzero 1.1+** | Compatible with: **go-zero 1.5+**
+- **Base framework**: [zeromicro/go-zero](https://github.com/zeromicro/go-zero)
