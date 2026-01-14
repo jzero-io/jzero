@@ -42,7 +42,7 @@ When helping with jzero development:
 
 ### Database Operations
 
-- **[Best Practices](references/database-patterns/best-practices.md)**: Model import rules, error handling, field constants ⚠️
+- **[Best Practices](references/database-patterns/best-practices.md)**: Model import rules, condition chain usage, error handling, field constants ⚠️
 - **[Model Generation](references/database-patterns/model-generation.md)**: From SQL files or remote datasource
 - **[Database Connection](references/database-patterns/database-connection.md)**: MySQL, PostgreSQL, SQLite, Redis configuration
 - **[Condition Builder](references/database-patterns/condition-builder.md)**: Type-safe query building with `condition.NewChain()` API

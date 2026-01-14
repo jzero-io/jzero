@@ -105,7 +105,7 @@ import (
 
 func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
     // ✅ Build conditions with condition options
-    conditions := condition.NewChain().
+    chain := condition.NewChain().
         Equal(usersmodel.Age, req.Age,
             condition.WithSkipFunc(func() bool {
                 return req.Age <= 0  // Skip if Age not set
@@ -117,11 +117,10 @@ func (l *List) List(req *types.ListRequest) (*types.ListResponse, error) {
             }),
         ).
         Page(req.Page, req.Size).
-        OrderBy("id DESC").
-        Build()
+        OrderBy("id DESC")
 
     // Use generated PageByCondition method
-    users, total, err := l.svcCtx.Model.Users.PageByCondition(l.ctx, nil, conditions...)
+    users, total, err := l.svcCtx.Model.Users.PageByCondition(l.ctx, nil, chain.Build()...)
 
     return &types.ListResponse{List: users, Total: total}, err
 }
@@ -159,16 +158,15 @@ err = l.svcCtx.Model.Users.Update(l.ctx, nil, user)
 #### ✅ CORRECT - Use UpdateFieldsByCondition for partial updates
 ```go
 // ✅ CORRECT - Update only specific fields
-conditions := condition.NewChain().
-    Equal(usersmodel.Id, req.Id).
-    Build()
+chain := condition.NewChain().
+    Equal(usersmodel.Id, req.Id)
 
 updateData := map[string]any{
     string(usersmodel.Name): req.Name,
     // Only Name field will be updated, other fields remain unchanged
 }
 
-_, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
+_, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, chain.Build()...)
 ```
 
 ### Update by Conditions
@@ -185,16 +183,15 @@ import (
 
 func (l *Update) Update(req *types.UpdateRequest) error {
     // ✅ Build conditions with chain
-    conditions := condition.NewChain().
-        Equal(usersmodel.Id, req.Id).
-        Build()
+    chain := condition.NewChain().
+        Equal(usersmodel.Id, req.Id)
 
     updateData := map[string]any{
         string(usersmodel.Name): req.Name,
         string(usersmodel.Age):  req.Age,
     }
 
-    _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
+    _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, chain.Build()...)
     if err != nil {
         l.Logger.Errorf("failed to update user: %v", err)
         return err
@@ -214,9 +211,8 @@ import (
 
 func (l *Update) Update(req *types.UpdateRequest) error {
     // ✅ Build conditions with chain
-    conditions := condition.NewChain().
-        Equal(usersmodel.Id, req.Id).
-        Build()
+    chain := condition.NewChain().
+        Equal(usersmodel.Id, req.Id)
 
     // ✅ Build update fields with UpdateFieldChain
     updateFields := condition.NewUpdateFieldChain().
@@ -225,7 +221,7 @@ func (l *Update) Update(req *types.UpdateRequest) error {
         Incr(usersmodel.Version).              // Increment version
         Build()
 
-    _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateFields, conditions...)
+    _, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateFields, chain.Build()...)
     if err != nil {
         l.Logger.Errorf("failed to update user: %v", err)
         return err
@@ -247,11 +243,10 @@ import (
 
 func (l *Delete) Delete(ids []int64) error {
     // ✅ Build conditions with chain
-    conditions := condition.NewChain().
-        In(usersmodel.Id, ids).
-        Build()
+    chain := condition.NewChain().
+        In(usersmodel.Id, ids)
 
-    _, err := l.svcCtx.Model.Users.DeleteByCondition(l.ctx, nil, conditions...)
+    _, err := l.svcCtx.Model.Users.DeleteByCondition(l.ctx, nil, chain.Build()...)
     if err != nil {
         l.Logger.Errorf("failed to delete users: %v", err)
         return err
@@ -280,7 +275,7 @@ func (l *GetSalesReport) GetSalesReport(req *types.SalesReportRequest) (*types.S
     // ✅ Build date range conditions with chain
     chain := condition.NewChain().
         GreaterThanOrEqual(ordersmodel.CreatedAt, req.StartDate).
-        Less(ordersmodel.CreatedAt, req.EndDate)
+        LessThan(ordersmodel.CreatedAt, req.EndDate)
 
     // Build aggregation query
     stmt, args := condition.BuildSelect(

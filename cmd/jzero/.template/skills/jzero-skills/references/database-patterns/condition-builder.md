@@ -47,7 +47,7 @@ import (
 
 func (l *SearchUsers) SearchUsers(req *types.SearchRequest) error {
     // ✅ Build all conditions with condition options
-    conditions := condition.NewChain().
+    chain := condition.NewChain().
         Equal(usersmodel.Status, req.Status,
             condition.WithSkipFunc(func() bool {
                 return req.Status == ""  // Skip if Status empty
@@ -89,11 +89,10 @@ func (l *SearchUsers) SearchUsers(req *types.SearchRequest) error {
             }),
         ).
         Page(req.Page, req.Size).
-        OrderBy("created_at DESC").
-        Build()
+        OrderBy("created_at DESC")
 
     // Execute query
-    usersList, total, err := l.svcCtx.Model.Users.PageByCondition(l.ctx, nil, conditions...)
+    usersList, total, err := l.svcCtx.Model.Users.PageByCondition(l.ctx, nil, chain.Build()...)
     // ...
 }
 ```

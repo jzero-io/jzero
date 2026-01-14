@@ -19,9 +19,8 @@ This prevents naming conflicts and makes code more maintainable.
 import "github.com/yourproject/internal/model/users"
 
 // ❌ Don't use users.Id
-conditions := condition.NewChain().
-    Equal(users.Id, req.Id).
-    Build()
+chain := condition.NewChain().
+    Equal(users.Id, req.Id)
 ```
 
 #### ✅ CORRECT - Import with alias
@@ -29,9 +28,11 @@ conditions := condition.NewChain().
 import usersmodel "github.com/yourproject/internal/model/users"
 
 // ✅ Use usersmodel.Id
-conditions := condition.NewChain().
-    Equal(usersmodel.Id, req.Id).
-    Build()
+chain := condition.NewChain().
+    Equal(usersmodel.Id, req.Id)
+
+// convert to conditions
+conditions := chain.Build()
 ```
 
 **This applies to ALL model imports:** `usersmodel`, `ordersmodel`, `productmodel`, etc.
@@ -104,16 +105,15 @@ err = l.svcCtx.Model.Users.Update(l.ctx, nil, user)
 #### ✅ CORRECT - Use UpdateFieldsByCondition for partial updates
 ```go
 // ✅ CORRECT - Update specific fields only
-conditions := condition.NewChain().
-    Equal(usersmodel.Id, req.Id).
-    Build()
+chain := condition.NewChain().
+    Equal(usersmodel.Id, req.Id)
 
 updateData := map[string]any{
     string(usersmodel.Name): req.Name,
     // Only Name field will be updated
 }
 
-_, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
+_, err := l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, chain.Build()...)
 ```
 
 #### ✅ CORRECT - Real-world pattern for optional fields
@@ -125,13 +125,14 @@ func (l *Update) Update(req *types.UpdateRequest) error {
     if err != nil {
         return err
     }
+	
+	chain := condition.NewChain()
 
     // 2. Business validation (e.g., email uniqueness)
     if req.Email != "" {
-        conditions := condition.NewChain().
+        chain = chain.
             Equal(usersmodel.Email, req.Email).
-            NotEqual(usersmodel.Id, req.Id). // Exclude current user
-            Build()
+            NotEqual(usersmodel.Id, req.Id) // Exclude current user
         // ... check if email exists
     }
 
@@ -144,18 +145,13 @@ func (l *Update) Update(req *types.UpdateRequest) error {
         updateData[string(usersmodel.Email)] = req.Email
     }
 
-    // 4. Execute partial update
-    conditions := condition.NewChain().
-        Equal(usersmodel.Id, req.Id).
-        Build()
-
-    return l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, conditions...)
+    return l.svcCtx.Model.Users.UpdateFieldsByCondition(l.ctx, nil, updateData, chain.Build()...)
 }
 ```
 
 **Summary:**
 - `Update(ctx, session, data)` - Full object update (ALL fields including zero values)
-- `UpdateFieldsByCondition(ctx, session, data, conditions...)` - Partial field update (only specified fields)
+- `UpdateFieldsByCondition(ctx, session, data, chain.Build()...)` - Partial field update (only specified fields)
 - **For optional fields**: Use map-based approach with manual empty checks - do NOT use UpdateFieldChain (it doesn't support WithSkipFunc)
 
 ---
@@ -177,9 +173,11 @@ conditions := condition.New(
 #### ✅ CORRECT - Using condition.NewChain()
 ```go
 // ✅ CORRECT - Clean and fluent API
-conditions := condition.NewChain().
-    Equal(usersmodel.Status, "active").
-    Build()
+chain := condition.NewChain().
+    Equal(usersmodel.Status, "active")
+
+// convert to conditions
+conditions := chain.Build()
 ```
 
 ---
@@ -193,19 +191,20 @@ Generated constants provide type safety and prevent typos.
 #### ❌ WRONG - Hardcoded strings
 ```go
 // ❌ WRONG - Hardcoded string (typo-prone)
-conditions := condition.NewChain().
+chain := condition.NewChain().
     Equal("id", req.Id).
-    Equal("name", req.Name).
-    Build()
+    Equal("name", req.Name)
 ```
 
 #### ✅ CORRECT - Generated constants
 ```go
 // ✅ CORRECT - Type-safe constants
-conditions := condition.NewChain().
+chain := condition.NewChain().
     Equal(usersmodel.Id, req.Id).
-    Equal(usersmodel.Name, req.Name).
-    Build()
+    Equal(usersmodel.Name, req.Name)
+
+// convert to conditions
+conditions := chain.Build()
 ```
 
 ---
