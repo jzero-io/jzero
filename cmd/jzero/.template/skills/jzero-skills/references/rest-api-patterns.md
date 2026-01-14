@@ -16,12 +16,13 @@ info(
 )
 ```
 
-### 2. MUST Set `group` in @server Block
+### 2. MUST Set `group` and `compact_handler` in @server Block
 
 ```api
 @server(
     prefix: /api/v1
     group: user  // ‼️ REQUIRED - MUST set group
+    compact_handler: true      // ‼️ REQUIRED merge handler to one file
     middleware: Auth
 )
 service user-api {
@@ -52,8 +53,8 @@ When `group` is set in `@server`:
     prefix: /api/v1
 )
 service user-api {
-    @handler UserCreate  // ❌ Needs group prefix
-    post /users (UserCreateRequest) returns (UserCreateResponse)
+    @handler CreateUser
+    post /users (CreateUserRequest) returns (CreateUserResponse)
 }
 ```
 
@@ -64,6 +65,35 @@ service user-api {
 @server(
     prefix: /api/v1
     group: user  // ‼️ REQUIRED
+    compact_handler: true      // ‼️ REQUIRED merge handler to one file
+)
+service user-api {
+    @handler Create  // ✅ No group prefix needed
+    post /users (CreateRequest) returns (CreateResponse)
+}
+```
+
+### ❌ WRONG - Without compact_handler
+
+```api
+// No compact_handler set in @server
+@server(
+    prefix: /api/v1
+)
+service user-api {
+    @handler CreateUser
+    post /users (CreateUserRequest) returns (CreateUserResponse)
+}
+```
+
+### ✅ CORRECT - With compact_handler
+
+```api
+// group set in @server
+@server(
+    prefix: /api/v1
+    group: user  // ‼️ REQUIRED
+    compact_handler: true      // ‼️ REQUIRED merge handler to one file
 )
 service user-api {
     @handler Create  // ✅ No group prefix needed
@@ -199,6 +229,7 @@ type (
 @server(
     prefix: /api/v1
     group: user          // ‼️ REQUIRED
+    compact_handler: true      // ‼️ REQUIRED merge handler to one file
     middleware: Auth
 )
 service user-api {
