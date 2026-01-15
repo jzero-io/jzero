@@ -26,8 +26,7 @@ jzero automatically generates comprehensive CRUD methods for your models. **Use 
 
 ## Basic CRUD Operations
 
-> **⚠️ CRITICAL:** All database operations below MUST follow the critical rules in [Best Practices](./best-practices.md#-critical-rules), including:
-> See [Best Practices → Critical Rules](./best-practices.md#-critical-rules) for detailed examples.
+> **⚠️ CRITICAL:** All database operations below MUST follow the critical rules in [Best Practices](./best-practices.md)
 
 ### Insert
 
@@ -332,5 +331,4 @@ func (l *GetOrder) GetOrder(userId, orderId int64) (*ordersmodel.Orders, error) 
 
 - [Best Practices](./best-practices.md) - Database usage guidelines
 - [Model Generation](./model-generation.md) - Generating models with CRUD methods
-- [Condition Builder](./condition-builder.md) - Building query conditions
 - [Database Connection](./database-connection.md) - Setting up database connections

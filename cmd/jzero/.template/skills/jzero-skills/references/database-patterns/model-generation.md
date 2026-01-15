@@ -4,6 +4,16 @@
 
 jzero supports multiple ways to generate models from SQL schemas. The generated models provide comprehensive CRUD methods with type-safe field constants and caching support.
 
+## ⚠️ Important: Migration Requirements
+
+**When modifying database schemas, you MUST create migration files** in `desc/sql_migration/` to track changes and enable rollbacks.
+
+- **Required**: Create migration files (xx.up.sql and xx.down.sql) for any schema changes
+- **Development**: Use `jzero migrate` commands with `.jzero.yaml`
+- **Production**: Use code-based migration in `cmd/server.go` - automatic on startup
+
+See [SQL Migration Guide](./sql-migration.md) for complete migration workflow.
+
 ## Method 1: From Local SQL Files (Recommended)
 
 Place SQL DDL files in `desc/sql/` directory:
@@ -14,6 +24,22 @@ desc/sql/
    ├── orders.sql
    └── products.sql
 ```
+
+### Local SQL Mode Workflow
+
+1. **Place SQL files** in `desc/sql/` directory
+2. **Create migration files** in `desc/sql_migration/` for schema changes (xx.up.sql and xx.down.sql)
+3. **Generate models**: Run `jzero gen --desc desc/sql/table.sql`
+4. **Apply migrations**:
+   - Development: Use `jzero migrate up` with `.jzero.yaml`
+   - Production: Automatic via code in `cmd/server.go`
+
+### Best Practices for Local SQL Mode
+
+- **Keep DDL files organized** - One table per file
+- **Version control schema** - SQL files track schema evolution
+- **Create migrations for changes** - Every schema modification needs xx.up.sql and xx.down.sql
+- **Use `.jzero.yaml` for generation config** - Centralize settings
 
 Run generation:
 
@@ -44,9 +70,27 @@ gen:
     - products
 ```
 
+### Remote Datasource Mode Workflow
+
+1. **Create migration files** directly in `desc/sql_migration/` (no need for `desc/sql/*.sql` files)
+2. **Apply migrations to database**:
+   - Development: Use `jzero migrate up` with `.jzero.yaml`
+   - Production: Automatic via code in `cmd/server.go`
+3. **Generate models from database**: Run `jzero gen`
+4. **Database is source of truth** - Schema comes from actual database structure
+
+### Best Practices for Remote Datasource Mode
+
+- **Create migrations directly** - No `desc/sql/*.sql` files needed
+- **Apply migrations first** - Ensure database is up-to-date before generating models
+- **Regenerate after schema changes** - Models reflect latest database structure
+- **Use `.jzero.yaml` for datasource config** - Centralize connection settings
+- **Database-first approach** - Suitable for existing databases or database-first development
+
 Run generation:
 
 ```bash
+# Generate from configured datasource
 jzero gen
 ```
 
@@ -154,9 +198,42 @@ jzero generates these methods by default for each model:
 |--------|-------------|-------------|
 | `WithTable(func(table) string).Method(...)` | Specify table name | Table sharding |
 
+## Configuration Best Practices
+
+### Both Modes
+
+- **Use `.jzero.yaml` for generation configuration** - Centralize your generation settings
+- **Enable caching for read-heavy models** - Use `model-cache: true` and `model-cache-table` for appropriate tables
+
+### Choosing the Right Mode
+
+| Factor | Local SQL Mode | Remote Datasource Mode |
+|--------|---------------|---------------------|
+| **Schema source** | `desc/sql/*.sql` files | Database |
+| **Migration files** | `desc/sql_migration/` | `desc/sql_migration/` |
+| **Model generation** | `jzero gen --desc desc/sql/x.sql` | `jzero gen` |
+| **Best for** | New projects, code-first | Existing databases, database-first |
+| **Team collaboration** | Code reviews on schema files | Code reviews on migration files |
+
+### When to Use Each Mode
+
+**Use Local SQL Mode when**:
+- Starting a new project
+- Want version-controlled schema definitions
+- Prefer code-first development
+- Need clear documentation of database structure
+- Team reviews schema changes in code
+
+**Use Remote Datasource Mode when**:
+- Working with existing databases
+- Prefer database-first development
+- Multiple services share same database
+- Don't need separate SQL files
+- Want simpler file structure
+
 ## Related Documentation
 
 - [Database Connection](./database-connection.md) - Setting up database connections
-- [Condition Builder](./condition-builder.md) - Building query conditions
+- [SQL Migration Guide](./sql-migration.md) - Managing schema changes with migrations
 - [CRUD Operations](./crud-operations.md) - Using generated methods
-- [Best Practices](./best-practices.md) - Database usage guidelines
+- [Best Practices](./best-practices.md) - Database operation guidelines and critical rules

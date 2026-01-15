@@ -189,7 +189,6 @@ model := model.NewModel(sqlxConn, modelx.WithCachedConn(cachedConn))
 ## Related Documentation
 
 - [Model Generation](./model-generation.md) - Learn how to generate models
-- [Condition Builder](./condition-builder.md) - Building query conditions
 - [CRUD Operations](./crud-operations.md) - Database operations patterns
 - [Best Practices](./best-practices.md) - Database usage guidelines
 

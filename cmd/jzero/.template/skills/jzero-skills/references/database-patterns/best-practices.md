@@ -4,11 +4,44 @@
 
 This guide outlines best practices for working with databases in jzero applications to ensure security, performance, and maintainability.
 
-## ⚠️ Critical Rules
+## ⚠️⚠️⚠️ CRITICAL RULES - MUST FOLLOW ⚠️⚠️⚠️
 
-These rules are critical and MUST be followed to avoid common bugs and security issues.
+These rules are **CRITICAL** and **MUST be followed** to avoid common bugs and security issues.
 
-### 1. Model Import Rule
+---
+
+## 🚨 MOST CRITICAL: Condition Builder Rule
+
+### 🚨🚨🚨 ALWAYS use `condition.NewChain()` instead of `condition.New()` 🚨🚨🚨
+
+**THIS IS THE MOST IMPORTANT RULE** - The chain API provides a fluent, type-safe interface for building conditions.
+
+#### ❌❌❌ FORBIDDEN - NEVER use condition.New()
+```go
+// ❌❌❌ WRONG - DO NOT USE THIS PATTERN
+conditions := condition.New(
+    condition.Condition{Field: usersmodel.Status, Operator: condition.Equal, Value: "active"},
+)
+```
+
+#### ✅✅✅ REQUIRED - ALWAYS use condition.NewChain()
+```go
+// ✅✅✅ CORRECT - THIS IS THE ONLY ACCEPTABLE PATTERN
+chain := condition.NewChain().
+    Equal(usersmodel.Status, "active")
+
+// convert to conditions
+conditions := chain.Build()
+```
+
+**⚠️ IMPORTANT REMINDERS**:
+- 🚫 **NEVER** use `condition.New()` - this is error-prone and deprecated
+- ✅ **ALWAYS** use `condition.NewChain()` - fluent, type-safe, clean API
+- ✅ **ALWAYS** call `.Build()` at the end to convert to conditions
+
+---
+
+## 1. Model Import Rule
 
 **‼️ ALL `internal/model/xx` imports MUST use alias `xxmodel`**
 
@@ -156,33 +189,7 @@ func (l *Update) Update(req *types.UpdateRequest) error {
 
 ---
 
-### 4. Condition Builder Rule
-
-**‼️ ALWAYS use `condition.NewChain()` instead of `condition.New()`**
-
-The chain API provides a fluent, type-safe interface for building conditions.
-
-#### ❌ WRONG - Using condition.New()
-```go
-// ❌ WRONG - Verbose and error-prone
-conditions := condition.New(
-    condition.Condition{Field: usersmodel.Status, Operator: condition.Equal, Value: "active"},
-)
-```
-
-#### ✅ CORRECT - Using condition.NewChain()
-```go
-// ✅ CORRECT - Clean and fluent API
-chain := condition.NewChain().
-    Equal(usersmodel.Status, "active")
-
-// convert to conditions
-conditions := chain.Build()
-```
-
----
-
-### 5. Field Constants Rule
+## 4. Field Constants Rule
 
 **‼️ ALWAYS use generated field constants (e.g., `usersmodel.Id`) instead of hardcoded strings**
 
@@ -209,7 +216,7 @@ conditions := chain.Build()
 
 ---
 
-### 6. FindOne Result Rule
+## 5. FindOne Result Rule
 
 **‼️ `FindOne`/`FindOneByXx` methods only need `err` check - no need to check for `nil`**
 
@@ -244,12 +251,13 @@ return &types.GetResponse{...}, nil
 
 ## Additional Best Practices
 
-### Model Generation
+### Migrations
 
-- **Place SQL files in `desc/sql/` directory** - Keep your DDL files organized
-- **Use `jzero gen` to generate models from SQL files** - Leverage code generation
-- **Use `.jzero.yaml` for generation configuration** - Centralize your generation settings
-- **Enable caching for read-heavy models** - Use `model-cache: true` and `model-cache-table` for appropriate tables
+- ⚠️ **Required**: Create migration files in `desc/sql_migration/` for any schema changes
+- **Development**: Use `jzero migrate` commands with `.jzero.yaml`
+- **Production**: Use code-based migration in `cmd/server.go` - automatic on startup
+- See [SQL Migration Guide](./sql-migration.md) for complete migration workflow
+- See [Model Generation](./model-generation.md) for detailed instructions on generating models
 
 ### Performance
 
@@ -282,6 +290,7 @@ return &types.GetResponse{...}, nil
 
 ## Related Documentation
 
+- [SQL Migration Guide](./sql-migration.md) - Managing schema changes with up/down migrations ⚠️
 - [Database Connection](./database-connection.md) - Setting up database connections
 - [Model Generation](./model-generation.md) - Generating models with field constants
 - [Condition Builder](./condition-builder.md) - Building query conditions (MUST read)
