@@ -128,7 +128,7 @@ Define clear types with proper validation tags. **Note: With `group` set in `@se
 ```go
 // API definition (.api file)
 type (
-    CreateRequest {      // ✅ No "User" prefix when group is set
+    CreateRequest {      // ✅ No "User" suffix when group is set
         Name     string `json:"name" validate:"required,min=2,max=50"`
         Email    string `json:"email" validate:"required,email"`
         Age      int    `json:"age" validate:"required,gte=18,lte=120"`
@@ -140,7 +140,7 @@ type (
         Message string `json:"message"`
     }
 
-    GetRequest {          // ✅ No "User" prefix when group is set
+    GetRequest {          // ✅ No "User" suffix when group is set
         Id int64 `path:"id" validate:"required,gt=0"`
     }
 
@@ -151,7 +151,7 @@ type (
         Age   int    `json:"age"`
     }
 
-    ListRequest {         // ✅ No "User" prefix when group is set
+    ListRequest {         // ✅ No "User" suffix when group is set
         Page     int    `form:"page,default=1" validate:"gte=1"`
         PageSize int    `form:"page_size,default=10" validate:"gte=1,lte=100"`
         Keyword  string `form:"keyword,optional"`
@@ -159,7 +159,7 @@ type (
 
     ListResponse {
         Total int64        `json:"total"`
-        List []Info  `json:"users"`
+        List []Info        `json:"users"`
     }
 
     Info {
@@ -203,7 +203,7 @@ type (
     }
 
     GetRequest {          // ✅ No "User" suffix needed
-        Id int64 `path:"id"`
+        Id int64 `path:"id" validate:"required,gt=0"`
     }
 
     GetResponse {
@@ -224,11 +224,28 @@ type (
     }
 
     DeleteResponse {}
+
+    ListRequest {
+        Page     int    `form:"page,default=1" validate:"gte=1"`
+        PageSize int    `form:"page_size,default=10" validate:"gte=1,lte=100"`
+        Keyword  string `form:"keyword,optional"`
+    }
+
+    ListResponse {
+        Total int64       `json:"total"`
+        Users []UserInfo  `json:"users"`
+    }
+
+    UserInfo {
+        Id    int64  `json:"id"`
+        Name  string `json:"name"`
+        Email string `json:"email"`
+    }
 )
 
 @server(
     prefix: /api/v1
-    group: user          // ‼️ REQUIRED
+    group: user                // ‼️ REQUIRED
     compact_handler: true      // ‼️ REQUIRED merge handler to one file
     middleware: Auth
 )
@@ -248,6 +265,10 @@ service user-api {
     @doc "Delete user"
     @handler Delete      // ✅ No "User" suffix needed
     delete /users/:id (DeleteRequest) returns (DeleteResponse)
+
+    @doc "List user"
+    @handler List        // ✅ No "User" suffix needed
+    get /users (ListRequest) returns (ListResponse)
 }
 ```
 
