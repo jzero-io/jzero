@@ -6,6 +6,9 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package skills
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/spf13/cobra"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/skills/skillsinit"
@@ -28,7 +31,11 @@ var initCmd = &cobra.Command{
 }
 
 func GetCommand() *cobra.Command {
-	initCmd.Flags().StringP("output", "o", ".claude/skills", "output directory")
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	initCmd.Flags().StringP("output", "o", filepath.Join(homeDir, ".claude", "skills"), "output directory")
 
 	// Add init subcommand
 	skillsCmd.AddCommand(initCmd)
