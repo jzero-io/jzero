@@ -23,9 +23,10 @@ When helping with jzero development:
 
 1. **For new projects**: Start with [Development Workflows](#development-workflows)
 2. **For REST APIs**: Check [REST API File Structure](references/rest-api-patterns/api-file-structure.md) - ⚠️ Critical rules
-3. **For databases**: Review [Database Best Practices](references/database-patterns/best-practices.md) - ⚠️ Must read
-4. **For SQL changes**: Check [SQL Migration Guide](references/database-patterns/sql-migration.md) - ⚠️ Schema changes
-5. **For specific operations**: Reference the appropriate pattern guide below
+3. **For RPC services**: Review [Proto File Structure](references/rpc-patterns/proto-file-structure.md) - Proto standards & multi-proto support
+4. **For databases**: Review [Database Best Practices](references/database-patterns/best-practices.md) - ⚠️ Must read
+5. **For SQL changes**: Check [SQL Migration Guide](references/database-patterns/sql-migration.md) - ⚠️ Schema changes
+6. **For specific operations**: Reference the appropriate pattern guide below
 
 ## Core Patterns
 
@@ -40,6 +41,14 @@ When helping with jzero development:
 - ✅ Correct vs ❌ incorrect patterns with examples
 
 **When to use**: Creating or modifying REST API services, implementing HTTP endpoints
+
+### RPC Services
+
+- **[Proto File Structure](references/rpc-patterns/proto-file-structure.md)**: Proto standards, multi-proto support, file structure, HTTP gateway, OpenAPI docs
+- **[Proto Field Validation](references/rpc-patterns/proto-validation.md)**: Field validation with protovalidate, CEL expressions, built-in constraints
+- **[Proto Middleware](references/rpc-patterns/proto-middleware.md)**: HTTP/RPC middleware at service and method levels
+
+**When to use**: Creating or modifying RPC services, working with proto files, adding validation or middleware
 
 ### Database Operations
 
@@ -103,10 +112,12 @@ jzero-skills/
 ├── SKILL.md                           # This file - skill entry point
 ├── references/                        # Detailed pattern documentation
 │   ├── rest-api-patterns/            # REST API guides
-│   │   ├── README.md                 # Navigation index
 │   │   └── api-file-structure.md     # ⚠️ Critical rules for .api files
+│   ├── rpc-patterns/                # RPC/Proto service guides
+│   │   ├── proto-file-structure.md  # Proto standards & multi-proto
+│   │   ├── proto-validation.md      # Field validation guide
+│   │   └── proto-middleware.md      # Middleware patterns
 │   └── database-patterns/            # Database operation guides
-│       ├── README.md                 # Navigation index
 │       ├── best-practices.md         # ⚠️ Critical rules with examples
 │       ├── sql-migration.md          # ⚠️ Schema changes & migrations
 │       ├── database-connection.md    # DB & Redis setup
@@ -169,6 +180,11 @@ myproject/
 1. Master API file requirements (critical for avoiding regeneration issues)
 2. Learn three-layer architecture patterns
 3. Study [Database Best Practices](references/database-patterns/best-practices.md)
+
+**Creating RPC services?**
+1. Learn proto file structure: [Proto File Structure](references/rpc-patterns/proto-file-structure.md)
+2. Add validation: [Proto Field Validation](references/rpc-patterns/proto-validation.md)
+3. Implement middleware: [Proto Middleware](references/rpc-patterns/proto-middleware.md)
 
 **Working with databases?**
 1. ⚠️ **Must read**: [Database Best Practices](references/database-patterns/best-practices.md)
