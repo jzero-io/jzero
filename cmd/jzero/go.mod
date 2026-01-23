@@ -13,7 +13,7 @@ require (
 	github.com/jhump/protoreflect v1.17.0
 	github.com/jzero-io/desc v1.2.0
 	github.com/jzero-io/go_fmt v0.0.0-20250905015347-1a45352494b7
-	github.com/jzero-io/jzero v1.1.2
+	github.com/jzero-io/jzero v1.1.3
 	github.com/mark3labs/mcp-go v0.43.2
 	github.com/moby/patternmatcher v0.6.0
 	github.com/pkg/errors v0.9.1
@@ -137,8 +137,8 @@ require (
 	google.golang.org/grpc v1.75.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	modernc.org/libc v1.67.0 // indirect
+	modernc.org/libc v1.67.6 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.43.0 // indirect
+	modernc.org/sqlite v1.44.3 // indirect
 )
