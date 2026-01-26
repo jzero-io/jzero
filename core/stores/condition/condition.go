@@ -37,6 +37,8 @@ const (
 	Offset           Operator = "OFFSET"
 	Between          Operator = "BETWEEN"
 	NotBetween       Operator = "NOT BETWEEN"
+	ForUpdate        Operator = "FOR UPDATE" // only take effective for select builder
+	ForShare         Operator = "FOR SHARE"  // only take effective for select builder
 
 	// OrderBy Deprecated Use OrderByDesc or OrderByAsc instead.
 	OrderBy     Operator = "ORDER BY"
@@ -208,6 +210,10 @@ func BuildSelectWithFlavor(flavor sqlbuilder.Flavor, builder *sqlbuilder.SelectB
 			}
 		case Join:
 			builder.JoinWithOption(c.JoinCondition.Option, c.JoinCondition.Table, cast.ToStringSlice(ToSlice(c.JoinCondition.OnExpr))...)
+		case ForUpdate:
+			builder.ForUpdate()
+		case ForShare:
+			builder.ForShare()
 		}
 	}
 	if clause != nil {

@@ -53,3 +53,17 @@ func TestChainIsNotNull(t *testing.T) {
 	assert.Equal(t, "SELECT user.name, user.age FROM user WHERE `user`.`field` = ? AND `delete_at` IS NOT NULL", statement)
 	assert.Equal(t, []any{"value2"}, args)
 }
+
+func TestSelectForUpdate(t *testing.T) {
+	sb := sqlbuilder.NewSelectBuilder().Select("name", "age").From("user")
+	chain := NewChain().
+		Equal("field1", "value1", WithSkip(true)).
+		Equal("field2", "value2").
+		OrderByDesc("create_time").
+		OrderByAsc("sort").
+		ForUpdate()
+
+	statement, args := BuildSelectWithFlavor(sqlbuilder.MySQL, sb, chain.Build()...)
+	assert.Equal(t, "SELECT name, age FROM user WHERE `field2` = ? ORDER BY `create_time` DESC, `sort` ASC FOR UPDATE", statement)
+	assert.Equal(t, []any{"value2"}, args)
+}
