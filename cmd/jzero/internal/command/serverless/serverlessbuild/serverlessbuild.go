@@ -32,19 +32,23 @@ func Run() error {
 			return err
 		}
 		for _, p := range plugins {
-			if !strings.HasPrefix(p.Path, "./") {
-				p.Path = "./" + p.Path
-			}
-			if err = work.DropUse(p.Path); err != nil {
-				return err
+			if !p.Mono {
+				if !strings.HasPrefix(p.Path, "./") {
+					p.Path = "./" + p.Path
+				}
+				if err = work.DropUse(p.Path); err != nil {
+					return err
+				}
 			}
 		}
 		for _, p := range plugins {
-			if !strings.HasPrefix(p.Path, "./") {
-				p.Path = "./" + p.Path
-			}
-			if err = work.AddUse(p.Path, ""); err != nil {
-				return err
+			if !p.Mono {
+				if !strings.HasPrefix(p.Path, "./") {
+					p.Path = "./" + p.Path
+				}
+				if err = work.AddUse(p.Path, ""); err != nil {
+					return err
+				}
 			}
 		}
 		if err = os.WriteFile("go.work", modfile.Format(work.Syntax), 0o644); err != nil {
@@ -52,14 +56,19 @@ func Run() error {
 		}
 	} else {
 		initArgs := []string{"work", "init", "."}
+		var pluginArgs []string
 		for _, p := range plugins {
-			initArgs = append(initArgs, p.Path)
+			if !p.Mono {
+				pluginArgs = append(pluginArgs, p.Path)
+			}
 		}
-		ec := exec.Command("go", initArgs...)
-		ec.Dir = wd
-		output, err := ec.CombinedOutput()
-		if err != nil {
-			return errors.Wrapf(err, "go work init meet error %s", string(output))
+		if len(pluginArgs) > 0 {
+			ec := exec.Command("go", append(initArgs, pluginArgs...)...)
+			ec.Dir = wd
+			output, err := ec.CombinedOutput()
+			if err != nil {
+				return errors.Wrapf(err, "go work init meet error %s", string(output))
+			}
 		}
 	}
 
@@ -69,11 +78,15 @@ func Run() error {
 		return err
 	}
 	for i := 0; i < len(plugins); i++ {
-		pluginGoMod, err := mod.GetGoMod(filepath.Join(wd, plugins[i].Path))
-		if err != nil {
-			return err
+		if !plugins[i].Mono {
+			pluginGoMod, err := mod.GetGoMod(filepath.Join(wd, plugins[i].Path))
+			if err != nil {
+				return err
+			}
+			plugins[i].Module = pluginGoMod.Path
+		} else {
+			plugins[i].Module = filepath.ToSlash(filepath.Join(goMod.Path, "plugins", plugins[i].Name))
 		}
-		plugins[i].Module = pluginGoMod.Path
 	}
 
 	frameType, err := desc.GetFrameType()

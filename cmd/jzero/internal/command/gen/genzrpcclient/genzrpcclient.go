@@ -193,6 +193,9 @@ func Generate(genModule bool) (err error) {
 		protoDir := filepath.Join("desc", "proto")
 		thirdPartyProtoDir := filepath.Join("desc", "proto", "third_party")
 		protoParser.ImportPaths = []string{protoDir, thirdPartyProtoDir}
+		for _, v := range config.C.Gen.Zrpcclient.ProtoInclude {
+			protoParser.ImportPaths = append(protoParser.ImportPaths, v)
+		}
 		protoParser.IncludeSourceCodeInfo = true
 
 		rel, err := filepath.Rel(config.C.ProtoDir(), fp)
@@ -281,8 +284,8 @@ func Generate(genModule bool) (err error) {
 			}())
 		}
 
-		if len(config.C.Gen.ProtoInclude) > 0 {
-			protocCmd += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.ProtoInclude, " -I"))
+		if len(config.C.Gen.Zrpcclient.ProtoInclude) > 0 {
+			protocCmd += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.Zrpcclient.ProtoInclude, " -I"))
 		}
 
 		logx.Debugf(protocCmd)
@@ -427,6 +430,10 @@ func generatePluginFiles(plugins []plugin.Plugin) error {
 			protoParser.InferImportPaths = false
 
 			protoParser.ImportPaths = []string{pluginProtoDir, pluginThirdPartyProtoDir}
+
+			for _, v := range config.C.Gen.Zrpcclient.ProtoInclude {
+				protoParser.ImportPaths = append(protoParser.ImportPaths, v)
+			}
 			protoParser.IncludeSourceCodeInfo = true
 
 			rel, err := filepath.Rel(pluginProtoDir, fp)
@@ -504,8 +511,8 @@ func generatePluginFiles(plugins []plugin.Plugin) error {
 				}())
 			}
 
-			if len(config.C.Gen.ProtoInclude) > 0 {
-				protocCmd += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.ProtoInclude, " -I"))
+			if len(config.C.Gen.Zrpcclient.ProtoInclude) > 0 {
+				protocCmd += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.Zrpcclient.ProtoInclude, " -I"))
 			}
 
 			logx.Debugf(protocCmd)
@@ -677,8 +684,8 @@ func genPluginNoRpcServiceExcludeThirdPartyProto(plugin plugin.Plugin, goModule,
 			}(),
 		)
 
-		if len(config.C.Gen.ProtoInclude) > 0 {
-			command += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.ProtoInclude, " -I"))
+		if len(config.C.Gen.Zrpcclient.ProtoInclude) > 0 {
+			command += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.Zrpcclient.ProtoInclude, " -I"))
 		}
 
 		logx.Debug(command)

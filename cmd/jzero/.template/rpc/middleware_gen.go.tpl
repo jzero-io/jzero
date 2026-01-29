@@ -18,11 +18,16 @@ var (
     _ = grpc.SupportPackageIsVersion7
 )
 
+// RegisterGen register zrpc middleware
 func RegisterGen(zrpc *zrpc.RpcServer, gw *gateway.Server) {
-	 {{range $v := .HttpMiddlewares}}gw.Use({{$v.Name | FirstUpper}}Middleware)
-     {{end}}
-     {{range $v := .ZrpcMiddlewares}}zrpc.AddUnaryInterceptors({{$v.Name | FirstUpper}}Middleware)
-        zrpc.AddStreamInterceptors({{$v.Name | FirstUpper}}StreamMiddleware){{end}}
+	{{- range $v := .HttpMiddlewares}}
+	gw.Use({{$v.Name | FirstUpper}}Middleware)
+	{{- end}}
+
+	{{- range $v := .ZrpcMiddlewares}}
+	zrpc.AddUnaryInterceptors({{$v.Name | FirstUpper}}Middleware)
+	zrpc.AddStreamInterceptors({{$v.Name | FirstUpper}}StreamMiddleware)
+	{{- end}}
 }
 
 // Define and compile routes

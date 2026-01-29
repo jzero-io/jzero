@@ -15,17 +15,6 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func ProcessOsArgs() []string {
-	args := os.Args[1:]
-
-	mcpArgs := []string{os.Args[0]}
-	for _, a := range args {
-		split := strings.Split(a, "__")
-		mcpArgs = append(mcpArgs, split...)
-	}
-	return mcpArgs
-}
-
 type CobraMCPServer struct {
 	rootCmd *cobra.Command
 	server  *server.MCPServer

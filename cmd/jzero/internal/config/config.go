@@ -59,6 +59,9 @@ type Config struct {
 	// gen command
 	Gen GenConfig `mapstructure:"gen"`
 
+	// skills command
+	Skills SkillsConfig `mapstructure:"skills"`
+
 	// template command
 	Template TemplateConfig `mapstructure:"template"`
 
@@ -135,6 +138,14 @@ type GenConfig struct {
 	Zrpcclient GenZrpcclientConfig `mapstructure:"zrpcclient"`
 }
 
+type SkillsConfig struct {
+	Init SkillsInitConfig `mapstructure:"init"`
+}
+
+type SkillsInitConfig struct {
+	Output string `mapstructure:"output"`
+}
+
 type GenSwaggerConfig struct {
 	Desc       []string `mapstructure:"desc"`
 	DescIgnore []string `mapstructure:"desc-ignore"`
@@ -146,12 +157,13 @@ type GenSwaggerConfig struct {
 type GenZrpcclientConfig struct {
 	Hooks HooksConfig `mapstructure:"hooks"`
 
-	Desc       []string `mapstructure:"desc"`
-	DescIgnore []string `mapstructure:"desc-ignore"`
-	Output     string   `mapstructure:"output"`
-	GoVersion  string   `mapstructure:"goVersion"`
-	GoModule   string   `mapstructure:"goModule"`
-	GoPackage  string   `mapstructure:"goPackage"`
+	Desc         []string `mapstructure:"desc"`
+	DescIgnore   []string `mapstructure:"desc-ignore"`
+	ProtoInclude []string `mapstructure:"proto-include"`
+	Output       string   `mapstructure:"output"`
+	GoVersion    string   `mapstructure:"goVersion"`
+	GoModule     string   `mapstructure:"goModule"`
+	GoPackage    string   `mapstructure:"goPackage"`
 }
 
 type TemplateConfig struct {

@@ -125,6 +125,14 @@ func (c Chain) Between(field Field, value any, op ...opts.Opt[ChainOperatorOpts]
 	return c.addChain(field, Between, value, op...)
 }
 
+func (c Chain) ForUpdate(op ...opts.Opt[ChainOperatorOpts]) Chain {
+	return c.addChain("", ForUpdate, nil, op...)
+}
+
+func (c Chain) ForShare(op ...opts.Opt[ChainOperatorOpts]) Chain {
+	return c.addChain("", ForShare, nil, op...)
+}
+
 func (c Chain) Or(fields []Field, operators []Operator, values []any, op ...opts.Opt[ChainOperatorOpts]) Chain {
 	o := opts.DefaultApply(op...)
 	c.conditions = append(c.conditions, Condition{

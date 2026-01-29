@@ -186,6 +186,9 @@ func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 	protoDir := filepath.Join("desc", "proto")
 	thirdPartyProtoDir := filepath.Join("desc", "proto", "third_party")
 	protoParser.ImportPaths = []string{protoDir, thirdPartyProtoDir}
+	for _, v := range config.C.Gen.ProtoInclude {
+		protoParser.ImportPaths = append(protoParser.ImportPaths, v)
+	}
 	protoParser.IncludeSourceCodeInfo = true
 
 	for _, v := range protoFiles {

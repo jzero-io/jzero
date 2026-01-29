@@ -114,6 +114,7 @@ func GetCommand() *cobra.Command {
 
 		genZRpcClientCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
 		genZRpcClientCmd.Flags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
+		genZRpcClientCmd.Flags().StringSliceP("proto-include", "", []string{}, "proto include path")
 		genZRpcClientCmd.Flags().StringP("output", "o", "zrpcclient-go", "generate rpcclient code")
 		genZRpcClientCmd.Flags().StringP("goModule", "", "", "set go module name")
 		genZRpcClientCmd.Flags().StringP("goVersion", "", "", "set go version, only effect when having goModule flag")

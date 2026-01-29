@@ -1,0 +1,453 @@
+# Proto Middleware
+
+## Overview
+
+jzero supports adding middleware to proto services at multiple levels. Multiple middleware can be specified using comma separation.
+
+## Middleware Options
+
+### Import Required Packages
+
+```protobuf
+import "jzero/api/http.proto";
+import "jzero/api/zrpc.proto";
+```
+
+## Middleware Levels
+
+### 1. Service-Level HTTP Middleware
+
+Apply HTTP middleware to all methods in a service:
+
+```protobuf
+import "jzero/api/http.proto";
+
+service User {
+    option (jzero.api.http_group) = {
+        middleware: "auth,logging,rateLimit",
+    };
+
+    rpc CreateUser(CreateUserRequest) returns(CreateUserResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/user/create",
+            body: "*"
+        };
+    };
+
+    rpc ListUser(ListUserRequest) returns(ListUserResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/user/{username}/list",
+        };
+    };
+}
+```
+
+**Result**: All HTTP methods in the User service will have `auth`, `logging`, and `rateLimit` middleware applied.
+
+### 2. Method-Level HTTP Middleware
+
+Apply HTTP middleware to specific methods:
+
+```protobuf
+service User {
+    rpc CreateUser(CreateUserRequest) returns(CreateUserResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/user/create",
+            body: "*"
+        };
+        option (jzero.api.http) = {
+            middleware: "auth,withValue1",
+        };
+    };
+
+    rpc ListUser(ListUserRequest) returns(ListUserResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/user/{username}/list",
+        };
+        // No middleware - public endpoint
+    };
+}
+```
+
+**Result**: Only `CreateUser` will have `auth` and `withValue1` middleware. `ListUser` has no middleware.
+
+### 3. Service-Level RPC Middleware
+
+Apply RPC middleware to all methods in a service:
+
+```protobuf
+import "jzero/api/zrpc.proto";
+
+service User {
+    option (jzero.api.zrpc_group) = {
+        middleware: "auth,logging",
+    };
+
+    rpc CreateUser(CreateUserRequest) returns(CreateUserResponse);
+    rpc GetUser(GetUserRequest) returns(GetUserResponse);
+}
+```
+
+**Result**: All RPC methods in the User service will have `auth` and `logging` middleware applied.
+
+### 4. Method-Level RPC Middleware
+
+Apply RPC middleware to specific methods:
+
+```protobuf
+import "jzero/api/zrpc.proto";
+
+service User {
+    rpc CreateUser(CreateUserRequest) returns(CreateUserResponse) {
+        option (jzero.api.zrpc) = {
+            middleware: "withValue1,trace",
+        };
+    };
+
+    rpc GetUser(GetUserRequest) returns(GetUserResponse) {
+        // No middleware
+    };
+}
+```
+
+**Result**: Only `CreateUser` RPC method will have `withValue1` and `trace` middleware.
+
+## Combined HTTP and RPC Middleware
+
+You can use both HTTP and RPC middleware in the same proto file:
+
+```protobuf
+import "jzero/api/http.proto";
+import "jzero/api/zrpc.proto";
+
+service User {
+    // HTTP middleware for all HTTP endpoints
+    option (jzero.api.http_group) = {
+        middleware: "auth,logging",
+    };
+
+    // RPC middleware for all RPC methods
+    option (jzero.api.zrpc_group) = {
+        middleware: "trace",
+    };
+
+    rpc CreateUser(CreateUserRequest) returns(CreateUserResponse) {
+        // HTTP endpoint with auth+logging (from group)
+        option (google.api.http) = {
+            post: "/api/v1/user/create",
+            body: "*"
+        };
+        // RPC method with trace (from group)
+    };
+
+    rpc DeleteUser(DeleteUserRequest) returns(DeleteUserResponse) {
+        // HTTP endpoint with additional middleware
+        option (google.api.http) = {
+            delete: "/api/v1/user/{id}"
+        };
+        option (jzero.api.http) = {
+            middleware: "adminCheck",  // Added to group middleware
+        };
+        // RPC method with trace (from group)
+    };
+}
+```
+
+## Generated Middleware Files
+
+After running `jzero gen`, the following files will be generated (using `auth` as an example):
+
+```
+internal/
+├── middleware/
+│   ├── authmiddleware.go      # Auth middleware implementation
+│   └── middleware_gen.go      # Middleware registration (generated)
+```
+
+### Middleware Implementation Template
+
+Generated middleware (`internal/middleware/authmiddleware.go`):
+
+```go
+package middleware
+
+import (
+    "net/http"
+)
+
+type AuthMiddleware struct {
+    // Add dependencies here
+}
+
+func NewAuthMiddleware() *AuthMiddleware {
+    return &AuthMiddleware{}
+}
+
+func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        // TODO: Implement authentication logic here
+
+        // Call next handler
+        next(w, r)
+    }
+}
+```
+
+### Middleware Registration
+
+Generated registration (`internal/middleware/middleware_gen.go`):
+
+```go
+package middleware
+
+// This file is auto-generated by jzero
+// Do not modify manually
+
+// RegisterAllMiddleware registers all middleware
+func RegisterAllMiddleware(server *http.Server) {
+    // Middleware registration code
+}
+```
+
+## Common Middleware Patterns
+
+### Authentication Middleware
+
+```protobuf
+service UserService {
+    option (jzero.api.http_group) = {
+        middleware: "auth,jwt",
+    };
+
+    rpc GetProfile(GetProfileRequest) returns(GetProfileResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/user/profile"
+        };
+    };
+}
+```
+
+Implementation:
+```go
+func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        token := r.Header.Get("Authorization")
+        if token == "" {
+            http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+        }
+
+        // Validate token and set context
+        // ...
+
+        next(w, r)
+    }
+}
+```
+
+### Logging Middleware
+
+```protobuf
+service OrderService {
+    option (jzero.api.http_group) = {
+        middleware: "logging,metrics",
+    };
+
+    rpc CreateOrder(CreateOrderRequest) returns(CreateOrderResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/order/create"
+            body: "*"
+        };
+    };
+}
+```
+
+### Rate Limiting Middleware
+
+```protobuf
+service PublicService {
+    option (jzero.api.http_group) = {
+        middleware: "rateLimit",
+    };
+
+    rpc GetData(GetDataRequest) returns(GetDataResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/data/{id}"
+        };
+    };
+}
+```
+
+### Admin-Only Middleware
+
+```protobuf
+service AdminService {
+    rpc DeleteUser(DeleteUserRequest) returns(DeleteUserResponse) {
+        option (google.api.http) = {
+            delete: "/api/v1/admin/user/{id}"
+        };
+        option (jzero.api.http) = {
+            middleware: "adminCheck,auditLog",
+        };
+    };
+}
+```
+
+## Middleware Execution Order
+
+Middleware executes in the order specified (left to right):
+
+```protobuf
+service UserService {
+    option (jzero.api.http_group) = {
+        middleware: "logging,auth,rateLimit",  // Order matters!
+    };
+}
+```
+
+**Execution flow**:
+1. `logging` - Logs the request
+2. `auth` - Authenticates the user
+3. `rateLimit` - Checks rate limits
+4. **Handler** - Actual business logic
+
+## Best Practices
+
+### ✅ Do's
+
+```protobuf
+// Group related middleware at service level
+service UserService {
+    option (jzero.api.http_group) = {
+        middleware: "auth,logging",  // All endpoints need auth
+    };
+
+    // Add extra middleware for sensitive operations
+    rpc DeleteUser(DeleteUserRequest) returns(DeleteUserResponse) {
+        option (google.api.http) = {
+            delete: "/api/v1/user/{id}"
+        };
+        option (jzero.api.http) = {
+            middleware: "adminCheck",  // Additional admin check
+        };
+    };
+}
+
+// Use descriptive middleware names
+service PaymentService {
+    option (jzero.api.http_group) = {
+        middleware: "authentication,authorization,auditLog",
+    };
+}
+```
+
+### ❌ Don'ts
+
+```protobuf
+// DON'T: Duplicate middleware definitions
+service UserService {
+    option (jzero.api.http_group) = {
+        middleware: "auth,logging,auth",  // ❌ Duplicated
+    };
+
+    rpc CreateUser(CreateUserRequest) returns(CreateUserResponse) {
+        option (jzero.api.http) = {
+            middleware: "auth,logging",  // ❌ Already in group
+        };
+    };
+}
+
+// DON'T: Over-middleware public endpoints
+service PublicService {
+    option (jzero.api.http_group) = {
+        middleware: "auth,logging,rateLimit,cors,csrf,trace,metrics",  // ❌ Too many
+    };
+}
+
+// DON'T: Forget middleware for sensitive operations
+service AdminService {
+    rpc DeleteAllUsers(DeleteAllUsersRequest) returns(DeleteAllUsersResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/admin/delete-all"  // ❌ No middleware!
+        };
+    };
+}
+```
+
+## Middleware vs Service Group
+
+| Feature | Service Group | Method Level |
+|---------|--------------|--------------|
+| Scope | All methods in service | Specific method only |
+| Use case | Common middleware for all endpoints | Endpoint-specific requirements |
+| Option | `jzero.api.http_group` / `jzero.api.zrpc_group` | `jzero.api.http` / `jzero.api.zrpc` |
+| Inheritance | Inherited by all methods | Overrides/adds to group |
+
+## Complete Example
+
+```protobuf
+syntax = "proto3";
+
+package userpb;
+
+import "google/api/annotations.proto";
+import "jzero/api/http.proto";
+import "jzero/api/zrpc.proto";
+
+option go_package = "./pb/userpb";
+
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+}
+
+message CreateUserResponse {
+  int32 id = 1;
+}
+
+message DeleteUserRequest {
+  int32 id = 1;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+}
+
+service UserService {
+    // All HTTP methods require authentication and logging
+    option (jzero.api.http_group) = {
+        middleware: "auth,logging",
+    };
+
+    // All RPC methods have tracing
+    option (jzero.api.zrpc_group) = {
+        middleware: "trace",
+    };
+
+    // Standard create operation
+    rpc CreateUser(CreateUserRequest) returns(CreateUserResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/user/create"
+            body: "*"
+        };
+        // Uses: auth, logging (HTTP) + trace (RPC)
+    };
+
+    // Delete operation requires additional admin check
+    rpc DeleteUser(DeleteUserRequest) returns(DeleteUserResponse) {
+        option (google.api.http) = {
+            delete: "/api/v1/user/{id}"
+        };
+        option (jzero.api.http) = {
+            middleware: "adminCheck",  // Additional middleware
+        };
+        // Uses: auth, logging, adminCheck (HTTP) + trace (RPC)
+    };
+}
+```
+
+## Related Topics
+
+- [Proto File Structure](proto-file-structure.md) - Basic proto file setup
+- [Proto Field Validation](proto-validation.md) - Adding validation to proto messages
+- [jzero Documentation](https://docs.jzero.io) - Official documentation

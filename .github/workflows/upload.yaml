@@ -42,7 +42,7 @@ jobs:
           jzero gen
           go get github.com/jzero-io/jzero@${{ github.sha }}
           go mod tidy
-          jzero new helloworld --serverless
+          jzero new helloworld --serverless --mono
           cd plugins/helloworld
           jzero add api helloworld
           jzero gen
@@ -84,7 +84,7 @@ jobs:
           jzero gen
           go get github.com/jzero-io/jzero@${{ github.sha }}
           go mod tidy
-          jzero new helloworld --frame gateway --serverless
+          jzero new helloworld --frame gateway --serverless --mono
           cd plugins/helloworld
           jzero add proto helloworld
           jzero gen
@@ -127,7 +127,7 @@ jobs:
           jzero add proto user
           go get github.com/jzero-io/jzero@${{ github.sha }}
           go mod tidy
-          jzero new helloworld --frame rpc --serverless
+          jzero new helloworld --frame rpc --serverless --mono
           cd plugins/helloworld
           jzero add proto helloworld
           jzero gen

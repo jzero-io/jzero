@@ -44,11 +44,13 @@ func Run() error {
 			return err
 		}
 		for _, p := range deletePlugins {
-			if !strings.HasPrefix(p.Path, "./") {
-				p.Path = "./" + p.Path
-			}
-			if err = work.DropUse(p.Path); err != nil {
-				return err
+			if !p.Mono {
+				if !strings.HasPrefix(p.Path, "./") {
+					p.Path = "./" + p.Path
+				}
+				if err = work.DropUse(p.Path); err != nil {
+					return err
+				}
 			}
 		}
 		if err = os.WriteFile("go.work", modfile.Format(work.Syntax), 0o644); err != nil {
@@ -73,11 +75,15 @@ func Run() error {
 	}
 
 	for i := 0; i < len(remainingPlugins); i++ {
-		pluginGoMod, err := mod.GetGoMod(filepath.Join(wd, remainingPlugins[i].Path))
-		if err != nil {
-			return err
+		if !plugins[i].Mono {
+			pluginGoMod, err := mod.GetGoMod(filepath.Join(wd, remainingPlugins[i].Path))
+			if err != nil {
+				return err
+			}
+			remainingPlugins[i].Module = pluginGoMod.Path
+		} else {
+			remainingPlugins[i].Module = filepath.ToSlash(filepath.Join(goMod.Path, "plugins", remainingPlugins[i].Name))
 		}
-		remainingPlugins[i].Module = pluginGoMod.Path
 	}
 
 	frameType, err := desc.GetFrameType()

@@ -12,12 +12,18 @@ jzero 支持插件化机制, 可以方便的进行插件的安装和卸载操作
 ```shell
 # api 项目插件
 jzero new your_plugin --frame api --serverless
+# api 项目插件 mono
+jzero new your_plugin --frame api --serverless --mono
 
 # rpc 项目插件
 jzero new your_plugin --frame rpc --serverless
+# rpc 项目插件 mono
+jzero new your_plugin --frame rpc --serverless --mono
 
 # gateway 项目插件
 jzero new your_plugin --frame gateway --serverless
+# gateway 项目插件 mono
+jzero new your_plugin --frame gateway --serverless --mono
 ```
 
 ## 编译项目
