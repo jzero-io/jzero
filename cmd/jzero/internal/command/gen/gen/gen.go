@@ -24,6 +24,13 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 )
 
+type OperateGenT struct {
+	GenModel bool
+	GenApi   bool
+	GenRpc   bool
+	GenMongo bool
+}
+
 func Run() error {
 	// 兼容之前的 gen style
 	if config.C.Gen.Style != "" && config.C.Gen.Style != "gozero" {
@@ -53,29 +60,27 @@ func Run() error {
 		RemoveExtraFiles(config.C.Wd(), config.C.Style)
 	}()
 
-	var apiSpecMap map[string]*spec.ApiSpec
-	var protoSpecMap map[string]rpcparser.Proto
-	if len(config.C.Gen.Desc) == 1 && strings.HasSuffix(config.C.Gen.Desc[0], ".api") {
-		jzeroApi := genapi.JzeroApi{
-			Module: module,
-		}
-		apiSpecMap, err = jzeroApi.Gen()
-		if err != nil {
-			return err
-		}
-	} else if len(config.C.Gen.Desc) == 1 && strings.HasSuffix(config.C.Gen.Desc[0], ".proto") {
-		jzeroRpc := genrpc.JzeroRpc{
-			Module: module,
-		}
-		protoSpecMap, err = jzeroRpc.Gen()
-		if err != nil {
-			return err
+	// 当存在 desc 指定时，只生成指定文件 (暂不支持指定 mongo)
+	var operateGenData OperateGenT
+	if len(config.C.Gen.Desc) >= 1 {
+		for _, v := range config.C.Gen.Desc {
+			if strings.HasSuffix(v, ".api") {
+				operateGenData.GenApi = true
+			}
+			if strings.HasSuffix(v, ".proto") {
+				operateGenData.GenRpc = true
+			}
+			if strings.HasSuffix(v, ".sql") {
+				operateGenData.GenModel = true
+			}
 		}
 	} else {
-		apiSpecMap, protoSpecMap, err = allGen(module)
-		if err != nil {
-			return err
-		}
+		operateGenData.GenModel, operateGenData.GenApi, operateGenData.GenRpc, operateGenData.GenMongo = true, true, true, true
+	}
+
+	apiSpecMap, protoSpecMap, err := operateGen(module, operateGenData)
+	if err != nil {
+		return err
 	}
 	// 收集并保存元数据（复用已解析的数据）
 	if err = collectAndSaveMetadata(apiSpecMap, protoSpecMap); err != nil {
@@ -85,37 +90,44 @@ func Run() error {
 	return nil
 }
 
-func allGen(module string) (apiSpecMap map[string]*spec.ApiSpec, protoSpecMap map[string]rpcparser.Proto, err error) {
-	jzeroModel := genmodel.JzeroModel{
-		Module: module,
-	}
-	err = jzeroModel.Gen()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	jzeroApi := genapi.JzeroApi{
-		Module: module,
-	}
-	apiSpecMap, err = jzeroApi.Gen()
-	if err != nil {
-		return nil, nil, err
+func operateGen(module string, t OperateGenT) (apiSpecMap map[string]*spec.ApiSpec, protoSpecMap map[string]rpcparser.Proto, err error) {
+	if t.GenModel {
+		jzeroModel := genmodel.JzeroModel{
+			Module: module,
+		}
+		err = jzeroModel.Gen()
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
-	jzeroRpc := genrpc.JzeroRpc{
-		Module: module,
-	}
-	protoSpecMap, err = jzeroRpc.Gen()
-	if err != nil {
-		return nil, nil, err
+	if t.GenApi {
+		jzeroApi := genapi.JzeroApi{
+			Module: module,
+		}
+		apiSpecMap, err = jzeroApi.Gen()
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
-	jzeroMongo := genmongo.JzeroMongo{
-		Module: module,
+	if t.GenRpc {
+		jzeroRpc := genrpc.JzeroRpc{
+			Module: module,
+		}
+		protoSpecMap, err = jzeroRpc.Gen()
+		if err != nil {
+			return nil, nil, err
+		}
 	}
-	err = jzeroMongo.Gen()
-	if err != nil {
-		return nil, nil, err
+	if t.GenMongo {
+		jzeroMongo := genmongo.JzeroMongo{
+			Module: module,
+		}
+		err = jzeroMongo.Gen()
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 	return
 }
