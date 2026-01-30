@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
@@ -52,28 +53,61 @@ func Run() error {
 		RemoveExtraFiles(config.C.Wd(), config.C.Style)
 	}()
 
+	var apiSpecMap map[string]*spec.ApiSpec
+	var protoSpecMap map[string]rpcparser.Proto
+	if len(config.C.Gen.Desc) == 1 && strings.HasSuffix(config.C.Gen.Desc[0], ".api") {
+		jzeroApi := genapi.JzeroApi{
+			Module: module,
+		}
+		apiSpecMap, err = jzeroApi.Gen()
+		if err != nil {
+			return err
+		}
+	} else if len(config.C.Gen.Desc) == 1 && strings.HasSuffix(config.C.Gen.Desc[0], ".proto") {
+		jzeroRpc := genrpc.JzeroRpc{
+			Module: module,
+		}
+		protoSpecMap, err = jzeroRpc.Gen()
+		if err != nil {
+			return err
+		}
+	} else {
+		apiSpecMap, protoSpecMap, err = allGen(module)
+		if err != nil {
+			return err
+		}
+	}
+	// 收集并保存元数据（复用已解析的数据）
+	if err = collectAndSaveMetadata(apiSpecMap, protoSpecMap); err != nil {
+		logx.Debugf("collect and save metadata error: %s", err.Error())
+	}
+
+	return nil
+}
+
+func allGen(module string) (apiSpecMap map[string]*spec.ApiSpec, protoSpecMap map[string]rpcparser.Proto, err error) {
 	jzeroModel := genmodel.JzeroModel{
 		Module: module,
 	}
 	err = jzeroModel.Gen()
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	jzeroApi := genapi.JzeroApi{
 		Module: module,
 	}
-	apiSpecMap, err := jzeroApi.Gen()
+	apiSpecMap, err = jzeroApi.Gen()
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	jzeroRpc := genrpc.JzeroRpc{
 		Module: module,
 	}
-	protoSpecMap, err := jzeroRpc.Gen()
+	protoSpecMap, err = jzeroRpc.Gen()
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	jzeroMongo := genmongo.JzeroMongo{
@@ -81,15 +115,9 @@ func Run() error {
 	}
 	err = jzeroMongo.Gen()
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
-
-	// 收集并保存元数据（复用已解析的数据）
-	if err = collectAndSaveMetadata(apiSpecMap, protoSpecMap); err != nil {
-		logx.Debugf("collect and save metadata error: %s", err.Error())
-	}
-
-	return nil
+	return
 }
 
 // collectAndSaveMetadata 收集并保存项目元数据（复用已解析的数据）
