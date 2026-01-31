@@ -17,6 +17,7 @@ title: 首页
 * 支持通过**配置文件/命令行参数/环境变量**组合的方式灵活控制 jzero 的各项配置, 极简指令生成代码, ai 友好
 * 支持基于 **git 对改动文件**生成代码, 支持对**指定描述文件**生成代码或**忽略指定描述文件**生成代码, 提升大型项目代码生成效率
 * 内置常用开发模板并增强模板特性, 支持**自定义模板**, 构建专属企业内部代码模板, 极大降低开发成本
+* 支持**插件化架构**, 功能模块可作为独立插件动态加载, 支持插件创建、编译和卸载, 完美适配团队协作和模块解耦
 
 更多详情请参阅：[https://docs.jzero.io](https://docs.jzero.io)
 
@@ -64,5 +65,35 @@ http://localhost:8001/swagger
 ```
 :::
 
+## 相关生态
+
+### jzero-intellij IDE 插件
+
+如果你是 **GoLand / IntelliJ IDEA** 用户，**jzero-intellij 插件**将极大提升你的开发体验！
+
+**核心功能**：
+✅ 一键创建文件
+✅ 智能代码高亮
+✅ 双向文件跳转
+✅ 行首执行按钮
+✅ 配置文件执行
+
+**下载地址**：https://github.com/jzero-io/jzero-intellij/releases
+
+### jzero-admin 后台管理系统
+
+基于 jzero 的后台管理系统，内置 RBAC 权限管理，开箱即用
+
+**核心特性**：
+✅ 完整权限系统(用户/菜单/角色)
+✅ 多数据库支持(MySQL/PostgreSQL/SQLite)
+✅ 后端插件化
+✅ 国际化支持
+
+**在线演示**：
+- 阿里云云函数：http://jzero-admin.jaronnie.com
+- Vercel：https://admin.jzero.io
+
+**GitHub**：https://github.com/jzero-io/jzero-admin
 
 

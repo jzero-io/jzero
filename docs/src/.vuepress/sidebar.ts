@@ -45,12 +45,20 @@ export default sidebar({
         expanded: true,
     },
     {
-          text: "release",
+          text: "版本记录",
           icon: "catppuccin:release",
           prefix: "release/",
           children: "structure",
           collapsible: true,
           expanded: true,
+    },
+    {
+        text: "博客",
+        icon: "logos:bloglovin",
+        prefix: "blog/",
+        children: "structure",
+        collapsible: true,
+        expanded: false,
     },
   ],
 });
