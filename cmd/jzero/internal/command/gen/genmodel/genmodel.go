@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	ddlparser "github.com/zeromicro/ddl-parser/parser"
@@ -27,6 +26,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/dsn"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 )
 
 type JzeroModel struct {
