@@ -130,7 +130,7 @@ func (jm *JzeroModel) Gen() error {
 		}
 
 		switch {
-		case config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0 && !config.C.Gen.ModelDatasource:
+		case config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0:
 			m, _, err := gitstatus.ChangedFiles(config.C.SqlDir(), ".sql")
 			if err == nil {
 				genCodeSqlFiles = append(genCodeSqlFiles, m...)
@@ -186,7 +186,7 @@ func (jm *JzeroModel) Gen() error {
 
 	var mu sync.Mutex
 
-	if config.C.Gen.ModelDatasource {
+	if config.C.Gen.ModelDatasource && len(config.C.Gen.Desc) == 0 {
 		if len(config.C.Gen.ModelDatasourceTable) == 1 && config.C.Gen.ModelDatasourceTable[0] == "*" {
 			allTables, err = getAllTables(conns, config.C.Gen.ModelDriver)
 			if err != nil {
