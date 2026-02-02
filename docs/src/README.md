@@ -65,35 +65,5 @@ http://localhost:8001/swagger
 ```
 :::
 
-## 相关生态
-
-### jzero-intellij IDE 插件
-
-如果你是 **GoLand / IntelliJ IDEA** 用户，**jzero-intellij 插件**将极大提升你的开发体验！
-
-**核心功能**：
-✅ 一键创建文件
-✅ 智能代码高亮
-✅ 双向文件跳转
-✅ 行首执行按钮
-✅ 配置文件执行
-
-**下载地址**：https://github.com/jzero-io/jzero-intellij/releases
-
-### jzero-admin 后台管理系统
-
-基于 jzero 的后台管理系统，内置 RBAC 权限管理，开箱即用
-
-**核心特性**：
-✅ 完整权限系统(用户/菜单/角色)
-✅ 多数据库支持(MySQL/PostgreSQL/SQLite)
-✅ 后端插件化
-✅ 国际化支持
-
-**在线演示**：
-- 阿里云云函数：http://jzero-admin.jaronnie.com
-- Vercel：https://admin.jzero.io
-
-**GitHub**：https://github.com/jzero-io/jzero-admin
 
 
