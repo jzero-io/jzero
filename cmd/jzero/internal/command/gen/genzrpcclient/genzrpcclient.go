@@ -158,6 +158,7 @@ func Generate(genModule bool) (err error) {
 	if err != nil {
 		return err
 	}
+	logx.Debugf("excludeThirdPartyProtoFiles: %v", excludeThirdPartyProtoFiles)
 
 	var services []string
 	for _, fp := range files {
@@ -226,7 +227,7 @@ func Generate(genModule bool) (err error) {
 			}
 		}
 
-		protocCmd := fmt.Sprintf("protoc %s -I%s -I%s --go_out=%s --go_opt=module=%s --go-grpc_out=%s --go-grpc_opt=module=%s",
+		protocCmd := fmt.Sprintf("protoc %s -I%s -I%s --go_out=%s --go_opt=module=%s --go_opt=M%s=%s --go-grpc_out=%s --go-grpc_opt=module=%s --go-grpc_opt=M%s=%s",
 			fp,
 			config.C.ProtoDir(),
 			filepath.Join(config.C.ProtoDir(), "third_party"),
@@ -237,6 +238,17 @@ func Generate(genModule bool) (err error) {
 				return filepath.Join(config.C.Gen.Zrpcclient.Output)
 			}(),
 			module,
+			rel,
+			func() string {
+				if strings.HasPrefix(goPackage, module) {
+					return goPackage
+				}
+
+				if genModule {
+					return filepath.ToSlash(filepath.Join(module, "model", goPackage))
+				}
+				return filepath.ToSlash(filepath.Join(module, config.C.Gen.Zrpcclient.Output, "model", goPackage))
+			}(),
 			func() string {
 				if !genModule {
 					return "."
@@ -244,6 +256,17 @@ func Generate(genModule bool) (err error) {
 				return filepath.Join(config.C.Gen.Zrpcclient.Output)
 			}(),
 			module,
+			rel,
+			func() string {
+				if strings.HasPrefix(goPackage, module) {
+					return goPackage
+				}
+
+				if genModule {
+					return filepath.ToSlash(filepath.Join(module, "model", goPackage))
+				}
+				return filepath.ToSlash(filepath.Join(module, config.C.Gen.Zrpcclient.Output, "model", goPackage))
+			}(),
 		)
 
 		for _, exp := range excludeThirdPartyProtoFiles {
