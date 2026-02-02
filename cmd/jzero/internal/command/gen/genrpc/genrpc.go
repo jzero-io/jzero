@@ -178,6 +178,7 @@ func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 	if err != nil {
 		return nil, err
 	}
+	logx.Debugf("excludeThirdPartyProtoFiles = %s", excludeThirdPartyProtoFiles)
 
 	// 获取 proto 的 go_package
 	var protoParser protoparse.Parser
