@@ -227,7 +227,7 @@ func Generate(genModule bool) (err error) {
 			}
 		}
 
-		protocCmd := fmt.Sprintf("protoc %s -I%s -I%s --go_out=%s --go_opt=module=%s --go_opt=M%s=%s --go-grpc_out=%s --go-grpc_opt=module=%s --go-grpc_opt=M%s=%s",
+		protocCmd := fmt.Sprintf("protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s",
 			fp,
 			config.C.ProtoDir(),
 			filepath.Join(config.C.ProtoDir(), "third_party"),
@@ -237,35 +237,11 @@ func Generate(genModule bool) (err error) {
 				}
 				return filepath.Join(config.C.Gen.Zrpcclient.Output)
 			}(),
-			module,
-			rel,
-			func() string {
-				if strings.HasPrefix(goPackage, module) {
-					return goPackage
-				}
-
-				if genModule {
-					return filepath.ToSlash(filepath.Join(module, "model", goPackage))
-				}
-				return filepath.ToSlash(filepath.Join(module, config.C.Gen.Zrpcclient.Output, "model", goPackage))
-			}(),
 			func() string {
 				if !genModule {
 					return "."
 				}
 				return filepath.Join(config.C.Gen.Zrpcclient.Output)
-			}(),
-			module,
-			rel,
-			func() string {
-				if strings.HasPrefix(goPackage, module) {
-					return goPackage
-				}
-
-				if genModule {
-					return filepath.ToSlash(filepath.Join(module, "model", goPackage))
-				}
-				return filepath.ToSlash(filepath.Join(module, config.C.Gen.Zrpcclient.Output, "model", goPackage))
 			}(),
 		)
 
@@ -286,7 +262,7 @@ func Generate(genModule bool) (err error) {
 
 			goPackage = fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
 
-			protocCmd += fmt.Sprintf(" --go_opt=M%s=%s --go-grpc_opt=M%s=%s", rel, func() string {
+			protocCmd += fmt.Sprintf(" --go_opt=module=%s --go_opt=M%s=%s --go-grpc_opt=module=%s --go-grpc_opt=M%s=%s", module, rel, func() string {
 				if strings.HasPrefix(goPackage, module) {
 					return goPackage
 				}
@@ -295,7 +271,7 @@ func Generate(genModule bool) (err error) {
 					return filepath.ToSlash(filepath.Join(module, "model", goPackage))
 				}
 				return filepath.ToSlash(filepath.Join(module, config.C.Gen.Zrpcclient.Output, "model", goPackage))
-			}(), rel, func() string {
+			}(), module, rel, func() string {
 				if strings.HasPrefix(goPackage, module) {
 					return goPackage
 				}
@@ -429,6 +405,11 @@ func generatePluginFiles(plugins []plugin.Plugin) error {
 			return err
 		}
 
+		excludeThirdPartyProtoFiles, err := desc.FindExcludeThirdPartyProtoFiles(pluginProtoDir)
+		if err != nil {
+			return err
+		}
+
 		for _, fp := range pluginProtoFiles {
 			parser := rpcparser.NewDefaultProtoParser()
 			parse, err := parser.Parse(fp, true)
@@ -444,11 +425,6 @@ func generatePluginFiles(plugins []plugin.Plugin) error {
 			importPaths = append(importPaths, pluginProtoDir)
 			importPaths = append(importPaths, pluginThirdPartyProtoDir)
 
-			excludeThirdPartyProtoFiles, err := desc.FindNoRpcServiceExcludeThirdPartyProtoFiles(pluginProtoDir)
-			if err != nil {
-				return err
-			}
-
 			var protoParser protoparse.Parser
 			protoParser.InferImportPaths = false
 
@@ -459,42 +435,12 @@ func generatePluginFiles(plugins []plugin.Plugin) error {
 			}
 			protoParser.IncludeSourceCodeInfo = true
 
-			rel, err := filepath.Rel(pluginProtoDir, fp)
-			if err != nil {
-				return err
-			}
-
-			fds, err := protoParser.ParseFiles(rel)
-			if err != nil {
-				continue
-			}
-
-			if len(fds) == 0 {
-				continue
-			}
-
-			goPackage := fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
-
-			protocCmd := fmt.Sprintf("protoc %s -I%s -I%s --go_out=%s --go_opt=module=%s --go_opt=M%s=%s --go-grpc_out=%s --go-grpc_opt=module=%s --go-grpc_opt=M%s=%s",
+			protocCmd := fmt.Sprintf("protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s",
 				fp,
 				pluginProtoDir,
 				pluginThirdPartyProtoDir,
 				config.C.Gen.Zrpcclient.Output,
-				config.C.Gen.Zrpcclient.GoModule,
-				rel, func() string {
-					if strings.HasPrefix(goPackage, config.C.Gen.Zrpcclient.GoModule) {
-						return goPackage
-					}
-					return filepath.ToSlash(filepath.Join(config.C.Gen.Zrpcclient.GoModule, "plugins", p.Name, "model", goPackage))
-				}(),
 				config.C.Gen.Zrpcclient.Output,
-				config.C.Gen.Zrpcclient.GoModule,
-				rel, func() string {
-					if strings.HasPrefix(goPackage, config.C.Gen.Zrpcclient.GoModule) {
-						return goPackage
-					}
-					return filepath.ToSlash(filepath.Join(config.C.Gen.Zrpcclient.GoModule, "plugins", p.Name, "model", goPackage))
-				}(),
 			)
 
 			for _, exp := range excludeThirdPartyProtoFiles {
@@ -510,7 +456,7 @@ func generatePluginFiles(plugins []plugin.Plugin) error {
 				parserImportPaths = []string{pluginProtoDir, pluginThirdPartyProtoDir}
 				protoParser.ImportPaths = parserImportPaths
 
-				fds, err = protoParser.ParseFiles(expRel)
+				fds, err := protoParser.ParseFiles(expRel)
 				if err != nil {
 					continue
 				}
@@ -521,12 +467,12 @@ func generatePluginFiles(plugins []plugin.Plugin) error {
 
 				expGoPackage := fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
 
-				protocCmd += fmt.Sprintf(" --go_opt=M%s=%s --go-grpc_opt=M%s=%s", expRel, func() string {
+				protocCmd += fmt.Sprintf(" --go_opt=module=%s --go_opt=M%s=%s --go-grpc_opt=module=%s --go-grpc_opt=M%s=%s", config.C.Gen.Zrpcclient.GoModule, expRel, func() string {
 					if strings.HasPrefix(expGoPackage, config.C.Gen.Zrpcclient.GoModule) {
 						return expGoPackage
 					}
 					return filepath.ToSlash(filepath.Join(config.C.Gen.Zrpcclient.GoModule, "plugins", p.Name, "model", expGoPackage))
-				}(), expRel, func() string {
+				}(), config.C.Gen.Zrpcclient.GoModule, expRel, func() string {
 					if strings.HasPrefix(expGoPackage, config.C.Gen.Zrpcclient.GoModule) {
 						return expGoPackage
 					}
