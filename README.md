@@ -8,11 +8,15 @@
 
 <p align="center">
 <img align="center" width="150px" src="https://oss.jaronnie.com/jzero.svg">
+<img align="center" width="300px" src="https://github.com/user-attachments/assets/44184df0-20ce-403d-ab38-74088915bc33">
+
 </p>
 
 ## 简介
 
-基于 [go-zero框架](https://github.com/zeromicro/go-zero) 以及 [go-zero/goctl工具](https://github.com/zeromicro/go-zero/tree/master/tools/goctl) 开发的 [jzero](https://github.com/jzero-io/jzero) 框架, 可一键初始化 api/gateway/rpc 项目, 并基于可描述文件(**api/proto/sql**)自动生成**服务端和客户端**代码, 降低开发心智, 解放双手!
+基于 [go-zero框架](https://github.com/zeromicro/go-zero) 以及 [go-zero/goctl工具](https://github.com/zeromicro/go-zero/tree/master/tools/goctl) 开发的 [jzero](https://github.com/jzero-io/jzero) 框架, 可一键初始化 api/gateway/rpc 项目。
+
+基于可描述文件(**api/proto/sql**)自动生成**服务端和客户端**框架代码, 基于内置的 jzero-skills 让 AI 生成符合最佳实践的业务逻辑代码，降低开发心智, 解放双手!
 
 具备以下特点:
 
