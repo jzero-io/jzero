@@ -253,12 +253,23 @@ func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 
 				goPackage = fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
 
-				command += fmt.Sprintf(" --go_opt=M%s=%s", rel, func() string {
-					if strings.HasPrefix(goPackage, jr.Module) {
-						return goPackage
-					}
-					return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
-				}())
+				command += fmt.Sprintf(" --go_opt=module=%s --go_opt=M%s=%s --go-grpc_opt=module=%s --go-grpc_opt=M%s=%s",
+					jr.Module,
+					rel,
+					func() string {
+						if strings.HasPrefix(goPackage, jr.Module) {
+							return goPackage
+						}
+						return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
+					}(),
+					jr.Module,
+					rel,
+					func() string {
+						if strings.HasPrefix(goPackage, jr.Module) {
+							return goPackage
+						}
+						return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
+					}())
 			}
 
 			if len(config.C.Gen.ProtoInclude) > 0 {
