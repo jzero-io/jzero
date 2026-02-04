@@ -386,7 +386,7 @@ go run main.go server
 
 **在线演示**：
 
-- 阿里云云函数：[http://jzero-admin.jaronnie.com](http://jzero-admin.jaronnie.com)
+- 阿里云云函数：[https://jzero-admin.jaronnie.com](https://jzero-admin.jaronnie.com)
 - Vercel：[https://admin.jzero.io](https://admin.jzero.io)
 
 **GitHub**：[https://github.com/jzero-io/jzero-admin](https://github.com/jzero-io/jzero-admin)

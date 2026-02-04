@@ -13,7 +13,7 @@ jzero-admin 是 jzero 的最佳实践
 
 ## 演示地址
 
-* [阿里云云函数](http://jzero-admin.jaronnie.com)
+* [阿里云云函数](https://jzero-admin.jaronnie.com)
 * [vercel](https://admin.jzero.io)
 
 ![](https://oss.jaronnie.com/image-20251217134305041.png)
