@@ -118,7 +118,7 @@ func FindExcludeThirdPartyProtoFiles(protoDirPath string) ([]string, error) {
 			if protoFile.Name() == "third_party" {
 				continue
 			}
-			filenames, err := FindNoRpcServiceExcludeThirdPartyProtoFiles(filepath.Join(protoDirPath, protoFile.Name()))
+			filenames, err := FindExcludeThirdPartyProtoFiles(filepath.Join(protoDirPath, protoFile.Name()))
 			if err != nil {
 				return nil, err
 			}
@@ -335,8 +335,8 @@ func GetProtoFrameEtcFilename(source, style string) string {
 	return filename + ".yaml"
 }
 
-// ParseCurrentFileRoutes 只解析当前文件的路由，不处理 import
-func ParseCurrentFileRoutes(filename string) ([]spec.Route, error) {
+// ParseCurrentApiRoutes 只解析当前 api 文件的路由，不处理 import
+func ParseCurrentApiRoutes(filename string) ([]spec.Route, error) {
 	p := apiparser.New(filename, "")
 	astAST := p.Parse()
 	if err := p.CheckErrors(); err != nil {

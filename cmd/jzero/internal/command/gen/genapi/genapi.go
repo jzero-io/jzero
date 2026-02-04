@@ -71,7 +71,7 @@ func (ja *JzeroApi) Gen() (map[string]*spec.ApiSpec, error) {
 	// 收集当前文件的路由（不包含 import）
 	currentRoutesMap := make(map[string][]spec.Route, len(apiFiles))
 	for _, v := range apiFiles {
-		routes, err := desc.ParseCurrentFileRoutes(v)
+		routes, err := desc.ParseCurrentApiRoutes(v)
 		if err != nil {
 			return nil, errors.Wrapf(err, "parse current routes %s", v)
 		}
