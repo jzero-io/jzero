@@ -225,28 +225,12 @@ func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 
 			goPackage := fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
 
-			command := fmt.Sprintf("goctl rpc protoc %s -I%s -I%s --go_out=%s --go_opt=module=%s --go_opt=M%s=%s --go-grpc_out=%s --go-grpc_opt=module=%s --go-grpc_opt=M%s=%s --zrpc_out=%s --client=%t --home %s -m --style %s",
+			command := fmt.Sprintf("goctl rpc protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s --zrpc_out=%s --client=%t --home %s -m --style %s",
 				v,
 				config.C.ProtoDir(),
 				filepath.Join(config.C.ProtoDir(), "third_party"),
 				filepath.Join("."),
-				jr.Module,
-				rel,
-				func() string {
-					if strings.HasPrefix(goPackage, jr.Module) {
-						return goPackage
-					}
-					return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
-				}(),
 				filepath.Join("."),
-				jr.Module,
-				rel,
-				func() string {
-					if strings.HasPrefix(goPackage, jr.Module) {
-						return goPackage
-					}
-					return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
-				}(),
 				zrpcOut,
 				config.C.Gen.RpcClient,
 				goctlHome,
@@ -269,12 +253,23 @@ func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 
 				goPackage = fds[0].AsFileDescriptorProto().GetOptions().GetGoPackage()
 
-				command += fmt.Sprintf(" --go_opt=M%s=%s", rel, func() string {
-					if strings.HasPrefix(goPackage, jr.Module) {
-						return goPackage
-					}
-					return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
-				}())
+				command += fmt.Sprintf(" --go_opt=module=%s --go_opt=M%s=%s --go-grpc_opt=module=%s --go-grpc_opt=M%s=%s",
+					jr.Module,
+					rel,
+					func() string {
+						if strings.HasPrefix(goPackage, jr.Module) {
+							return goPackage
+						}
+						return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
+					}(),
+					jr.Module,
+					rel,
+					func() string {
+						if strings.HasPrefix(goPackage, jr.Module) {
+							return goPackage
+						}
+						return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
+					}())
 			}
 
 			if len(config.C.Gen.ProtoInclude) > 0 {
