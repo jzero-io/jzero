@@ -5,19 +5,13 @@ star: true
 order: 1
 ---
 
-:::tip jzero 支持多 proto 进行管理 proto(goctl 原生工具不支持).
+## 特性
 
-jzero 在自动生成代码的时候会自动识别 desc/proto 下的文件并自动注册到 zrpc 上.
-jzero 默认支持对 proto 的字段校验
-:::
-
-jzero 框架的理念是:
-
-* 不同模块分在不同的 proto 文件下
-
-jzero 中 proto 规范:
-
-* proto 文件引用规范: 依据于 go-zero 的 proto 规范， 即 service 的 rpc 方法中入参和出参的 proto 不能是 import 的 proto 文件中的 message, 只能在当前文件
+- ✅ **支持多 proto 文件**：可在项目中定义多个 proto 文件（如 user.proto、order.proto、product.proto）
+- ✅ 支持**引入公共 proto** 文件
+- ✅ **一键生成 RPC 客户端**：生成独立的 RPC 客户端代码，脱离服务端依赖，解耦服务端和客户端
+- ✅ **内置字段验证**：基于 `buf.validate` 实现自动参数校验
+- ✅ **灵活中间件配置**：支持为整个 service 或单个 method 配置 HTTP/RPC 中间件
 
 ## proto 文件示例
 
@@ -62,7 +56,15 @@ import "buf/validate/validate.proto";
 
 option go_package = "./pb/versionpb";
 
-message VersionRequest {
+// 使用内置规则
+message CreateRequest {
+  string email = 1 [(buf.validate.field).string.email = true];
+  int32 age = 2 [(buf.validate.field).int32.gt = 17];
+  string name = 3 [(buf.validate.field).string.min_len = 2];
+}
+
+// cel 表达式, 支持自定义 message
+message GetRequest {
   int32 id = 1 [
     (buf.validate.field).cel = {
       id: "id.length"
@@ -72,6 +74,8 @@ message VersionRequest {
   ];
 }
 ```
+
+**内置规则如果有国际化需求, 可使用 [protovalidate-translator](https://github.com/jzero-io/protovalidate-translator)**
 
 ## middleware
 
