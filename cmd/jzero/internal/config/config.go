@@ -120,17 +120,23 @@ type GenConfig struct {
 		Table   string   `mapstructure:"table"`
 		Columns []string `mapstructure:"columns"`
 	} `mapstructure:"model-ignore-columns-table"`
-	ModelSchema          string   `mapstructure:"model-schema"`
-	ModelDatasource      bool     `mapstructure:"model-datasource"`
-	ModelDatasourceUrl   []string `mapstructure:"model-datasource-url"`
-	ModelDatasourceTable []string `mapstructure:"model-datasource-table"`
-	ModelCache           bool     `mapstructure:"model-cache"`
-	ModelCacheTable      []string `mapstructure:"model-cache-table"`
-	ModelCachePrefix     string   `mapstructure:"model-cache-prefix"`
-	MongoType            []string `mapstructure:"mongo-type"`
-	MongoCache           bool     `mapstructure:"mongo-cache"`
-	MongoCachePrefix     string   `mapstructure:"mongo-cache-prefix"`
-	MongoCacheType       []string `mapstructure:"mongo-cache-type"`
+	ModelSchema           string   `mapstructure:"model-schema"`
+	ModelDatasource       bool     `mapstructure:"model-datasource"`
+	ModelDatasourceUrl    []string `mapstructure:"model-datasource-url"`
+	ModelDatasourceTable  []string `mapstructure:"model-datasource-table"`
+	ModelCache            bool     `mapstructure:"model-cache"`
+	ModelCacheTable       []string `mapstructure:"model-cache-table"`
+	ModelCachePrefix      string   `mapstructure:"model-cache-prefix"`
+	ModelNewOriginal      bool     `mapstructure:"model-new-original"`
+	ModelCacheExpiryTable []struct {
+		Table          string `mapstructure:"table"`
+		Expiry         int64  `mapstructure:"expiry"`
+		NotFoundExpiry int64  `mapstructure:"not-found-expiry"`
+	} `mapstructure:"model-cache-expiry-table"`
+	MongoType        []string `mapstructure:"mongo-type"`
+	MongoCache       bool     `mapstructure:"mongo-cache"`
+	MongoCachePrefix string   `mapstructure:"mongo-cache-prefix"`
+	MongoCacheType   []string `mapstructure:"mongo-cache-type"`
 
 	// Gen Sub Command
 	Swagger GenSwaggerConfig `mapstructure:"swagger"`

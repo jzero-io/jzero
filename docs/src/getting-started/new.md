@@ -115,21 +115,18 @@ http://localhost:8001/swagger
 
 ## 可选特性 model/redis/model+redis
 
-基于可选特性, 提供了一整套使用 model/redis 的解决方案
+基于可选特性, 提供了一整套使用 model/redis/model 的解决方案
 
 ```shell
-# 只需要数据库特性
-jzero new your_project --frame api --features model
-jzero new your_project --frame rpc --features model
-jzero new your_project --frame gateway --features model
+# 使用场景: 需要连接关系型数据库(model)且包含数据库缓存(cache), redis
+jzero new your_project --features model,cache,redis
 
-# 只需要 redis 特性
-jzero new your_project --frame api --features redis
-jzero new your_project --frame rpc --features redis
-jzero new your_project --frame gateway --features redis
+# 使用场景: 需要连接关系型数据库(model), redis
+jzero new your_project --features model,redis
 
-# 数据库+redis 特性
-jzero new your_project --frame api --features model,redis
-jzero new your_project --frame rpc --features model,redis
-jzero new your_project --frame gateway --features model,redis
+# 使用场景: 需要连接关系型数据库(model)且包含数据库缓存(cache)
+jzero new your_project --features model,cache
+
+# 使用场景: 需要连接关系型数据库(model)
+jzero new your_project --features model
 ```

@@ -1,11 +1,14 @@
 package svc
 
 import (
-    "github.com/jzero-io/jzero/core/configcenter"
+	"errors"
+	"time"
+
+	"github.com/jzero-io/jzero/core/configcenter"
 	{{ if has "model" .Features }}"github.com/jzero-io/jzero/core/stores/modelx"{{ end }}
-	{{ if has "redis" .Features }}"github.com/jzero-io/jzero/core/stores/cache"
-	"github.com/zeromicro/go-zero/core/stores/redis"
-	"github.com/pkg/errors"{{ end }}
+	{{ if has "redis" .Features }}"github.com/zeromicro/go-zero/core/stores/redis"{{ end }}
+	{{ if has "cache" .Features }}"github.com/zeromicro/go-zero/core/stores/cache"
+	"github.com/zeromicro/go-zero/core/syncx"{{ end }}
 
 	"{{ .Module }}/internal/config"
 	{{ if has "model" .Features }}"{{ .Module }}/internal/model"{{ end }}
@@ -15,8 +18,8 @@ type ServiceContext struct {
 	ConfigCenter configcenter.ConfigCenter[config.Config]
 	{{ if has "model" .Features }}SqlxConn sqlx.SqlConn
 	Model model.Model{{ end }}
-	{{ if has "redis" .Features }}RedisConn *redis.Redis
-	Cache cache.Cache{{ end }}
+	{{ if has "redis" .Features }}RedisConn *redis.Redis{{ end }}
+	{{ if has "cache" .Features }}Cache cache.Cache{{ end }}
 }
 
 func NewServiceContext(cc configcenter.ConfigCenter[config.Config]) *ServiceContext {
@@ -26,8 +29,21 @@ func NewServiceContext(cc configcenter.ConfigCenter[config.Config]) *ServiceCont
 
 	{{ if has "model" .Features }}svcCtx.SqlxConn = modelx.MustNewConn(cc.MustGetConfig().Sqlx.SqlConf){{ end }}
 	{{ if has "redis" .Features }}svcCtx.RedisConn = redis.MustNewRedis(cc.MustGetConfig().Redis.RedisConf){{ end }}
-	{{ if has "redis" .Features }}svcCtx.Cache = cache.NewRedisNode(svcCtx.RedisConn, errors.New("cache not found")){{ end }}
-	{{ if and (has "model" .Features) (has "redis" .Features) }}svcCtx.Model = model.NewModel(svcCtx.SqlxConn, modelx.WithCachedConn(modelx.NewConnWithCache(svcCtx.SqlxConn, svcCtx.Cache))){{else if has "model" .Features }}svcCtx.Model = model.NewModel(svcCtx.SqlxConn){{ end }}
+	{{ if has "cache" .Features }}svcCtx.Cache = cache.New(cc.MustGetConfig().Cache.Redis,
+		syncx.NewSingleFlight(),
+		cache.NewStat("redis-cache"),
+		errors.New("cache not found"),
+		cache.WithExpiry(time.Duration(cc.MustGetConfig().Cache.Expiry)*time.Millisecond),
+		cache.WithNotFoundExpiry(time.Duration(cc.MustGetConfig().Cache.NotFoundExpiry)*time.Millisecond),
+	){{ end }}
+	{{ if and (has "model" .Features) (has "cache" .Features) }}svcCtx.Model = model.NewModel(
+		svcCtx.SqlxConn,
+		modelx.WithCacheConf(cc.MustGetConfig().Cache.Redis),
+		modelx.WithCacheOpts(
+			cache.WithExpiry(time.Duration(cc.MustGetConfig().Cache.Expiry)*time.Millisecond),
+			cache.WithNotFoundExpiry(time.Duration(cc.MustGetConfig().Cache.NotFoundExpiry)*time.Millisecond),
+		),
+	){{else if has "model" .Features }}svcCtx.Model = model.NewModel(svcCtx.SqlxConn){{ end }}
 	svcCtx.SetConfigListener()
 	return svcCtx
 }
