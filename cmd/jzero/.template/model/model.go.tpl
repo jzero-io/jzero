@@ -3,13 +3,34 @@
 package model
 
 import (
+	"time"
+
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/jzero-io/jzero/core/stores/modelx"
     "github.com/eddieowens/opts"
+	"github.com/zeromicro/go-zero/core/stores/cache"
 
 	{{range $v := .ImportsWithAlias}}{{if $v.Alias}}{{$v.Alias}}{{end}} "{{$v.Path}}"
 	{{end}}
 )
+
+{{if .ModelExpiryTable}}
+var (
+	ModelExpiryTable map[string]int64 = map[string]int64{
+		{{range $k, $v := .ModelExpiryTable}}"{{$k}}": {{$v}},
+		{{end}}
+	}
+)
+{{end}}
+
+{{if .ModelNotFoundExpiryTable}}
+var (
+	ModelNotFoundExpiryTable map[string]int64 = map[string]int64{
+		{{range $k, $v := .ModelNotFoundExpiryTable}}"{{$k}}": {{$v}},
+		{{end}}
+	}
+)
+{{end}}
 
 {{range $k,$v := .MutiModelsWithAlias}} type {{$k | FirstUpper | ToCamel}}Model struct {
     {{range $vv := $v}}{{$vv.Name | FirstUpper | ToCamel}} {{$vv.Alias}}.{{$vv.Name | FirstUpper |ToCamel}}Model
@@ -18,20 +39,98 @@ import (
 {{end}}
 
 type Model struct {
-    {{range $v := .TablePackages}}{{$v | FirstUpper | ToCamel}} {{$v}}.{{$v | FirstUpper |ToCamel}}Model
+    {{range $v := .TableInfos}}{{$v.Name | FirstUpper | ToCamel}} {{$v.Name}}.{{$v.Name | FirstUpper |ToCamel}}Model
     {{end}}
 }
 
+{{if .ModelNewOriginal}}
+{{range $v := .TableInfos}}
+func NewOriginal{{$v.Name | FirstUpper | ToCamel}}Model(conn sqlx.SqlConn{{if and $.ModelCache $v.WithCache}}, c cache.CacheConf, op ...cache.Option{{end}}) {{$v.Name}}.{{$v.Name | FirstUpper | ToCamel}}Model {
+	{{if and $.ModelCache $v.WithCache}}
+	{{if $v.HasCacheExpiry}}
+	if expiry, ok := ModelExpiryTable["{{$v.Name}}"]; ok {
+		op = append(op, cache.WithExpiry(time.Duration(expiry)*time.Millisecond))
+	}
+	{{end}}
+	{{if $v.HasNotFoundExpiry}}
+	if notFoundExpiry, ok := ModelNotFoundExpiryTable["{{$v.Name}}"]; ok {
+		op = append(op, cache.WithNotFoundExpiry(time.Duration(notFoundExpiry)*time.Millisecond))
+	}
+	{{end}}
+	return {{$v.Name}}.NewOriginal{{$v.Name | FirstUpper | ToCamel}}Model(conn, c, op...)
+	{{else}}
+	return {{$v.Name}}.NewOriginal{{$v.Name | FirstUpper | ToCamel}}Model(conn)
+	{{end}}
+}
+{{end}}
+{{end}}
+
+{{if .ModelNewOriginal}}
+{{range $k,$v := .MutiModelsWithAlias}}
+{{range $vv := $v}}
+func NewOriginal{{$k | FirstUpper | ToCamel}}{{$vv.Name | FirstUpper | ToCamel}}Model(conn sqlx.SqlConn{{if and $.ModelCache $vv.WithCache}}, c cache.CacheConf, op ...cache.Option{{end}}) {{$vv.Alias}}.{{$vv.Name | FirstUpper |ToCamel}}Model {
+	{{if and $.ModelCache $vv.WithCache}}
+	{{if $vv.HasCacheExpiry}}
+	if expiry, ok := ModelExpiryTable["{{$vv.FullName}}"]; ok {
+		op = append(op, cache.WithExpiry(time.Duration(expiry)*time.Millisecond))
+	}
+	{{end}}
+	{{if $vv.HasNotFoundExpiry}}
+	if notFoundExpiry, ok := ModelNotFoundExpiryTable["{{$vv.FullName}}"]; ok {
+		op = append(op, cache.WithNotFoundExpiry(time.Duration(notFoundExpiry)*time.Millisecond))
+	}
+	{{end}}
+	return {{$vv.Alias}}.NewOriginal{{$vv.Name | FirstUpper | ToCamel}}Model(conn, c, op...)
+	{{else}}
+	return {{$vv.Alias}}.NewOriginal{{$vv.Name | FirstUpper | ToCamel}}Model(conn)
+	{{end}}
+}
+{{end}}
+{{end}}
+{{end}}
+
 func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
+	{{range $v := .TableInfos}}
+	{{if and $.ModelCache (or $v.HasCacheExpiry $v.HasNotFoundExpiry)}}
+	{{$v.Name | ToCamel}}CacheOpts := opts.DefaultApply(op...).CacheOpts
+	{{if $v.HasCacheExpiry}}
+	if expiry, ok := ModelExpiryTable["{{$v.Name}}"]; ok {
+		{{$v.Name | ToCamel}}CacheOpts = append({{$v.Name | ToCamel}}CacheOpts, cache.WithExpiry(time.Duration(expiry)*time.Millisecond))
+	}
+	{{end}}
+	{{if $v.HasNotFoundExpiry}}
+	if notFoundExpiry, ok := ModelNotFoundExpiryTable["{{$v.Name}}"]; ok {
+		{{$v.Name | ToCamel}}CacheOpts = append({{$v.Name | ToCamel}}CacheOpts, cache.WithNotFoundExpiry(time.Duration(notFoundExpiry)*time.Millisecond))
+	}
+	{{end}}
+	{{end}}
+	{{end}}
+
 	return Model{
-         {{range $v := .TablePackages}}{{$v | FirstUpper | ToCamel}}: {{$v}}.New{{ $v | FirstUpper | ToCamel }}Model(conn, op...),
+         {{range $v := .TableInfos}}{{if and $.ModelCache (or $v.HasCacheExpiry $v.HasNotFoundExpiry)}}{{$v.Name | FirstUpper | ToCamel}}: {{$v.Name}}.New{{ $v.Name | FirstUpper | ToCamel }}Model(conn, append(op, modelx.WithCacheOpts({{$v.Name | ToCamel}}CacheOpts...))...),{{else}}{{$v.Name | FirstUpper | ToCamel}}: {{$v.Name}}.New{{ $v.Name | FirstUpper | ToCamel }}Model(conn, op...),{{end}}
          {{end}}
 	}
 }
 
 {{range $k,$v := .MutiModelsWithAlias}} func New{{$k | FirstUpper | ToCamel}}Model(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) {{$k | FirstUpper | ToCamel}}Model {
+	{{range $vv := $v}}
+	{{if and $.ModelCache (or $vv.HasCacheExpiry $vv.HasNotFoundExpiry)}}
+	{{$vv.Name | ToCamel}}CacheOpts := opts.DefaultApply(op...).CacheOpts
+	{{if $vv.HasCacheExpiry}}
+	if expiry, ok := ModelExpiryTable["{{$vv.FullName}}"]; ok {
+		{{$vv.Name | ToCamel}}CacheOpts = append({{$vv.Name | ToCamel}}CacheOpts, cache.WithExpiry(time.Duration(expiry)*time.Millisecond))
+	}
+	{{end}}
+	{{if $vv.HasNotFoundExpiry}}
+	if notFoundExpiry, ok := ModelNotFoundExpiryTable["{{$vv.FullName}}"]; ok {
+		{{$vv.Name | ToCamel}}CacheOpts = append({{$vv.Name | ToCamel}}CacheOpts, cache.WithNotFoundExpiry(time.Duration(notFoundExpiry)*time.Millisecond))
+	}
+	{{end}}
+	{{end}}
+	{{end}}
+
 	return {{$k | FirstUpper | ToCamel}}Model{
-        {{range $vv := $v}}{{$vv.Name | FirstUpper | ToCamel}}: {{$vv.Alias}}.New{{ $vv.Name | FirstUpper | ToCamel }}Model(conn, op...),
+        {{range $vv := $v}}{{$vv.Name | FirstUpper | ToCamel}}: {{$vv.Alias}}.New{{ $vv.Name | FirstUpper | ToCamel }}Model(conn, {{if and $.ModelCache (or $vv.HasCacheExpiry $vv.HasNotFoundExpiry)}}append(op, modelx.WithCacheOpts({{$vv.Name | ToCamel}}CacheOpts...))...{{else}}op...{{end}}),
         {{end}}
 	}
 }
