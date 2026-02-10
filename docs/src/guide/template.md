@@ -69,3 +69,60 @@ jzero new mysimpleapi --local myapi
 # 然后将 $HOME/.jzero/templates/local/myapi 下的内容放到仓库中, 并上传到 myapi 分支
 jzero new project_name --remote https://github.com/jzero-io/templates --branch myapi
 ```
+
+模板结构如下:
+
+```bash
+$ tree ~/.jzero/templates/local/myapi
+└── app
+    ├── Dockerfile.tpl
+    ├── README.md.tpl
+    ├── cmd
+    │   ├── root.go.tpl
+    │   ├── server.go.tpl
+    │   └── version.go.tpl
+    ├── desc
+    │   ├── api
+    │   │   ├── helloworld.api.tpl
+    │   │   └── version.api.tpl
+    │   └── swagger
+    │       ├── helloworld.swagger.json.tpl
+    │       ├── swagger.json.tpl
+    │       └── version.swagger.json.tpl
+    ├── etc
+    │   └── etc.yaml.tpl
+    ├── go.mod.tpl
+    ├── internal
+    │   ├── config
+    │   │   └── config.go.tpl
+    │   ├── custom
+    │   │   └── custom.go.tpl
+    │   ├── handler
+    │   │   ├── helloworld
+    │   │   │   └── helloworld_compact.go.tpl
+    │   │   ├── routes.go.tpl
+    │   │   └── version
+    │   │       └── version.go.tpl
+    │   ├── logic
+    │   │   ├── helloworld
+    │   │   │   └── create.go.tpl
+    │   │   └── version
+    │   │       └── version.go.tpl
+    │   ├── middleware
+    │   │   ├── middleware.go.tpl
+    │   │   ├── response.go.tpl
+    │   │   └── validator.go.tpl
+    │   ├── svc
+    │   │   ├── config.go.tpl
+    │   │   ├── middleware.go.tpl
+    │   │   └── servicecontext.go.tpl
+    │   └── types
+    │       ├── helloworld
+    │       │   └── types.go.tpl
+    │       ├── types.go.tpl
+    │       └── version
+    │           └── types.go.tpl
+    ├── main.go.tpl
+    └── plugins
+        └── plugins.go.tpl
+```
