@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
-	github.com/go-git/go-git/v5 v5.16.4
+	github.com/go-git/go-git/v5 v5.16.5
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/hashicorp/go-version v1.8.0
 	github.com/iancoleman/orderedmap v0.3.0
