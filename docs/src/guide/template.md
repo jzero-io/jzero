@@ -21,13 +21,6 @@ jzero template init --branch gateway
 goctl template init --home .template/go-zero
 ```
 
-## 构建属于自己的模版
-
-```shell
-# 将当前项目构建为模版，并保存到 $HOME/.jzero/templates/local 下
-jzero template build --name template_name
-```
-
 ## 使用自定义模版初始化项目
 
 * 指定远程仓库模板
@@ -48,4 +41,31 @@ jzero new project_name --local template_name
 
 ```shell
 jzero new project_name --home path_to_template
+```
+
+## 实战: 构建属于自己的模版
+
+:::tip 可以将当前任意项目转换成 jzero 模板, 这非常 cool!
+:::
+
+```bash
+# 新增一个 api 项目
+jzero new simpleapi
+# 进入项目
+cd simpleapi
+# 新增一个 api
+jzero add api helloworld
+# 生成代码
+jzero gen
+
+# 将当前项目构建为模版, 并保存到 $HOME/.jzero/templates/local/myapi 下
+jzero template build --name myapi
+
+# 此时就可以使用你自己构建的模板了, 你会发现生成的项目自动拥有了 helloworld api 了.
+jzero new mysimpleapi --local myapi
+
+# 但是你发现该模板仅允许本地使用, 为了达到通用的效果
+# 你可以在远程仓库如 github 创建一个 templates 仓库(假设为 https://github.com/jzero-io/templates)
+# 然后将 $HOME/.jzero/templates/local/myapi 下的内容放到仓库中, 并上传到 myapi 分支
+jzero new project_name --remote https://github.com/jzero-io/templates --branch myapi
 ```
