@@ -183,7 +183,7 @@ func (ja *JzeroApi) Gen() (map[string]*spec.ApiSpec, error) {
 	}
 
 	if !config.C.Quiet {
-		fmt.Println(console.Green("Done"))
+		fmt.Println(console.Green("Gen Api Done"))
 	}
 	return apiSpecMap, nil
 }
@@ -486,7 +486,7 @@ func (ja *JzeroApi) generateRoute2CodeFile(apiSpecMap map[string]*spec.ApiSpec, 
 	}
 
 	if !config.C.Quiet {
-		fmt.Printf("%s", console.Green("Done\n"))
+		fmt.Printf("%s", console.Green("Gen Route2code Done\n"))
 	}
 
 	return nil

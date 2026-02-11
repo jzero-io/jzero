@@ -118,7 +118,7 @@ func (jm *JzeroMongo) Gen() error {
 	}
 
 	if !config.C.Quiet {
-		fmt.Println(console.Green("Done"))
+		fmt.Println(console.Green("Gen Mongo Done"))
 	}
 
 	return nil
