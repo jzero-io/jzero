@@ -108,17 +108,18 @@ func Gen() (err error) {
 				pluginName := getPluginNameFromFilePath(v)
 				if pluginName != "" {
 					// 插件文件处理：找到 desc/api 在路径中的位置
-					descApiIndex := strings.Index(v, "/desc/api/")
+					descApiPath := filepath.Join("desc", "api") + string(filepath.Separator)
+					descApiIndex := strings.Index(v, descApiPath)
 					var pluginApiDir string
 					if descApiIndex == -1 {
-						// 如果找不到 /desc/api/ 模式，尝试查找路径末尾是否以 desc/api 结尾
-						if strings.HasSuffix(filepath.Dir(v), "/desc/api") {
+						// 如果找不到 desc/api 模式，尝试查找路径末尾是否以 desc/api 结尾
+						if strings.HasSuffix(filepath.Dir(v), filepath.Join("desc", "api")) {
 							pluginApiDir = filepath.Dir(v)
 						} else {
 							return fmt.Errorf("invalid plugin api path: %s", v)
 						}
 					} else {
-						pluginApiDir = v[:descApiIndex+len("/desc/api")]
+						pluginApiDir = v[:descApiIndex+len(descApiPath)]
 					}
 
 					var relErr error
@@ -127,7 +128,7 @@ func Gen() (err error) {
 						return relErr
 					}
 					// 在插件目录下保持结构
-					relPath = "plugins/" + pluginName + "/" + relPath
+					relPath = filepath.Join("plugins", pluginName, relPath)
 				} else {
 					// 普通 API 文件处理
 					relPath, err = filepath.Rel(config.C.ApiDir(), v)

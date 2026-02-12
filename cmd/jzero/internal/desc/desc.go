@@ -31,28 +31,45 @@ func GetFrameType() (string, error) {
 		// rpc 项目
 		frameType = "rpc"
 
-		// 获取全量 proto 文件
-		protoFiles, err := FindRpcServiceProtoFiles(config.C.ProtoDir())
-		if err != nil {
-			return "", err
-		}
-
-		for _, v := range protoFiles {
-			// parse proto
-			protoParser := rpcparser.NewDefaultProtoParser()
-			var parse rpcparser.Proto
-			parse, err = protoParser.Parse(v, true)
+		// 检查是否是 gateway 项目（优先检查 cmd/server.go）
+		if isGatewayProject() {
+			frameType = "gateway"
+		} else {
+			// 获取全量 proto 文件
+			protoFiles, err := FindRpcServiceProtoFiles(config.C.ProtoDir())
 			if err != nil {
 				return "", err
 			}
-			if IsNeedGenProtoDescriptor(parse) {
-				frameType = "gateway"
-				break
+
+			for _, v := range protoFiles {
+				// parse proto
+				protoParser := rpcparser.NewDefaultProtoParser()
+				var parse rpcparser.Proto
+				parse, err = protoParser.Parse(v, true)
+				if err != nil {
+					return "", err
+				}
+				if IsNeedGenProtoDescriptor(parse) {
+					frameType = "gateway"
+					break
+				}
 			}
 		}
 	}
 
 	return frameType, nil
+}
+
+// isGatewayProject 检查是否是 gateway 项目，通过检查 cmd/server.go 是否导入 gateway 包
+func isGatewayProject() bool {
+	serverGoPath := filepath.Join("cmd", "server.go")
+	content, err := os.ReadFile(serverGoPath)
+	if err != nil {
+		return false
+	}
+	contentStr := string(content)
+	return strings.Contains(contentStr, `"github.com/zeromicro/go-zero/gateway"`) ||
+		strings.Contains(contentStr, `github.com/zeromicro/go-zero/gateway`)
 }
 
 func GetProtoDescriptorPath(protoPath string) string {
