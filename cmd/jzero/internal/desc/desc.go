@@ -60,16 +60,13 @@ func GetFrameType() (string, error) {
 	return frameType, nil
 }
 
-// isGatewayProject 检查是否是 gateway 项目，通过检查 cmd/server.go 是否导入 gateway 包
+// isGatewayProject 检查 third_party/grpc-gateway 目录是否存在
 func isGatewayProject() bool {
-	serverGoPath := filepath.Join("cmd", "server.go")
-	content, err := os.ReadFile(serverGoPath)
-	if err != nil {
-		return false
+	grpcGatewayPath := filepath.Join(config.C.ProtoDir(), "third_party", "grpc-gateway")
+	if _, err := os.Stat(grpcGatewayPath); err == nil {
+		return true
 	}
-	contentStr := string(content)
-	return strings.Contains(contentStr, `"github.com/zeromicro/go-zero/gateway"`) ||
-		strings.Contains(contentStr, `github.com/zeromicro/go-zero/gateway`)
+	return false
 }
 
 func GetProtoDescriptorPath(protoPath string) string {
