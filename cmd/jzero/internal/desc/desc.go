@@ -31,7 +31,7 @@ func GetFrameType() (string, error) {
 		// rpc 项目
 		frameType = "rpc"
 
-		// 检查是否是 gateway 项目（优先检查 cmd/server.go）
+		// 检查是否是 gateway 项目
 		if isGatewayProject() {
 			frameType = "gateway"
 		} else {
