@@ -31,28 +31,42 @@ func GetFrameType() (string, error) {
 		// rpc 项目
 		frameType = "rpc"
 
-		// 获取全量 proto 文件
-		protoFiles, err := FindRpcServiceProtoFiles(config.C.ProtoDir())
-		if err != nil {
-			return "", err
-		}
-
-		for _, v := range protoFiles {
-			// parse proto
-			protoParser := rpcparser.NewDefaultProtoParser()
-			var parse rpcparser.Proto
-			parse, err = protoParser.Parse(v, true)
+		// 检查是否是 gateway 项目（优先检查 cmd/server.go）
+		if isGatewayProject() {
+			frameType = "gateway"
+		} else {
+			// 获取全量 proto 文件
+			protoFiles, err := FindRpcServiceProtoFiles(config.C.ProtoDir())
 			if err != nil {
 				return "", err
 			}
-			if IsNeedGenProtoDescriptor(parse) {
-				frameType = "gateway"
-				break
+
+			for _, v := range protoFiles {
+				// parse proto
+				protoParser := rpcparser.NewDefaultProtoParser()
+				var parse rpcparser.Proto
+				parse, err = protoParser.Parse(v, true)
+				if err != nil {
+					return "", err
+				}
+				if IsNeedGenProtoDescriptor(parse) {
+					frameType = "gateway"
+					break
+				}
 			}
 		}
 	}
 
 	return frameType, nil
+}
+
+// isGatewayProject 检查 third_party/grpc-gateway 目录是否存在
+func isGatewayProject() bool {
+	grpcGatewayPath := filepath.Join(config.C.ProtoDir(), "third_party", "grpc-gateway")
+	if _, err := os.Stat(grpcGatewayPath); err == nil {
+		return true
+	}
+	return false
 }
 
 func GetProtoDescriptorPath(protoPath string) string {
