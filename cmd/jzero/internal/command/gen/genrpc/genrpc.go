@@ -345,7 +345,7 @@ func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 
 	if len(genCodeProtoFiles) > 0 {
 		if !config.C.Quiet {
-			fmt.Println(console.Green("Done"))
+			fmt.Println(console.Green("Gen Rpc Done"))
 		}
 	}
 
