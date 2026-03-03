@@ -45,7 +45,7 @@ func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServ
 		return err
 	}
 	if !config.C.Quiet {
-		fmt.Printf("%s", console.Green("Done\n"))
+		fmt.Printf("%s", console.Green("Gen Server Done\n"))
 	}
 	return nil
 }
