@@ -104,20 +104,20 @@ var (
 }
 
 func (ja *JzeroApi) updateHandlerImportedTypesPath(f *ast.File, fset *token.FileSet, file HandlerFile) error {
-	typesImportPath := fmt.Sprintf("%s/%s", ja.Module, config.C.Gen.TypesDir)
-	if astutil.UsesImport(f, fmt.Sprintf("%s/internal/types", ja.Module)) {
-		astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
+	oldImportPath := fmt.Sprintf("%s/internal/types", ja.Module)
+	if astutil.UsesImport(f, oldImportPath) {
+		astutil.DeleteImport(fset, f, oldImportPath)
 	}
+	typesImportPath := fmt.Sprintf("%s/%s/%s", ja.Module, config.C.Gen.TypesDir, file.Package)
 	if astutil.UsesImport(f, typesImportPath) {
 		return nil
 	}
-	astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/%s/%s", ja.Module, config.C.Gen.TypesDir, file.Package))
+	astutil.AddNamedImport(fset, f, "types", typesImportPath)
 
 	return nil
 }
 
 func (ja *JzeroApi) updateLogicImportedTypesPath(f *ast.File, fset *token.FileSet, file LogicFile) error {
-	typesImportPath := fmt.Sprintf("%s/%s", ja.Module, config.C.Gen.TypesDir)
 	oldImportPath := fmt.Sprintf("%s/internal/types", ja.Module)
 	astutil.DeleteImport(fset, f, oldImportPath)
 	if file.RequestType == nil && file.ResponseType == nil {
