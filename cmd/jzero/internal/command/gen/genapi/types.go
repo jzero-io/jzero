@@ -15,6 +15,7 @@ import (
 	"github.com/zeromicro/go-zero/tools/goctl/util"
 	"golang.org/x/tools/go/ast/astutil"
 
+	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
@@ -47,12 +48,12 @@ var (
 				return err
 			}
 
-			_ = os.MkdirAll(filepath.Join("internal", "types", goPackage), 0o755)
+			_ = os.MkdirAll(filepath.Join(config.C.Gen.TypesDir, "types", goPackage), 0o755)
 			process, err := gosimports.Process("", typesGoBytes, nil)
 			if err != nil {
 				return err
 			}
-			if err = os.WriteFile(filepath.Join("internal", "types", goPackage, "types.go"), process, 0o644); err != nil {
+			if err = os.WriteFile(filepath.Join(config.C.Gen.TypesDir, "types", goPackage, "types.go"), process, 0o644); err != nil {
 				return err
 			}
 		} else {
@@ -96,27 +97,33 @@ var (
 	if err != nil {
 		return err
 	}
-	if err = os.WriteFile(filepath.Join("internal", "types", "types.go"), process, 0o644); err != nil {
+	if err = os.WriteFile(filepath.Join(config.C.Gen.TypesDir, "types", "types.go"), process, 0o644); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (ja *JzeroApi) updateHandlerImportedTypesPath(f *ast.File, fset *token.FileSet, file HandlerFile) error {
-	if astutil.UsesImport(f, fmt.Sprintf("%s/internal/types", ja.Module)) {
-		astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
-		astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
+	oldImportPath := fmt.Sprintf("%s/internal/types", ja.Module)
+	if astutil.UsesImport(f, oldImportPath) {
+		astutil.DeleteImport(fset, f, oldImportPath)
 	}
+	typesImportPath := fmt.Sprintf("%s/%s/%s", ja.Module, config.C.Gen.TypesDir, file.Package)
+	if astutil.UsesImport(f, typesImportPath) {
+		return nil
+	}
+	astutil.AddNamedImport(fset, f, "types", typesImportPath)
 
 	return nil
 }
 
 func (ja *JzeroApi) updateLogicImportedTypesPath(f *ast.File, fset *token.FileSet, file LogicFile) error {
-	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
+	oldImportPath := fmt.Sprintf("%s/internal/types", ja.Module)
+	astutil.DeleteImport(fset, f, oldImportPath)
 	if file.RequestType == nil && file.ResponseType == nil {
 		return nil
 	}
-	astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
+	astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/%s/%s", ja.Module, config.C.Gen.TypesDir, file.Package))
 	return nil
 }
 

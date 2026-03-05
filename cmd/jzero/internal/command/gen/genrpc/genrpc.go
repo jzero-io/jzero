@@ -260,7 +260,7 @@ func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 						if strings.HasPrefix(goPackage, jr.Module) {
 							return goPackage
 						}
-						return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
+						return filepath.ToSlash(filepath.Join(jr.Module, config.C.Gen.TypesDir, goPackage))
 					}(),
 					jr.Module,
 					rel,
@@ -268,7 +268,7 @@ func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 						if strings.HasPrefix(goPackage, jr.Module) {
 							return goPackage
 						}
-						return filepath.ToSlash(filepath.Join(jr.Module, "internal", goPackage))
+						return filepath.ToSlash(filepath.Join(jr.Module, config.C.Gen.TypesDir, goPackage))
 					}())
 			}
 

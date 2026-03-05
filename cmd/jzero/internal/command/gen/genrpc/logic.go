@@ -45,7 +45,7 @@ func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Pr
 				return nil, err
 			}
 
-			fp := filepath.Join(config.C.Wd(), "internal", "logic", strings.ToLower(service.Name), namingFormat+".go")
+			fp := filepath.Join(config.C.Wd(), config.C.Gen.TypesDir, "logic", strings.ToLower(service.Name), namingFormat+".go")
 
 			f := LogicFile{
 				Path:             fp,

@@ -137,6 +137,7 @@ type GenConfig struct {
 	MongoCache       bool     `mapstructure:"mongo-cache"`
 	MongoCachePrefix string   `mapstructure:"mongo-cache-prefix"`
 	MongoCacheType   []string `mapstructure:"mongo-cache-type"`
+	TypesDir         string   `mapstructure:"types-dir"`
 
 	// Gen Sub Command
 	Swagger GenSwaggerConfig `mapstructure:"swagger"`

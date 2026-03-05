@@ -40,7 +40,7 @@ func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServ
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(filepath.Join(config.C.Wd(), "internal", "server", "server.go"), serverFile, 0o644)
+	err = os.WriteFile(filepath.Join(config.C.Wd(), config.C.Gen.TypesDir, "server", "server.go"), serverFile, 0o644)
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (jr *JzeroRpc) GetAllServerFiles(descFilepath string, protoSpec rpcparser.P
 		if err != nil {
 			return nil, err
 		}
-		fp := filepath.Join(config.C.Wd(), "internal", "server", strings.ToLower(service.Name), namingFormat+".go")
+		fp := filepath.Join(config.C.Wd(), config.C.Gen.TypesDir, "server", strings.ToLower(service.Name), namingFormat+".go")
 
 		f := ServerFile{
 			DescFilepath: descFilepath,
