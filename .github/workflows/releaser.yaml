@@ -48,7 +48,7 @@ jobs:
           password: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Docker build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           registry: ghcr.io
           context: .
