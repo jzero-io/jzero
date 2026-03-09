@@ -5,6 +5,11 @@ import { navbar } from "vuepress-theme-hope";
 export const zhNavbar = navbar([
   "/",
   {
+    link: "https://docs.jzero.io/blog/",
+    text: "博客",
+    icon: "fluent-mdl2:blog"
+  },
+  {
     link: "https://github.com/jzero-io/examples",
     text: "代码示例",
     icon: "vscode-icons:file-type-go"
