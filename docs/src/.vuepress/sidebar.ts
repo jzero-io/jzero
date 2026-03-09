@@ -54,7 +54,7 @@ export default sidebar({
     },
     {
         text: "博客",
-        icon: "logos:bloglovin",
+        icon: "fluent-mdl2:blog",
         prefix: "blog/",
         children: "structure",
         collapsible: true,
