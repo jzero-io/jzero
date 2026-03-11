@@ -1,27 +1,27 @@
 ---
-title: 项目初始化
+title: Project Initialization
 icon: mdi:new-box
 order: 3
 ---
 
-## 模板介绍
+## Template Introduction
 
-模板是一个预先定义好的一组代码结构，提供了项目的基础架构和工程规范
+A template is a predefined set of code structures that provides the basic architecture and engineering standards for a project.
 
-模板可以帮助你快速开始初始化一个项目, 而不需要从零开始编写代码
+Templates help you quickly start initializing a project without writing code from scratch.
 
-## 模板类型
+## Template Types
 
-jzero 提供了以下几种类型模板, 满足各种场景:
+jzero provides the following types of templates to meet various scenarios:
 
-* 内置模板(frame): 内置模板, 提供框架核心能力, 支持可选特性(数据库/缓存)
-* 路径模板(home): 指定路径作为模板, 一般放入特定项目内部, 满足特定项目需要
-* 本地模板(local): 本地全局模板, 位于 ~/.jzero/templates/local 文件夹中
-* 远程仓库模板(remote+branch): 可用来构建企业专属的远程模板仓库
+* Built-in template(frame): Built-in template providing core framework capabilities, supports optional features (database/cache)
+* Path template(home): Specify a path as a template, usually placed inside a specific project to meet specific project needs
+* Local template(local): Local global template located in ~/.jzero/templates/local folder
+* Remote repository template(remote+branch): Can be used to build enterprise-specific remote template repositories
 
-具体使用请参阅: [模板指南](../guide/template.md)
+For detailed usage, see: [Template Guide](../guide/template.md)
 
-## 初始化 api 项目
+## Initialize api project
 
 ::: code-tabs#shell
 
@@ -30,11 +30,11 @@ jzero 提供了以下几种类型模板, 满足各种场景:
 ```bash
 jzero new your_project --frame api
 cd your_project
-# 下载依赖
+# download dependencies
 go mod tidy
-# 启动服务端程序
+# start server
 go run main.go server
-# 访问 swagger ui
+# visit swagger ui
 http://localhost:8001/swagger
 ```
 
@@ -43,16 +43,16 @@ http://localhost:8001/swagger
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --frame api
 cd your_project
-# 下载依赖
+# download dependencies
 go mod tidy
-# 启动服务端程序
+# start server
 go run main.go server
-# 访问 swagger ui
+# visit swagger ui
 http://localhost:8001/swagger
 ```
 :::
 
-## 初始化 rpc 项目
+## Initialize rpc project
 
 ::: code-tabs#shell
 
@@ -61,9 +61,9 @@ http://localhost:8001/swagger
 ```bash
 jzero new your_project --frame rpc
 cd your_project
-# 下载依赖
+# download dependencies
 go mod tidy
-# 启动服务端程序
+# start server
 go run main.go server
 ```
 
@@ -72,16 +72,16 @@ go run main.go server
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --frame rpc
 cd your_project
-# 下载依赖
+# download dependencies
 go mod tidy
-# 启动服务端程序
+# start server
 go run main.go server
 ```
 :::
 
-## 初始化 gateway 项目
+## Initialize gateway project
 
-:::important 同时支持 grpc/http 接口
+:::important Supports both grpc/http interfaces
 :::
 
 ::: code-tabs#shell
@@ -91,11 +91,11 @@ go run main.go server
 ```bash
 jzero new your_project --frame gateway
 cd your_project
-# 下载依赖
+# download dependencies
 go mod tidy
-# 启动服务端程序
+# start server
 go run main.go server
-# 访问 swagger ui
+# visit swagger ui
 http://localhost:8001/swagger
 ```
 
@@ -104,29 +104,29 @@ http://localhost:8001/swagger
 ```bash
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest new your_project --frame gateway
 cd your_project
-# 下载依赖
+# download dependencies
 go mod tidy
-# 启动服务端程序
+# start server
 go run main.go server
-# 访问 swagger ui
+# visit swagger ui
 http://localhost:8001/swagger
 ```
 :::
 
-## 可选特性 model/redis/model+redis
+## Optional features model/redis/model+redis
 
-基于可选特性, 提供了一整套使用 model/redis/model 的解决方案
+Based on optional features, provides a complete solution for using model/redis/model
 
 ```shell
-# 使用场景: 需要连接关系型数据库(model)且包含数据库缓存(cache), redis
+# Use case: need to connect to relational database(model) with database cache(cache), redis
 jzero new your_project --features model,cache,redis
 
-# 使用场景: 需要连接关系型数据库(model), redis
+# Use case: need to connect to relational database(model), redis
 jzero new your_project --features model,redis
 
-# 使用场景: 需要连接关系型数据库(model)且包含数据库缓存(cache)
+# Use case: need to connect to relational database(model) with database cache(cache)
 jzero new your_project --features model,cache
 
-# 使用场景: 需要连接关系型数据库(model)
+# Use case: need to connect to relational database(model)
 jzero new your_project --features model
 ```

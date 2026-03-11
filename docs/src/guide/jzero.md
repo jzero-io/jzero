@@ -1,18 +1,18 @@
 ---
-title: 玩转 jzero
+title: Mastering jzero
 icon: catppuccin:astro-config
 star: true
 order: 0.1
 ---
 
-## 关于配置
+## About Configuration
 
-* 支持通过配置文件 .jzero.yaml 控制各种参数
-* 支持通过 flag 控制各种参数
-* 支持通过环境变量控制各种参数
-* 支持通过以上组合的方式控制各种参数, 优先级从高到低为: 环境变量  > flag  > 配置文件
+* Supports controlling various parameters through configuration file .jzero.yaml
+* Supports controlling various parameters through flag
+* Supports controlling various parameters through environment variables
+* Supports controlling various parameters through combination of above methods, priority from high to low: environment variables > flag > configuration file
 
-如: `jzero gen --style go_zero` 对应 `.jzero.yaml` 内容
+Example: `jzero gen --style go_zero` corresponds to `.jzero.yaml` content
 
 ::: code-tabs#yaml
 @tab .jzero.yaml
@@ -22,15 +22,15 @@ gen:
 ```
 :::
 
-即 `jzero gen` + `.jzero.yaml` = `jzero gen --git-change=true`
+`jzero gen` + `.jzero.yaml` = `jzero gen --git-change=true`
 
-对于环境变量的使用, 需要增加前缀 `JZERO_`, 如 `JZERO_GEN_GIT_CHANGE`
+For environment variable usage, need to add prefix `JZERO_`, such as `JZERO_GEN_GIT_CHANGE`
 
-即 `JZERO_GEN_GIT_CHANGE=go_zero jzero gen` = `jzero gen --git-change=true`
+`JZERO_GEN_GIT_CHANGE=go_zero jzero gen` = `jzero gen --git-change=true`
 
-环境变量的定义支持使用配置文件, 默认为 `.jzero.env.yaml`
+Environment variable definition supports using configuration file, default is `.jzero.env.yaml`
 
-如:
+Example:
 
 ::: code-tabs#yaml
 @tab .jzero.env.yaml
@@ -39,9 +39,9 @@ JZERO_GEN_GIT_CHANGE: true
 ```
 :::
 
-### 子命令
+### Subcommands
 
-对于子命令的配置, 如: `jzero gen zrpcclient --output client` 对应 `.jzero.yaml` 内容
+For subcommand configuration, such as: `jzero gen zrpcclient --output client` corresponds to `.jzero.yaml` content
 
 ::: code-tabs#yaml
 @tab .jzero.yaml
@@ -54,7 +54,7 @@ gen:
 
 `jzero gen zrpcclient` + `.jzero.yaml` = `jzero gen zrpcclient --output client`
 
-同样支持环境变量的配置 `JZERO_GEN_ZRPCCLIENT_NAME`
+Also supports environment variable configuration `JZERO_GEN_ZRPCCLIENT_NAME`
 
 ::: code-tabs#yaml
 @tab .jzero.env.yaml
@@ -65,19 +65,19 @@ JZERO_GEN_ZRPCCLIENT_OUTPUT: client
 
 `jzero gen zrpcclient` + `.jzero.env.yaml` = `jzero gen zrpcclient --output client`
 
-## 设置工作目录
+## Set working directory
 
 ```shell
 jzero gen -w /path/to
 ```
 
-## 设置 quiet 模式
+## Set quiet mode
 
 ```shell
 jzero gen --quiet
 ```
 
-## 设置 debug 模式
+## Set debug mode
 
 ```shell
 jzero gen --debug

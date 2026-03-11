@@ -3,15 +3,19 @@ import { navbar } from "vuepress-theme-hope";
 
 // @ts-ignore
 export const enNavbar = navbar([
-  "/en/",
+  {
+    link: "https://docs.jzero.io/blog/",
+    text: "Blog",
+    icon: "fluent-mdl2:blog"
+  },
   {
     link: "https://github.com/jzero-io/examples",
-    text: "code example",
+    text: "Examples",
     icon: "vscode-icons:file-type-go"
   },
   {
     link: "https://github.com/jzero-io/jzero-admin",
-    text: "jzero admin",
+    text: "jzero Admin",
     icon: "icon-park-outline:system"
   },
 ]);

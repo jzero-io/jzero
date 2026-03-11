@@ -5,17 +5,17 @@ order: 6
 ---
 
 ```shell
-# 默认输出到 ~/.claude/skills 文件夹中
+# Default output to ~/.claude/skills folder
 jzero skills init
-# 输入到当前项目
+# Output to current project
 jzero skills init --output .claude/skills
 ```
 
-## 使用技巧
+## Usage Tips
 
-* `jzero-skills` 开头, 然后描述你的需求提示词即可
+* Start with `jzero-skills`, then describe your requirement prompt
 
-## 实战演示
+## Demo
 
 <video width="720" height="450" controls>
   <source src="https://oss.jaronnie.com/jzero-skills.mp4" type="video/mp4">

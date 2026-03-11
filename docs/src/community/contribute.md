@@ -1,17 +1,17 @@
 ---
-title: 欢迎贡献👏
+title: Welcome to Contribute👏
 icon: ooui:user-contributions-ltr
 star: true
 order: 30
 ---
 
-欢迎参与 jzero 的开发以及维护, 这是一件非常有意义的事情, 让我们一起让 jzero 变得更好.
+Welcome to participate in jzero's development and maintenance. This is a very meaningful thing. Let's make jzero better together.
 
-## 步骤
+## Steps
 
 ### 1. fork jzero
 
-[点击这里 fork](https://github.com/jzero-io/jzero/fork)
+[Click here to fork](https://github.com/jzero-io/jzero/fork)
 
 ### 2. clone
 
@@ -54,7 +54,7 @@ Create your pull request!!!
 
 ## debug jzero
 
-1. fork jzero 并 clone jzero 到本地后
+1. After forking jzero and cloning jzero locally
 
 ```shell
 cd jzero
@@ -75,15 +75,8 @@ jzero gen --debug --debug-sleep-time 15
 
 4. attach jzero process
 
-推荐采用 goland, 使用 attach 到 jzero 的进程中, 即可 debug, 如下所示:
+It's recommended to use goland, attach to jzero's process for debugging, as shown below:
 
 <video width="720" height="450" controls>
   <source src="https://oss.jaronnie.com/iShot_2024-09-20_09.22.54.mp4" type="video/mp4">
 </video>
-
-
-
-
-
-
-

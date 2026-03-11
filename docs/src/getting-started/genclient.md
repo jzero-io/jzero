@@ -1,12 +1,12 @@
 ---
-title: 生成客户端代码
+title: Generate client code
 icon: clarity:thin-client-line
 order: 5
 ---
 
-## 生成 Swagger
+## Generate Swagger
 
-### 使用方法
+### Usage
 
 ::: code-tabs#shell
 
@@ -15,7 +15,7 @@ order: 5
 ```bash
 cd your_project
 jzero gen swagger
-# 合并成一个 swagger.json 文件
+# merge into single swagger.json file
 jzero gen swagger --merge
 ```
 
@@ -23,22 +23,22 @@ jzero gen swagger --merge
 ```bash
 cd your_project
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger
-# 合并成一个 swagger.json 文件
+# merge into single swagger.json file
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger --merge
 ```
 :::
 
-**Swagger 文件**: `desc/swagger`
+**Swagger files**: `desc/swagger`
 
-**Swagger UI 地址**: `localhost:8001/swagger`
+**Swagger UI address**: `localhost:8001/swagger`
 
-## 生成 Zrpc 客户端
+## Generate Zrpc client
 
-生成 zrpc 客户端存在以下场景:
+There are several scenarios for generating zrpc client:
 
-* 直接对服务端的 proto 文件生成客户端代码, 与主服务共用一个 go module, 其他服务要引用时, 需要引用整个源码才能使用(不推荐)
-* 将服务端的 proto 文件复制到要引用的服务, 使用 `jzero gen zrpcclient` 生成到当前项目中(简单场景下推荐使用)
-* 直接对服务端的 proto 文件生成客户端代码, 有独立的 go module, 通过 ci 流程推送到单独的远程仓库, 其他服务引用时直接 go get 引入(大型项目推荐)
+* Directly generate client code from server's proto file, share same go module with main service, other services need to reference entire source code to use (not recommended)
+* Copy server's proto file to referencing service, use `jzero gen zrpcclient` to generate to current project (recommended for simple scenarios)
+* Directly generate client code from server's proto file, has independent go module, push to separate remote repository through CI process, other services directly go get to reference (recommended for large projects)
 
 ::: code-tabs#shell
 
@@ -47,7 +47,7 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen swagger --merge
 ```bash
 cd your_project
 jzero gen zrpcclient --output simplerpcclient
-# 设置 zrpcclient 为独立 go module
+# set zrpcclient as independent go module
 jzero gen zrpcclient --output simplerpcclient --goModule gitlab.xx.com/xx/simplerpcclient
 ```
 
@@ -55,12 +55,12 @@ jzero gen zrpcclient --output simplerpcclient --goModule gitlab.xx.com/xx/simple
 ```bash
 cd your_project
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen zrpcclient --output simplerpcclient
-# 设置 zrpcclient 为独立 go module
+# set zrpcclient as independent go module
 docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen zrpcclient --output simplerpcclient --goModule gitlab.xx.com/xx/simplerpcclient
 ```
 :::
 
-**代码示例**:
+**Code example**:
 
 ```go
 package main
@@ -91,11 +91,11 @@ func main() {
 }
 ```
 
-### 服务端调用其他 zrpcclient 场景
+### Server calling other zrpcclient scenarios
 
-推荐将生成的 zrpcclient 放在 third_party 下, 并且为了区分服务端和客户端, 建议使用单独的 .jzero.yaml 生成 zrpcclient
+Recommend placing generated zrpcclient under third_party, and to distinguish server and client, recommend using separate .jzero.yaml to generate zrpcclient
 
-如:
+For example:
 
 `third_party/matchingclient/.jzero.yaml`
 
@@ -105,7 +105,7 @@ gen:
     output: .
 ```
 
-在 `third_party/matchingclient` 下执行 `jzero gen zrpcclient`
+Execute `jzero gen zrpcclient` under `third_party/matchingclient`
 
 ```shell
 $ tree third_party/matchingclient -a
@@ -113,13 +113,13 @@ third_party/matchingclient
 ├── .jzero.yaml
 ├── clientset.go
 ├── desc
-│   └── proto
-│       └── matching.proto
+│   └── proto
+│       └── matching.proto
 ├── model
-│   └── types
-│       └── matching
-│           ├── matching.pb.go
-│           └── matching_grpc.pb.go
+│   └── types
+│       └── matching
+│           ├── matching.pb.go
+│           └── matching_grpc.pb.go
 └── typed
     └── matching
         └── matching.go

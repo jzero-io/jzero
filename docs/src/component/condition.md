@@ -1,20 +1,20 @@
 ---
-title: condition(数据库条件查询)
+title: condition(Database condition query)
 icon: material-symbols:conditions
 order: 4
 ---
 
-condition 的核心在于构造出 statement 和 args 参数, 然后搭配 go-zero 的 sqlx 执行器实际执行.
+The core of condition is to construct statement and args parameters, then use go-zero's sqlx executor to actually execute.
 
-## 特性
+## Features
 
-* 依赖于 [go-sqlbuilder](https://github.com/huandu/go-sqlbuilder) 一套代码兼容多种常用的数据库类型
-* 支持链式调用方便使用
+* Depends on [go-sqlbuilder](https://github.com/huandu/go-sqlbuilder) for one codebase compatible with multiple common database types
+* Supports chain calls for easy use
 
-:::tip 搭配 jzero 的数据库代码自动生成的功能, 仅需构造出 conditions 即可
+:::tip Pair with jzero's automatic database code generation feature, only need to construct conditions
 :::
 
-## 查询场景
+## Query scenarios
 
 ::: code-tabs#shell
 
@@ -41,40 +41,40 @@ type Config struct {
 }
 
 func main() {
-	// 加载配置
+	// load config
 	cc := configcenter.MustNewConfigCenter[Config](
 		configcenter.Config{Type: "yaml"},
 		subscriber.MustNewFsnotifySubscriber("etc/etc.yaml"),
 	)
 
-	// 连接 mysql 并返回 flavor
+	// connect mysql and return flavor
 	sqlConn, flavor := modelx.MustNewConnAndSqlbuilderFlavor(cc.MustGetConfig().Sqlx)
 
 	conditions := condition.New(condition.Condition{
-		// 操作的字段
+		// field to operate
 		Field: "name",
-		// 操作
+		// operation
 		Operator: condition.Equal,
-		// 字段的值
+		// field value
 		Value: "jzero",
-		// ValueFunc 优先级比 Skip 高
+		// ValueFunc has higher priority than Skip
 		ValueFunc: func() any {
 			return "jzero"
 		},
-		// 是否跳过该条件
+		// whether to skip this condition
 		Skip: false,
-		// SkipFunc 优先级比 Skip 高
+		// SkipFunc has higher priority than Skip
 		SkipFunc: func() bool {
 			return false
 		},
 	})
 
-	// 设置全局 flavor(默认 mysql)
+	// set global flavor(default mysql)
 	sqlbuilder.DefaultFlavor = sqlbuilder.PostgreSQL
 	statement, args := condition.BuildSelect(sqlbuilder.Select("*").From("user"), conditions...)
 	fmt.Println(statement, args)
 
-	// 使用特定 flavor
+	// use specific flavor
 	statement, args = condition.BuildSelectWithFlavor(flavor, sqlbuilder.Select("id", "name").From("user"), conditions...)
 
 	type User struct {
@@ -117,35 +117,35 @@ type Config struct {
 }
 
 func main() {
-	// 加载配置
+	// load config
 	cc := configcenter.MustNewConfigCenter[Config](
 		configcenter.Config{Type: "yaml"},
 		subscriber.MustNewFsnotifySubscriber("etc/etc.yaml"),
 	)
 
-	// 连接 mysql 并返回 flavor
+	// connect mysql and return flavor
 	sqlConn, flavor := modelx.MustNewConnAndSqlbuilderFlavor(cc.MustGetConfig().Sqlx)
 
 	chain := condition.NewChain().Equal("name", "jzero",
-		// WithValueFunc 比 value 优先级高
+		// WithValueFunc has higher priority than value
 		condition.WithValueFunc(func() any {
 			return "jzero"
 		}),
-		// 是否跳过该条件
+		// whether to skip this condition
 		condition.WithSkip(false),
-		// WithSkipFunc 优先级比 WithSkip 高
+		// WithSkipFunc has higher priority than WithSkip
 		condition.WithSkipFunc(
 			func() bool {
 				return false
 			}),
 	)
 
-	// 设置全局 flavor(默认 mysql)
+	// set global flavor(default mysql)
 	sqlbuilder.DefaultFlavor = sqlbuilder.PostgreSQL
 	statement, args := condition.BuildSelect(sqlbuilder.Select("*").From("user"), chain.Build()...)
 	fmt.Println(statement, args)
 
-	// 使用特定 flavor
+	// use specific flavor
 	statement, args = condition.BuildSelectWithFlavor(flavor, sqlbuilder.Select("id", "name").From("user"), chain.Build()...)
 
 	type User struct {
@@ -174,7 +174,7 @@ sqlx:
 
 :::
 
-## 更新场景
+## Update scenarios
 
 ::: code-tabs#shell
 
@@ -200,39 +200,39 @@ type Config struct {
 }
 
 func main() {
-	// 加载配置
+	// load config
 	cc := configcenter.MustNewConfigCenter[Config](
 		configcenter.Config{Type: "yaml"},
 		subscriber.MustNewFsnotifySubscriber("etc/etc.yaml"),
 	)
 
-	// 连接 mysql 并返回 flavor
+	// connect mysql and return flavor
 	sqlConn, flavor := modelx.MustNewConnAndSqlbuilderFlavor(cc.MustGetConfig().Sqlx)
 
 	conditions := condition.New(condition.Condition{
-		// 操作的字段
+		// field to operate
 		Field: "name",
-		// 操作
+		// operation
 		Operator: condition.Equal,
-		// 字段的值
+		// field value
 		Value: "jzero",
-		// ValueFunc 优先级比 Skip 高
+		// ValueFunc has higher priority than Skip
 		ValueFunc: func() any {
 			return "jzero"
 		},
-		// 是否跳过该条件
+		// whether to skip this condition
 		Skip: false,
-		// SkipFunc 优先级比 Skip 高
+		// SkipFunc has higher priority than Skip
 		SkipFunc: func() bool {
 			return false
 		},
 	})
 
-	// 设置全局 flavor(默认 mysql)
+	// set global flavor(default mysql)
 	sqlbuilder.DefaultFlavor = sqlbuilder.PostgreSQL
 	statement, args := condition.BuildUpdate(
 		sqlbuilder.Update("user"),
-		// 设置更新字段, 直接使用 map
+		// set update fields, directly use map
 		map[string]any{
 			"name": "jzero",
 			"version": condition.UpdateField{
@@ -241,10 +241,10 @@ func main() {
 		},
 		conditions...)
 
-	// 使用特定 flavor
+	// use specific flavor
 	statement, args = condition.BuildUpdateWithFlavor(flavor,
 		sqlbuilder.Update("user"),
-		// 设置更新字段, 直接使用 map
+		// set update fields, directly use map
 		map[string]any{
 			"name": "jzero",
 			"version": condition.UpdateField{
@@ -284,34 +284,34 @@ type Config struct {
 }
 
 func main() {
-	// 加载配置
+	// load config
 	cc := configcenter.MustNewConfigCenter[Config](
 		configcenter.Config{Type: "yaml"},
 		subscriber.MustNewFsnotifySubscriber("etc/etc.yaml"),
 	)
 
-	// 连接 mysql 并返回 flavor
+	// connect mysql and return flavor
 	sqlConn, flavor := modelx.MustNewConnAndSqlbuilderFlavor(cc.MustGetConfig().Sqlx)
 
 	chain := condition.NewChain().Equal("name", "jzero",
-		// WithValueFunc 比 value 优先级高
+		// WithValueFunc has higher priority than value
 		condition.WithValueFunc(func() any {
 			return "jzero"
 		}),
-		// 是否跳过该条件
+		// whether to skip this condition
 		condition.WithSkip(false),
-		// WithSkipFunc 优先级比 WithSkip 高
+		// WithSkipFunc has higher priority than WithSkip
 		condition.WithSkipFunc(
 			func() bool {
 				return false
 			}),
 	)
 
-	// 设置全局 flavor(默认 mysql)
+	// set global flavor(default mysql)
 	sqlbuilder.DefaultFlavor = sqlbuilder.PostgreSQL
 	statement, args := condition.BuildUpdate(
 		sqlbuilder.Update("user"),
-		// 设置更新字段, 构造出 map
+		// set update fields, construct map
 		condition.NewUpdateFieldChain().
 			Assign("name", "jzero").
 			Incr("version").
@@ -319,10 +319,10 @@ func main() {
 		chain.Build()...)
 	fmt.Println(statement, args)
 
-	// 使用特定 flavor
+	// use specific flavor
 	statement, args = condition.BuildUpdateWithFlavor(flavor,
 		sqlbuilder.Update("user"),
-		// 设置更新字段, 构造出 map
+		// set update fields, construct map
 		condition.NewUpdateFieldChain().
 			Assign("name", "jzero").
 			Incr("version").
@@ -347,7 +347,7 @@ sqlx:
 
 :::
 
-## 删除场景
+## Delete scenarios
 
 ::: code-tabs#shell
 
@@ -374,40 +374,40 @@ type Config struct {
 }
 
 func main() {
-	// 加载配置
+	// load config
 	cc := configcenter.MustNewConfigCenter[Config](
 		configcenter.Config{Type: "yaml"},
 		subscriber.MustNewFsnotifySubscriber("etc/etc.yaml"),
 	)
 
-	// 连接 mysql 并返回 flavor
+	// connect mysql and return flavor
 	sqlConn, flavor := modelx.MustNewConnAndSqlbuilderFlavor(cc.MustGetConfig().Sqlx)
 
 	conditions := condition.New(condition.Condition{
-		// 操作的字段
+		// field to operate
 		Field: "name",
-		// 操作
+		// operation
 		Operator: condition.Equal,
-		// 字段的值
+		// field value
 		Value: "jzero",
-		// ValueFunc 优先级比 Skip 高
+		// ValueFunc has higher priority than Skip
 		ValueFunc: func() any {
 			return "jzero"
 		},
-		// 是否跳过该条件
+		// whether to skip this condition
 		Skip: false,
-		// SkipFunc 优先级比 Skip 高
+		// SkipFunc has higher priority than Skip
 		SkipFunc: func() bool {
 			return false
 		},
 	})
 
-	// 设置全局 flavor(默认 mysql)
+	// set global flavor(default mysql)
 	sqlbuilder.DefaultFlavor = sqlbuilder.PostgreSQL
 	statement, args := condition.BuildDelete(sqlbuilder.DeleteFrom("user"), conditions...)
 	fmt.Println(statement, args)
 
-	// 使用特定 flavor
+	// use specific flavor
 	statement, args = condition.BuildDeleteWithFlavor(flavor, sqlbuilder.DeleteFrom("user"), conditions...)
 
 	result, err := sqlConn.ExecCtx(context.Background(), statement, args)
@@ -442,35 +442,35 @@ type Config struct {
 }
 
 func main() {
-	// 加载配置
+	// load config
 	cc := configcenter.MustNewConfigCenter[Config](
 		configcenter.Config{Type: "yaml"},
 		subscriber.MustNewFsnotifySubscriber("etc/etc.yaml"),
 	)
 
-	// 连接 mysql 并返回 flavor
+	// connect mysql and return flavor
 	sqlConn, flavor := modelx.MustNewConnAndSqlbuilderFlavor(cc.MustGetConfig().Sqlx)
 
 	chain := condition.NewChain().Equal("name", "jzero",
-		// WithValueFunc 比 value 优先级高
+		// WithValueFunc has higher priority than value
 		condition.WithValueFunc(func() any {
 			return "jzero"
 		}),
-		// 是否跳过该条件
+		// whether to skip this condition
 		condition.WithSkip(false),
-		// WithSkipFunc 优先级比 WithSkip 高
+		// WithSkipFunc has higher priority than WithSkip
 		condition.WithSkipFunc(
 			func() bool {
 				return false
 			}),
 	)
 
-	// 设置全局 flavor(默认 mysql)
+	// set global flavor(default mysql)
 	sqlbuilder.DefaultFlavor = sqlbuilder.PostgreSQL
 	statement, args := condition.BuildDelete(sqlbuilder.DeleteFrom("user"), chain.Build()...)
 	fmt.Println(statement, args)
 
-	// 使用特定 flavor
+	// use specific flavor
 	statement, args = condition.BuildDeleteWithFlavor(flavor, sqlbuilder.DeleteFrom("user"), chain.Build()...)
 
 	result, err := sqlConn.ExecCtx(context.Background(), statement, args)

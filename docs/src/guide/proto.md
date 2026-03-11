@@ -1,19 +1,19 @@
 ---
-title: proto 指南
+title: proto guide
 icon: vscode-icons:file-type-protobuf
 star: true
 order: 1
 ---
 
-## 特性
+## Features
 
-- ✅ **支持多 proto 文件**：可在项目中定义多个 proto 文件（如 user.proto、order.proto、product.proto）
-- ✅ 支持**引入公共 proto** 文件
-- ✅ **一键生成 RPC 客户端**：生成独立的 RPC 客户端代码，脱离服务端依赖，解耦服务端和客户端
-- ✅ **内置字段验证**：基于 `buf.validate` 实现自动参数校验
-- ✅ **灵活中间件配置**：支持为整个 service 或单个 method 配置 HTTP/RPC 中间件
+- ✅ **Support multiple proto files**: Can define multiple proto files in project (e.g., user.proto, order.proto, product.proto)
+- ✅ Support **importing common proto** files
+- ✅ **One-click generate RPC client**: Generate independent RPC client code, decouple from server dependency
+- ✅ **Built-in field validation**: Automatic parameter validation based on `buf.validate`
+- ✅ **Flexible middleware configuration**: Support configuring HTTP/RPC middleware for entire service or single method
 
-## proto 文件示例
+## proto file example
 
 ```protobuf
 syntax = "proto3";
@@ -43,7 +43,7 @@ service Version {
 }
 ```
 
-## proto 字段校验
+## proto field validation
 
 see: [protovalidate](https://buf.build/docs/protovalidate/)
 
@@ -56,14 +56,14 @@ import "buf/validate/validate.proto";
 
 option go_package = "./pb/versionpb";
 
-// 使用内置规则
+// Use built-in rules
 message CreateRequest {
   string email = 1 [(buf.validate.field).string.email = true];
   int32 age = 2 [(buf.validate.field).int32.gt = 17];
   string name = 3 [(buf.validate.field).string.min_len = 2];
 }
 
-// cel 表达式, 支持自定义 message
+// cel expression, supports custom message
 message GetRequest {
   int32 id = 1 [
     (buf.validate.field).cel = {
@@ -75,11 +75,11 @@ message GetRequest {
 }
 ```
 
-**内置规则如果有国际化需求, 可使用 [protovalidate-translator](https://github.com/jzero-io/protovalidate-translator)**
+**If built-in rules need internationalization, can use [protovalidate-translator](https://github.com/jzero-io/protovalidate-translator)**
 
 ## middleware
 
-添加 middleware, 多个 middleware 使用逗号隔开
+Add middleware, separate multiple middleware with commas
 
 ```protobuf
 import "jzero/api/http.proto";
@@ -108,12 +108,12 @@ service User {
 }
 ```
 
-详细解释:
-* option (jzero.api.http_group) 即将该 service 下的所有 method 都新增 http 中间件
-* option (jzero.api.http) 只针对某个 method 新增 http 中间件
-* option (jzero.api.zrpc_group) 即将该 service 下的所有 method 都新增 zrpc 中间件
-* option (jzero.api.zrpc) 只针对某个 method 新增 zrpc 中间件
+Detailed explanation:
+* option (jzero.api.http_group) adds http middleware to all methods under this service
+* option (jzero.api.http) only adds http middleware to specific method
+* option (jzero.api.zrpc_group) adds zrpc middleware to all methods under this service
+* option (jzero.api.zrpc) only adds zrpc middleware to specific method
 
-执行 `jzero gen` 后将会生成一下文件, 以 auth 为例:
+After executing `jzero gen`, following files will be generated, using auth as example:
 * internal/middleware/authmiddleware.go
 * internal/middleware/middleware_gen.go

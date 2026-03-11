@@ -1,154 +1,154 @@
 ---
-title: AI 驱动的 Go 开发：jzero 如何让开发更高效更可靠
+title: "AI-Driven Go Development: How jzero Makes Development More Efficient and Reliable"
 icon: streamline-ultimate:blog-blogger-logo
 ---
 
-在 AI 辅助编程逐渐成为主流的今天，大家都逐渐在用 AI 工具辅助开发了，也确实大大提升了编码效率。但一个不可忽视的问题是：
+As AI-assisted programming gradually becomes mainstream, everyone is gradually using AI tools to assist development, which has indeed greatly improved coding efficiency. However, an overlooked issue is:
 
-**AI 生成的代码往往缺乏可读性与可维护性，难以融入团队的开发标准和工程体系。**
+**AI-generated code often lacks readability and maintainability, making it difficult to integrate into team development standards and engineering systems.**
 
-### 传统 AI 编程的痛点
+### Pain Points of Traditional AI Programming
 
-**1. 与 AI 的"拉扯"消耗大量精力**
+**1. "Tug of war" with AI consumes a lot of energy**
 
-使用传统 AI 工具时，你需要反复与 AI "拉扯"才能获得可用的代码：
+When using traditional AI tools, you need to repeatedly "tug" with AI to get usable code:
 
 ```
-你：帮我写一个用户注册接口
-AI：生成了一段代码（不符合框架规范）
+You: Help me write a user registration interface
+AI: Generated a piece of code (doesn't follow framework standards)
 
-你：命名不符合团队规范，参照 user/list.go 的写法
-AI：又改了一版（还是不完全对）
+You: Naming doesn't follow team standards, refer to user/list.go
+AI: Modified another version (still not completely right)
 
-你：要使用框架的 Model 层方法，不要直接写 SQL
-AI：继续修改...
+You: Should use the framework's Model layer methods, don't write SQL directly
+AI: Continue modifying...
 
-你：编译错误，修复问题
-AI：继续修改...
+You: Compilation error, fix the problem
+AI: Continue modifying...
 
-你：终于能用了（但已经花了 30 分钟，经历了 n 轮对话）
+You: Finally works (but spent 30 minutes, experienced n rounds of dialogue)
 ```
 
-**2. AI 仅以目标为导向，忽略工程实践**
+**2. AI is only goal-oriented, ignoring engineering practices**
 
-- ❌ **缺乏最佳实践**：AI 不知道框架推荐写法，生成的代码"能用但不优雅"
-- ❌ **不符合团队规范**：命名、注释、目录结构各不相同
-- ❌ **易反复修改**：同样的需求，每次生成的代码都不一样
-- ❌ **质量不可控**：缺乏错误处理、日志、监控等工程要素
+- ❌ **Lacks best practices**: AI doesn't know framework-recommended patterns, generated code "works but isn't elegant"
+- ❌ **Doesn't follow team standards**: Naming, comments, directory structure vary
+- ❌ **Prone to repeated modifications**: Same requirement, different code generated each time
+- ❌ **Uncontrollable quality**: Lacks error handling, logging, monitoring and other engineering elements
 
-**3. 无法参照框架最佳实践**
+**3. Cannot reference framework best practices**
 
-- ❌ 不知道框架提供了哪些工具类和辅助函数
-- ❌ 不了解框架推荐的目录结构和模块划分
-- ❌ 不清楚框架的性能优化建议
-- ❌ 生成的代码像"外来的"，难以融入现有项目
+- ❌ Doesn't know what utility classes and helper functions the framework provides
+- ❌ Doesn't understand framework-recommended directory structure and module division
+- ❌ Unclear about framework performance optimization suggestions
+- ❌ Generated code looks "foreign", difficult to integrate into existing projects
 
-### jzero 如何解决这些问题
+### How jzero Solves These Problems
 
-**通过 agent skills 中定义的工作流程以及最佳实践，减少用户与 AI 之间的"拉扯"**：
+**By defining workflows and best practices in agent skills, reduce the "tug of war" between users and AI**:
 
-1. **标准化工作流**：`api/proto/sql` → `jzero gen` → 框架代码 → AI 填充业务逻辑
-2. **完整的框架知识**：jzero-skills 包含框架最佳实践，AI 自动遵循
-3. **约束条件下发挥**：AI 在框架约束下智能填充，既高效又规范
-4. **一次生成即可用**：减少反复修改，代码质量有保障
+1. **Standardized workflow**: `api/proto/sql` → `jzero gen` → framework code → AI fills business logic
+2. **Complete framework knowledge**: jzero-skills contains framework best practices, AI follows automatically
+3. **Work within constraints**: AI intelligently fills business logic under framework constraints, both efficient and standardized
+4. **One-time generation is usable**: Reduce repeated modifications, guaranteed code quality
 
-- 🔧 **引擎一**（基于固定模板生成基础框架代码）：100% 标准化，保证架构统一
-- 🤖 **引擎二**（AI Skills 生成业务代码）：在框架约束下智能填充业务逻辑
-- 💥 **双剑合璧**：既享受 AI 的效率，又保证代码质量和可维护性
+- 🔧 **Engine One** (generate basic framework code based on fixed templates): 100% standardized, ensures architectural consistency
+- 🤖 **Engine Two** (AI Skills generate business code): Intelligently fill business logic under framework constraints
+- 💥 **Combined**: Enjoy AI efficiency while ensuring code quality and maintainability
 
-## jzero 的双引擎开发模式
+## jzero's Dual-Engine Development Mode
 
-jzero 双引擎模式将代码生成分为两个阶段，AI 先生成描述文件，再基于描述文件生成框架代码和业务逻辑：
+jzero's dual-engine mode divides code generation into two stages, where AI first generates descriptor files, then generates framework code and business logic based on descriptor files:
 
-**🏗️ jzero 双引擎架构**
+**🏗️ jzero Dual-Engine Architecture**
 
 ---
 
-**🔧 引擎一：基础框架代码生成**
+**🔧 Engine One: Basic Framework Code Generation**
 
-*   AI 生成 api 文件 → jzero 框架生成 Handler/Logic/Types
-*   AI 生成 proto 文件 → jzero 框架生成 Server/Logic/Pb
-*   AI 生成 sql 文件 → jzero 生成 Model 层通用方法代码
-*   **特点**：标准化、可预测、符合最佳实践
-*   **速度**：秒级生成
-
----
-
-**🤖 引擎二：AI Skills 业务代码生成**
-
-*   Logic 层业务逻辑实现
-*   复杂查询和事务处理
-*   **特点**：智能化、自动化、理解业务需求
-*   **速度**：分钟级实现
+*   AI generates api file → jzero framework generates Handler/Logic/Types
+*   AI generates proto file → jzero framework generates Server/Logic/Pb
+*   AI generates sql file → jzero generates Model layer general method code
+*   **Features**: Standardized, predictable, follows best practices
+*   **Speed**: Second-level generation
 
 ---
 
-**💥 双剑合璧**：完整功能代码，开发效率提升 10 倍
+**🤖 Engine Two: AI Skills Business Code Generation**
 
-### 一分钟看懂双引擎
+*   Logic layer business logic implementation
+*   Complex queries and transaction processing
+*   **Features**: Intelligent, automated, understands business requirements
+*   **Speed**: Minute-level implementation
 
-**传统开发**（你自己做所有事）：
+---
+
+**💥 Combined**: Complete functional code, 10x development efficiency improvement
+
+### Understanding Dual-Engine in One Minute
+
+**Traditional Development** (you do everything yourself):
 ```
-需求 → 手写 .api → 手写 Handler → 手写 Logic → 手写 Model → 调试
-       20分钟     10分钟      60分钟      30分钟     30分钟
-总计：2.5 小时
+Requirement → Hand-write .api → Hand-write Handler → Hand-write Logic → Hand-write Model → Debug
+       20min     10min      60min      30min     30min
+Total: 2.5 hours
 ```
 
-**jzero 双引擎**（你只描述需求）：
+**jzero Dual-Engine** (you only describe requirements):
 ```
-需求 → AI 创建 .api → jzero 框架生成基础框架 → AI 生成业务逻辑
-       1分钟         10秒            3-5分钟
-总计：7 分钟 ⚡
+Requirement → AI creates .api → jzero framework generates basic framework → AI generates business logic
+       1min         10sec            3-5min
+Total: 7 minutes ⚡
 ```
 
-**关键区别**：
-- 🔧 **引擎一**（jzero gen）：生成标准化框架代码，保证架构统一
-- 🤖 **引擎二**（AI Skills）：理解需求，智能填充业务逻辑
-- 💡 **你的角色**：从"代码搬运工"变成"架构师和业务专家"
+**Key Difference**:
+- 🔧 **Engine One** (jzero gen): Generate standardized framework code, ensure architectural consistency
+- 🤖 **Engine Two** (AI Skills): Understand requirements, intelligently fill business logic
+- 💡 **Your role**: From "code porter" to "architect and business expert"
 
-### 为什么需要这种模式？
+### Why Do We Need This Mode?
 
-**传统开发模式的痛点**：
+**Pain points of traditional development mode**:
 
-- ❌ **重复造轮子**：每次新建功能都要写一遍相似的 Handler/Logic/Model
-- ❌ **架构不一致**：不同开发者写的代码风格各异，维护成本高
-- ❌ **AI 不懂框架**：普通 AI 生成的代码需要大量调整才能融入项目
-- ❌ **效率瓶颈**：框架代码占用大量时间，真正用于业务逻辑的时间少
+- ❌ **Reinventing the wheel**: Every new feature requires writing similar Handler/Logic/Model
+- ❌ **Inconsistent architecture**: Different developers write code with different styles, high maintenance cost
+- ❌ **AI doesn't understand frameworks**: Ordinary AI-generated code needs lots of adjustments to integrate into projects
+- ❌ **Efficiency bottleneck**: Framework code takes a lot of time, little time left for business logic
 
-**jzero 双引擎模式的优势**：
+**Advantages of jzero dual-engine mode**:
 
-| 维度 | 引擎一：框架生成 | 引擎二：AI Skills | 结合优势    |
+| Dimension | Engine One: Framework Generation | Engine Two: AI Skills | Combined Advantage    |
 |------|----------------|------------------|---------|
-| **生成内容** | Handler/Logic/Model 框架 | 业务逻辑实现 | 完整功能代码  |
-| **代码质量** | 100% 符合框架规范 | 遵循最佳实践 | 生产级别    |
-| **开发速度** | 秒级生成 | 分钟级实现 | 10 倍提升  |
-| **架构统一** | ✅ 完全统一 | ✅ 自动遵循 | 团队协作无摩擦 |
-| **可维护性** | 标准化结构 | 清晰的业务逻辑 | 极易维护    |
+| **Generated Content** | Handler/Logic/Model framework | Business logic implementation | Complete functional code  |
+| **Code Quality** | 100% follows framework standards | Follows best practices | Production level    |
+| **Development Speed** | Second-level generation | Minute-level implementation | 10x improvement  |
+| **Architectural Consistency** | ✅ Completely consistent | ✅ Automatically follows | Frictionless team collaboration |
+| **Maintainability** | Standardized structure | Clear business logic | Extremely easy to maintain    |
 
 ---
 
-## 双引擎实战：如何协作生成高质量易维护的代码
+## Dual-Engine in Practice: How to Collaborate to Generate High-Quality, Maintainable Code
 
-让我们通过一个具体例子，看看两个引擎如何完美配合。
+Let's see how two engines work together perfectly through a specific example.
 
-你的需求：
+Your requirement:
 ```
-jzero-skills 创建用户管理 api，支持：
-1. 用户注册（用户名 3-20 位、邮箱验证、密码至少 8 位）
-2. 获取用户信息
+jzero-skills create user management api, supporting:
+1. User registration (username 3-20 characters, email validation, password at least 8 characters)
+2. Get user info
 ```
 
-### 🔧 引擎一：基础框架代码生成（自动执行）
+### 🔧 Engine One: Basic Framework Code Generation (Automatic)
 
-**步骤 1：AI 创建 api 定义文件**
+**Step 1: AI creates api definition file**
 
-AI 根据需求描述，自动推断并添加验证规则：
+Based on requirement description, AI automatically infers and adds validation rules:
 
-- ✅ 用户名 3-20 位 → `validate:"required,min=3,max=20"`
-- ✅ 邮箱验证 → `validate:"required,email"`
-- ✅ 密码至少 8 位 → `validate:"required,min=8"`
+- ✅ Username 3-20 characters → `validate:"required,min=3,max=20"`
+- ✅ Email validation → `validate:"required,email"`
+- ✅ Password at least 8 characters → `validate:"required,min=8"`
 
-AI 自动生成 `desc/api/user.api`：
+AI automatically generates `desc/api/user.api`:
 
 ```go
 info(
@@ -187,64 +187,64 @@ type GetResponse {
     compact_handler: true
 )
 service simpleapi {
-    @doc "用户注册"
+    @doc "User registration"
     @handler Register
     post /register (RegisterRequest) returns (RegisterResponse)
 
-    @doc "获取用户信息"
+    @doc "Get user info"
     @handler Get
     get /:id (GetRequest) returns (GetResponse)
 }
 ```
 
-**步骤 2：AI 自动创建数据库表定义**
+**Step 2: AI automatically creates database table definition**
 
-AI 根据需求自动生成 `desc/sql/user.sql`：
+AI automatically generates `desc/sql/user.sql` based on requirements:
 
 ```sql
 CREATE TABLE `user` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID',
-  `username` varchar(20) NOT NULL COMMENT '用户名',
-  `email` varchar(255) NOT NULL COMMENT '邮箱',
-  `password` varchar(255) NOT NULL COMMENT '密码',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'User ID',
+  `username` varchar(20) NOT NULL COMMENT 'Username',
+  `email` varchar(255) NOT NULL COMMENT 'Email',
+  `password` varchar(255) NOT NULL COMMENT 'Password',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created at',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated at',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_username` (`username`),
   UNIQUE KEY `idx_email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='User table';
 ```
 
-AI 智能设计：
-- ✅ 根据验证规则自动推断字段类型（username 20 位 → varchar(20)）
-- ✅ 自动添加索引（username/email 唯一索引）
-- ✅ 自动添加时间戳字段（created_at/updated_at）
-- ✅ 自动添加表注释和字段注释
+AI intelligently designs:
+- ✅ Automatically infers field types based on validation rules (username 20 characters → varchar(20))
+- ✅ Automatically adds indexes (username/email unique indexes)
+- ✅ Automatically adds timestamp fields (created_at/updated_at)
+- ✅ Automatically adds table and field comments
 
-**步骤 2：AI 自动执行框架生成命令**
+**Step 2: AI automatically executes framework generation command**
 
 ```bash
-# 1. 生成 Handler/Logic/Types（从 api 文件）
+# 1. Generate Handler/Logic/Types (from api file)
 jzero gen --desc desc/api/user.api
 
-# 2. 生成 Model 层（从 sql 文件）
+# 2. Generate Model layer (from sql file)
 jzero gen --desc desc/sql/user.sql
 ```
 
-→ 生成文件：
-- ✅ `internal/model/model.go` // 所有 model 注册
-- ✅ `internal/model/user/*.go` // User Model 层（CRUD 方法、字段常量）
+→ Generated files:
+- ✅ `internal/model/model.go` // All model registration
+- ✅ `internal/model/user/*.go` // User Model layer (CRUD methods, field constants)
 - ✅ `internal/handler/user/user_compact.go` // user handler
-- ✅ `internal/handler/routes.go` // 路由注册
-- ✅ `internal/logic/user/register.go` // register 业务逻辑空实现
-- ✅ `internal/logic/user/get.go` //  get 业务逻辑空实现
-- ✅ `internal/types/user/types.go`   // type struct 定义
+- ✅ `internal/handler/routes.go` // Route registration
+- ✅ `internal/logic/user/register.go` // Register business logic empty implementation
+- ✅ `internal/logic/user/get.go` // Get business logic empty implementation
+- ✅ `internal/types/user/types.go`   // type struct definition
 
-### 🤖 引擎二：AI Skills 填充业务逻辑（AI 智能生成）
+### 🤖 Engine Two: AI Skills Fill Business Logic (AI Intelligent Generation)
 
-**步骤 3：AI 实现 register 和 get 业务逻辑**
+**Step 3: AI implements register and get business logic**
 
-**引擎一生成的 register 框架代码** `internal/logic/user/register.go`：
+**Register framework code generated by Engine One** `internal/logic/user/register.go`:
 
 ```go
 package user
@@ -282,7 +282,7 @@ func (l *Register) Register(req *types.RegisterRequest) (resp *types.RegisterRes
 }
 ```
 
-**引擎二 AI Skills 填充 register 业务逻辑后**：
+**After Engine Two AI Skills fills register business logic**:
 
 ```go
 package user
@@ -328,7 +328,7 @@ func (l *Register) Register(req *types.RegisterRequest) (resp *types.RegisterRes
             return nil, err
         }
     } else {
-        return nil, errors.New("用户名已存在")
+        return nil, errors.New("username already exists")
     }
 
     user := &usermodel.User{
@@ -351,7 +351,7 @@ func (l *Register) Register(req *types.RegisterRequest) (resp *types.RegisterRes
 }
 ```
 
-**引擎一生成的 get 框架代码** `internal/logic/user/get.go`：
+**Get framework code generated by Engine One** `internal/logic/user/get.go`:
 
 ```go
 package user
@@ -373,7 +373,7 @@ type Get struct {
     r      *http.Request
 }
 
-// 获取用户信息
+// Get user info
 func NewGet(ctx context.Context, svcCtx *svc.ServiceContext, r *http.Request) *Get {
     return &Get{
         Logger: logx.WithContext(ctx),
@@ -390,7 +390,7 @@ func (l *Get) Get(req *types.GetRequest) (resp *types.GetResponse, err error) {
 }
 ```
 
-**引擎二 AI Skills 填充 get 业务逻辑后**：
+**After Engine Two AI Skills fills get business logic**:
 
 ```go
 package user
@@ -414,7 +414,7 @@ type Get struct {
     r      *http.Request
 }
 
-// 获取用户信息
+// Get user info
 func NewGet(ctx context.Context, svcCtx *svc.ServiceContext, r *http.Request) *Get {
     return &Get{
         Logger: logx.WithContext(ctx),
@@ -428,7 +428,7 @@ func (l *Get) Get(req *types.GetRequest) (resp *types.GetResponse, err error) {
     user, err := l.svcCtx.Model.User.FindOne(l.ctx, nil, req.Id)
     if err != nil {
         if errors.Is(err, usermodel.ErrNotFound) {
-            return nil, errors.New("用户不存在")
+            return nil, errors.New("user does not exist")
         }
         l.Logger.Errorf("failed to find user: %v", err)
         return nil, err
@@ -442,98 +442,98 @@ func (l *Get) Get(req *types.GetRequest) (resp *types.GetResponse, err error) {
 }
 ```
 
-### 📊 总结：双引擎协作的核心价值
+### 📊 Summary: Core Value of Dual-Engine Collaboration
 
-通过这个完整的例子，我们可以清楚地看到 jzero 双引擎模式的协作流程和价值：
+Through this complete example, we can clearly see the workflow and value of jzero dual-engine mode collaboration:
 
 
-| 阶段 | 负责引擎 | 核心任务 | 输出成果 |
+| Stage | Responsible Engine | Core Task | Output |
 |------|---------|---------|---------|
-| **描述文件生成** | 🤖 AI Skills | 理解需求，生成 api/sql 定义 | 规范的描述文件 |
-| **框架代码生成** | 🔧 jzero gen | 基于描述文件生成标准框架 | Handler/Logic/Model 空实现 |
-| **业务逻辑填充** | 🤖 AI Skills | 实现具体的业务逻辑 | 完整可用的功能代码 |
+| **Descriptor File Generation** | 🤖 AI Skills | Understand requirements, generate api/sql definitions | Standardized descriptor files |
+| **Framework Code Generation** | 🔧 jzero gen | Generate standard framework based on descriptor files | Handler/Logic/Model empty implementations |
+| **Business Logic Filling** | 🤖 AI Skills | Implement specific business logic | Complete usable functional code |
 
-**关键优势**
+**Key Advantages**
 
-✅ **各司其职，发挥所长**
-   - 引擎一（jzero gen）：确保架构统一、代码规范、生成快速
-   - 引擎二（AI Skills）：理解业务、智能填充、处理复杂逻辑
+✅ **Each specializes in their field**
+   - Engine One (jzero gen): Ensures architectural consistency, code standardization, fast generation
+   - Engine Two (AI Skills): Understands business, intelligently fills logic, handles complex logic
 
-✅ **质量与效率兼顾**
-   - 框架代码 100% 符合规范，无技术债
-   - 业务逻辑智能生成，减少重复劳动
-   - 开发效率提升 10 倍，代码质量不降反升
+✅ **Quality and efficiency both considered**
+   - Framework code 100% follows standards, no technical debt
+   - Business logic intelligently generated, reduce repetitive work
+   - 10x development efficiency improvement, code quality not compromised but improved
 
-✅ **可预测的输出**
-   - 框架代码位置、命名、结构完全标准化
-   - 团队成员生成的代码风格一致
-   - 便于 Code Review 和团队协作
+✅ **Predictable output**
+   - Framework code location, naming, structure completely standardized
+   - Team members generate code with consistent style
+   - Easy for Code Review and team collaboration
 
-✅ **降低认知负担**
-   - 开发者只需关注业务逻辑，框架细节自动处理
-   - 新人上手快，项目维护成本低
-   - AI 在约束条件下工作，不会"胡乱发挥"
+✅ **Reduce cognitive burden**
+   - Developers only focus on business logic, framework details automatically handled
+   - New team members get up to speed quickly, low project maintenance cost
+   - AI works under constraints, won't "randomly create"
 
-**与传统开发的对比**
+**Comparison with Traditional Development**
 
-| 开发模式 | 耗时 | 代码质量 | 架构统一 | 可维护性 |
+| Development Mode | Time | Code Quality | Architectural Consistency | Maintainability |
 |---------|------|---------|---------|---------|
-| **纯手工开发** | 2.5 小时 | ⭐⭐⭐ | ❌ 不确定 | ⭐⭐ |
-| **传统 AI 辅助** | 30 分钟+ | ⭐⭐ | ❌ 不确定 | ⭐⭐ |
-| **jzero 双引擎** | 7 分钟 | ⭐⭐⭐⭐⭐ | ✅ 完全统一 | ⭐⭐⭐⭐⭐ |
+| **Pure Manual Development** | 2.5 hours | ⭐⭐⭐ | ❌ Uncertain | ⭐⭐ |
+| **Traditional AI Assistance** | 30 minutes+ | ⭐⭐ | ❌ Uncertain | ⭐⭐ |
+| **jzero Dual-Engine** | 7 minutes | ⭐⭐⭐⭐⭐ | ✅ Completely consistent | ⭐⭐⭐⭐⭐ |
 
-**核心理念**
+**Core Philosophy**
 
-jzero 双引擎模式体现了我们对 AI 辅助开发的核心观点：
+jzero dual-engine mode embodies our core view on AI-assisted development:
 
-> **AI 不应该替代开发者做架构决策，而应该在框架约束下智能填充业务逻辑。**
+> **AI should not replace developers in making architectural decisions, but should intelligently fill business logic under framework constraints.**
 
 
-### 思考: jzero 为何仅使用 skills 放弃 MCP
+### Reflection: Why jzero Only Uses Skills and Abandons MCP
 
-在探索 AI 辅助开发的过程中，jzero 曾经尝试过集成 MCP (Model Context Protocol)。这是一个允许 AI 模型通过标准化协议访问外部工具和数据的协议。然而，经过深入实践和验证，我们最终决定放弃 MCP。
+In exploring AI-assisted development, jzero attempted to integrate MCP (Model Context Protocol). This is a protocol that allows AI models to access external tools and data through standardized protocols. However, after in-depth practice and validation, we finally decided to abandon MCP.
 
-**原因很简单：jzero 的代码生成流程本身就足够简单直接。**
+**The reason is simple: jzero's code generation process is inherently simple and direct.**
 
-**jzero 的核心设计理念**
+**jzero's Core Design Philosophy**
 
-jzero 从一开始就采用了一种极其简单的代码生成方式：
+jzero has adopted an extremely simple code generation approach from the start:
 
 ```
-描述文件 (api/sql/proto) → jzero gen → 完整的框架代码
+Descriptor files (api/sql/proto) → jzero gen → Complete framework code
 ```
 
-这个流程的核心优势在于：
+The core advantages of this process:
 
-✅ **文件位置和结构都是约定的**
-- api 描述文件统一放在 `desc/api/` 目录
-- sql 描述文件统一放在 `desc/sql/` 目录
-- proto 描述文件统一放在 `desc/proto/` 目录
+✅ **File locations and structures are all conventional**
+- api descriptor files uniformly placed in `desc/api/` directory
+- sql descriptor files uniformly placed in `desc/sql/` directory
+- proto descriptor files uniformly placed in `desc/proto/` directory
 
-✅ **一条命令搞定代码生成**
-- `jzero gen` // 自动扫描 api/proto/sql 生成代码
-- `jzero gen --desc desc/api/user.api` // 仅生成 user.api
-- `jzero gen --desc desc/proto/user.proto` // 仅生成 user.proto
-- `jzero gen --desc desc/sql/user.sql` // 仅生成 user.sql
+✅ **One command handles code generation**
+- `jzero gen` // Automatically scan api/proto/sql to generate code
+- `jzero gen --desc desc/api/user.api` // Only generate user.api
+- `jzero gen --desc desc/proto/user.proto` // Only generate user.proto
+- `jzero gen --desc desc/sql/user.sql` // Only generate user.sql
 
-对于 jzero 这样约定明确、命令简单的框架，**skills 比 mcp 更直接、更简单高效、更易用**。
+For a framework like jzero with clear conventions and simple commands, **skills is more direct, simple, efficient, and easy to use than mcp**.
 
-## 快速开始
+## Quick Start
 
 ```bash
-# 1. 安装 jzero
+# 1. Install jzero
 go install github.com/jzero-io/jzero/cmd/jzero@latest
 
-# 2. 初始化 jzero-skills
+# 2. Initialize jzero-skills
 jzero skills init
 
-# 3. 创建项目
+# 3. Create project
 jzero new simpleapi --frame api
 
-# 4. 在 Claude Code 中描述需求
-# "使用 jzero-skills 创建一个用户管理 api..."
+# 4. Describe requirements in Claude Code
+# "Use jzero-skills to create a user management api..."
 ```
 
-**觉得有用？请给 jzero 一个 ⭐ Star，支持我们继续改进！**
+**Find it useful? Please give jzero a ⭐ Star to support our continued improvement!**
 
 GitHub: [https://github.com/jzero-io/jzero](https://github.com/jzero-io/jzero)

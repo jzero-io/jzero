@@ -1,76 +1,76 @@
 ---
-title: 模版指南
+title: Template guide
 icon: vscode-icons:folder-type-template
 star: true
 order: 5.3
 ---
 
-## 模版初始化
+## Template initialization
 
-将jzero内嵌模版或者远程仓库的模版初始化到本地磁盘。
+Initialize jzero embedded templates or remote repository templates to local disk.
 
 ```shell
-# 初始化jzero内嵌模板到 $HOME/.jzero/templates/$Version 下, 可以修改模板后再进行新建项目
+# Initialize jzero embedded templates to $HOME/.jzero/templates/$Version, can modify templates then create new projects
 jzero template init
-# 或者初始化模板到当前项目的 .template, jzero gen 默认会优先读取当前项目的 .template 作为模板 home
+# Or initialize templates to current project's .template, jzero gen will prioritize reading current project's .template as template home
 jzero template init --output .template
-# 初始化远程仓库模板到 $HOME/.jzero/templates/remote 下, 如 gateway, 
+# Initialize remote repository templates to $HOME/.jzero/templates/remote, such as gateway
 jzero template init --branch gateway
 
-# 如果仍需要扩展 go-zero 的 template
+# If still need to extend go-zero's template
 goctl template init --home .template/go-zero
 ```
 
-## 使用自定义模版初始化项目
+## Initialize project with custom template
 
-* 指定远程仓库模板
+* Specify remote repository template
 
 ```shell
 jzero new project_name --remote repo_to_your_templates --branch template_branch
-# 从缓存获取远程模板
+# Get remote template from cache
 jzero new project_name --remote repo_to_your_templates --branch template_branch --cache
 ```
 
-* 使用本地模版
+* Use local template
 
 ```shell
 jzero new project_name --local template_name
 ```
 
-* 使用路径模版
+* Use path template
 
 ```shell
 jzero new project_name --home path_to_template
 ```
 
-## 实战: 构建属于自己的模版
+## Practice: Build your own template
 
-:::tip 可以将当前任意项目转换成 jzero 模板, 这非常 cool!
+:::tip Can convert any current project to jzero template, this is very cool!
 :::
 
 ```bash
-# 新增一个 api 项目
+# Add a new api project
 jzero new simpleapi
-# 进入项目
+# Enter project
 cd simpleapi
-# 新增一个 api
+# Add a new api
 jzero add api helloworld
-# 生成代码
+# Generate code
 jzero gen
 
-# 将当前项目构建为模版, 并保存到 $HOME/.jzero/templates/local/myapi 下
+# Build current project as template, save to $HOME/.jzero/templates/local/myapi
 jzero template build --name myapi
 
-# 此时就可以使用你自己构建的模板了, 你会发现生成的项目自动拥有了 helloworld api 了.
+# Now you can use your own template, you'll find the generated project automatically has helloworld api
 jzero new mysimpleapi --local myapi
 
-# 但是你发现该模板仅允许本地使用, 为了达到通用的效果
-# 你可以在远程仓库如 github 创建一个 templates 仓库(假设为 https://github.com/jzero-io/templates)
-# 然后将 $HOME/.jzero/templates/local/myapi 下的内容放到仓库中, 并上传到 myapi 分支
+# But you find this template only allows local use, for universal effect
+# You can create a templates repository in remote repository like github (assume https://github.com/jzero-io/templates)
+# Then put content from $HOME/.jzero/templates/local/myapi into repository, and upload to myapi branch
 jzero new project_name --remote https://github.com/jzero-io/templates --branch myapi
 ```
 
-模板结构如下:
+Template structure:
 
 ```bash
 $ tree ~/.jzero/templates/local/myapi
@@ -78,50 +78,50 @@ $ tree ~/.jzero/templates/local/myapi
     ├── Dockerfile.tpl
     ├── README.md.tpl
     ├── cmd
-    │   ├── root.go.tpl
-    │   ├── server.go.tpl
-    │   └── version.go.tpl
+    │   ├── root.go.tpl
+    │   ├── server.go.tpl
+    │   └── version.go.tpl
     ├── desc
-    │   ├── api
-    │   │   ├── helloworld.api.tpl
-    │   │   └── version.api.tpl
-    │   └── swagger
-    │       ├── helloworld.swagger.json.tpl
-    │       ├── swagger.json.tpl
-    │       └── version.swagger.json.tpl
+    │   ├── api
+    │   │   ├── helloworld.api.tpl
+    │   │   └── version.api.tpl
+    │   └── swagger
+    │       ├── helloworld.swagger.json.tpl
+    │       ├── swagger.json.tpl
+    │       └── version.swagger.json.tpl
     ├── etc
-    │   └── etc.yaml.tpl
+    │   └── etc.yaml.tpl
     ├── go.mod.tpl
     ├── internal
-    │   ├── config
-    │   │   └── config.go.tpl
-    │   ├── custom
-    │   │   └── custom.go.tpl
-    │   ├── handler
-    │   │   ├── helloworld
-    │   │   │   └── helloworld_compact.go.tpl
-    │   │   ├── routes.go.tpl
-    │   │   └── version
-    │   │       └── version.go.tpl
-    │   ├── logic
-    │   │   ├── helloworld
-    │   │   │   └── create.go.tpl
-    │   │   └── version
-    │   │       └── version.go.tpl
-    │   ├── middleware
-    │   │   ├── middleware.go.tpl
-    │   │   ├── response.go.tpl
-    │   │   └── validator.go.tpl
-    │   ├── svc
-    │   │   ├── config.go.tpl
-    │   │   ├── middleware.go.tpl
-    │   │   └── servicecontext.go.tpl
-    │   └── types
-    │       ├── helloworld
-    │       │   └── types.go.tpl
-    │       ├── types.go.tpl
-    │       └── version
-    │           └── types.go.tpl
+    │   ├── config
+    │   │   └── config.go.tpl
+    │   ├── custom
+    │   │   └── custom.go.tpl
+    │   ├── handler
+    │   │   ├── helloworld
+    │   │   │   └── helloworld_compact.go.tpl
+    │   │   ├── routes.go.tpl
+    │   │   └── version
+    │   │       └── version.go.tpl
+    │   ├── logic
+    │   │   ├── helloworld
+    │   │   │   └── create.go.tpl
+    │   │   └── version
+    │   │       └── version.go.tpl
+    │   ├── middleware
+    │   │   ├── middleware.go.tpl
+    │   │   ├── response.go.tpl
+    │   │   └── validator.go.tpl
+    │   ├── svc
+    │   │   ├── config.go.tpl
+    │   │   ├── middleware.go.tpl
+    │   │   └── servicecontext.go.tpl
+    │   └── types
+    │       ├── helloworld
+    │       │   └── types.go.tpl
+    │       ├── types.go.tpl
+    │       └── version
+    │           └── types.go.tpl
     ├── main.go.tpl
     └── plugins
         └── plugins.go.tpl

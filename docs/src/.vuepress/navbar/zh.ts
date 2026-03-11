@@ -3,7 +3,6 @@ import { navbar } from "vuepress-theme-hope";
 
 // @ts-ignore
 export const zhNavbar = navbar([
-  "/",
   {
     link: "https://docs.jzero.io/blog/",
     text: "博客",

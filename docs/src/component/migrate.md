@@ -1,15 +1,15 @@
 ---
-title: migrate(管理数据库迁移脚本)
+title: migrate(Database migration management)
 icon: streamline-plump-color:database
 order: 3
 ---
 
-migrate 组件默认读取 desc/sql_migration 下的 sql 文件, 管理 sql.
+migrate component reads sql files under desc/sql_migration by default to manage sql.
 
-* Up: 默认升级所有 up 脚本, 支持传入 steps 参数升级几个
-* Down: 默认回滚所有 down 脚本, 支持传入 steps 参数回滚几个
-* Goto: 切到某个版本
-* Version: 获取当前版本
+* Up: Upgrade all up scripts by default, supports passing steps parameter to upgrade several
+* Down: Rollback all down scripts by default, supports passing steps parameter to rollback several
+* Goto: Switch to a specific version
+* Version: Get current version
 
 ::: code-tabs#shell
 
@@ -39,7 +39,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	defer m.Close()
 
 	if err = m.Up(); err != nil {
@@ -78,7 +78,7 @@ CREATE TABLE `manage_user` (
 
 INSERT INTO `manage_user` (`uuid`, `create_time`, `update_time`, `username`, `password`, `nickname`, `gender`, `phone`, `status`, `email`)
 VALUES
-    ('1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f','2024-10-24 09:45:00','2024-10-31 09:40:13','admin','123456','超级管理员','1','','1','');
+    ('1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f','2024-10-24 09:45:00','2024-10-31 09:40:13','admin','123456','Super Admin','1','','1','');
 ```
 
 @tab desc/sql_migration/1_init.down.sql
@@ -88,12 +88,12 @@ DROP TABLE IF EXISTS `manage_user`;
 ```
 :::
 
-## 支持多数据库切换
+## Support multi-database switching
 
-:::tip 根据 driver 区分不同的数据库的迁移目录
+:::tip Distinguish different database migration directories by driver
 :::
 
-migrate 增加可选参数 `WithSourceAppendDriver`:
+migrate adds optional parameter `WithSourceAppendDriver`:
 
 * mysql source: desc/sql_migration/mysql
 * pgx source: desc/sql_migration/pgx
@@ -127,7 +127,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	defer m.Close()
 
 	if err = m.Up(); err != nil {
@@ -167,7 +167,7 @@ CREATE TABLE `manage_user` (
 
 INSERT INTO `manage_user` (`uuid`, `create_time`, `update_time`, `username`, `password`, `nickname`, `gender`, `phone`, `status`, `email`)
 VALUES
-    ('1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f','2024-10-24 09:45:00','2024-10-31 09:40:13','admin','123456','超级管理员','1','','1','');
+    ('1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f','2024-10-24 09:45:00','2024-10-31 09:40:13','admin','123456','Super Admin','1','','1','');
 ```
 
 @tab desc/sql_migration/sqlite/1_init.down.sql

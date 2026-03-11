@@ -7,15 +7,15 @@ export default defineUserConfig({
 
   locales: {
     "/": {
+      lang: "en-US",
+      title: "Jzero Framework",
+      description: "Jzero docs",
+    },
+    "/zh-CN/": {
       lang: "zh-CN",
       title: "Jzero Framework",
       description: "Jzero docs",
     },
-    // "/en/": {
-    //   lang: "en-US",
-    //   title: "Jzero Framework",
-    //   description: "Jzero docs",
-    // },
   },
 
   theme,

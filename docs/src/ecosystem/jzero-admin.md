@@ -1,19 +1,19 @@
 ---
-title: jzero-admin(后台管理系统)
+title: jzero-admin(Backend management system)
 icon: catppuccin:folder-admin
 order: 1
 ---
 
-jzero-admin 是 jzero 的最佳实践
+jzero-admin is jzero's best practice
 
-* 实现了最简单的后台管理模板, 用户管理/菜单管理/角色管理
-* 支持 mysql/postgres/sqlite
-* 后端插件化支持
-* i18n 支持
+* Implements the simplest backend management template, user management/menu management/role management
+* Supports mysql/postgres/sqlite
+* Backend plugin support
+* i18n support
 
-## 演示地址
+## Demo
 
-* [阿里云云函数](https://jzero-admin.jaronnie.com)
+* [Aliyun Function Compute](https://jzero-admin.jaronnie.com)
 * [vercel](https://admin.jzero.io)
 
 ![](https://oss.jaronnie.com/image-20251217134305041.png)

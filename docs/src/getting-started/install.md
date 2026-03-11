@@ -1,63 +1,63 @@
 ---
-title: 安装 jzero
+title: Install jzero
 icon: marketeq:download-alt-4
 order: 2
 ---
 
-## 安装 golang
+## Install golang
 
-推荐采用 [gvm](https://github.com/jaronnie/gvm) 安装 golang 环境
+Recommend using [gvm](https://github.com/jaronnie/gvm) to install golang environment
 
-## 安装 jzero
+## Install jzero
 
-提供以下三种方式使用 jzero, 请根据实际情况任选一种即可
+Provides the following three ways to use jzero, choose one based on your actual situation
 
-* 源码安装(**go version >= go1.24.3**)
-* 直接[下载 jzero 二进制文件](https://github.com/jzero-io/jzero/releases)
-* 基于 Docker 安装 jzero, [镜像地址](https://github.com/jzero-io/jzero/pkgs/container/jzero)
+* Source installation(**go version >= go1.24.3**)
+* Directly [download jzero binary](https://github.com/jzero-io/jzero/releases)
+* Install jzero based on Docker, [image address](https://github.com/jzero-io/jzero/pkgs/container/jzero)
 
-### 源码安装 jzero
+### Install jzero from source
 
 ```bash
-# 设置国内代理(可选)
+# Set domestic proxy (optional)
 # go env -w GOPROXY=https://goproxy.cn,direct
 go install github.com/jzero-io/jzero/cmd/jzero@latest
 
-# 获取 jzero 版本信息
+# Get jzero version
 jzero version
 
-# 自动下载所依赖的工具
+# Auto download required tools
 jzero check
 ```
 
-### 下载 jzero 二进制文件
+### Download jzero binary
 
-[下载地址](https://github.com/jzero-io/jzero/releases)
+[Download address](https://github.com/jzero-io/jzero/releases)
 
-根据自己的操作系统选择对应的压缩包, 解压后放在 `$GOPATH/bin` 目录下即可
+Select the corresponding package based on your operating system, extract and place in `$GOPATH/bin` directory
 
-执行以下内容完成 jzero 的环境准备
+Execute the following to complete jzero environment setup
 
 ```shell
-# 获取 jzero 版本信息
+# Get jzero version
 jzero version
 
-# 自动下载所依赖的工具
+# Auto download required tools
 jzero check
 ```
 
-### 基于 Docker 安装 jzero
+### Install jzero based on Docker
 
 ```shell
-# 获取 jzero 版本信息
+# Get jzero version
 docker run --rm ghcr.io/jzero-io/jzero:latest version
 ```
 
-## 升级 jzero
+## Upgrade jzero
 
 ```shell
-# 升级为最新版
+# Upgrade to latest version
 jzero upgrade
-# 升级到指定版本 
-jzero upgrade --channel <commit_hash> 或 <tag>
+# Upgrade to specific version
+jzero upgrade --channel <commit_hash> or <tag>
 ```

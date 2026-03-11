@@ -1,47 +1,47 @@
 ---
-title: 新增可描述文件
+title: Add descriptor files
 icon: proicons:tag-add
 order: 3.1
 ---
 
-jzero 根据可描述文件(desc)生成代码:
+jzero generates code based on descriptor files (desc):
 
-* desc/api: api 可描述语言, 生成 http 服务端/客户端代码. [使用指南](../guide/api.md)
-* desc/proto: proto 可描述语言, 生成 grpc 服务端/客户端代码. [使用指南](../guide/proto.md)
-* desc/sql: sql 可描述语言, 生成数据库代码. [使用指南](../guide/model.md)
+* desc/api: api descriptor language, generate http server/client code. [User guide](../guide/api.md)
+* desc/proto: proto descriptor language, generate grpc server/client code. [User guide](../guide/proto.md)
+* desc/sql: sql descriptor language, generate database code. [User guide](../guide/model.md)
 
-亦可基于配置生成 model 代码:
+Can also generate model code based on configuration:
 
-* model datasource: 通过远程数据源生成数据库代码. [使用指南](../guide/model.md)
-* mongo type: 通过指定 mongo type 生成 mongodb 代码. [使用指南](../guide/mongo.md)
+* model datasource: Generate database code through remote datasource. [User guide](../guide/model.md)
+* mongo type: Generate mongodb code by specifying mongo type. [User guide](../guide/mongo.md)
 
-## 新增 api 文件
+## Add api file
 
-将在 desc/api 文件夹下新增 api 文件
+Will add api file under desc/api folder
 
 ```shell
-# group 为 test
+# group is test
 jzero add api test
-# group 为 test/test1
+# group is test/test1
 jzero add api test/test1
 ```
 
-## 新增 proto 文件
+## Add proto file
 
-将在 desc/proto 文件夹下新增 proto 文件
+Will add proto file under desc/proto folder
 
 ```shell
-# Service 为 Test
+# Service is Test
 jzero add proto test
-# Service 为 TestTest1
+# Service is TestTest1
 jzero add proto test/test1
 ```
 
-## 新增 sql 文件
+## Add sql file
 
-将在 desc/sql 文件夹下新增 sql 文件
+Will add sql file under desc/sql folder
 
 ```shell
-# table 名为 test
+# table name is test
 jzero add sql test
 ```

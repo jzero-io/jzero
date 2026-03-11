@@ -1,24 +1,23 @@
 ---
-title: 保姆级 api 教程
+title: Comprehensive API Tutorial
 icon: eos-icons:api
 star: true
 order: 0.2
 ---
 
-## 概述
+## Overview
 
-api 是 go-zero 自研的领域特性语言（下文称 api 语言 或 api 描述语言）, 旨在实现人性化的基础描述语言, 作为生成 HTTP 服务最基本的描述语言.
+api is go-zero's self-developed domain-specific language (hereinafter referred to as api language or api descriptor language), aimed at implementing a user-friendly basic descriptor language as the most basic descriptor language for generating HTTP services.
 
-jzero 扩展了 api 语法, 支持了一下特性: 
+jzero has extended api syntax, supporting the following features:
+* `go_package`: Generates go types in defined packages, allowing different api files to have same-named type definitions, consistent with proto's `go_package`
+* `compact_handler`: Generates handlers of the same route group in one file, reducing file count, consistent with proto's server module
 
-* `go_package`: 将 go types 生成在定义的 package 中, 所以能支持不同 api 文件的 type 定义可以同名, 保持和 proto 中的 `go_package` 一致
-* `compact_handler`: 能将同一组路由的 handler 生成在同一个文件中, 减少文件的数量, 保持和 proto 的 server 模块一致
-
-## api 定义
+## api definition
 
 ```api
 info (
-    // 定义 go_package: 生成的 go types 放入的文件夹位置
+    // Define go_package: folder location for generated go types
     go_package: "user"
 )
 
@@ -30,12 +29,12 @@ type User {
 type PageRequest {
     page int `form:"page"`
     size int `form:"size"`
-    username string `form:"username,optional"` // 过滤参数, 可选
+    username string `form:"username,optional"` // filter parameter, optional
 }
 
 type PageResponse {
-    total uint64 `json:"total"` // 总数
-    list  []User `json:"list"`  // 分页数据
+    total uint64 `json:"total"` // total
+    list  []User `json:"list"`  // paginated data
 }
 
 type UpdateRequest {
@@ -46,31 +45,31 @@ type UpdateRequest {
 type UpdateResponse {}
 
 @server (
-    prefix:          /api/user // 路由 prefix
-    group:           user      // 生成的 handler/logic 文件夹位置
-    jwt:             JwtAuth   // 是否启用 jwt 验证
-    middleware:      AuthX     // 该组路由的中间件
-    compact_handler: true      // 是否合并该组的 handler 为同一个文件, 默认每个路由都有 handler 文件
+    prefix:          /api/user // route prefix
+    group:           user      // generated handler/logic folder location
+    jwt:             JwtAuth   // whether to enable jwt authentication
+    middleware:      AuthX     // middleware for this route group
+    compact_handler: true      // whether to merge this group's handlers into one file, default each route has handler file
 )
 service simpleapi {
-    @doc "用户分页"
+    @doc "User pagination"
     @handler Page
     get /page (PageRequest) returns (PageResponse)
 
-    @doc "更新用户"
+    @doc "Update user"
     @handler Update
     post /update (UpdateRequest) returns (UpdateResponse)
 }
 ```
 
-对应的 curl 命令:
+Corresponding curl commands:
 
 ```shell
-# 用户分页接口
+# User pagination endpoint
 curl -X GET "http://localhost:8080/api/user/page?page=1&size=10&username=test" \
   -H "Authorization: Bearer <your-jwt-token>"
 
-# 更新用户接口
+# Update user endpoint
 curl -X POST "http://localhost:8080/api/user/update/123" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <your-jwt-token>" \
@@ -78,28 +77,28 @@ curl -X POST "http://localhost:8080/api/user/update/123" \
 
 ```
 
-## api 字段校验
+## api field validation
 
-> jzero 默认集成 [https://github.com/go-playground/validator](https://github.com/go-playground/validator) 进行字段校验
+> jzero integrates [https://github.com/go-playground/validator](https://github.com/go-playground/validator) by default for field validation
 
 ```shell {4}
 syntax = "v1"
 
 type CreateRequest {
-    name string `json:"name" validate:"gte=2,lte=30"` // 名称
+    name string `json:"name" validate:"gte=2,lte=30"` // name
 }
 ```
 
-## 将 types 文件夹按照 go_package 进行分组
+## Group types folder by go_package
 
-:::important go_package 的选项, 参考自 proto 文件, 能将 message 生成的结构体分组
+:::important go_package option, referenced from proto files, can group generated message structs
 
-在 api 文件中同理, go_package 选项能将定义的 type 生成的结构体分组
+Similarly in api files, go_package option can group defined type-generated structs
 
-两大优点: 
-1. 避免默认生成的 types/types.go 爆炸
+Two major advantages:
+1. Avoid default generated types/types.go explosion
 
-2. 提升开发体验, 不同 group 下的 type 命名不会冲突
+2. Improve development experience, type names in different groups don't conflict
 :::
 
 ```shell {3,4,5,6}
@@ -110,7 +109,7 @@ info (
 )
 ```
 
-## 合并同一个 group 的 handler 为同一个文件
+## Merge handlers of same group into one file
 
 ```shell {4}
 @server (

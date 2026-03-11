@@ -1,14 +1,14 @@
 ---
-title: 生成服务端代码
+title: Generate server code
 icon: vscode-icons:folder-type-api-opened
 order: 4
 ---
 
-jzero 生成代码命令极其精简, 仅需 `jzero gen` 就能自动识别所有的可描述文件/配置, 完成代码的生成.
+jzero code generation command is extremely simple, only need `jzero gen` to automatically recognize all descriptor files/configurations and complete code generation.
 
-通过上一篇文档的 `jzero add` 命令添加可描述文件后, 执行 `jzero gen` 即可看到生成的文件了.
+After adding descriptor files with the `jzero add` command from the previous document, execute `jzero gen` to see the generated files.
 
-## 生成代码
+## Generate code
 
 ::: code-tabs#shell
 
@@ -27,16 +27,16 @@ docker run --rm -v ${PWD}:/app ghcr.io/jzero-io/jzero:latest gen
 ```
 :::
 
-## 基于 git 变动生成代码
+## Generate code based on git changes
 
-::: tip 基于 git status -su 获取新增/改动的可描述文件
+::: tip Get new/modified descriptor files based on git status -su
 :::
 
 ```shell
 jzero gen --git-change
 ```
 
-## 指定 desc 生成代码
+## Generate code for specific desc
 
 ```shell
 jzero gen --desc desc/api/xx.api
@@ -44,7 +44,7 @@ jzero gen --desc desc/proto/xx.proto
 jzero gen --desc desc/sql/xx.sql
 ```
 
-## 忽略指定 desc 生成代码
+## Ignore specific desc when generating code
 
 ```shell
 jzero gen --desc-ignore desc/api/xx.api
@@ -52,4 +52,4 @@ jzero gen --desc-ignore desc/proto/xx.proto
 jzero gen --desc-ignore desc/sql/xx.sql
 ```
 
-更多用法请参阅: [jzero 指南](../guide/jzero.md)
+For more usage, see: [jzero guide](../guide/jzero.md)
