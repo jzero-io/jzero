@@ -77,11 +77,11 @@ http://localhost:8001/swagger
 * jzero-intellij(jzero 的 goland 插件): https://github.com/jzero-io/jzero-intellij
 * jzero-admin(基于 jzero 的后台管理系统): https://github.com/jzero-io/jzero-admin
 
-更多生态请查阅: [https://docs.jzero.io/ecosystem](https://docs.jzero.io/ecosystem)
+更多生态请查阅: [https://docs.jzero.io/ecosystem/](https://docs.jzero.io/ecosystem/)
 
 ## 贡献者
 
-[贡献](https://docs.jzero.io/guide/contribute.html)
+[贡献](https://docs.jzero.io/community/contribute.html)
 
 <a href="https://openomy.app/github/jzero-io/jzero" target="_blank" style="display: block; width: 100%;" align="center">
   <img src="https://openomy.app/svg?repo=jzero-io/jzero&chart=bubble&latestMonth=3" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />

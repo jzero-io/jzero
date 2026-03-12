@@ -77,11 +77,11 @@ For more example code, please visit: https://github.com/jzero-io/examples
 * jzero-intellij (jzero's goland plugin): https://github.com/jzero-io/jzero-intellij
 * jzero-admin (Admin system based on jzero): https://github.com/jzero-io/jzero-admin
 
-For more ecosystem, please visit: [https://docs.jzero.io/ecosystem](https://docs.jzero.io/ecosystem)
+For more ecosystem, please visit: [https://docs.jzero.io/ecosystem/](https://docs.jzero.io/ecosystem/)
 
 ## Contributors
 
-[Contribute](https://docs.jzero.io/guide/contribute.html)
+[Contribute](https://docs.jzero.io/community/contribute.html)
 
 <a href="https://openomy.app/github/jzero-io/jzero" target="_blank" style="display: block; width: 100%;" align="center">
   <img src="https://openomy.app/svg?repo=jzero-io/jzero&chart=bubble&latestMonth=3" target="_blank" alt="Contribution Leaderboard" style="display: block; width: 100%;" />
