@@ -38,7 +38,7 @@ export default hopeTheme({
 
       // Page meta
       metaLocales: {
-        editLink: "在 GitHub 上编辑此页",
+        editLink: "Edit this page on GitHub",
       },
     },
     "/zh-CN/": {
@@ -49,7 +49,7 @@ export default hopeTheme({
 
       // Page meta
       metaLocales: {
-        editLink: "Edit this page on GitHub",
+        editLink: "在 GitHub 上编辑此页",
       },
     },
   },
