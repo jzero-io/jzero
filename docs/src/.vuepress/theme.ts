@@ -12,8 +12,6 @@ export default hopeTheme({
     url: "https://github.com/jaronnie",
   },
 
-  iconAssets: "iconify",
-
   copyright: 'Copyright © 2024-2026 jzero-io',
 
   // made by https://gopherize.me
@@ -54,12 +52,81 @@ export default hopeTheme({
     },
   },
 
+  // These features are enabled for demo, only preserve features you need here
+  markdown: {
+    align: true,
+    attrs: true,
+    codeTabs: true,
+    component: true,
+    demo: true,
+    figure: true,
+    gfm: true,
+    imgLazyload: true,
+    imgSize: true,
+    include: true,
+    mark: true,
+    plantuml: true,
+    spoiler: true,
+    stylize: [
+      {
+        matcher: "Recommended",
+        replacer: ({ tag }) => {
+          if (tag === "em") {
+            return {
+              tag: "Badge",
+              attrs: { type: "tip" },
+              content: "Recommended",
+            };
+          }
+        },
+      },
+    ],
+    sub: true,
+    sup: true,
+    tabs: true,
+    tasklist: true,
+    vPre: true,
+
+    // uncomment these if you need TeX support
+    // math: {
+    //   // install katex before enabling it
+    //   type: "katex",
+    //   // or install @mathjax/src before enabling it
+    //   type: "mathjax",
+    // },
+
+    // install chart.js before enabling it
+    // chartjs: true,
+
+    // install echarts before enabling it
+    // echarts: true,
+
+    // install flowchart.ts before enabling it
+    // flowchart: true,
+
+    // install mermaid before enabling it
+    // mermaid: true,
+
+    // playground: {
+    //   presets: ["ts", "vue"],
+    // },
+
+    // install @vue/repl before enabling it
+    // vuePlayground: true,
+
+    // install sandpack-vue3 before enabling it
+    // sandpack: true,
+
+    // install @vuepress/plugin-revealjs and uncomment these if you need slides
+    // revealjs: {
+    //   plugins: ["highlight", "math", "search", "notes", "zoom"],
+    // },
+  },
+
   // 在这里配置主题提供的插件
   plugins: {
-    blog: {
-      // category: "category",
-      // tag: "tag",
-      // star: "star",
+    icon: {
+      assets: "iconify"
     },
     comment: {
       provider: "Giscus",
@@ -68,41 +135,8 @@ export default hopeTheme({
       category: "Announcements",
       categoryId: "DIC_kwDOLq1_9c4Cf5lp",
     },
-
     components: {
       components: ["Badge", "VPCard"],
-    },
-
-    // 此处开启了很多功能用于演示，你应仅保留用到的功能。
-    mdEnhance: {
-      align: true,
-      attrs: true,
-      codetabs: true,
-      component: true,
-      // demo: true,
-      figure: true,
-      imgLazyload: true,
-      imgSize: true,
-      include: true,
-      mark: true,
-      // stylize: [
-      //   {
-      //     matcher: "Recommended",
-      //     replacer: ({ tag }) => {
-      //       if (tag === "em")
-      //         return {
-      //           tag: "Badge",
-      //           attrs: { type: "tip" },
-      //           content: "Recommended",
-      //         };
-      //     },
-      //   },
-      // ],
-      // sub: true,
-      // sup: true,
-      // tabs: true,
-      // tasklist: true,
-      // vPre: true,
     },
   },
 });
