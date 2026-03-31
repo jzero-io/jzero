@@ -28,33 +28,6 @@ func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx co
 		return nil, err
 	}
 }
-
-{{if .withCacheEnabled}}
-func (m *default{{.upperStartCamelObject}}Model) FindOneNoCacheBy{{.upperField}}(ctx context.Context, session sqlx.Session, {{.in}}) (*{{.upperStartCamelObject}}, error) {
-	var resp {{.upperStartCamelObject}}
-    var err error
-
-	sb := sqlbuilder.Select({{.lowerStartCamelObject}}Rows).From(m.table)
-	condition.SelectByWhereRawSql(sb, "{{.originalField}}", {{.lowerStartCamelField}})
-    sb.Limit(1)
-
-    sql, args := sb.BuildWithFlavor(m.flavor)
-
-    if session != nil {
-        err = session.QueryRowCtx(ctx, &resp, sql, args...)
-    } else {
-        err = m.conn.QueryRowCtx(ctx, &resp, sql, args...)
-    }
-
-	switch err {
-	case nil:
-		return &resp, nil
-	case sqlx.ErrNotFound:
-		return nil, ErrNotFound
-	default:
-		return nil, err
-	}
-}{{end}}
 {{else}}
 func (m *default{{.upperStartCamelObject}}Model) FindOneBy{{.upperField}}(ctx context.Context, session sqlx.Session, {{.in}}) (*{{.upperStartCamelObject}}, error) {
 	var resp {{.upperStartCamelObject}}
