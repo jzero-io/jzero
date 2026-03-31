@@ -211,7 +211,7 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFiles []string) (err error) {
 	}
 
 	if !config.C.Quiet {
-		fmt.Printf("%s\n", console.Green("Done"))
+		fmt.Printf("%s\n", console.Green("Gen Rpc Middleware Done"))
 	}
 	return nil
 }
