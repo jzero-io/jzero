@@ -1,13 +1,13 @@
 module github.com/jzero-io/jzero/cmd/jzero
 
-go 1.24.3
+go 1.25.0
 
 require (
 	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
 	github.com/go-git/go-git/v5 v5.17.1
 	github.com/golang-migrate/migrate/v4 v4.19.1
-	github.com/hashicorp/go-version v1.8.0
+	github.com/hashicorp/go-version v1.9.0
 	github.com/iancoleman/orderedmap v0.3.0
 	github.com/jaronnie/genius v0.6.1
 	github.com/jhump/protoreflect v1.17.0

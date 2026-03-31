@@ -12,7 +12,7 @@ Recommend using [gvm](https://github.com/jaronnie/gvm) to install golang environ
 
 Provides the following three ways to use jzero, choose one based on your actual situation
 
-* Source installation(**go version >= go1.24.3**)
+* Source installation(**go version >= go1.25.0**)
 * Directly [download jzero binary](https://github.com/jzero-io/jzero/releases)
 * Install jzero based on Docker, [image address](https://github.com/jzero-io/jzero/pkgs/container/jzero)
 

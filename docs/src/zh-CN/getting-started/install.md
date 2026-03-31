@@ -12,7 +12,7 @@ order: 2
 
 提供以下三种方式使用 jzero, 请根据实际情况任选一种即可
 
-* 源码安装(**go version >= go1.24.3**)
+* 源码安装(**go version >= go1.25.0**)
 * 直接[下载 jzero 二进制文件](https://github.com/jzero-io/jzero/releases)
 * 基于 Docker 安装 jzero, [镜像地址](https://github.com/jzero-io/jzero/pkgs/container/jzero)
 
