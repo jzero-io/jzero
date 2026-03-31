@@ -21,6 +21,76 @@ Currently supports two database types: mysql and postgres, where:
 * Supports redis/custom cache
 * Dynamically adapts to multiple database types (mysql/postgres/sqlite), just modify configuration file to specify database driver, can switch between different databases without modifying any code
 
+## Cache Configuration
+
+jzero supports flexible cache configuration for generated models:
+
+* **model-cache**: Enable or disable cache for generated models (default: false)
+* **model-cache-table**: Specify which tables to cache (default: * for all tables)
+* **model-cache-expiry-table**: Configure custom cache expiry times for specific tables
+
+### Cache Expiry Configuration
+
+The `model-cache-expiry-table` option allows you to set different cache expiry times for different tables:
+
+```yaml
+gen:
+  model-cache-expiry-table:
+    - table: manage_user
+      expiry: 3600              # cache expiry for found data (in seconds)
+      not-found-expiry: 60      # cache expiry for not-found data (in seconds)
+    - table: manage_role
+      expiry: 7200
+      not-found-expiry: 120
+```
+
+**Fields:**
+* **table**: The table name to apply the cache expiry settings
+* **expiry**: Cache duration in seconds for successfully queried data (default: system default)
+* **not-found-expiry**: Cache duration in seconds for not-found queries (default: system default)
+
+This configuration is particularly useful for:
+* Tables with different data update frequencies
+* Reducing cache misses for frequently accessed reference data
+* Optimizing cache hit rates for specific business scenarios
+
+### NewOriginal Functions
+
+The `model-new-original` option controls whether to generate `NewOriginal` functions for each table:
+
+```yaml
+gen:
+  model-new-original: true  # default: false
+```
+
+When enabled, jzero generates additional `NewOriginal*XxxModel` functions alongside the standard `NewModel` function. These functions provide:
+
+* **Direct model initialization**: Create individual model instances without initializing all models
+* **Flexible cache configuration**: Each model can be initialized with custom cache options
+* **Better performance**: Only initialize the models you actually need
+
+**Example generated code:**
+
+```go
+// Standard initialization (all models)
+func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
+    return Model{
+        ManageUser: manage_user.NewManageUserModel(conn, op...),
+        // ... other models
+    }
+}
+
+// Individual model initialization (when model-new-original: true)
+func NewOriginalManageUserModel(conn sqlx.SqlConn, c cache.CacheConf, op ...cache.Option) manage_user.ManageUserModel {
+    return manage_user.NewOriginalManageUserModel(conn, c, op...)
+}
+```
+
+**Usage scenarios:**
+* Microservices where only specific models are needed
+* Applications requiring different cache configurations per model
+* Performance optimization by avoiding unnecessary model initialization
+
 ## Generate code based on local sql ddl files
 
 ```shell
@@ -42,6 +112,13 @@ gen:
   # cache tables, default is *(all)
   model-cache-table:
     - manage_user
+  # set cache expiry for specific tables (in seconds)
+  model-cache-expiry-table:
+    - table: manage_user
+      expiry: 3600
+      not-found-expiry: 60
+  # generate NewOriginal functions for each table (default: false)
+  model-new-original: true
   # schema
   model-schema: jzero-admin
   # Ignore columns while creating or updating rows, default is create_at,created_at,create_time,update_at,updated_at,update_time
@@ -176,6 +253,13 @@ gen:
   # cache tables, default is *(all)
   model-cache-table:
     - manage_user
+  # set cache expiry for specific tables (in seconds)
+  model-cache-expiry-table:
+    - table: manage_user
+      expiry: 3600
+      not-found-expiry: 60
+  # generate NewOriginal functions for each table (default: false)
+  model-new-original: true
   # whether to use remote mysql datasource to generate code
   model-datasource: true
   # mysql datasource configuration
@@ -246,6 +330,13 @@ gen:
   # cache tables, default is *(all)
   model-cache-table:
     - manage_user
+  # set cache expiry for specific tables (in seconds)
+  model-cache-expiry-table:
+    - table: manage_user
+      expiry: 3600
+      not-found-expiry: 60
+  # generate NewOriginal functions for each table (default: false)
+  model-new-original: true
   # whether to use remote postgres datasource to generate code
   model-datasource: true
   # postgres datasource configuration
