@@ -29,7 +29,6 @@ jzero 支持灵活的模型缓存配置:
 * **model-cache**: 启用或禁用模型缓存(默认: false)
 * **model-cache-table**: 指定哪些表需要缓存(默认: * 表示所有表)
 * **model-cache-expiry-table**: 为特定表配置自定义缓存过期时间
-* **model-new-original**: 为每个表生成 NewOriginal 初始化函数(默认: false)
 
 ### 缓存过期时间配置
 
@@ -55,43 +54,6 @@ gen:
 * 数据更新频率不同的表
 * 减少频繁访问的参考数据的缓存未命中
 * 针对特定业务场景优化缓存命中率
-
-### NewOriginal 函数
-
-`model-new-original` 选项控制是否为每个表生成 `NewOriginal` 函数:
-
-```yaml
-gen:
-  model-new-original: true  # 默认: false
-```
-
-启用后,jzero 会生成额外的 `NewOriginal*XxxModel` 函数,与标准的 `NewModel` 函数一起使用。这些函数提供:
-
-* **直接模型初始化**: 可以单独创建某个模型实例,而无需初始化所有模型
-* **灵活的缓存配置**: 每个模型可以使用自定义的缓存选项进行初始化
-* **更好的性能**: 只初始化实际需要的模型,避免不必要的初始化开销
-
-**示例生成的代码:**
-
-```go
-// 标准初始化(所有模型)
-func NewModel(conn sqlx.SqlConn, op ...opts.Opt[modelx.ModelOpts]) Model {
-    return Model{
-        ManageUser: manage_user.NewManageUserModel(conn, op...),
-        // ... 其他模型
-    }
-}
-
-// 单独模型初始化(当 model-new-original: true 时)
-func NewOriginalManageUserModel(conn sqlx.SqlConn, c cache.CacheConf, op ...cache.Option) manage_user.ManageUserModel {
-    return manage_user.NewOriginalManageUserModel(conn, c, op...)
-}
-```
-
-**使用场景:**
-* 微服务架构中,只需要特定模型的场景
-* 应用需要为不同模型配置不同缓存选项的情况
-* 通过避免不必要的模型初始化来优化性能
 
 ## 基于本地 sql ddl 文件生成代码
 
@@ -119,8 +81,6 @@ gen:
     - table: manage_user
       expiry: 3600
       not-found-expiry: 60
-  # 为每个表生成 NewOriginal 函数(默认: false)
-  model-new-original: true
   # schema
   model-schema: jzero-admin
   # Ignore columns while creating or updating rows, 默认为 create_at,created_at,create_time,update_at,updated_at,update_time
@@ -260,8 +220,6 @@ gen:
     - table: manage_user
       expiry: 3600
       not-found-expiry: 60
-  # 为每个表生成 NewOriginal 函数(默认: false)
-  model-new-original: true
   # 是否使用远程 mysql 数据源生成代码
   model-datasource: true
   # mysql 数据源配置
@@ -302,8 +260,6 @@ gen:
     - table: manage_user
       expiry: 3600
       not-found-expiry: 60
-  # 为每个表生成 NewOriginal 函数(默认: false)
-  model-new-original: true
   # 是否使用远程 mysql 数据源生成代码
   model-datasource: true
   # mysql 数据源配置
@@ -344,8 +300,6 @@ gen:
     - table: manage_user
       expiry: 3600
       not-found-expiry: 60
-  # 为每个表生成 NewOriginal 函数(默认: false)
-  model-new-original: true
   # 是否使用远程 postgres 数据源生成代码
   model-datasource: true
   # postgres 数据源配置
@@ -386,8 +340,6 @@ gen:
     - table: manage_user
       expiry: 3600
       not-found-expiry: 60
-  # 为每个表生成 NewOriginal 函数(默认: false)
-  model-new-original: true
   # 是否使用远程 postgres 数据源生成代码
   model-datasource: true
   # postgres 数据源配置

@@ -147,7 +147,6 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 		"ModelExpiryTable":         modelExpiryTable,
 		"ModelNotFoundExpiryTable": modelNotFoundExpiryTable,
 		"ModelCache":               config.C.Gen.ModelCache,
-		"ModelNewOriginal":         config.C.Gen.ModelNewOriginal,
 	}, lo.If(
 		// 兼容老版本 model 路径
 		// TODO: wait to remove
