@@ -127,7 +127,6 @@ type GenConfig struct {
 	ModelCache            bool     `mapstructure:"model-cache"`
 	ModelCacheTable       []string `mapstructure:"model-cache-table"`
 	ModelCachePrefix      string   `mapstructure:"model-cache-prefix"`
-	ModelNewOriginal      bool     `mapstructure:"model-new-original"`
 	ModelCacheExpiryTable []struct {
 		Table          string `mapstructure:"table"`
 		Expiry         int64  `mapstructure:"expiry"`
