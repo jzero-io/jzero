@@ -14,13 +14,13 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/plugin"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/serverless"
 )
 
 func Run() error {
 	wd, _ := os.Getwd()
 
-	plugins, err := plugin.GetPlugins()
+	plugins, err := serverless.GetPlugins()
 	if err != nil {
 		return err
 	}

@@ -14,25 +14,25 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/plugin"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/serverless"
 )
 
 func Run() error {
 	wd, _ := os.Getwd()
 
-	plugins, err := plugin.GetPlugins()
+	plugins, err := serverless.GetPlugins()
 	if err != nil {
 		return err
 	}
 
 	deletePlugins := plugins
-	var remainingPlugins []plugin.Plugin
+	var remainingPlugins []serverless.Plugin
 
 	for _, p := range config.C.Serverless.Delete.Plugin {
-		deletePlugins = lo.Reject(plugins, func(item plugin.Plugin, index int) bool {
+		deletePlugins = lo.Reject(plugins, func(item serverless.Plugin, index int) bool {
 			return item.Path != filepath.ToSlash(filepath.Join("plugins", p))
 		})
-		remainingPlugins = lo.Filter(plugins, func(item plugin.Plugin, index int) bool {
+		remainingPlugins = lo.Filter(plugins, func(item serverless.Plugin, index int) bool {
 			return item.Path != filepath.ToSlash(filepath.Join("plugins", p))
 		})
 	}

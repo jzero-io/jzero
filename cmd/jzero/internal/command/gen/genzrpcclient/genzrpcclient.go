@@ -25,7 +25,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/plugin"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/serverless"
 )
 
 type DirContext struct {
@@ -152,7 +152,7 @@ func Generate(genModule bool) (err error) {
 		return err
 	}
 
-	plugins, _ := plugin.GetPlugins()
+	plugins, _ := serverless.GetPlugins()
 
 	excludeThirdPartyProtoFiles, err := desc.FindExcludeThirdPartyProtoFiles(config.C.ProtoDir())
 	if err != nil {
@@ -372,7 +372,7 @@ func Generate(genModule bool) (err error) {
 	return nil
 }
 
-func generatePluginFiles(plugins []plugin.Plugin) error {
+func generatePluginFiles(plugins []serverless.Plugin) error {
 	if len(plugins) == 0 {
 		return nil
 	}
@@ -592,7 +592,7 @@ func generatePluginFiles(plugins []plugin.Plugin) error {
 	return nil
 }
 
-func genPluginNoRpcServiceExcludeThirdPartyProto(plugin plugin.Plugin, goModule, output string) error {
+func genPluginNoRpcServiceExcludeThirdPartyProto(plugin serverless.Plugin, goModule, output string) error {
 	pluginProtoDir := filepath.Join(plugin.Path, "desc", "proto")
 	pluginThirdPartyProtoDir := filepath.Join(plugin.Path, "desc", "proto", "third_party")
 

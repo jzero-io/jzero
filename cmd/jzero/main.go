@@ -23,6 +23,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/migrate"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/new"
+	plugincmd "github.com/jzero-io/jzero/cmd/jzero/internal/command/plugin"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/serverless"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/skills"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/template"
@@ -32,6 +33,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/plugin"
 )
 
 var WorkingDir string
@@ -108,6 +110,21 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	// Initialize plugin handler
+	pluginHandler := plugin.NewDefaultHandler(plugincmd.ValidPluginFilenamePrefixes)
+	if len(os.Args) > 1 {
+		cmdPathPieces := os.Args[1:]
+
+		// only look for suitable extension executables if
+		// the specified command does not already exist
+		if _, _, err := rootCmd.Find(cmdPathPieces); err != nil {
+			if err := plugin.HandlePluginCommand(pluginHandler, cmdPathPieces); err != nil {
+				logx.Error(err)
+				os.Exit(1)
+			}
+		}
+	}
+
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -139,6 +156,7 @@ func init() {
 	rootCmd.AddCommand(skills.GetCommand())
 	rootCmd.AddCommand(template.GetCommand())
 	rootCmd.AddCommand(upgrade.GetCommand())
+	rootCmd.AddCommand(plugincmd.GetCommand())
 	rootCmd.AddCommand(versioncmd.GetCommand())
 }
 

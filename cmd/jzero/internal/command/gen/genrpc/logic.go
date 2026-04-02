@@ -36,7 +36,7 @@ type LogicFile struct {
 	ServerStream     bool
 }
 
-func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec rpcparser.Proto) ([]LogicFile, error) {
+func (jr *JzeroRpc) GetAllLogicFiles(descFilepath string, protoSpec *rpcparser.Proto) ([]LogicFile, error) {
 	var logicFiles []LogicFile
 	for _, service := range protoSpec.Service {
 		for _, rpc := range service.RPC {

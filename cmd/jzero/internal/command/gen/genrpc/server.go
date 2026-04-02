@@ -50,7 +50,7 @@ func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServ
 	return nil
 }
 
-func (jr *JzeroRpc) GetAllServerFiles(descFilepath string, protoSpec rpcparser.Proto) ([]ServerFile, error) {
+func (jr *JzeroRpc) GetAllServerFiles(descFilepath string, protoSpec *rpcparser.Proto) ([]ServerFile, error) {
 	var serverFiles []ServerFile
 	for _, service := range protoSpec.Service {
 		namingFormat, err := format.FileNamingFormat(config.C.Style, service.Name+"Server")
