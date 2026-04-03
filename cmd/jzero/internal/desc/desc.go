@@ -49,7 +49,7 @@ func GetFrameType() (string, error) {
 				if err != nil {
 					return "", err
 				}
-				if IsNeedGenProtoDescriptor(parse) {
+				if IsNeedGenProtoDescriptor(&parse) {
 					frameType = "gateway"
 					break
 				}
@@ -78,7 +78,7 @@ func GetProtoDescriptorPath(protoPath string) string {
 	return filepath.Join("desc", "pb", strings.TrimSuffix(rel, ".proto")+".pb")
 }
 
-func IsNeedGenProtoDescriptor(proto rpcparser.Proto) bool {
+func IsNeedGenProtoDescriptor(proto *rpcparser.Proto) bool {
 	for _, ps := range proto.Service {
 		for _, rpc := range ps.RPC {
 			for _, option := range rpc.Options {

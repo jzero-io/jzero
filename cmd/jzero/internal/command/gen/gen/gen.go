@@ -93,7 +93,7 @@ func Run() error {
 }
 
 // collectAndSaveMetadata 收集并保存项目元数据（复用已解析的数据）
-func collectAndSaveMetadata(apiSpecMap map[string]*spec.ApiSpec, protoSpecMap map[string]rpcparser.Proto) error {
+func collectAndSaveMetadata(apiSpecMap map[string]*spec.ApiSpec, protoSpecMap map[string]*rpcparser.Proto) error {
 	if len(apiSpecMap) == 0 && len(protoSpecMap) == 0 {
 		return nil
 	}

@@ -23,7 +23,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/stringx"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/plugin"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/serverless"
 )
 
 func Gen() (err error) {
@@ -58,7 +58,7 @@ func Gen() (err error) {
 			}
 
 			// 增加 plugins 的 api 文件
-			plugins, err := plugin.GetPlugins()
+			plugins, err := serverless.GetPlugins()
 			if err == nil {
 				for _, p := range plugins {
 					if pathx.FileExists(filepath.Join(p.Path, "desc", "api")) {
@@ -359,7 +359,7 @@ func Gen() (err error) {
 			}
 
 			// 增加 plugins 的 proto 文件
-			plugins, err := plugin.GetPlugins()
+			plugins, err := serverless.GetPlugins()
 			if err == nil {
 				for _, p := range plugins {
 					if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {

@@ -113,7 +113,7 @@ func CollectFromAPI(apiSpecMap map[string]*spec.ApiSpec) (*APIMetadata, error) {
 
 // CollectFromProto 从 Proto 文件收集元数据
 // protoSpecMap: 已解析的 Proto 文件映射，key 为文件路径
-func CollectFromProto(protoSpecMap map[string]rpcparser.Proto) (*ProtoMetadata, error) {
+func CollectFromProto(protoSpecMap map[string]*rpcparser.Proto) (*ProtoMetadata, error) {
 	var metadata ProtoMetadata
 
 	// 为每个 Proto 文件解析行号信息
@@ -209,7 +209,7 @@ func buildLogicPath(groupOrService, handler string) (string, error) {
 }
 
 // parseProtoLineNumbers 解析 Proto 文件并提取 RPC 行号
-func parseProtoLineNumbers(protoFile string, protoSpec rpcparser.Proto) (map[string]int, error) {
+func parseProtoLineNumbers(protoFile string, protoSpec *rpcparser.Proto) (map[string]int, error) {
 	lineMap := make(map[string]int)
 
 	// 遍历服务和 RPC

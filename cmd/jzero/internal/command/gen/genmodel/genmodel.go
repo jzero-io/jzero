@@ -121,7 +121,7 @@ func (jm *JzeroModel) Gen() error {
 		sqlFiles        []string
 		genCodeSqlFiles []string
 	)
-	genCodeSqlSpecMap := make(map[string][]*ddlparser.Table)
+	genCodeSqlSpecMap := make(map[string]*ddlparser.Table)
 
 	if !config.C.Gen.ModelDatasource {
 		sqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
@@ -217,7 +217,7 @@ func (jm *JzeroModel) Gen() error {
 				}
 				mu.Lock()
 				defer mu.Unlock()
-				genCodeSqlSpecMap[f] = tableParsers
+				genCodeSqlSpecMap[f] = tableParsers[0]
 
 				bf := strings.TrimSuffix(filepath.Base(f), ".sql")
 
@@ -246,10 +246,8 @@ func (jm *JzeroModel) Gen() error {
 	eg.SetLimit(len(genCodeSqlFiles))
 	for _, f := range genCodeSqlFiles {
 		eg.Go(func() error {
-			tableParsers := genCodeSqlSpecMap[f]
-			for _, tp := range tableParsers {
-				genCodeTables = append(genCodeTables, tp.Name)
-			}
+			tableParser := genCodeSqlSpecMap[f]
+			genCodeTables = append(genCodeTables, tableParser.Name)
 			return generateModelFromSqlFile(f, goctlHome)
 		})
 	}

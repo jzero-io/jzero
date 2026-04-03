@@ -41,7 +41,7 @@ func (l RegisterLines) String() string {
 	return "\n\t\t" + strings.Join(l, "\n\t\t")
 }
 
-func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
+func (jr *JzeroRpc) Gen() (map[string]*rpcparser.Proto, error) {
 	var (
 		serverImports   ImportLines
 		pbImports       ImportLines
@@ -58,7 +58,7 @@ func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 		return nil, nil
 	}
 
-	protoSpecMap := make(map[string]rpcparser.Proto, len(protoFiles))
+	protoSpecMap := make(map[string]*rpcparser.Proto, len(protoFiles))
 	for _, v := range protoFiles {
 		// parse proto
 		protoParser := rpcparser.NewDefaultProtoParser()
@@ -67,12 +67,12 @@ func (jr *JzeroRpc) Gen() (map[string]rpcparser.Proto, error) {
 		if err != nil {
 			return nil, err
 		}
-		protoSpecMap[v] = parse
+		protoSpecMap[v] = &parse
 	}
 
 	// 获取需要生成代码的proto 文件
 	var genCodeProtoFiles []string
-	genCodeProtoSpecMap := make(map[string]rpcparser.Proto, len(protoFiles))
+	genCodeProtoSpecMap := make(map[string]*rpcparser.Proto, len(protoFiles))
 
 	switch {
 	case config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0:
