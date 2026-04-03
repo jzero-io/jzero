@@ -1,6 +1,6 @@
 ---
 title: migrate(Database migration management)
-icon: streamline-plump-color:database
+icon: /icons/streamline-plump-color-database.svg
 order: 3
 ---
 

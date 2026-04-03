@@ -1,6 +1,6 @@
 ---
 title: 欢迎贡献👏
-icon: ooui:user-contributions-ltr
+icon: /icons/ooui-user-contributions-ltr.svg
 star: true
 order: 30
 ---

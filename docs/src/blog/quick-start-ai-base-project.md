@@ -1,6 +1,6 @@
 ---
 title: "Build AI Base Project with jzero in One Click"
-icon: emojione-v1:rocket
+icon: /icons/emojione-v1-rocket.svg
 description: "Quickly build enterprise-grade Go projects through standardized framework + AI-assisted business logic"
 ---
 

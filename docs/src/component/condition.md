@@ -1,6 +1,6 @@
 ---
 title: condition(Database condition query)
-icon: material-symbols:conditions
+icon: /icons/material-symbols-conditions.svg
 order: 4
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: modelx(Database connection)
-icon: oui:vis-query-sql
+icon: /icons/oui-vis-query-sql.svg
 order: 2
 ---
 

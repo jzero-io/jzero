@@ -1,6 +1,6 @@
 ---
 title: Template guide
-icon: vscode-icons:folder-type-template
+icon: /icons/vscode-icons-folder-type-template.svg
 star: true
 order: 5.3
 ---

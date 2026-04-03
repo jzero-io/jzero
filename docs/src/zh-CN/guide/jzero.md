@@ -1,6 +1,6 @@
 ---
 title: 玩转 jzero
-icon: catppuccin:astro-config
+icon: /icons/catppuccin-astro-config.svg
 star: true
 order: 0.1
 ---

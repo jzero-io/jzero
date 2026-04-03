@@ -1,6 +1,6 @@
 ---
 title: modelx(数据库连接)
-icon: oui:vis-query-sql
+icon: /icons/oui-vis-query-sql.svg
 order: 2
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: 安装 jzero
-icon: marketeq:download-alt-4
+icon: /icons/marketeq-download-alt-4.svg
 order: 2
 ---
 

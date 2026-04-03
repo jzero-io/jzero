@@ -1,6 +1,6 @@
 ---
 title: 项目初始化
-icon: mdi:new-box
+icon: /icons/mdi-new-box.svg
 order: 3
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Database version automatic migration
-icon: carbon:migrate
+icon: /icons/carbon-migrate.svg
 star: true
 order: 5.5
 ---

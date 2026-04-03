@@ -1,6 +1,6 @@
 ---
 title: "Free Your Hands! jzero Boosts Go Development Efficiency 10x"
-icon: streamline-ultimate:blog-blogger-logo
+icon: /icons/streamline-ultimate-blog-blogger-logo.svg
 ---
 
 As a developer, have you ever encountered these problems:

@@ -1,6 +1,6 @@
 ---
 title: jzero-intellij(goland 插件)
-icon: catppuccin:folder-admin
+icon: /icons/catppuccin-folder-admin.svg
 order: 2
 ---
 

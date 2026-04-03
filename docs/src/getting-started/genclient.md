@@ -1,6 +1,6 @@
 ---
 title: Generate client code
-icon: clarity:thin-client-line
+icon: /icons/clarity-thin-client-line.svg
 order: 5
 ---
 

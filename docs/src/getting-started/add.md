@@ -1,6 +1,6 @@
 ---
 title: Add descriptor files
-icon: proicons:tag-add
+icon: /icons/proicons-tag-add.svg
 order: 3.1
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Comprehensive API Tutorial
-icon: eos-icons:api
+icon: /icons/eos-icons-api.svg
 star: true
 order: 0.2
 ---

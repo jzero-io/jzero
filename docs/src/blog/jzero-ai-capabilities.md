@@ -1,6 +1,6 @@
 ---
 title: "AI-Driven Go Development: How jzero Makes Development More Efficient and Reliable"
-icon: streamline-ultimate:blog-blogger-logo
+icon: /icons/streamline-ultimate-blog-blogger-logo.svg
 ---
 
 As AI-assisted programming gradually becomes mainstream, everyone is gradually using AI tools to assist development, which has indeed greatly improved coding efficiency. However, an overlooked issue is:

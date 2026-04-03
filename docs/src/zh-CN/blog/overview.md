@@ -1,6 +1,6 @@
 ---
 title: 解放双手！jzero 让 Go 开发效率提升 10 倍
-icon: streamline-ultimate:blog-blogger-logo
+icon: /icons/streamline-ultimate-blog-blogger-logo.svg
 ---
 
 作为一名开发者，你是否也遇到过这些问题：

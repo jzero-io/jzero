@@ -1,6 +1,6 @@
 ---
 title: condition(数据库条件查询)
-icon: material-symbols:conditions
+icon: /icons/material-symbols-conditions.svg
 order: 4
 ---
 

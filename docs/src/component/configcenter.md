@@ -1,6 +1,6 @@
 ---
 title: configcenter(Configuration center)
-icon: catppuccin:astro-config
+icon: /icons/catppuccin-astro-config.svg
 order: 1
 ---
 

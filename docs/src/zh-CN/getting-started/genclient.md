@@ -1,6 +1,6 @@
 ---
 title: 生成客户端代码
-icon: clarity:thin-client-line
+icon: /icons/clarity-thin-client-line.svg
 order: 5
 ---
 

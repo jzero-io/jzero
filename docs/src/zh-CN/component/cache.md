@@ -1,6 +1,6 @@
 ---
 title: cache(缓存连接)
-icon: octicon:cache-16
+icon: /icons/octicon-cache-16.svg
 order: 2.1
 ---
 

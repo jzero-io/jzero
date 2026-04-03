@@ -1,6 +1,6 @@
 ---
 title: Skills
-icon: logos:claude-icon
+icon: /icons/logos-claude-icon.svg
 order: 6
 ---
 

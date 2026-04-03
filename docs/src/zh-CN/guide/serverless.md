@@ -1,6 +1,6 @@
 ---
 title: 插件指南
-icon: arcticons:game-plugins
+icon: /icons/arcticons-game-plugins.svg
 star: true
 order: 5.4
 ---

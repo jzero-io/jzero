@@ -1,6 +1,6 @@
 ---
 title: 新增可描述文件
-icon: proicons:tag-add
+icon: /icons/proicons-tag-add.svg
 order: 3.1
 ---
 

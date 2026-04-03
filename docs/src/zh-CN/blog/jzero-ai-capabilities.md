@@ -1,6 +1,6 @@
 ---
 title: AI 驱动的 Go 开发：jzero 如何让开发更高效更可靠
-icon: streamline-ultimate:blog-blogger-logo
+icon: /icons/streamline-ultimate-blog-blogger-logo.svg
 ---
 
 在 AI 辅助编程逐渐成为主流的今天，大家都逐渐在用 AI 工具辅助开发了，也确实大大提升了编码效率。但一个不可忽视的问题是：

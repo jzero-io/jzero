@@ -1,6 +1,6 @@
 ---
 title: model 指南
-icon: uil:database
+icon: /icons/uil-database.svg
 star: true
 order: 4
 ---

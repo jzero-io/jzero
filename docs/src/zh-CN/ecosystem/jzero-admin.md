@@ -1,6 +1,6 @@
 ---
 title: jzero-admin(后台管理系统)
-icon: catppuccin:folder-admin
+icon: /icons/catppuccin-folder-admin.svg
 order: 1
 ---
 

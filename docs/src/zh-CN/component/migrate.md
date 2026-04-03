@@ -1,6 +1,6 @@
 ---
 title: migrate(管理数据库迁移脚本)
-icon: streamline-plump-color:database
+icon: /icons/streamline-plump-color-database.svg
 order: 3
 ---
 

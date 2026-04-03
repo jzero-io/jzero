@@ -1,6 +1,6 @@
 ---
 title: jzero-admin(Backend management system)
-icon: catppuccin:folder-admin
+icon: /icons/catppuccin-folder-admin.svg
 order: 1
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: proto guide
-icon: vscode-icons:file-type-protobuf
+icon: /icons/vscode-icons-file-type-protobuf.svg
 star: true
 order: 1
 ---

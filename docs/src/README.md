@@ -1,6 +1,6 @@
 ---
 home: false
-icon: fluent:home-heart-20-filled
+icon: /icons/fluent-home-heart-20-filled.svg
 title: Home
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Project Initialization
-icon: mdi:new-box
+icon: /icons/mdi-new-box.svg
 order: 3
 ---
 

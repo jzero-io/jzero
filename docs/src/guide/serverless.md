@@ -1,6 +1,6 @@
 ---
 title: Plugin guide
-icon: arcticons:game-plugins
+icon: /icons/arcticons-game-plugins.svg
 star: true
 order: 5.4
 ---

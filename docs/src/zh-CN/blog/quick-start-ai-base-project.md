@@ -1,6 +1,6 @@
 ---
 title: "使用 jzero 一键搭建 AI 基座项目"
-icon: emojione-v1:rocket
+icon: /icons/emojione-v1-rocket.svg
 description: "通过标准化框架 + AI 辅助业务逻辑的方式，快速搭建企业级 Go 项目"
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Generate server code
-icon: vscode-icons:folder-type-api-opened
+icon: /icons/vscode-icons-folder-type-api-opened.svg
 order: 4
 ---
 

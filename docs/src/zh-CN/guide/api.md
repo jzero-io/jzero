@@ -1,6 +1,6 @@
 ---
 title: 保姆级 api 教程
-icon: eos-icons:api
+icon: /icons/eos-icons-api.svg
 star: true
 order: 0.2
 ---
