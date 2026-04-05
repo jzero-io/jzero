@@ -45,16 +45,3 @@ jobs:
         with:
           branch: gh-pages
           folder: docs/src/.vuepress/dist
-
-      - name: Upload to jaronnie/jzero-docs-deploy-pages
-        run: |
-          go install github.com/jaronnie/grum@latest
-          GITHUB_TOKEN=${{ secrets.ACCESS_TOKEN }} grum clone https://github.com/jaronnie/jzero-docs-deploy-pages
-          cd jzero-docs-deploy-pages
-          git config user.name "dependabot[bot]"
-          git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
-          find . -mindepth 1 ! -name "api" ! -name ".git" ! -name "vercel.json" ! -path "./api/*" ! -path "./.git/*" -exec rm -rf {} +
-          mv ../docs/src/.vuepress/dist/* ./
-          git add .
-          git diff-index --quiet HEAD || git commit -m "chore(docs): update docs"
-          git push -f
