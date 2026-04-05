@@ -5,11 +5,9 @@ icon: /icons/emojione-v1-rocket.svg
 
 ## jzero × Vercel：生态打通的强大组合
 
-### 为什么选择 jzero + Vercel？
-
 **什么是 jzero？**
 
-**jzero** 是基于 go-zero 框架开发的增强型开发工具：
+基于 [go-zero框架](https://github.com/zeromicro/go-zero) 以及 [go-zero/goctl工具](https://github.com/zeromicro/go-zero/tree/master/tools/goctl) 开发的 [jzero](https://github.com/jzero-io/jzero) 框架
 
 🏗️ **通过模板生成基础框架代码**：基于描述文件自动生成框架代码（api → api 框架代码、proto → proto 框架代码、sql/远程数据库地址 → model 代码）
 
@@ -27,27 +25,37 @@ icon: /icons/emojione-v1-rocket.svg
 
 ---
 
-**为什么选择 jzero + Vercel？**
+**Vercel 平台优势**
 
-- ✅ **零配置部署**：jzero 生成的代码完全兼容 Vercel 平台，从 Git 仓库直接部署，无需额外配置
+- ✅ **零配置部署**：从 Git 仓库直接部署，无需额外配置，无需自己的服务器，无需 ci/cd 流程
 - ✅ **全球边缘网络**：借助 Vercel 的全球基础设施，将 Go 函数部署到离用户最近的边缘节点，实现毫秒级响应
 - ✅ **免费域名与 HTTPS**：自动获得 `.vercel.app` 生产级域名，内置 CDN 加速和 SSL 证书
 - ✅ **预览环境**：每次提交 PR 自动生成独立预览 URL
 
-> 💡 **核心价值**：jzero 深度打通 Vercel 生态，让 Go 开发者享受前端级别的部署体验！通过 `.api` 定义自动生成符合 Vercel 规范的无服务器函数，真正实现"一次定义，处处运行"。
+> 💡 **核心价值**：jzero 深度打通 Vercel 生态，让 Go 开发者享受前端级别的部署体验！通过 `.api` 定义自动生成符合 Vercel 规范的无服务器函数，无需再部署到自己的服务器上。
 
 ## 快速开始：一键接入 Vercel 生态
 
-### 创建 Vercel 兼容项目
+### 创建 Vercel 项目
 
 jzero 提供了专为 Vercel 生态优化的项目模板，生成的代码结构完全符合 Vercel 平台规范：
 
 ```bash
-# 创建新的 Vercel 无服务器项目
-jzero new jzero-api-vercel-example --branch api-vercel
+# 安装 jzero
+go install github.com/jzero-io/jzero@latest
+# 安装相关工具
+jzero check
+go install github.com/jzero-io/gorename@latest
+# 从远程模板创建新的 Vercel 无服务器项目
+jzero new jzero-api-vercel-example --remote https://github.com/jzero-io/templates --branch api-vercel
+# 添加新的 api
+jzero add api test
+# 生成代码
+jzero gen
 ```
 
 **项目结构**：
+
 ```
 jzero-api-vercel-example/
 ├── vercel/
@@ -81,6 +89,8 @@ git commit -m "Initial commit"
 git remote add origin https://github.com/your-username/jzero-api-vercel-example.git
 git push -u origin main
 ```
+
+示例代码仓库地址: https://github.com/jaronnie/jzero-api-vercel-example
 
 ### Vercel 平台自动识别
 
