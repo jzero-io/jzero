@@ -161,4 +161,15 @@ func RemoveExtraFiles(wd, style string) {
 			}
 		}
 	}
+
+	// Check if etc directory is empty and remove it if so
+	etcDir := filepath.Join(wd, "etc")
+	if pathx.FileExists(etcDir) {
+		entries, err := os.ReadDir(etcDir)
+		if err == nil && len(entries) == 0 {
+			if err := os.Remove(etcDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+				logx.Debugf("remove empty etc directory error: %s", err.Error())
+			}
+		}
+	}
 }
