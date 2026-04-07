@@ -23,7 +23,6 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/migrate"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/new"
-	plugincmd "github.com/jzero-io/jzero/cmd/jzero/internal/command/plugin"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/serverless"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/skills"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/template"
@@ -44,7 +43,6 @@ var (
 	Template embed.FS
 )
 
-// ldflags
 var (
 	version = "v1.3.0"
 	commit  string
@@ -111,7 +109,7 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	// Initialize plugin handler
-	pluginHandler := plugin.NewDefaultHandler(plugincmd.ValidPluginFilenamePrefixes)
+	pluginHandler := plugin.NewDefaultHandler([]string{"jzero"})
 	if len(os.Args) > 1 {
 		cmdPathPieces := os.Args[1:]
 
@@ -119,16 +117,11 @@ func Execute() {
 		// the specified command does not already exist
 		if _, _, err := rootCmd.Find(cmdPathPieces); err != nil {
 			if err := plugin.HandlePluginCommand(pluginHandler, cmdPathPieces); err != nil {
-				logx.Error(err)
-				os.Exit(1)
+				cobra.CheckErr(err)
 			}
 		}
 	}
-
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
+	cobra.CheckErr(rootCmd.Execute())
 }
 
 func init() {
@@ -156,7 +149,6 @@ func init() {
 	rootCmd.AddCommand(skills.GetCommand())
 	rootCmd.AddCommand(template.GetCommand())
 	rootCmd.AddCommand(upgrade.GetCommand())
-	rootCmd.AddCommand(plugincmd.GetCommand())
 	rootCmd.AddCommand(versioncmd.GetCommand())
 }
 

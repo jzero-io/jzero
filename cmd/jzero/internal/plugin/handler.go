@@ -7,9 +7,7 @@ package plugin
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"syscall"
 )
 
@@ -44,16 +42,7 @@ func NewDefaultHandler(validPrefixes []string) *DefaultHandler {
 
 // Lookup implements Handler
 func (h *DefaultHandler) Lookup(filename string) (string, bool) {
-	// First, check in ~/.jzero/plugins directory
-	homeDir, err := os.UserHomeDir()
-	if err == nil {
-		pluginPath := filepath.Join(homeDir, ".jzero", "plugins", fmt.Sprintf("%s-%s", h.ValidPrefixes[0], filename))
-		if _, err := os.Stat(pluginPath); err == nil {
-			return pluginPath, true
-		}
-	}
-
-	// Fall back to PATH search
+	// Search PATH for plugins with valid prefix
 	for _, prefix := range h.ValidPrefixes {
 		path, err := exec.LookPath(fmt.Sprintf("%s-%s", prefix, filename))
 		if err == nil && len(path) > 0 {
