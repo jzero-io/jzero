@@ -58,6 +58,14 @@ func (jr *JzeroRpc) Gen() (map[string]*rpcparser.Proto, error) {
 		return nil, nil
 	}
 
+	if !config.C.Quiet {
+		msg := "to generate rpc code from proto files"
+		if config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0 {
+			msg += " (git-change mode)"
+		}
+		fmt.Printf("%s %s\n", console.Green("Start"), msg)
+	}
+
 	protoSpecMap := make(map[string]*rpcparser.Proto, len(protoFiles))
 	for _, v := range protoFiles {
 		// parse proto
@@ -142,10 +150,6 @@ func (jr *JzeroRpc) Gen() (map[string]*rpcparser.Proto, error) {
 
 	if len(genCodeProtoFiles) == 0 {
 		return protoSpecMap, nil
-	}
-
-	if config.C.Quiet {
-		fmt.Printf("%s to generate rpc code from proto files\n", console.Green("Start"))
 	}
 
 	// 处理模板

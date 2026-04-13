@@ -46,6 +46,10 @@ func (jm *JzeroModel) Gen() error {
 		conns         []Conn
 	)
 
+	if !pathx.FileExists(config.C.SqlDir()) && !config.C.Gen.ModelDatasource {
+		return nil
+	}
+
 	if config.C.Gen.ModelDriver == "postgres" {
 		config.C.Gen.ModelDriver = "pgx"
 	}
@@ -85,10 +89,14 @@ func (jm *JzeroModel) Gen() error {
 		if !config.C.Quiet {
 			fmt.Printf("%s to generate model from %s\n", console.Green("Start"), config.C.Gen.ModelDatasourceUrl)
 		}
-	}
-
-	if !pathx.FileExists(config.C.SqlDir()) && !config.C.Gen.ModelDatasource {
-		return nil
+	} else {
+		if !config.C.Quiet {
+			msg := "to generate model code from sql files"
+			if config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0 {
+				msg += " (git-change mode)"
+			}
+			fmt.Printf("%s %s\n", console.Green("Start"), msg)
+		}
 	}
 
 	// 处理模板
@@ -236,10 +244,6 @@ func (jm *JzeroModel) Gen() error {
 		}
 	} else {
 		return nil
-	}
-
-	if !config.C.Quiet {
-		fmt.Printf("%s to generate model code from sql files\n", console.Green("Start"))
 	}
 
 	var eg errgroup.Group

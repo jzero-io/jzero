@@ -52,6 +52,14 @@ func (ja *JzeroApi) Gen() (map[string]*spec.ApiSpec, error) {
 		return nil, nil
 	}
 
+	if !config.C.Quiet {
+		msg := "to generate api code from api files"
+		if config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0 {
+			msg += " (git-change mode)"
+		}
+		fmt.Printf("%s %s\n", console.Green("Start"), msg)
+	}
+
 	apiFiles, err := desc.FindRouteApiFiles(config.C.ApiDir())
 	if err != nil {
 		return nil, err
@@ -165,10 +173,6 @@ func (ja *JzeroApi) Gen() (map[string]*spec.ApiSpec, error) {
 
 	if len(genCodeApiFiles) == 0 {
 		return apiSpecMap, nil
-	}
-
-	if !config.C.Quiet {
-		fmt.Printf("%s to generate api code from api files\n", console.Green("Start"))
 	}
 
 	err = ja.generateApiCode(apiFiles, apiSpecMap, genCodeApiFiles, genCodeApiSpecMap, currentRoutesMap, importedFiles)
