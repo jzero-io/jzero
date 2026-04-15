@@ -7,6 +7,9 @@ package main
 
 import (
 	"embed"
+	"errors"
+	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -160,9 +163,23 @@ func InitConfig() {
 		}
 	}
 
-	if WorkingDir != "" {
-		if err := os.Chdir(WorkingDir); err != nil {
-			cobra.CheckErr(err)
+	if WorkingDir != "" && os.Getenv("JZERO_FORKED") != "true" {
+		// Convert relative path to absolute path
+		absPath, err := filepath.Abs(WorkingDir)
+		if err != nil {
+			cobra.CheckErr(fmt.Errorf("failed to get absolute path for working directory: %w", err))
+		}
+
+		// Verify the directory exists
+		if _, err := os.Stat(absPath); err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				cobra.CheckErr(fmt.Errorf("working directory does not exist: %s", absPath))
+			}
+			cobra.CheckErr(fmt.Errorf("failed to access working directory: %w", err))
+		}
+
+		if err := os.Chdir(absPath); err != nil {
+			cobra.CheckErr(fmt.Errorf("failed to change to working directory: %w", err))
 		}
 	}
 
