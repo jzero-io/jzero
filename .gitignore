@@ -5,3 +5,4 @@ dist
 node_modules
 docs/package-lock.json
 .omc
+cmd/jzero/jzero

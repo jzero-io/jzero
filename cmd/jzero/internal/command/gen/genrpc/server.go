@@ -2,7 +2,6 @@ package genrpc
 
 import (
 	"bytes"
-	"fmt"
 	"go/ast"
 	goformat "go/format"
 	goparser "go/parser"
@@ -17,7 +16,6 @@ import (
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
@@ -28,9 +26,6 @@ type ServerFile struct {
 }
 
 func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServers RegisterLines) error {
-	if !config.C.Quiet {
-		fmt.Printf("%s to generate internal/server/server.go\n", console.Green("Start"))
-	}
 	serverFile, err := templatex.ParseTemplate(filepath.Join("rpc", "server.go.tpl"), map[string]any{
 		"Module":          jr.Module,
 		"ServerImports":   serverImports,
@@ -43,9 +38,6 @@ func (jr *JzeroRpc) genServer(serverImports, pbImports ImportLines, registerServ
 	err = os.WriteFile(filepath.Join(config.C.Wd(), "internal", "server", "server.go"), serverFile, 0o644)
 	if err != nil {
 		return err
-	}
-	if !config.C.Quiet {
-		fmt.Printf("%s", console.Green("Gen Server Done\n"))
 	}
 	return nil
 }

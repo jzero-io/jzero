@@ -9,7 +9,6 @@ import (
 
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
@@ -32,7 +31,7 @@ type TableInfo struct {
 }
 
 func (jm *JzeroModel) GenRegister(tables []string) error {
-	logx.Debugf("get register tables: %v", tables)
+	// Debug removed("get register tables: %v", tables)
 
 	slices.Sort(tables)
 
@@ -53,7 +52,7 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 		}
 		mf := filepath.Join("internal", "model", strings.ToLower(tf))
 		if !pathx.FileExists(mf) {
-			logx.Debugf("%s table generated code not exists, skip", tf)
+			// Debug removed("%s table generated code not exists, skip", tf)
 			continue
 		}
 
@@ -86,9 +85,9 @@ func (jm *JzeroModel) GenRegister(tables []string) error {
 		}
 	}
 
-	logx.Debugf("get register imports: %v", imports)
-	logx.Debugf("get register table packages: %v", tablePackages)
-	logx.Debugf("get register muti models: %v", mutiModels)
+	// Debug removed("get register imports: %v", imports)
+	// Debug removed("get register table packages: %v", tablePackages)
+	// Debug removed("get register muti models: %v", mutiModels)
 
 	// Build cache expiry table maps - only when cache is enabled
 	var modelExpiryTable map[string]int64

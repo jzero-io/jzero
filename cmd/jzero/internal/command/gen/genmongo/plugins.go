@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/rinchsan/gosimports"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
@@ -26,7 +25,7 @@ type NameWithAlias struct {
 }
 
 func (jm *JzeroMongo) GenRegister(types []string) error {
-	logx.Debugf("get register tables: %v", types)
+	// Debug removed("get register tables: %v", types)
 
 	slices.Sort(types)
 
@@ -46,7 +45,7 @@ func (jm *JzeroMongo) GenRegister(types []string) error {
 		}
 		mf := filepath.Join("internal", "mongo", strings.ToLower(tf))
 		if !pathx.FileExists(mf) {
-			logx.Debugf("%s mongo model generated code not exists, skip", t)
+			// Debug removed("%s mongo model generated code not exists, skip", t)
 			continue
 		}
 
@@ -71,9 +70,9 @@ func (jm *JzeroMongo) GenRegister(types []string) error {
 		}
 	}
 
-	logx.Debugf("get register imports: %v", imports)
-	logx.Debugf("get register types packages: %v", typePackages)
-	logx.Debugf("get register muti models: %v", mutiModels)
+	// Debug removed("get register imports: %v", imports)
+	// Debug removed("get register types packages: %v", typePackages)
+	// Debug removed("get register muti models: %v", mutiModels)
 
 	template, err := templatex.ParseTemplate(filepath.Join("mongo", "model.go.tpl"), map[string]any{
 		"Imports":             imports,

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/jhump/protoreflect/desc/protoparse"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
@@ -61,7 +60,7 @@ func (jr *JzeroRpc) genNoRpcServiceExcludeThirdPartyProto(protoDirPath string) e
 			filepath.Join("."),
 			jr.Module)
 
-		logx.Debug(command)
+		// Debug removed(command)
 
 		_, err = execx.Run(command, config.C.Wd())
 		if err != nil {

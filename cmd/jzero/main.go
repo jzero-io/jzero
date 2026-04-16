@@ -15,6 +15,8 @@ import (
 	"strconv"
 	"time"
 
+	goversion "github.com/hashicorp/go-version"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -35,6 +37,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/plugin"
 )
 
@@ -67,6 +70,27 @@ var rootCmd = &cobra.Command{
 	Short: `Used to create project by templates and generate server/client code by api/proto/sql file.
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// Display logo
+		if os.Getenv("JZERO_HOOK_TRIGGERED") != "true" && os.Getenv("JZERO_FORKED") != "true" && !config.C.Quiet {
+			console.DisplayLogo(version, lo.If(config.C.Debug, func() []string {
+				var toolVersion []string
+				tv := config.C.ToolVersion()
+
+				toolVersion = appendToolVersion(toolVersion, "goctl", tv.GoctlVersion)
+
+				frameType, err := desc.GetFrameType()
+				cobra.CheckErr(err)
+
+				if frameType == "rpc" || frameType == "gateway" {
+					toolVersion = appendToolVersion(toolVersion, "protoc", tv.ProtocVersion)
+					toolVersion = appendToolVersion(toolVersion, "protoc-gen-go", tv.ProtocGenGoVersion)
+					toolVersion = appendToolVersion(toolVersion, "protoc-gen-go-grpc", tv.ProtocGenGoGrpcVersion)
+					toolVersion = appendToolVersion(toolVersion, "protoc-gen-openapiv2", tv.ProtocGenOpenapiv2Version)
+				}
+				return toolVersion
+			}()).Else(nil))
+		}
+
 		// Run environment check first
 		if cmd.Name() != check.GetCommand().Use && cmd.Name() != versioncmd.GetCommand().Use {
 			frameType, err := desc.GetFrameType()
@@ -124,7 +148,20 @@ func Execute() {
 			}
 		}
 	}
-	cobra.CheckErr(rootCmd.Execute())
+	if err := rootCmd.Execute(); err != nil {
+		if console.IsRenderedError(err) {
+			os.Exit(1)
+		}
+		cobra.CheckErr(err)
+	}
+}
+
+func appendToolVersion(items []string, name string, v *goversion.Version) []string {
+	if v == nil {
+		return items
+	}
+
+	return append(items, fmt.Sprintf("%s v%s", name, v.String()))
 }
 
 func init() {
@@ -184,17 +221,9 @@ func InitConfig() {
 	}
 
 	cobra.CheckErr(config.InitConfig(rootCmd))
+
+	logx.Disable()
 	if config.C.Debug {
-		logx.MustSetup(logx.LogConf{Encoding: "plain"})
-		logx.SetLevel(logx.DebugLevel)
-		if config.C.DebugSleepTime > 0 {
-			logx.Debugf("using jzero frame debug mode, please wait time.Sleep(time.Second * %d)", config.C.DebugSleepTime)
-		} else {
-			logx.Debugf("using jzero frame debug mode")
-		}
 		time.Sleep(time.Duration(config.C.DebugSleepTime) * time.Second)
-		logx.Debugf("get config: %#v", config.C)
-	} else {
-		logx.Disable()
 	}
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/format"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/parser/api/parser"
@@ -22,7 +21,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console/progress"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
@@ -47,22 +46,14 @@ func (l RegisterLines) String() string {
 	return "\n\t\t" + strings.Join(l, "\n\t\t")
 }
 
-func (ja *JzeroApi) Gen() (map[string]*spec.ApiSpec, error) {
+func (ja *JzeroApi) Gen(progressChan chan<- progress.Message) (map[string]*spec.ApiSpec, error) {
 	if !pathx.FileExists(config.C.ApiDir()) {
 		return nil, nil
 	}
 
-	if !config.C.Quiet {
-		msg := "to generate api code from api files"
-		if config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0 {
-			msg += " (git-change mode)"
-		}
-		fmt.Printf("%s %s\n", console.Green("Start"), msg)
-	}
-
 	apiFiles, err := desc.FindRouteApiFiles(config.C.ApiDir())
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "find route api files")
 	}
 
 	apiSpecMap := make(map[string]*spec.ApiSpec, len(apiFiles))
@@ -175,7 +166,7 @@ func (ja *JzeroApi) Gen() (map[string]*spec.ApiSpec, error) {
 		return apiSpecMap, nil
 	}
 
-	err = ja.generateApiCode(apiFiles, apiSpecMap, genCodeApiFiles, genCodeApiSpecMap, currentRoutesMap, importedFiles)
+	err = ja.generateApiCode(apiFiles, apiSpecMap, genCodeApiFiles, genCodeApiSpecMap, currentRoutesMap, importedFiles, progressChan)
 	if err != nil {
 		return nil, err
 	}
@@ -186,13 +177,10 @@ func (ja *JzeroApi) Gen() (map[string]*spec.ApiSpec, error) {
 		return nil, err
 	}
 
-	if !config.C.Quiet {
-		fmt.Println(console.Green("Gen Api Done"))
-	}
 	return apiSpecMap, nil
 }
 
-func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*spec.ApiSpec, genCodeApiFiles []string, genCodeApiSpecMap map[string]*spec.ApiSpec, currentRoutesMap map[string][]spec.Route, importedFiles map[string]bool) error {
+func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*spec.ApiSpec, genCodeApiFiles []string, genCodeApiSpecMap map[string]*spec.ApiSpec, currentRoutesMap map[string][]spec.Route, importedFiles map[string]bool, progressChan chan<- progress.Message) error {
 	if err := ja.cleanHandlersDir(genCodeApiFiles, genCodeApiSpecMap); err != nil {
 		return err
 	}
@@ -208,7 +196,7 @@ func (ja *JzeroApi) generateApiCode(apiFiles []string, apiSpecMap map[string]*sp
 		return err
 	}
 
-	if err := ja.generateCodeForApiFiles(genCodeApiFiles, apiSpecMap, importedFiles, templateDir); err != nil {
+	if err := ja.generateCodeForApiFiles(genCodeApiFiles, apiSpecMap, importedFiles, templateDir, progressChan); err != nil {
 		return err
 	}
 
@@ -284,7 +272,6 @@ func (ja *JzeroApi) prepareTemplateDir() (string, error) {
 		}
 	}
 
-	logx.Debugf("goctl_home = %s", tempDir)
 	return tempDir, nil
 }
 
@@ -329,9 +316,10 @@ func (ja *JzeroApi) collectRoutesGoBody(apiFiles []string, apiSpecMap map[string
 }
 
 // generateCodeForApiFiles 为所有 API 文件生成代码
-func (ja *JzeroApi) generateCodeForApiFiles(genCodeApiFiles []string, apiSpecMap map[string]*spec.ApiSpec, importedFiles map[string]bool, templateDir string) error {
-	// 按 group 分组，同一 group 的文件串行处理，不同 group 并发处理
-	groupToFiles := make(map[string][]string)
+func (ja *JzeroApi) generateCodeForApiFiles(genCodeApiFiles []string, apiSpecMap map[string]*spec.ApiSpec, importedFiles map[string]bool, templateDir string, progressChan chan<- progress.Message) error {
+	// goctl api go 内部会并发执行 backup/sweep，多个进程并发跑时会踩到共享状态，
+	// 导致概率性 panic。这里按文件串行生成，避免同目录并发调用 goctl。
+	var filesToGenerate []string
 	for _, apiFile := range genCodeApiFiles {
 		if importedFiles[apiFile] {
 			continue
@@ -339,52 +327,29 @@ func (ja *JzeroApi) generateCodeForApiFiles(genCodeApiFiles []string, apiSpecMap
 		if len(apiSpecMap[apiFile].Service.Routes()) == 0 {
 			continue
 		}
+		filesToGenerate = append(filesToGenerate, apiFile)
+	}
 
-		// 收集该文件的所有 group
-		groups := make(map[string]struct{})
-		for _, g := range apiSpecMap[apiFile].Service.Groups {
-			if groupAnnotation := g.GetAnnotation("group"); groupAnnotation != "" {
-				groups[groupAnnotation] = struct{}{}
-			}
+	for _, apiFile := range filesToGenerate {
+		if err := format.ApiFormatByPath(apiFile, false); err != nil {
+			return errors.Wrapf(err, "format api file: %s", apiFile)
 		}
 
-		// 如果没有 group，使用默认分组
-		if len(groups) == 0 {
-			groupToFiles[""] = append(groupToFiles[""], apiFile)
-		} else {
-			for group := range groups {
-				groupToFiles[group] = append(groupToFiles[group], apiFile)
-			}
+		command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", apiFile, ".", templateDir, config.C.Style)
+		if config.C.Debug {
+			progressChan <- progress.NewDebug(command)
+		}
+
+		if _, err := execx.Run(command, config.C.Wd()); err != nil {
+			return errors.Wrapf(err, "api file: %s", apiFile)
+		}
+
+		if progressChan != nil {
+			progressChan <- progress.NewFile(apiFile)
 		}
 	}
 
-	// 并发处理不同 group
-	var eg errgroup.Group
-	for _, files := range groupToFiles {
-		currentFiles := files
-		eg.Go(func() error {
-			// 同一 group 内的文件串行处理
-			for _, apiFile := range currentFiles {
-				if !config.C.Quiet {
-					fmt.Printf("%s api file %s \n", console.Green("Using"), apiFile)
-				}
-
-				if err := format.ApiFormatByPath(apiFile, false); err != nil {
-					return errors.Wrapf(err, "format api file: %s", apiFile)
-				}
-
-				command := fmt.Sprintf("goctl api go --api %s --dir %s --home %s --style %s", apiFile, ".", templateDir, config.C.Style)
-				logx.Debugf("command: %s", command)
-
-				if _, err := execx.Run(command, config.C.Wd()); err != nil {
-					return errors.Wrapf(err, "api file: %s", apiFile)
-				}
-			}
-			return nil
-		})
-	}
-
-	return eg.Wait()
+	return nil
 }
 
 // patchHandlerAndLogicFiles 并发 patch handler 和 logic 文件
@@ -476,10 +441,6 @@ func (ja *JzeroApi) generateRoutesGoFile(apiFiles []string, apiSpecMap map[strin
 
 // generateRoute2CodeFile 生成 route2code.go 文件
 func (ja *JzeroApi) generateRoute2CodeFile(apiSpecMap map[string]*spec.ApiSpec, currentRoutesMap map[string][]spec.Route, importedFiles map[string]bool) error {
-	if !config.C.Quiet {
-		fmt.Printf("%s to generate internal/handler/route2code.go\n", console.Green("Start"))
-	}
-
 	route2CodeBytes, err := ja.genRoute2Code(apiSpecMap, currentRoutesMap, importedFiles)
 	if err != nil {
 		return err
@@ -487,10 +448,6 @@ func (ja *JzeroApi) generateRoute2CodeFile(apiSpecMap map[string]*spec.ApiSpec, 
 
 	if err := os.WriteFile(filepath.Join("internal", "handler", "route2code.go"), route2CodeBytes, 0o644); err != nil {
 		return err
-	}
-
-	if !config.C.Quiet {
-		fmt.Printf("%s", console.Green("Gen Route2code Done\n"))
 	}
 
 	return nil

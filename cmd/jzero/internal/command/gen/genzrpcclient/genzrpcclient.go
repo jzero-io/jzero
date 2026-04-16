@@ -11,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rinchsan/gosimports"
 	"github.com/samber/lo"
-	"github.com/zeromicro/go-zero/core/logx"
 	conf "github.com/zeromicro/go-zero/tools/goctl/config"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/generator"
@@ -22,6 +21,8 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console/progress"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
@@ -34,6 +35,11 @@ type DirContext struct {
 	OptionGoPackage string
 	Resource        string
 	Output          string
+}
+
+type pluginProtoGroup struct {
+	Plugin serverless.Plugin
+	Files  []string
 }
 
 func (d DirContext) GetCall() generator.Dir {
@@ -101,8 +107,92 @@ func (d DirContext) SetPbDir(pbDir, grpcDir string) {
 }
 
 func Generate(genModule bool) (err error) {
-	g := generator.NewGenerator(config.C.Style, false)
+	showProgress := !config.C.Quiet
+	files, err := listZRPCClientProtoFiles()
+	if err != nil {
+		return err
+	}
 
+	pluginGroups, err := listZRPCClientPluginGroups()
+	if err != nil {
+		return err
+	}
+
+	if len(files) > 0 {
+		if err = executeStage(
+			console.Green("Gen")+" "+console.Yellow("zrpcclient"),
+			showProgress,
+			showProgress,
+			func(progressChan chan<- progress.Message) error {
+				return generateMainZRPCClient(genModule, files, len(pluginGroups) > 0, progressChan)
+			},
+		); err != nil {
+			return err
+		}
+	}
+
+	if len(pluginGroups) > 0 {
+		if err = executeStage(
+			console.Green("Gen")+" "+console.Yellow("zrpcclient plugin"),
+			showProgress,
+			showProgress,
+			func(progressChan chan<- progress.Message) error {
+				return generatePluginFiles(pluginGroups, progressChan)
+			},
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func HasInput() (bool, error) {
+	files, err := listZRPCClientProtoFiles()
+	if err != nil {
+		return false, err
+	}
+	if len(files) > 0 {
+		return true, nil
+	}
+
+	pluginGroups, err := listZRPCClientPluginGroups()
+	if err != nil {
+		return false, err
+	}
+
+	return len(pluginGroups) > 0, nil
+}
+
+func executeStage(title string, headerShown, showProgress bool, fn func(chan<- progress.Message) error) error {
+	if !showProgress {
+		return fn(nil)
+	}
+
+	progressChan := make(chan progress.Message, 10)
+	done := make(chan struct{})
+	var stageErr error
+
+	if headerShown {
+		fmt.Printf("%s\n", console.BoxHeader("", title))
+	}
+
+	go func() {
+		stageErr = fn(progressChan)
+		close(done)
+	}()
+
+	state := progress.ConsumeStage(progressChan, done, title, false, headerShown)
+	progress.FinishStage(title, false, &state, stageErr)
+
+	if stageErr != nil {
+		return console.MarkRenderedError(stageErr)
+	}
+
+	return nil
+}
+
+func listZRPCClientProtoFiles() ([]string, error) {
 	var files []string
 
 	switch {
@@ -112,18 +202,22 @@ func Generate(genModule bool) (err error) {
 				if filepath.Ext(v) == ".proto" {
 					files = append(files, v)
 				}
-			} else {
-				specifiedProtoFiles, err := desc.FindRpcServiceProtoFiles(v)
-				if err != nil {
-					return err
-				}
-				files = append(files, specifiedProtoFiles...)
+				continue
 			}
+
+			specifiedProtoFiles, err := desc.FindRpcServiceProtoFiles(v)
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, specifiedProtoFiles...)
 		}
 	default:
-		files, err = desc.FindRpcServiceProtoFiles(config.C.ProtoDir())
-		if err != nil {
-			return err
+		if pathx.FileExists(config.C.ProtoDir()) {
+			var err error
+			files, err = desc.FindRpcServiceProtoFiles(config.C.ProtoDir())
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -134,31 +228,66 @@ func Generate(genModule bool) (err error) {
 					return item == v
 				})
 			}
-		} else {
-			specifiedProtoFiles, err := desc.FindRpcServiceProtoFiles(v)
-			if err != nil {
-				return err
-			}
-			for _, saf := range specifiedProtoFiles {
-				files = lo.Reject(files, func(item string, _ int) bool {
-					return item == saf
-				})
-			}
+			continue
+		}
+
+		specifiedProtoFiles, err := desc.FindRpcServiceProtoFiles(v)
+		if err != nil {
+			return nil, err
+		}
+		for _, saf := range specifiedProtoFiles {
+			files = lo.Reject(files, func(item string, _ int) bool {
+				return item == saf
+			})
 		}
 	}
+
+	files = lo.Reject(files, func(item string, _ int) bool {
+		return getPluginNameFromFilePath(item) != ""
+	})
+
+	return files, nil
+}
+
+func listZRPCClientPluginGroups() ([]pluginProtoGroup, error) {
+	plugins, _ := serverless.GetPlugins()
+	var groups []pluginProtoGroup
+
+	for _, p := range plugins {
+		pluginProtoDir := filepath.Join(p.Path, "desc", "proto")
+		if !pathx.FileExists(pluginProtoDir) {
+			continue
+		}
+
+		pluginProtoFiles, err := desc.FindRpcServiceProtoFiles(pluginProtoDir)
+		if err != nil {
+			return nil, err
+		}
+		if len(pluginProtoFiles) == 0 {
+			continue
+		}
+
+		groups = append(groups, pluginProtoGroup{
+			Plugin: p,
+			Files:  pluginProtoFiles,
+		})
+	}
+
+	return groups, nil
+}
+
+func generateMainZRPCClient(genModule bool, files []string, hasPlugins bool, progressChan chan<- progress.Message) error {
+	g := generator.NewGenerator(config.C.Style, false)
 
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	plugins, _ := serverless.GetPlugins()
-
 	excludeThirdPartyProtoFiles, err := desc.FindExcludeThirdPartyProtoFiles(config.C.ProtoDir())
 	if err != nil {
 		return err
 	}
-	logx.Debugf("excludeThirdPartyProtoFiles: %v", excludeThirdPartyProtoFiles)
 
 	var services []string
 	for _, fp := range files {
@@ -177,10 +306,9 @@ func Generate(genModule bool) (err error) {
 			services = append(services, service.Name)
 			_ = os.MkdirAll(filepath.Join(dirContext.GetCall().Filename, strings.ToLower(service.Name)), 0o755)
 		}
+
 		pbDir := filepath.Join(config.C.Gen.Zrpcclient.Output, "model")
-		// gen pb model
-		err = os.MkdirAll(pbDir, 0o755)
-		if err != nil {
+		if err = os.MkdirAll(pbDir, 0o755); err != nil {
 			return err
 		}
 
@@ -221,10 +349,8 @@ func Generate(genModule bool) (err error) {
 		}
 
 		module := config.C.Gen.Zrpcclient.GoModule
-		if !genModule {
-			if config.C.Gen.Zrpcclient.Output != "." {
-				module = getMod.Path
-			}
+		if !genModule && config.C.Gen.Zrpcclient.Output != "." {
+			module = getMod.Path
 		}
 
 		protocCmd := fmt.Sprintf("protoc %s -I%s -I%s --go_out=%s --go-grpc_out=%s",
@@ -266,7 +392,6 @@ func Generate(genModule bool) (err error) {
 				if strings.HasPrefix(goPackage, module) {
 					return goPackage
 				}
-
 				if genModule {
 					return filepath.ToSlash(filepath.Join(module, "model", goPackage))
 				}
@@ -275,7 +400,6 @@ func Generate(genModule bool) (err error) {
 				if strings.HasPrefix(goPackage, module) {
 					return goPackage
 				}
-
 				if genModule {
 					return filepath.ToSlash(filepath.Join(module, "model", goPackage))
 				}
@@ -287,7 +411,6 @@ func Generate(genModule bool) (err error) {
 			protocCmd += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.Zrpcclient.ProtoInclude, " -I"))
 		}
 
-		logx.Debugf(protocCmd)
 		resp, err := execx.Run(protocCmd, wd)
 		if err != nil {
 			return errors.Errorf("err: [%v], resp: [%s]", err, resp)
@@ -302,20 +425,12 @@ func Generate(genModule bool) (err error) {
 		if err != nil {
 			return err
 		}
-	}
 
-	hasPlugins := len(plugins) > 0
-	for _, p := range plugins {
-		if pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
-			pluginProtoFiles, err := desc.FindRpcServiceProtoFiles(filepath.Join(p.Path, "desc", "proto"))
-			if err == nil && len(pluginProtoFiles) > 0 {
-				hasPlugins = true
-				break
-			}
+		if progressChan != nil {
+			progressChan <- progress.NewFile(fp)
 		}
 	}
 
-	// gen clientset
 	template, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("client", "zrpcclient-go", "clientset.go.tpl")), map[string]any{
 		"Module":     config.C.Gen.Zrpcclient.GoModule,
 		"Package":    config.C.Gen.Zrpcclient.GoPackage,
@@ -330,12 +445,10 @@ func Generate(genModule bool) (err error) {
 	if err != nil {
 		return errors.Errorf("format go file %s %s meet error: %v", filepath.Join(config.C.Gen.Zrpcclient.Output, "clientset.go"), template, err)
 	}
-	err = os.WriteFile(filepath.Join(config.C.Gen.Zrpcclient.Output, "clientset.go"), formated, 0o644)
-	if err != nil {
+	if err = os.WriteFile(filepath.Join(config.C.Gen.Zrpcclient.Output, "clientset.go"), formated, 0o644); err != nil {
 		return err
 	}
 
-	// if set --module flag
 	if genModule {
 		goVersion, err := mod.GetGoVersion()
 		if err != nil {
@@ -353,27 +466,16 @@ func Generate(genModule bool) (err error) {
 		if err != nil {
 			return err
 		}
-		err = os.WriteFile(filepath.Join(config.C.Gen.Zrpcclient.Output, "go.mod"), template, 0o644)
-		if err != nil {
+		if err = os.WriteFile(filepath.Join(config.C.Gen.Zrpcclient.Output, "go.mod"), template, 0o644); err != nil {
 			return err
 		}
 	}
 
-	err = generatePluginFiles(plugins)
-	if err != nil {
-		return err
-	}
-
-	err = genNoRpcServiceExcludeThirdPartyProto(genModule, config.C.Gen.Zrpcclient.GoModule)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return genNoRpcServiceExcludeThirdPartyProto(genModule, config.C.Gen.Zrpcclient.GoModule, progressChan)
 }
 
-func generatePluginFiles(plugins []serverless.Plugin) error {
-	if len(plugins) == 0 {
+func generatePluginFiles(groups []pluginProtoGroup, progressChan chan<- progress.Message) error {
+	if len(groups) == 0 {
 		return nil
 	}
 
@@ -384,16 +486,13 @@ func generatePluginFiles(plugins []serverless.Plugin) error {
 
 	var pluginNames []string
 
-	for _, p := range plugins {
+	for _, group := range groups {
+		p := group.Plugin
 		pluginProtoDir := filepath.Join(p.Path, "desc", "proto")
 		pluginThirdPartyProtoDir := filepath.Join(p.Path, "desc", "proto", "third_party")
 
-		if !pathx.FileExists(pluginProtoDir) {
-			continue
-		}
-
-		pluginProtoFiles, err := desc.FindRpcServiceProtoFiles(pluginProtoDir)
-		if err != nil || len(pluginProtoFiles) == 0 {
+		pluginProtoFiles := group.Files
+		if len(pluginProtoFiles) == 0 {
 			continue
 		}
 
@@ -484,7 +583,7 @@ func generatePluginFiles(plugins []serverless.Plugin) error {
 				protocCmd += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.Zrpcclient.ProtoInclude, " -I"))
 			}
 
-			logx.Debugf(protocCmd)
+			// Debug removed(protocCmd)
 			resp, err := execx.Run(protocCmd, wd)
 			if err != nil {
 				return errors.Errorf("err: [%v], resp: [%s]", err, resp)
@@ -523,6 +622,10 @@ func generatePluginFiles(plugins []serverless.Plugin) error {
 			})
 			if err != nil {
 				return err
+			}
+
+			if progressChan != nil {
+				progressChan <- progress.NewFile(fp)
 			}
 		}
 
@@ -578,12 +681,8 @@ func generatePluginFiles(plugins []serverless.Plugin) error {
 		return err
 	}
 
-	for _, p := range plugins {
-		if !pathx.FileExists(filepath.Join(p.Path, "desc", "proto")) {
-			continue
-		}
-
-		err := genPluginNoRpcServiceExcludeThirdPartyProto(p, config.C.Gen.Zrpcclient.GoModule, config.C.Gen.Zrpcclient.Output)
+	for _, group := range groups {
+		err := genPluginNoRpcServiceExcludeThirdPartyProto(group.Plugin, config.C.Gen.Zrpcclient.GoModule, config.C.Gen.Zrpcclient.Output, progressChan)
 		if err != nil {
 			return err
 		}
@@ -592,7 +691,7 @@ func generatePluginFiles(plugins []serverless.Plugin) error {
 	return nil
 }
 
-func genPluginNoRpcServiceExcludeThirdPartyProto(plugin serverless.Plugin, goModule, output string) error {
+func genPluginNoRpcServiceExcludeThirdPartyProto(plugin serverless.Plugin, goModule, output string, progressChan chan<- progress.Message) error {
 	pluginProtoDir := filepath.Join(plugin.Path, "desc", "proto")
 	pluginThirdPartyProtoDir := filepath.Join(plugin.Path, "desc", "proto", "third_party")
 
@@ -657,17 +756,20 @@ func genPluginNoRpcServiceExcludeThirdPartyProto(plugin serverless.Plugin, goMod
 			command += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.Zrpcclient.ProtoInclude, " -I"))
 		}
 
-		logx.Debug(command)
+		// Debug removed(command)
 
 		_, err = execx.Run(command, config.C.Wd())
 		if err != nil {
 			return err
 		}
+		if progressChan != nil {
+			progressChan <- progress.NewFile(v)
+		}
 	}
 	return nil
 }
 
-func genNoRpcServiceExcludeThirdPartyProto(genModule bool, module string) error {
+func genNoRpcServiceExcludeThirdPartyProto(genModule bool, module string, progressChan chan<- progress.Message) error {
 	excludeThirdPartyProtoFiles, err := desc.FindNoRpcServiceExcludeThirdPartyProtoFiles(config.C.ProtoDir())
 	if err != nil {
 		return err
@@ -756,12 +858,27 @@ func genNoRpcServiceExcludeThirdPartyProto(genModule bool, module string) error 
 			}(),
 		)
 
-		logx.Debug(command)
+		// Debug removed(command)
 
 		_, err = execx.Run(command, config.C.Wd())
 		if err != nil {
 			return err
 		}
+		if progressChan != nil {
+			progressChan <- progress.NewFile(v)
+		}
 	}
 	return nil
+}
+
+func getPluginNameFromFilePath(filePath string) string {
+	if strings.Contains(filePath, "plugins"+string(filepath.Separator)) {
+		parts := strings.Split(filePath, string(filepath.Separator))
+		for i, part := range parts {
+			if part == "plugins" && i+1 < len(parts) {
+				return parts[i+1]
+			}
+		}
+	}
+	return ""
 }

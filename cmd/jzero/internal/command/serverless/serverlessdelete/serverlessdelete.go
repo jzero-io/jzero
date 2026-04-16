@@ -17,12 +17,13 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/serverless"
 )
 
-func Run() error {
+func Run() ([]string, error) {
 	wd, _ := os.Getwd()
+	var items []string
 
 	plugins, err := serverless.GetPlugins()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	deletePlugins := plugins
@@ -36,12 +37,15 @@ func Run() error {
 			return item.Path != filepath.ToSlash(filepath.Join("plugins", p))
 		})
 	}
+	for _, p := range deletePlugins {
+		items = appendUnique(items, p.Path)
+	}
 
 	if _, err := os.Stat("go.work"); err == nil {
 		goWork, _ := os.ReadFile("go.work")
 		work, err := modfile.ParseWork("", goWork, nil)
 		if err != nil {
-			return err
+			return items, err
 		}
 		for _, p := range deletePlugins {
 			if !p.Mono {
@@ -49,18 +53,19 @@ func Run() error {
 					p.Path = "./" + p.Path
 				}
 				if err = work.DropUse(p.Path); err != nil {
-					return err
+					return items, err
 				}
 			}
 		}
 		if err = os.WriteFile("go.work", modfile.Format(work.Syntax), 0o644); err != nil {
-			return err
+			return items, err
 		}
+		items = appendUnique(items, "go.work")
 		// reread
 		goWork, _ = os.ReadFile("go.work")
 		work, err = modfile.ParseWork("", goWork, nil)
 		if err != nil {
-			return err
+			return items, err
 		}
 		if (len(work.Use) == 0) || (len(work.Use) == 1 && work.Use[0].Path == ".") {
 			_ = os.Remove("go.work")
@@ -71,14 +76,14 @@ func Run() error {
 	// write plugins/plugins.go
 	goMod, err := mod.GetGoMod(wd)
 	if err != nil {
-		return err
+		return items, err
 	}
 
 	for i := 0; i < len(remainingPlugins); i++ {
 		if !plugins[i].Mono {
 			pluginGoMod, err := mod.GetGoMod(filepath.Join(wd, remainingPlugins[i].Path))
 			if err != nil {
-				return err
+				return items, err
 			}
 			remainingPlugins[i].Module = pluginGoMod.Path
 		} else {
@@ -88,7 +93,7 @@ func Run() error {
 
 	frameType, err := desc.GetFrameType()
 	if err != nil {
-		return err
+		return items, err
 	}
 
 	pluginsGoBytes, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("api", "serverless_plugins.go.tpl")), map[string]any{
@@ -96,15 +101,24 @@ func Run() error {
 		"Module":  goMod.Path,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join(frameType, "serverless_plugins.go.tpl"))))
 	if err != nil {
-		return err
+		return items, err
 	}
 	gosimports.LocalPrefix = goMod.Path
 	formatBytes, err := gosimports.Process("", pluginsGoBytes, nil)
 	if err != nil {
-		return err
+		return items, err
 	}
 	if err := os.WriteFile(filepath.Join("plugins", "plugins.go"), formatBytes, 0o644); err != nil {
-		return err
+		return items, err
 	}
-	return nil
+	return items, nil
+}
+
+func appendUnique(items []string, item string) []string {
+	for _, existing := range items {
+		if existing == item {
+			return items
+		}
+	}
+	return append(items, item)
 }

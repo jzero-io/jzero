@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/protoc"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/protocgengo"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/protocgengogrpc"
@@ -269,26 +268,21 @@ type ToolVersion struct {
 func (c *Config) ToolVersion() ToolVersion {
 	ToolVersionOnce.Do(func() {
 		goctlVersionResp, _ := execx.Run("goctl -v", "")
-		logx.Debugf("goctl version: %s", goctlVersionResp)
 		versionInfo := strings.Split(goctlVersionResp, " ")
 		if len(versionInfo) >= 3 {
 			ToolVersionValue.GoctlVersion, _ = version.NewVersion(strings.TrimPrefix(versionInfo[2], "v"))
 		}
 
 		protocVersionResp, _ := protoc.Version()
-		logx.Debugf("protoc version: %s", protocVersionResp)
 		ToolVersionValue.ProtocVersion, _ = version.NewVersion(strings.TrimPrefix(protocVersionResp, "libprotoc "))
 
 		protocGenGoVersionResp, _ := protocgengo.Version()
-		logx.Debugf("protoc-gen-go version: %s", protocGenGoVersionResp)
 		ToolVersionValue.ProtocGenGoVersion, _ = version.NewVersion(strings.TrimPrefix(protocGenGoVersionResp, "v"))
 
 		protocGenGoGrpcVersionResp, _ := protocgengogrpc.Version()
-		logx.Debugf("protoc-gen-go-grpc version: %s", protocGenGoGrpcVersionResp)
 		ToolVersionValue.ProtocGenGoGrpcVersion, _ = version.NewVersion(strings.TrimPrefix(protocGenGoGrpcVersionResp, "v"))
 
 		protocGenOpenapiv2VersionResp, _ := execx.Run("protoc-gen-openapiv2 --version", "")
-		logx.Debugf("protoc-gen-openapiv2 version: %s", protocGenOpenapiv2VersionResp)
 		versionInfo = strings.Split(protocGenOpenapiv2VersionResp, " ")
 		if len(versionInfo) >= 2 {
 			ToolVersionValue.ProtocGenOpenapiv2Version, _ = version.NewVersion(strings.TrimSuffix(strings.TrimPrefix(versionInfo[1], "v"), ","))
