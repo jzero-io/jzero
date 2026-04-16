@@ -17,19 +17,23 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/serverless"
 )
 
-func Run() error {
+func Run() ([]string, error) {
 	wd, _ := os.Getwd()
+	var items []string
 
 	plugins, err := serverless.GetPlugins()
 	if err != nil {
-		return err
+		return nil, err
+	}
+	for _, p := range plugins {
+		items = appendUnique(items, p.Path)
 	}
 
 	if _, err := os.Stat("go.work"); err == nil {
 		goWork, _ := os.ReadFile("go.work")
 		work, err := modfile.ParseWork("", goWork, nil)
 		if err != nil {
-			return err
+			return items, err
 		}
 		for _, p := range plugins {
 			if !p.Mono {
@@ -37,7 +41,7 @@ func Run() error {
 					p.Path = "./" + p.Path
 				}
 				if err = work.DropUse(p.Path); err != nil {
-					return err
+					return items, err
 				}
 			}
 		}
@@ -47,13 +51,14 @@ func Run() error {
 					p.Path = "./" + p.Path
 				}
 				if err = work.AddUse(p.Path, ""); err != nil {
-					return err
+					return items, err
 				}
 			}
 		}
 		if err = os.WriteFile("go.work", modfile.Format(work.Syntax), 0o644); err != nil {
-			return err
+			return items, err
 		}
+		items = appendUnique(items, "go.work")
 	} else {
 		initArgs := []string{"work", "init", "."}
 		var pluginArgs []string
@@ -67,21 +72,22 @@ func Run() error {
 			ec.Dir = wd
 			output, err := ec.CombinedOutput()
 			if err != nil {
-				return errors.Wrapf(err, "go work init meet error %s", string(output))
+				return items, errors.Wrapf(err, "go work init meet error %s", string(output))
 			}
+			items = appendUnique(items, "go.work")
 		}
 	}
 
 	// write plugins/plugins.go
 	goMod, err := mod.GetGoMod(wd)
 	if err != nil {
-		return err
+		return items, err
 	}
 	for i := 0; i < len(plugins); i++ {
 		if !plugins[i].Mono {
 			pluginGoMod, err := mod.GetGoMod(filepath.Join(wd, plugins[i].Path))
 			if err != nil {
-				return err
+				return items, err
 			}
 			plugins[i].Module = pluginGoMod.Path
 		} else {
@@ -91,7 +97,7 @@ func Run() error {
 
 	frameType, err := desc.GetFrameType()
 	if err != nil {
-		return err
+		return items, err
 	}
 
 	pluginsGoBytes, err := templatex.ParseTemplate(filepath.ToSlash(filepath.Join("api", "serverless_plugins.go.tpl")), map[string]any{
@@ -99,15 +105,24 @@ func Run() error {
 		"Module":  goMod.Path,
 	}, embeded.ReadTemplateFile(filepath.ToSlash(filepath.Join(frameType, "serverless_plugins.go.tpl"))))
 	if err != nil {
-		return err
+		return items, err
 	}
 	gosimports.LocalPrefix = goMod.Path
 	pluginsGoFormatBytes, err := gosimports.Process("", pluginsGoBytes, nil)
 	if err != nil {
-		return err
+		return items, err
 	}
 	if err := os.WriteFile(filepath.Join("plugins", "plugins.go"), pluginsGoFormatBytes, 0o644); err != nil {
-		return err
+		return items, err
 	}
-	return nil
+	return items, nil
+}
+
+func appendUnique(items []string, item string) []string {
+	for _, existing := range items {
+		if existing == item {
+			return items
+		}
+	}
+	return append(items, item)
 }

@@ -17,6 +17,8 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genswagger"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/gen/genzrpcclient"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/hooks"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/mod"
 )
 
@@ -25,9 +27,19 @@ var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: `Used to generate server code with api, proto, sql desc file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return gen.Run()
+		err := gen.Run()
+		if err == nil {
+			return nil
+		}
+
+		_ = hooks.Run(cmd, "After", "gen", config.C.Gen.Hooks.After)
+		if config.C.Quiet {
+			return err
+		}
+		return console.MarkRenderedError(err)
 	},
-	SilenceUsage: true,
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 // genZRpcClientCmd represents the rpcClient command
@@ -35,6 +47,12 @@ var genZRpcClientCmd = &cobra.Command{
 	Use:   "zrpcclient",
 	Short: `Gen zrpc client code by proto`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		hasInput, err := genzrpcclient.HasInput()
+		cobra.CheckErr(err)
+		if !hasInput {
+			return nil
+		}
+
 		wd, err := os.Getwd()
 		cobra.CheckErr(err)
 		mod, err := mod.GetGoMod(wd)
@@ -64,6 +82,8 @@ var genZRpcClientCmd = &cobra.Command{
 		}
 		return genzrpcclient.Generate(genModule)
 	},
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 // genSwaggerCmd represents the genSwagger command
@@ -73,6 +93,8 @@ var genSwaggerCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return genswagger.Gen()
 	},
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 func GetCommand() *cobra.Command {

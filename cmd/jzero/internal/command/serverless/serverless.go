@@ -5,12 +5,15 @@ Copyright © 2024 jaronnie <jaron@jaronnie.com>
 package serverless
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/serverless/serverlessbuild"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/command/serverless/serverlessdelete"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 )
 
 // serverlessCmd represents the serverless command
@@ -25,8 +28,10 @@ var serverlessBuildCmd = &cobra.Command{
 	Long:  `jzero serverless build.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		embeded.Home = config.C.Home
-		return serverlessbuild.Run()
+		return runServerlessStage("build", serverlessbuild.Run)
 	},
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 var serverlessDeleteCmd = &cobra.Command{
@@ -35,8 +40,10 @@ var serverlessDeleteCmd = &cobra.Command{
 	Long:  `jzero serverless delete.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		embeded.Home = config.C.Home
-		return serverlessdelete.Run()
+		return runServerlessStage("delete", serverlessdelete.Run)
 	},
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 func GetCommand() *cobra.Command {
@@ -46,4 +53,54 @@ func GetCommand() *cobra.Command {
 	serverlessDeleteCmd.Flags().StringSliceP("plugin", "p", nil, "plugin name")
 
 	return serverlessCmd
+}
+
+func runServerlessStage(kind string, fn func() ([]string, error)) error {
+	items, err := fn()
+	if config.C.Quiet {
+		return err
+	}
+
+	title := console.Green(stringsTitle(kind)) + " " + console.Yellow("serverless")
+	fmt.Printf("%s\n", console.BoxHeader("", title))
+
+	for _, item := range serverlessDisplayItems(items) {
+		fmt.Printf("%s\n", console.BoxItem(item))
+	}
+
+	if err != nil {
+		for _, line := range console.NormalizeErrorLines(err.Error()) {
+			fmt.Printf("%s\n", console.BoxDetailItem(line))
+		}
+		fmt.Printf("%s\n\n", console.BoxErrorFooter())
+		return console.MarkRenderedError(err)
+	}
+
+	fmt.Printf("%s\n\n", console.BoxSuccessFooter())
+	return nil
+}
+
+func serverlessDisplayItems(items []string) []string {
+	filtered := make([]string, 0, len(items))
+	for _, item := range items {
+		switch item {
+		case "go.work", "go.work.sum":
+			continue
+		default:
+			filtered = append(filtered, item)
+		}
+	}
+
+	return filtered
+}
+
+func stringsTitle(kind string) string {
+	switch kind {
+	case "build":
+		return "Build"
+	case "delete":
+		return "Delete"
+	default:
+		return kind
+	}
 }

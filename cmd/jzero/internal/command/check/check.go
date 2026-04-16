@@ -25,6 +25,14 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 )
 
+type toolCheckSpec struct {
+	name       string
+	required   string
+	current    *version.Version
+	ensurePath func() error
+	install    func() error
+}
+
 var toolVersionCheck = map[string]string{
 	"protoc":               "32.0",
 	"goctl":                "1.9.2",
@@ -243,14 +251,165 @@ func installProtoc() error {
 	return nil
 }
 
+func RunCheckCommand(all bool) error {
+	frameType, err := desc.GetFrameType()
+	if err != nil {
+		return err
+	}
+	if frameType == "" && !all {
+		return nil
+	}
+
+	specs := []toolCheckSpec{
+		{
+			name:     "goctl",
+			required: toolVersionCheck["goctl"],
+			current:  config.C.ToolVersion().GoctlVersion,
+			ensurePath: func() error {
+				_, err := env.LookPath("goctl")
+				if err != nil {
+					return errors.New("goctl is not installed")
+				}
+				return nil
+			},
+			install: func() error {
+				return golang.Install(fmt.Sprintf("github.com/zeromicro/go-zero/tools/goctl@v%s", toolVersionCheck["goctl"]))
+			},
+		},
+	}
+
+	if frameType == "rpc" || frameType == "gateway" || all {
+		specs = append(specs,
+			toolCheckSpec{
+				name:     "protoc",
+				required: toolVersionCheck["protoc"],
+				current:  config.C.ToolVersion().ProtocVersion,
+				ensurePath: func() error {
+					_, err := env.LookPath("protoc")
+					if err != nil {
+						return errors.New("protoc is not installed")
+					}
+					return nil
+				},
+				install: installProtoc,
+			},
+			toolCheckSpec{
+				name:     "protoc-gen-go",
+				required: toolVersionCheck["protoc-gen-go"],
+				current:  config.C.ToolVersion().ProtocGenGoVersion,
+				ensurePath: func() error {
+					_, err := env.LookPath("protoc-gen-go")
+					if err != nil {
+						return errors.New("protoc-gen-go is not installed")
+					}
+					return nil
+				},
+				install: func() error {
+					return golang.Install(fmt.Sprintf("google.golang.org/protobuf/cmd/protoc-gen-go@v%s", toolVersionCheck["protoc-gen-go"]))
+				},
+			},
+			toolCheckSpec{
+				name:     "protoc-gen-go-grpc",
+				required: toolVersionCheck["protoc-gen-go-grpc"],
+				current:  config.C.ToolVersion().ProtocGenGoGrpcVersion,
+				ensurePath: func() error {
+					_, err := env.LookPath("protoc-gen-go-grpc")
+					if err != nil {
+						return errors.New("protoc-gen-go-grpc is not installed")
+					}
+					return nil
+				},
+				install: func() error {
+					return golang.Install(fmt.Sprintf("google.golang.org/grpc/cmd/protoc-gen-go-grpc@v%s", toolVersionCheck["protoc-gen-go-grpc"]))
+				},
+			},
+			toolCheckSpec{
+				name:     "protoc-gen-openapiv2",
+				required: toolVersionCheck["protoc-gen-openapiv2"],
+				current:  config.C.ToolVersion().ProtocGenOpenapiv2Version,
+				ensurePath: func() error {
+					_, err := env.LookPath("protoc-gen-openapiv2")
+					if err != nil {
+						return errors.New("protoc-gen-openapiv2 is not installed")
+					}
+					return nil
+				},
+				install: func() error {
+					return golang.Install(fmt.Sprintf("github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v%s", toolVersionCheck["protoc-gen-openapiv2"]))
+				},
+			},
+		)
+	}
+
+	if config.C.Quiet {
+		for _, spec := range specs {
+			if _, err := ensureToolForCheck(spec); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	title := console.Green("Check") + " " + console.Yellow("tools")
+	fmt.Printf("%s\n", console.BoxHeader("", title))
+
+	for _, spec := range specs {
+		item, err := ensureToolForCheck(spec)
+		if err != nil {
+			fmt.Printf("%s\n", console.BoxErrorItem(spec.name))
+			for _, line := range console.NormalizeErrorLines(err.Error()) {
+				fmt.Printf("%s\n", console.BoxDetailItem(line))
+			}
+			fmt.Printf("%s\n\n", console.BoxErrorFooter())
+			return console.MarkRenderedError(err)
+		}
+		fmt.Printf("%s\n", console.BoxItem(item))
+	}
+
+	fmt.Printf("%s\n\n", console.BoxSuccessFooter())
+	return nil
+}
+
+func ensureToolForCheck(spec toolCheckSpec) (string, error) {
+	action := "ok"
+	if err := spec.ensurePath(); err != nil {
+		action = "installed"
+		if err := spec.install(); err != nil {
+			return "", err
+		}
+		if err := spec.ensurePath(); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%s (%s %s)", spec.name, action, spec.required), nil
+	}
+
+	checkVersion, err := version.NewVersion(spec.required)
+	if err != nil {
+		return "", err
+	}
+	if spec.current == nil || spec.current.LessThan(checkVersion) {
+		action = "upgraded"
+		if err := spec.install(); err != nil {
+			return "", err
+		}
+		if err := spec.ensurePath(); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%s (%s to %s)", spec.name, action, spec.required), nil
+	}
+
+	return fmt.Sprintf("%s (v%s)", spec.name, spec.required), nil
+}
+
 // checkCmd represents the check command
 var checkCmd = &cobra.Command{
 	Use:   "check",
 	Short: `Check and install all needed tools`,
-	Run: func(cmd *cobra.Command, args []string) {
-		err := RunCheck(true)
-		cobra.CheckErr(err)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return RunCheckCommand(false)
 	},
+	SilenceUsage:  true,
+	SilenceErrors: true,
 }
 
 func GetCommand() *cobra.Command {

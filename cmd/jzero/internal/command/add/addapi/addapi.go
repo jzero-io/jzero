@@ -15,7 +15,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
-func Run(args []string) error {
+func Run(args []string) (string, error) {
 	baseDir := filepath.Join("desc", "api")
 
 	apiName := args[0]
@@ -24,6 +24,8 @@ func Run(args []string) error {
 		apiName = strings.TrimSuffix(apiName, ".api")
 	}
 
+	target := filepath.Join(baseDir, apiName+".api")
+
 	// fix https://github.com/jzero-io/jzero/issues/405.
 	// For jzero, each api file, the server name can be different.
 	template, err := templatex.ParseTemplate(filepath.Join("api", "template.api.tpl"), map[string]any{
@@ -31,24 +33,24 @@ func Run(args []string) error {
 		"Group":   apiName,
 	}, embeded.ReadTemplateFile(filepath.Join("api", "template.api.tpl")))
 	if err != nil {
-		return err
+		return target, err
 	}
 
 	if config.C.Add.Output == "file" {
-		if filex.FileExists(filepath.Join(baseDir, apiName+".api")) {
-			return fmt.Errorf("%s already exists", apiName)
+		if filex.FileExists(target) {
+			return target, fmt.Errorf("%s already exists", apiName)
 		}
 
 		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, apiName)), 0o755)
 
-		err = os.WriteFile(filepath.Join(baseDir, apiName+".api"), template, 0o644)
+		err = os.WriteFile(target, template, 0o644)
 		if err != nil {
-			return err
+			return target, err
 		}
 
 		// format
-		return format.ApiFormatByPath(filepath.Join(baseDir, apiName+".api"), false)
+		return target, format.ApiFormatByPath(target, false)
 	}
 	fmt.Println(string(template))
-	return nil
+	return target, nil
 }

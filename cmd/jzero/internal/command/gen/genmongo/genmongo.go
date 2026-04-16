@@ -8,12 +8,10 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
 )
 
 type JzeroMongo struct {
@@ -41,17 +39,8 @@ func (jm *JzeroMongo) Gen() error {
 	} else {
 		goctlHome = filepath.Join(config.C.Home, "go-zero")
 	}
-	logx.Debugf("goctl_home = %s", goctlHome)
-
-	if !config.C.Quiet {
-		fmt.Printf("%s to generate mongo model code from types.\n", console.Green("Start"))
-	}
 
 	for _, mongoType := range config.C.Gen.MongoType {
-		if !config.C.Quiet {
-			fmt.Printf("%s mongo type %s\n", console.Green("Using"), mongoType)
-		}
-
 		// Support MutiModel with dot notation like "ntls_log.user"
 		var typeName string
 		if strings.Contains(mongoType, ".") {
@@ -105,7 +94,6 @@ func (jm *JzeroMongo) Gen() error {
 		args = append(args, fmt.Sprintf("--easy=%v", true))
 
 		cmd := exec.Command("goctl", args...)
-		logx.Debug(cmd.String())
 		resp, err := cmd.CombinedOutput()
 		if err != nil {
 			return errors.Errorf("gen mongo model code meet error. Err: %s:%s", err.Error(), resp)
@@ -115,10 +103,6 @@ func (jm *JzeroMongo) Gen() error {
 	err := jm.GenRegister(config.C.Gen.MongoType)
 	if err != nil {
 		return err
-	}
-
-	if !config.C.Quiet {
-		fmt.Println(console.Green("Gen Mongo Done"))
 	}
 
 	return nil

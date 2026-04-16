@@ -13,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	ddlparser "github.com/zeromicro/ddl-parser/parser"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/postgres"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/tools/goctl/util/pathx"
@@ -22,7 +21,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/embeded"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console/progress"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/dsn"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
@@ -38,16 +37,17 @@ type Conn struct {
 	SqlConn sqlx.SqlConn
 }
 
-func (jm *JzeroModel) Gen() error {
+func (jm *JzeroModel) Gen(progressChan chan<- progress.Message) ([]string, error) {
 	var (
 		allTables     []string
 		err           error
 		genCodeTables []string
 		conns         []Conn
+		genFiles      []string
 	)
 
 	if !pathx.FileExists(config.C.SqlDir()) && !config.C.Gen.ModelDatasource {
-		return nil
+		return nil, nil
 	}
 
 	if config.C.Gen.ModelDriver == "postgres" {
@@ -55,7 +55,7 @@ func (jm *JzeroModel) Gen() error {
 	}
 
 	if config.C.Gen.ModelDriver == "pgx" && !config.C.Gen.ModelDatasource {
-		return errors.New("postgres model only support datasource mode")
+		return nil, errors.New("postgres model only support datasource mode")
 	}
 
 	if config.C.Gen.ModelDatasource {
@@ -64,7 +64,7 @@ func (jm *JzeroModel) Gen() error {
 			for _, v := range config.C.Gen.ModelDatasourceUrl {
 				meta, err := dsn.ParseDSN(config.C.Gen.ModelDriver, v)
 				if err != nil {
-					return err
+					return nil, err
 				}
 				conns = append(conns, Conn{
 					Schema:  meta[dsn.Database],
@@ -75,7 +75,7 @@ func (jm *JzeroModel) Gen() error {
 			for _, v := range config.C.Gen.ModelDatasourceUrl {
 				meta, err := dsn.ParseDSN(config.C.Gen.ModelDriver, v)
 				if err != nil {
-					return err
+					return nil, err
 				}
 				conns = append(conns, Conn{
 					Schema:  meta[dsn.Database],
@@ -83,19 +83,7 @@ func (jm *JzeroModel) Gen() error {
 				})
 			}
 		default:
-			return errors.Errorf("model driver %s not support", config.C.Gen.ModelDriver)
-		}
-
-		if !config.C.Quiet {
-			fmt.Printf("%s to generate model from %s\n", console.Green("Start"), config.C.Gen.ModelDatasourceUrl)
-		}
-	} else {
-		if !config.C.Quiet {
-			msg := "to generate model code from sql files"
-			if config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0 {
-				msg += " (git-change mode)"
-			}
-			fmt.Printf("%s %s\n", console.Green("Start"), msg)
+			return nil, errors.Errorf("model driver %s not support", config.C.Gen.ModelDriver)
 		}
 	}
 
@@ -103,14 +91,14 @@ func (jm *JzeroModel) Gen() error {
 	var goctlHome string
 	tempDir, err := os.MkdirTemp(os.TempDir(), "")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer os.RemoveAll(tempDir)
 
 	// 先写入内置模板
 	err = embeded.WriteTemplateDir(filepath.Join("go-zero", "model"), filepath.Join(tempDir, "model"))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// 如果用户自定义了模板，则复制覆盖
@@ -118,12 +106,11 @@ func (jm *JzeroModel) Gen() error {
 	if pathx.FileExists(customTemplatePath) {
 		err = filex.CopyDir(customTemplatePath, filepath.Join(tempDir, "model"))
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	goctlHome = tempDir
-	logx.Debugf("goctl_home = %s", goctlHome)
 
 	var (
 		sqlFiles        []string
@@ -134,7 +121,7 @@ func (jm *JzeroModel) Gen() error {
 	if !config.C.Gen.ModelDatasource {
 		sqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		switch {
@@ -152,7 +139,7 @@ func (jm *JzeroModel) Gen() error {
 				} else {
 					specifiedSqlFiles, err := jzerodesc.FindSqlFiles(v)
 					if err != nil {
-						return err
+						return nil, err
 					}
 					genCodeSqlFiles = append(genCodeSqlFiles, specifiedSqlFiles...)
 				}
@@ -160,7 +147,7 @@ func (jm *JzeroModel) Gen() error {
 		default:
 			genCodeSqlFiles, err = jzerodesc.FindSqlFiles(config.C.SqlDir())
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 
@@ -178,7 +165,7 @@ func (jm *JzeroModel) Gen() error {
 			} else {
 				specifiedSqlFiles, err := jzerodesc.FindSqlFiles(v)
 				if err != nil {
-					return err
+					return nil, err
 				}
 				for _, saf := range specifiedSqlFiles {
 					genCodeSqlFiles = lo.Reject(genCodeSqlFiles, func(item string, _ int) bool {
@@ -198,7 +185,7 @@ func (jm *JzeroModel) Gen() error {
 		if len(config.C.Gen.ModelDatasourceTable) == 1 && config.C.Gen.ModelDatasourceTable[0] == "*" {
 			allTables, err = getAllTables(conns, config.C.Gen.ModelDriver)
 			if err != nil {
-				return err
+				return nil, err
 			}
 		} else {
 			allTables = config.C.Gen.ModelDatasourceTable
@@ -208,13 +195,22 @@ func (jm *JzeroModel) Gen() error {
 		eg.SetLimit(len(allTables))
 		for _, tableName := range allTables {
 			eg.Go(func() error {
+				if progressChan != nil {
+					progressChan <- progress.NewFile(tableName)
+				}
 				return generateModelFromDatasource(tableName, goctlHome)
 			})
 		}
 		if err = eg.Wait(); err != nil {
-			return err
+			return nil, err
 		}
-		return jm.GenRegister(allTables)
+		err = jm.GenRegister(allTables)
+		if err != nil {
+			return nil, err
+		}
+		// Add table names to genFiles for datasource mode
+		genFiles = append(genFiles, allTables...)
+		return genFiles, nil
 	} else if len(genCodeSqlFiles) != 0 {
 		var eg errgroup.Group
 		for _, f := range sqlFiles {
@@ -240,10 +236,10 @@ func (jm *JzeroModel) Gen() error {
 			})
 		}
 		if err = eg.Wait(); err != nil {
-			return err
+			return nil, err
 		}
 	} else {
-		return nil
+		return nil, nil
 	}
 
 	var eg errgroup.Group
@@ -252,24 +248,32 @@ func (jm *JzeroModel) Gen() error {
 		eg.Go(func() error {
 			tableParser := genCodeSqlSpecMap[f]
 			genCodeTables = append(genCodeTables, tableParser.Name)
+			if progressChan != nil {
+				displayName := fmt.Sprintf("%s (%s)", f, tableParser.Name)
+				progressChan <- progress.NewFile(displayName)
+			}
 			return generateModelFromSqlFile(f, goctlHome)
 		})
 	}
 
 	if err = eg.Wait(); err != nil {
-		return err
+		return nil, err
 	}
+
+	// Add SQL files to genFiles
+	genFiles = append(genFiles, genCodeSqlFiles...)
 
 	err = jm.GenRegister(allTables)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if !config.C.Quiet {
-		fmt.Println(console.Green("Gen Model Done"))
+	// Close progress channel to signal completion
+	if progressChan != nil {
+		close(progressChan)
 	}
 
-	return nil
+	return genFiles, nil
 }
 
 func getAllTables(conns []Conn, driver string) ([]string, error) {
@@ -335,10 +339,6 @@ func getIgnoreColumns(tableName string) []string {
 }
 
 func generateModelFromDatasource(tableName, goctlHome string) error {
-	if !config.C.Quiet {
-		fmt.Printf("%s table %s from datasource\n", console.Green("Generating"), tableName)
-	}
-
 	bf := tableName
 	if strings.Contains(tableName, ".") {
 		bf = strings.Split(tableName, ".")[1]
@@ -377,7 +377,7 @@ func generateModelFromDatasource(tableName, goctlHome string) error {
 		}
 
 		cmd := exec.Command("goctl", "model", "pg", "datasource", "--url", datasourceUrl, "--schema", schema, "-t", bf, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
-		logx.Debug(cmd.String())
+		// Debug removed(cmd.String())
 		resp, err := cmd.CombinedOutput()
 		if err != nil {
 			return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
@@ -400,7 +400,7 @@ func generateModelFromDatasource(tableName, goctlHome string) error {
 		}
 
 		cmd := exec.Command("goctl", "model", "mysql", "datasource", "--url", datasourceUrl, "-t", bf, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
-		logx.Debug(cmd.String())
+		// Debug removed(cmd.String())
 		resp, err := cmd.CombinedOutput()
 		if err != nil {
 			return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)
@@ -411,10 +411,6 @@ func generateModelFromDatasource(tableName, goctlHome string) error {
 }
 
 func generateModelFromSqlFile(sqlFile, goctlHome string) error {
-	if !config.C.Quiet {
-		fmt.Printf("%s sql file %s\n", console.Green("Using"), sqlFile)
-	}
-
 	bf := strings.TrimSuffix(filepath.Base(sqlFile), ".sql")
 
 	var (
@@ -449,7 +445,7 @@ func generateModelFromSqlFile(sqlFile, goctlHome string) error {
 	}
 
 	cmd := exec.Command("goctl", "model", "mysql", "ddl", "--database", schema, "--src", sqlFile, "--dir", modelDir, "--home", goctlHome, "--style", config.C.Style, "-i", strings.Join(getIgnoreColumns(bf), ","), "--cache="+fmt.Sprintf("%t", getIsCacheTable(bf)), "-p", config.C.Gen.ModelCachePrefix, "--strict="+fmt.Sprintf("%t", config.C.Gen.ModelStrict))
-	logx.Debug(cmd.String())
+	// Debug removed(cmd.String())
 	resp, err := cmd.CombinedOutput()
 	if err != nil {
 		return errors.Errorf("gen model code meet error. Err: %s:%s", err.Error(), resp)

@@ -16,7 +16,6 @@ import (
 	"github.com/dave/dst/decorator"
 	"github.com/rinchsan/gosimports"
 	"github.com/spf13/cast"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/api/spec"
 	"github.com/zeromicro/go-zero/tools/goctl/pkg/golang"
 	"github.com/zeromicro/go-zero/tools/goctl/util"
@@ -259,7 +258,7 @@ func (ja *JzeroApi) compactHandler(f *dst.File, fset *token.FileSet, file Handle
 			return err
 		}
 	}
-	logx.Debugf("remove old handler file: %s", file.Path)
+	// Debug removed("remove old handler file: %s", file.Path)
 	if err = os.Remove(file.Path); err != nil {
 		return err
 	}

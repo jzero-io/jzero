@@ -6,7 +6,6 @@ import (
 	"regexp"
 
 	"github.com/jzero-io/go_fmt/gofmtapi"
-	"github.com/zeromicro/go-zero/core/logx"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
@@ -34,7 +33,6 @@ func FormatFiles(files []string) error {
 	if len(opt.Files) == 0 {
 		return nil
 	}
-	logx.Debugf("format files: %v", opt.Files)
 	return gf.Execute(opt)
 }
 

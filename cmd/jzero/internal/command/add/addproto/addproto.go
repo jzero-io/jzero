@@ -14,7 +14,7 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
 
-func Run(args []string) error {
+func Run(args []string) (string, error) {
 	baseDir := filepath.Join("desc", "proto")
 
 	protoName := args[0]
@@ -22,6 +22,8 @@ func Run(args []string) error {
 	if strings.HasSuffix(protoName, ".proto") {
 		protoName = strings.TrimSuffix(protoName, ".proto")
 	}
+
+	target := filepath.Join(baseDir, protoName+".proto")
 
 	frameType, _ := desc.GetFrameType()
 	if frameType == "" {
@@ -35,22 +37,22 @@ func Run(args []string) error {
 		"Service": stringx.ToCamel(protoName),
 	}, embeded.ReadTemplateFile(filepath.Join(frameType, "template.proto.tpl")))
 	if err != nil {
-		return err
+		return target, err
 	}
 
 	if config.C.Add.Output == "file" {
-		if filex.FileExists(filepath.Join(baseDir, protoName+".proto")) {
-			return fmt.Errorf("%s already exists", protoName)
+		if filex.FileExists(target) {
+			return target, fmt.Errorf("%s already exists", protoName)
 		}
 
 		_ = os.MkdirAll(filepath.Dir(filepath.Join(baseDir, protoName)), 0o755)
 
-		err = os.WriteFile(filepath.Join(baseDir, protoName+".proto"), template, 0o644)
+		err = os.WriteFile(target, template, 0o644)
 		if err != nil {
-			return err
+			return target, err
 		}
-		return nil
+		return target, nil
 	}
 	fmt.Println(string(template))
-	return nil
+	return target, nil
 }

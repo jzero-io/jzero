@@ -35,8 +35,8 @@ func GetFrameType() (string, error) {
 		if isGatewayProject() {
 			frameType = "gateway"
 		} else {
-			// 获取全量 proto 文件
-			protoFiles, err := FindRpcServiceProtoFiles(config.C.ProtoDir())
+			// 对 frame type 只做尽力判断，不因 desc 语法错误提前中断真正的 gen 流程
+			protoFiles, err := FindExcludeThirdPartyProtoFiles(config.C.ProtoDir())
 			if err != nil {
 				return "", err
 			}
@@ -47,7 +47,7 @@ func GetFrameType() (string, error) {
 				var parse rpcparser.Proto
 				parse, err = protoParser.Parse(v, true)
 				if err != nil {
-					return "", err
+					continue
 				}
 				if IsNeedGenProtoDescriptor(&parse) {
 					frameType = "gateway"

@@ -8,7 +8,6 @@ import (
 
 	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/samber/lo"
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/tools/goctl/rpc/execx"
 	rpcparser "github.com/zeromicro/go-zero/tools/goctl/rpc/parser"
 	goctlconsole "github.com/zeromicro/go-zero/tools/goctl/util/console"
@@ -16,7 +15,7 @@ import (
 
 	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	jzerodesc "github.com/jzero-io/jzero/cmd/jzero/internal/desc"
-	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console"
+	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/console/progress"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/filex"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/gitstatus"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/osx"
@@ -41,7 +40,7 @@ func (l RegisterLines) String() string {
 	return "\n\t\t" + strings.Join(l, "\n\t\t")
 }
 
-func (jr *JzeroRpc) Gen() (map[string]*rpcparser.Proto, error) {
+func (jr *JzeroRpc) Gen(progressChan chan<- progress.Message) (map[string]*rpcparser.Proto, error) {
 	var (
 		serverImports   ImportLines
 		pbImports       ImportLines
@@ -56,14 +55,6 @@ func (jr *JzeroRpc) Gen() (map[string]*rpcparser.Proto, error) {
 
 	if len(protoFiles) == 0 {
 		return nil, nil
-	}
-
-	if !config.C.Quiet {
-		msg := "to generate rpc code from proto files"
-		if config.C.Gen.GitChange && gitstatus.IsGitRepo(filepath.Join(config.C.Wd())) && len(config.C.Gen.Desc) == 0 {
-			msg += " (git-change mode)"
-		}
-		fmt.Printf("%s %s\n", console.Green("Start"), msg)
 	}
 
 	protoSpecMap := make(map[string]*rpcparser.Proto, len(protoFiles))
@@ -176,13 +167,11 @@ func (jr *JzeroRpc) Gen() (map[string]*rpcparser.Proto, error) {
 	}
 
 	goctlHome = tempDir
-	logx.Debugf("goctl_home = %s", goctlHome)
 
 	excludeThirdPartyProtoFiles, err := jzerodesc.FindExcludeThirdPartyProtoFiles(config.C.ProtoDir())
 	if err != nil {
 		return nil, err
 	}
-	logx.Debugf("excludeThirdPartyProtoFiles = %s", excludeThirdPartyProtoFiles)
 
 	// 获取 proto 的 go_package
 	var protoParser protoparse.Parser
@@ -208,9 +197,6 @@ func (jr *JzeroRpc) Gen() (map[string]*rpcparser.Proto, error) {
 		}
 
 		if lo.Contains(genCodeProtoFiles, v) {
-			if !config.C.Quiet {
-				fmt.Printf("%s proto file %s\n", console.Green("Using"), v)
-			}
 			zrpcOut := "."
 
 			rel, err := filepath.Rel(protoDir, v)
@@ -280,11 +266,17 @@ func (jr *JzeroRpc) Gen() (map[string]*rpcparser.Proto, error) {
 				command += fmt.Sprintf(" -I%s ", strings.Join(config.C.Gen.ProtoInclude, " -I"))
 			}
 
-			logx.Debug(command)
-
 			_, err = execx.Run(command, config.C.Wd())
 			if err != nil {
 				return nil, err
+			}
+
+			// Send proto file progress
+			if progressChan != nil {
+				progressChan <- progress.NewFile(v)
+				if config.C.Debug {
+					progressChan <- progress.NewDebug(command)
+				}
 			}
 		}
 
@@ -332,7 +324,6 @@ func (jr *JzeroRpc) Gen() (map[string]*rpcparser.Proto, error) {
 				if len(config.C.Gen.ProtoInclude) > 0 {
 					protocCommand += fmt.Sprintf(" -I%s", strings.Join(config.C.Gen.ProtoInclude, " -I"))
 				}
-				logx.Debug(protocCommand)
 				_, err = execx.Run(protocCommand, config.C.Wd())
 				if err != nil {
 					return nil, err
@@ -345,12 +336,6 @@ func (jr *JzeroRpc) Gen() (map[string]*rpcparser.Proto, error) {
 			registerServers = append(registerServers, fmt.Sprintf("%s.Register%sServer(grpcServer, %ssvr.New%s(ctx))", filepath.Base(protoSpecMap[v].GoPackage), stringx.FirstUpper(s.Name), strings.ToLower(s.Name), stringx.FirstUpper(stringx.ToCamel(s.Name))))
 		}
 		pbImports = append(pbImports, fmt.Sprintf(`"%s/internal/%s"`, jr.Module, strings.TrimPrefix(protoSpecMap[v].GoPackage, "./")))
-	}
-
-	if len(genCodeProtoFiles) > 0 {
-		if !config.C.Quiet {
-			fmt.Println(console.Green("Gen Rpc Done"))
-		}
 	}
 
 	if pathx.FileExists(config.C.ProtoDir()) {

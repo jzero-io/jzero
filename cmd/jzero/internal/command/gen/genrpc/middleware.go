@@ -147,10 +147,6 @@ func (jr *JzeroRpc) genApiMiddlewares(protoFiles []string) (err error) {
 		return nil
 	}
 
-	if !config.C.Quiet {
-		fmt.Printf("%s to generate internal/middleware/middleware_gen.go\n", console.Green("Start"))
-	}
-
 	for _, v := range httpMiddlewares {
 		template, err := templatex.ParseTemplate(filepath.Join("rpc", "middleware_http.go.tpl"), map[string]any{
 			"Name": v.Name,
