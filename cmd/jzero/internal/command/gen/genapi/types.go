@@ -26,11 +26,9 @@ func (ja *JzeroApi) separateTypesGo(apiFiles []string, apiSpecMap map[string]*sp
 		return err
 	}
 
-	// 去重并生成默认 types.go
-	if len(typesWithoutPackage) > 0 {
-		if err := ja.generateDefaultTypesFile(typesWithoutPackage); err != nil {
-			return err
-		}
+	// Always rewrite the default types.go so old generated content does not linger.
+	if err := ja.generateDefaultTypesFile(typesWithoutPackage); err != nil {
+		return err
 	}
 
 	return nil
