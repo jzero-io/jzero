@@ -77,3 +77,81 @@ type OldType struct{}
 		t.Fatalf("separateTypesGo() should keep default types package, got:\n%s", got)
 	}
 }
+
+func TestSeparateTypesGoMergesTypesForSameGoPackage(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd() error = %v", err)
+	}
+	t.Cleanup(func() {
+		_ = os.Chdir(oldWd)
+	})
+
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Chdir() error = %v", err)
+	}
+
+	apiSpecMap := map[string]*spec.ApiSpec{
+		"desc/api/user.api": {
+			Info: spec.Info{
+				Properties: map[string]string{
+					"go_package": "shared",
+				},
+			},
+			Types: []spec.Type{
+				spec.DefineStruct{
+					RawName: "UserReq",
+					Members: []spec.Member{
+						{
+							Name: "Name",
+							Type: spec.PrimitiveType{RawName: "string"},
+							Tag:  "`json:\"name\"`",
+						},
+					},
+				},
+			},
+		},
+		"desc/api/order.api": {
+			Info: spec.Info{
+				Properties: map[string]string{
+					"go_package": "shared",
+				},
+			},
+			Types: []spec.Type{
+				spec.DefineStruct{
+					RawName: "OrderReq",
+					Members: []spec.Member{
+						{
+							Name: "Id",
+							Type: spec.PrimitiveType{RawName: "int64"},
+							Tag:  "`json:\"id\"`",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	ja := &JzeroApi{}
+	if err := ja.separateTypesGo([]string{"desc/api/user.api", "desc/api/order.api"}, apiSpecMap); err != nil {
+		t.Fatalf("separateTypesGo() error = %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join("internal", "types", "shared", "types.go"))
+	if err != nil {
+		t.Fatalf("ReadFile() error = %v", err)
+	}
+
+	got := string(data)
+	for _, want := range []string{
+		"package shared",
+		"type UserReq struct",
+		"type OrderReq struct",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("separateTypesGo() missing %q in merged file:\n%s", want, got)
+		}
+	}
+}
