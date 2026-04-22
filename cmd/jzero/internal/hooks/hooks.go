@@ -14,6 +14,12 @@ import (
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/execx"
 )
 
+var (
+	runOutputFn        = execx.RunOutput
+	printHookCommandFn = printHookCommand
+	printHookOutputFn  = printHookOutput
+)
+
 func Run(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error {
 	wd, _ := os.Getwd()
 
@@ -51,10 +57,10 @@ func Run(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error
 	}
 
 	for _, v := range hooks {
-		output, err := execx.RunOutput(v, wd, "JZERO_HOOK_TRIGGERED=true")
 		if !quiet {
-			printHookCommand(v, err == nil)
+			printHookCommandFn(v)
 		}
+		output, err := runOutputFn(v, wd, "JZERO_HOOK_TRIGGERED=true")
 		if err != nil {
 			lines := console.NormalizeErrorLines(output)
 			if len(lines) == 0 {
@@ -74,7 +80,7 @@ func Run(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error
 			return console.MarkRenderedError(err)
 		}
 		if !quiet && output != "" {
-			printHookOutput(output)
+			printHookOutputFn(output)
 		}
 	}
 
@@ -121,14 +127,10 @@ func Run(cmd *cobra.Command, hookAction, hooksName string, hooks []string) error
 	return nil
 }
 
-func printHookCommand(command string, success bool) {
+func printHookCommand(command string) {
 	if strings.Contains(command, "\n") {
 		lines := strings.Split(command, "\n")
-		if success {
-			fmt.Printf("%s\n", console.BoxItem(console.Cyan("Executing")))
-		} else {
-			fmt.Printf("%s\n", console.BoxErrorItem(console.Cyan("Executing")))
-		}
+		fmt.Printf("%s\n", console.BoxInfoItem(console.Cyan("Executing")))
 		for _, line := range lines {
 			trimmedLine := strings.TrimSpace(line)
 			if trimmedLine != "" {
@@ -139,12 +141,7 @@ func printHookCommand(command string, success bool) {
 	}
 
 	item := fmt.Sprintf("%s %s", console.Cyan("Executing"), command)
-	if success {
-		fmt.Printf("%s\n", console.BoxItem(item))
-		return
-	}
-
-	fmt.Printf("%s\n", console.BoxErrorItem(item))
+	fmt.Printf("%s\n", console.BoxInfoItem(item))
 }
 
 func printHookOutput(output string) {

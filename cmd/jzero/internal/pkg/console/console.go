@@ -61,6 +61,11 @@ func BoxItem(item string) string {
 	return fmt.Sprintf("│  %s %s", CheckMark(), item)
 }
 
+// BoxInfoItem creates a neutral informational box item.
+func BoxInfoItem(item string) string {
+	return fmt.Sprintf("│  %s %s", Cyan(">"), item)
+}
+
 // BoxErrorItem 创建box样式的错误条目
 func BoxErrorItem(item string) string {
 	return fmt.Sprintf("│  %s %s", CrossMark(), item)
