@@ -10,7 +10,7 @@ order: 0.1
 * Supports controlling various parameters through configuration file .jzero.yaml
 * Supports controlling various parameters through flag
 * Supports controlling various parameters through environment variables
-* Supports controlling various parameters through combination of above methods, priority from high to low: environment variables > flag > configuration file
+* Supports controlling various parameters through combination of above methods, priority from high to low: flag > environment variables > configuration file
 
 Example: `jzero gen --style go_zero` corresponds to `.jzero.yaml` content
 
@@ -82,3 +82,9 @@ jzero gen --quiet
 ```shell
 jzero gen --debug
 ```
+
+## Custom CLI plugins
+
+If built-in commands are not enough, `jzero` can dispatch unknown commands to external executables in `PATH`.
+
+See [Custom CLI plugins](./cli-plugin.md).

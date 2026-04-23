@@ -21,6 +21,33 @@ jzero provides the following types of templates to meet various scenarios:
 
 For detailed usage, see: [Template Guide](../guide/template.md)
 
+## Template market
+
+If built-in frames such as `api`, `rpc`, and `gateway` are not enough, visit the [jzero Template Market](https://templates.jzero.io).
+
+The template market is the entry for discovering built-in templates, official external templates, and third-party templates. You can use it to quickly find the source repository, usage guide, and recommended initialization command for a template.
+
+For official external templates, `jzero new` usually only needs the `--branch` parameter because the default remote repository already points to `https://github.com/jzero-io/templates`.
+
+Quick links:
+
+* [Template market home](https://templates.jzero.io)
+* [CLI template](https://templates.jzero.io/external/cli/)
+* [Vercel API template branch](https://github.com/jzero-io/templates/tree/api-vercel)
+
+```shell
+# Official CLI template
+jzero new mycli --branch cli
+
+# Official Vercel API template
+jzero new myvercel --branch api-vercel
+
+# Third-party or private template
+jzero new your_project --remote <template-repo> --branch <template-branch>
+```
+
+For more template details and examples, see the [jzero Template Market](https://templates.jzero.io) and [Template Guide](../guide/template.md).
+
 ## Initialize api project
 
 ::: code-tabs#shell

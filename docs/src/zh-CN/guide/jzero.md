@@ -10,7 +10,7 @@ order: 0.1
 * 支持通过配置文件 .jzero.yaml 控制各种参数
 * 支持通过 flag 控制各种参数
 * 支持通过环境变量控制各种参数
-* 支持通过以上组合的方式控制各种参数, 优先级从高到低为: 环境变量  > flag  > 配置文件
+* 支持通过以上组合的方式控制各种参数, 优先级从高到低为: flag > 环境变量 > 配置文件
 
 如: `jzero gen --style go_zero` 对应 `.jzero.yaml` 内容
 
@@ -82,3 +82,9 @@ jzero gen --quiet
 ```shell
 jzero gen --debug
 ```
+
+## 自定义 CLI 插件
+
+如果内置命令不够用，`jzero` 也支持将未知命令转发给 `PATH` 中的外部可执行文件。
+
+具体说明请参阅 [自定义 jzero CLI 插件](./cli-plugin.md)。
