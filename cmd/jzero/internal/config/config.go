@@ -109,6 +109,7 @@ type GenConfig struct {
 	Desc                    []string `mapstructure:"desc"`
 	DescIgnore              []string `mapstructure:"desc-ignore"`
 	GitChange               bool     `mapstructure:"git-change"`
+	ApiTypesDir             string   `mapstructure:"api-types-dir"`
 	Route2Code              bool
 	ProtoInclude            []string `mapstructure:"proto-include"`
 	RpcClient               bool     `mapstructure:"rpc-client"`

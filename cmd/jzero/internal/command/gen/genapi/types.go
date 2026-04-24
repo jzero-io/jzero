@@ -1,9 +1,12 @@
 package genapi
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/token"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -18,8 +21,11 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/tools/go/ast/astutil"
 
+	"github.com/jzero-io/jzero/cmd/jzero/internal/config"
 	"github.com/jzero-io/jzero/cmd/jzero/internal/pkg/templatex"
 )
+
+const defaultTypesDir = "internal/types"
 
 func (ja *JzeroApi) separateTypesGo(apiFiles []string, apiSpecMap map[string]*spec.ApiSpec) error {
 	_, typesWithoutPackage, err := ja.collectAndGenerateTypesByPackage(apiFiles, apiSpecMap)
@@ -29,6 +35,10 @@ func (ja *JzeroApi) separateTypesGo(apiFiles []string, apiSpecMap map[string]*sp
 
 	// Always rewrite the default types.go so old generated content does not linger.
 	if err := ja.generateDefaultTypesFile(typesWithoutPackage); err != nil {
+		return err
+	}
+
+	if err := ja.cleanupLegacyTypesDir(); err != nil {
 		return err
 	}
 
@@ -126,7 +136,10 @@ func (ja *JzeroApi) processApiFileTypes(apiFile string, apiSpec *spec.ApiSpec) (
 
 // writeTypesFile 写入 types.go 文件
 func (ja *JzeroApi) writeTypesFile(goPackage string, types []spec.Type) error {
-	typesDir := filepath.Join("internal", "types", goPackage)
+	typesDir, err := ja.typesOutputDir(goPackage)
+	if err != nil {
+		return err
+	}
 	if err := os.MkdirAll(typesDir, 0o755); err != nil {
 		return err
 	}
@@ -149,6 +162,14 @@ func (ja *JzeroApi) generateDefaultTypesFile(allTypes []spec.Type) error {
 	// 去重
 	uniqueTypes := ja.deduplicateTypes(allTypes)
 
+	typesDir, err := ja.typesOutputDir("")
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(typesDir, 0o755); err != nil {
+		return err
+	}
+
 	typesGoBytes, err := ja.renderTypesFile(uniqueTypes, "types")
 	if err != nil {
 		return err
@@ -159,7 +180,7 @@ func (ja *JzeroApi) generateDefaultTypesFile(allTypes []spec.Type) error {
 		return err
 	}
 
-	return os.WriteFile(filepath.Join("internal", "types", "types.go"), process, 0o644)
+	return os.WriteFile(filepath.Join(typesDir, "types.go"), process, 0o644)
 }
 
 func (ja *JzeroApi) renderTypesFile(types []spec.Type, packageName string) ([]byte, error) {
@@ -205,21 +226,187 @@ func (ja *JzeroApi) deduplicateTypes(types []spec.Type) []spec.Type {
 }
 
 func (ja *JzeroApi) updateHandlerImportedTypesPath(f *ast.File, fset *token.FileSet, file HandlerFile) error {
-	if astutil.UsesImport(f, fmt.Sprintf("%s/internal/types", ja.Module)) {
-		astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
-		astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
+	importPaths, err := ja.candidateTypesImportPaths(file.Package)
+	if err != nil {
+		return err
+	}
+
+	var hasTypesImport bool
+	for _, importPath := range importPaths {
+		if astutil.UsesImport(f, importPath) {
+			hasTypesImport = true
+		}
+		astutil.DeleteImport(fset, f, importPath)
+	}
+
+	if !hasTypesImport {
+		return nil
+	}
+
+	targetImportPath, err := ja.typesImportPath(file.Package)
+	if err != nil {
+		return err
+	}
+	astutil.AddNamedImport(fset, f, "types", targetImportPath)
+	return nil
+}
+
+func (ja *JzeroApi) updateLogicImportedTypesPath(f *ast.File, fset *token.FileSet, file LogicFile) error {
+	importPaths, err := ja.candidateTypesImportPaths(file.Package)
+	if err != nil {
+		return err
+	}
+	for _, importPath := range importPaths {
+		astutil.DeleteImport(fset, f, importPath)
+	}
+	if file.RequestType == nil && file.ResponseType == nil {
+		return nil
+	}
+
+	targetImportPath, err := ja.typesImportPath(file.Package)
+	if err != nil {
+		return err
+	}
+	astutil.AddNamedImport(fset, f, "types", targetImportPath)
+	return nil
+}
+
+func (ja *JzeroApi) typesOutputDir(goPackage string) (string, error) {
+	typesDir, err := ja.typesDir()
+	if err != nil {
+		return "", err
+	}
+	if goPackage == "" {
+		return typesDir, nil
+	}
+
+	return filepath.Join(typesDir, filepath.FromSlash(goPackage)), nil
+}
+
+func (ja *JzeroApi) typesDir() (string, error) {
+	typesDir := filepath.Clean(config.C.Gen.ApiTypesDir)
+	switch {
+	case filepath.IsAbs(typesDir):
+		return "", fmt.Errorf("gen types-dir must be relative to project root: %s", config.C.Gen.ApiTypesDir)
+	case typesDir == ".":
+		return "", errors.New("gen types-dir must not be project root")
+	case typesDir == "..", strings.HasPrefix(typesDir, ".."+string(os.PathSeparator)):
+		return "", fmt.Errorf("gen types-dir must stay within project root: %s", config.C.Gen.ApiTypesDir)
+	default:
+		return typesDir, nil
+	}
+}
+
+func (ja *JzeroApi) typesImportPath(goPackage string) (string, error) {
+	typesDir, err := ja.typesDir()
+	if err != nil {
+		return "", err
+	}
+	importPath := filepath.Join(ja.Module, typesDir)
+	if goPackage != "" {
+		importPath = filepath.Join(importPath, filepath.FromSlash(goPackage))
+	}
+	return filepath.ToSlash(importPath), nil
+}
+
+func (ja *JzeroApi) candidateTypesImportPaths(goPackage string) ([]string, error) {
+	paths := []string{
+		filepath.ToSlash(filepath.Join(ja.Module, defaultTypesDir)),
+	}
+
+	configuredPath, err := ja.typesImportPath("")
+	if err != nil {
+		return nil, err
+	}
+	paths = append(paths, configuredPath)
+
+	if goPackage != "" {
+		paths = append(paths, filepath.ToSlash(filepath.Join(ja.Module, defaultTypesDir, filepath.FromSlash(goPackage))))
+
+		configuredPackagePath, err := ja.typesImportPath(goPackage)
+		if err != nil {
+			return nil, err
+		}
+		paths = append(paths, configuredPackagePath)
+	}
+
+	return lo.Uniq(paths), nil
+}
+
+func (ja *JzeroApi) cleanupLegacyTypesDir() error {
+	typesDir, err := ja.typesDir()
+	if err != nil {
+		return err
+	}
+	if filepath.Clean(typesDir) == filepath.Clean(defaultTypesDir) {
+		return nil
+	}
+
+	if _, err := os.Stat(defaultTypesDir); err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+
+	var dirs []string
+	if err := filepath.Walk(defaultTypesDir, func(path string, info os.FileInfo, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if info.IsDir() {
+			dirs = append(dirs, path)
+			return nil
+		}
+		if info.Name() != "types.go" {
+			return nil
+		}
+
+		generated, err := isGeneratedTypesFile(path)
+		if err != nil {
+			return err
+		}
+		if generated {
+			if err := os.Remove(path); err != nil && !errors.Is(err, fs.ErrNotExist) {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	sort.Slice(dirs, func(i, j int) bool {
+		return len(dirs[i]) > len(dirs[j])
+	})
+	for _, dir := range dirs {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
+			return err
+		}
+		if len(entries) == 0 {
+			if err := os.Remove(dir); err != nil && !errors.Is(err, fs.ErrNotExist) {
+				return err
+			}
+		}
 	}
 
 	return nil
 }
 
-func (ja *JzeroApi) updateLogicImportedTypesPath(f *ast.File, fset *token.FileSet, file LogicFile) error {
-	astutil.DeleteImport(fset, f, fmt.Sprintf("%s/internal/types", ja.Module))
-	if file.RequestType == nil && file.ResponseType == nil {
-		return nil
+func isGeneratedTypesFile(path string) (bool, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return false, nil
+		}
+		return false, err
 	}
-	astutil.AddNamedImport(fset, f, "types", fmt.Sprintf("%s/internal/types/%s", ja.Module, file.Package))
-	return nil
+
+	return bytes.HasPrefix(data, []byte("// Code generated by ")), nil
 }
 
 // changeLogicTypes just change logic file logic function params and resp, but not body and others code
