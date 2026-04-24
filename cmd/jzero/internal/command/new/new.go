@@ -58,192 +58,137 @@ type GeneratedFile struct {
 
 // newCmd represents the new command
 var newCmd = &cobra.Command{
-	Use:          "new",
-	Short:        `Used to create project from templates`,
-	SilenceUsage: true,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		var app string
+	Use:           "new",
+	Short:         `Used to create project from templates`,
+	SilenceUsage:  true,
+	SilenceErrors: true,
+	RunE:          runNewCommand,
+}
+
+func runNewCommand(cmd *cobra.Command, args []string) error {
+	var app string
+	if len(args) > 0 {
+		app = args[0]
+	} else {
+		app = config.C.New.Name
+	}
+
+	stage := newConsoleStage{
+		title: newCommandTitle(),
+		quiet: config.C.Quiet,
+	}
+
+	if config.C.New.Serverless && config.C.New.Output != "" {
+		return stage.fail(errors.New("serverless mode not support output dir, must be in current project"))
+	}
+
+	if config.C.New.Output == "" {
 		if len(args) > 0 {
-			app = args[0]
+			config.C.New.Output = args[0]
 		} else {
-			app = config.C.New.Name
+			config.C.New.Output = config.C.New.Name
 		}
 
-		if config.C.New.Serverless && config.C.New.Output != "" {
-			return errors.New("serverless mode not support output dir, must be in current project")
+		if pathx.FileExists(config.C.New.Output) {
+			return stage.fail(errors.Errorf("%s already exists", config.C.New.Output))
 		}
+	}
 
-		if config.C.New.Output == "" {
-			if len(args) > 0 {
-				config.C.New.Output = args[0]
-			} else {
-				config.C.New.Output = config.C.New.Name
-			}
+	if config.C.New.Serverless {
+		config.C.New.Output = filepath.Join("plugins", config.C.New.Output)
+	}
 
-			if pathx.FileExists(config.C.New.Output) {
-				return errors.Errorf("%s already exists", config.C.New.Output)
-			}
+	if config.C.New.Module == "" {
+		if len(args) > 0 {
+			config.C.New.Module = args[0]
+		} else {
+			config.C.New.Module = config.C.New.Name
 		}
+	}
 
-		if config.C.New.Serverless {
-			config.C.New.Output = filepath.Join("plugins", config.C.New.Output)
-		}
-
-		if !config.C.Quiet {
-			fmt.Printf("%s project %s in %s dir\n", console.Green("Creating"), app, config.C.New.Output)
-		}
-
-		if config.C.New.Module == "" {
-			if len(args) > 0 {
-				config.C.New.Module = args[0]
-			} else {
-				config.C.New.Module = config.C.New.Name
-			}
-		}
-		// 在 go.mod 项目下但是项目本身没有 go.mod 文件
-		if config.C.New.Mono {
-			wd, _ := os.Getwd()
-			parentPackage, err := mod.GetParentPackage(wd)
-			if err != nil {
-				return err
-			}
-			config.C.New.Module = filepath.ToSlash(filepath.Join(parentPackage, config.C.New.Output))
-		}
-		gosimports.LocalPrefix = config.C.New.Module
-
-		home, _ := os.UserHomeDir()
-
-		var base string
-		switch {
-		// 使用内置模板
-		case config.C.New.Frame != "":
-			base = filepath.Join("frame", config.C.New.Frame, "app")
-		// 指定本地路径 ~/.jzero/templates/local 下的某文件夹作为模板
-		case config.C.New.Local != "":
-			embeded.Home = filepath.Join(home, ".jzero", "templates", "local", config.C.New.Local)
-			base = filepath.Join("app")
-		// 使用远程仓库模板
-		case config.C.New.Remote != "" && config.C.New.Branch != "":
-			fp := filepath.Join(home, ".jzero", "templates", "remote", config.C.New.Branch)
-			if filex.DirExists(fp) && config.C.New.Cache {
-				if !config.C.Quiet {
-					fmt.Printf("%s cache templates from '%s', please wait...\n", console.Green("Using"), fp)
-				}
-			} else {
-				_ = os.RemoveAll(fp)
-				if !config.C.Quiet {
-					fmt.Printf("%s templates into '%s', please wait...\n", console.Green("Cloning"), fp)
-				}
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(config.C.New.RemoteTimeout))
-				defer cancel()
-
-				if strings.HasPrefix(config.C.New.Remote, "git@") {
-					// SSH 协议
-					commandContext := exec.CommandContext(ctx, "git", "clone", "--depth", "1", "--branch", config.C.New.Branch, config.C.New.Remote, fp)
-					if resp, err := commandContext.CombinedOutput(); err != nil {
-						return errors.New(string(resp))
-					}
-				} else {
-					// HTTP 协议
-					auth := &http.BasicAuth{
-						Username: config.C.New.RemoteAuthUsername,
-						Password: config.C.New.RemoteAuthPassword,
-					}
-					// clone to local
-					if _, err := git.PlainCloneContext(ctx, fp, false, &git.CloneOptions{
-						SingleBranch:  true,
-						URL:           config.C.New.Remote,
-						Depth:         0,
-						ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
-						Auth:          auth,
-					}); err != nil {
-						return err
-					}
-				}
-
-				_ = os.RemoveAll(filepath.Join(fp, ".git"))
-			}
-			if !config.C.Quiet {
-				fmt.Println(console.Green("Done"))
-			}
-			embeded.Home = fp
-			base = filepath.Join("app")
-		// 指定特定路径作为模板
-		case config.C.Home != "":
-			embeded.Home = config.C.Home
-			if config.C.New.Frame != "" {
-				base = filepath.Join("frame", config.C.New.Frame, "app")
-			} else {
-				base = filepath.Join("app")
-				if !pathx.FileExists(base) && pathx.FileExists(filepath.Join(embeded.Home, "frame")) {
-					base = filepath.Join("frame", "api", "app")
-				}
-			}
-		default:
-			// 默认使用 api 模板
-			config.C.New.Frame = "api"
-			base = filepath.Join("frame", "api", "app")
-		}
-
-		if err := Run(app, base); err != nil {
-			return err
-		}
-
-		if !config.C.New.Gen {
-			return nil
-		}
-
-		// change dir to project
-		if err := os.Chdir(config.C.New.Output); err != nil {
-			return err
-		}
-		defer func() {
-			dir, _ := os.Getwd()
-			if err := os.Chdir(dir); err != nil {
-				cobra.CheckErr(err)
-			}
-		}()
-
-		frameType, err := desc.GetFrameType()
+	// 在 go.mod 项目下但是项目本身没有 go.mod 文件
+	if config.C.New.Mono {
+		wd, _ := os.Getwd()
+		parentPackage, err := mod.GetParentPackage(wd)
 		if err != nil {
+			return stage.fail(err)
+		}
+		config.C.New.Module = filepath.ToSlash(filepath.Join(parentPackage, config.C.New.Output))
+	}
+	gosimports.LocalPrefix = config.C.New.Module
+
+	stage.info(fmt.Sprintf("project: %s", app))
+	stage.info(fmt.Sprintf("output: %s", config.C.New.Output))
+
+	home, _ := os.UserHomeDir()
+	base, err := resolveTemplateBase(home, &stage)
+	if err != nil {
+		return stage.fail(err)
+	}
+
+	if err := Run(app, base); err != nil {
+		return stage.fail(err)
+	}
+	stage.success()
+
+	if !config.C.New.Gen {
+		return nil
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	// change dir to project
+	if err := os.Chdir(config.C.New.Output); err != nil {
+		return err
+	}
+	defer func() {
+		if err := os.Chdir(wd); err != nil {
+			cobra.CheckErr(err)
+		}
+	}()
+
+	frameType, err := desc.GetFrameType()
+	if err != nil {
+		return err
+	}
+	if frameType != "" {
+		if err := check.RunCheck(false); err != nil {
 			return err
 		}
-		if frameType != "" {
-			if err := check.RunCheck(false); err != nil {
-				return err
-			}
-		}
+	}
 
-		// special dir for jzero
-		if !filex.DirExists("desc") {
-			return nil
-		}
-		if !config.C.Quiet {
-			fmt.Printf("%s desc dir in %s, auto generate code\n", console.Green("Detected"), config.C.New.Output)
-		}
+	// special dir for jzero
+	if !filex.DirExists("desc") {
+		return nil
+	}
 
-		config.ResetConfig()
-		if err := config.InitConfig(cmd.Root()); err != nil {
+	config.ResetConfig()
+	if err := config.InitConfig(cmd.Root()); err != nil {
+		return err
+	}
+
+	// for gen persistent flags
+	if config.C.Style == "" {
+		config.C.Style = "gozero"
+	}
+	if config.C.Home == "" {
+		config.C.Home = filepath.Join(config.C.Wd(), ".template")
+	}
+
+	// run gen before hooks
+	if err := hooks.Run(cmd, "Before", "gen", config.C.Gen.Hooks.Before); err != nil {
+		return err
+	}
+	if err := gen.Run(); err != nil {
+		if config.C.Quiet {
 			return err
 		}
-
-		// for gen persistent flags
-		if config.C.Style == "" {
-			config.C.Style = "gozero"
-		}
-		if config.C.Home == "" {
-			config.C.Home = filepath.Join(config.C.Wd(), ".template")
-		}
-
-		// run gen before hooks
-		if err := hooks.Run(cmd, "Before", "gen", config.C.Gen.Hooks.Before); err != nil {
-			return err
-		}
-		if err := gen.Run(); err != nil {
-			return err
-		}
-		return hooks.Run(cmd, "After", "gen", config.C.Gen.Hooks.After)
-	},
+		return console.MarkRenderedError(err)
+	}
+	return hooks.Run(cmd, "After", "gen", config.C.Gen.Hooks.After)
 }
 
 func Run(appName, base string) error {
@@ -284,8 +229,7 @@ func Run(appName, base string) error {
 
 	for _, gf := range gfs {
 		if !gf.Skip {
-			err = checkWrite(gf.Path, gf.Content.Bytes())
-			if err != nil {
+			if err = checkWrite(gf.Path, gf.Content.Bytes()); err != nil {
 				return err
 			}
 		}
@@ -424,4 +368,131 @@ func GetCommand() *cobra.Command {
 	newCmd.Flags().StringSliceP("executable-extensions", "", []string{".sh"}, "select executable extensions")
 
 	return newCmd
+}
+
+func resolveTemplateBase(home string, stage *newConsoleStage) (string, error) {
+	switch {
+	// 使用内置模板
+	case config.C.New.Frame != "":
+		return filepath.Join("frame", config.C.New.Frame, "app"), nil
+	// 指定本地路径 ~/.jzero/templates/local 下的某文件夹作为模板
+	case config.C.New.Local != "":
+		embeded.Home = filepath.Join(home, ".jzero", "templates", "local", config.C.New.Local)
+		return filepath.Join("app"), nil
+	// 使用远程仓库模板
+	case config.C.New.Remote != "" && config.C.New.Branch != "":
+		fp := filepath.Join(home, ".jzero", "templates", "remote", config.C.New.Branch)
+		if filex.DirExists(fp) && config.C.New.Cache {
+			stage.info(fmt.Sprintf("template cache: %s", fp))
+		} else {
+			_ = os.RemoveAll(fp)
+			stage.info(fmt.Sprintf("clone template cache: %s", fp))
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(config.C.New.RemoteTimeout))
+			defer cancel()
+
+			if strings.HasPrefix(config.C.New.Remote, "git@") {
+				// SSH 协议
+				commandContext := exec.CommandContext(ctx, "git", "clone", "--depth", "1", "--branch", config.C.New.Branch, config.C.New.Remote, fp)
+				if resp, err := commandContext.CombinedOutput(); err != nil {
+					return "", errors.New(string(resp))
+				}
+			} else {
+				// HTTP 协议
+				auth := &http.BasicAuth{
+					Username: config.C.New.RemoteAuthUsername,
+					Password: config.C.New.RemoteAuthPassword,
+				}
+				// clone to local
+				if _, err := git.PlainCloneContext(ctx, fp, false, &git.CloneOptions{
+					SingleBranch:  true,
+					URL:           config.C.New.Remote,
+					Depth:         0,
+					ReferenceName: plumbing.ReferenceName("refs/heads/" + config.C.New.Branch),
+					Auth:          auth,
+				}); err != nil {
+					return "", err
+				}
+			}
+
+			_ = os.RemoveAll(filepath.Join(fp, ".git"))
+			stage.info("template cache ready")
+		}
+
+		embeded.Home = fp
+		return filepath.Join("app"), nil
+	// 指定特定路径作为模板
+	case config.C.Home != "":
+		embeded.Home = config.C.Home
+		base := filepath.Join("app")
+		if !pathx.FileExists(base) && pathx.FileExists(filepath.Join(embeded.Home, "frame")) {
+			base = filepath.Join("frame", "api", "app")
+		}
+		return base, nil
+	default:
+		// 默认使用 api 模板
+		config.C.New.Frame = "api"
+		return filepath.Join("frame", "api", "app"), nil
+	}
+}
+
+func newCommandTitle() string {
+	return console.Green("Create") + " " + console.Yellow("project")
+}
+
+type newConsoleStage struct {
+	title string
+	quiet bool
+	shown bool
+}
+
+func (s *newConsoleStage) ensureShown() {
+	if s.quiet || s.shown {
+		return
+	}
+
+	fmt.Printf("%s\n", console.BoxHeader("", s.title))
+	s.shown = true
+}
+
+func (s *newConsoleStage) info(item string) {
+	if s.quiet {
+		return
+	}
+
+	s.ensureShown()
+	fmt.Printf("%s\n", console.BoxInfoItem(item))
+}
+
+func (s *newConsoleStage) item(item string) {
+	if s.quiet {
+		return
+	}
+
+	s.ensureShown()
+	fmt.Printf("%s\n", console.BoxItem(item))
+}
+
+func (s *newConsoleStage) success() {
+	if s.quiet {
+		return
+	}
+	if !s.shown {
+		return
+	}
+
+	fmt.Printf("%s\n\n", console.BoxSuccessFooter())
+}
+
+func (s *newConsoleStage) fail(err error) error {
+	if s.quiet {
+		return err
+	}
+
+	s.ensureShown()
+	for _, line := range console.NormalizeErrorLines(err.Error()) {
+		fmt.Printf("%s\n", console.BoxDetailItem(line))
+	}
+	fmt.Printf("%s\n\n", console.BoxErrorFooter())
+	return console.MarkRenderedError(err)
 }
