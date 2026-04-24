@@ -102,6 +102,7 @@ func GetCommand() *cobra.Command {
 		genCmd.Flags().StringSliceP("desc", "", []string{}, "set desc path")
 		genCmd.Flags().StringSliceP("desc-ignore", "", []string{}, "set desc ignore path")
 		genCmd.Flags().BoolP("git-change", "", false, "set is git change, if changes then generate code")
+		genCmd.Flags().StringP("api-types-dir", "", filepath.Join("internal", "types"), "set generated api types dir, relative to the project root")
 		genCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
 		genCmd.Flags().StringSliceP("proto-include", "", []string{}, "proto include path")
 		genCmd.Flags().StringP("model-driver", "", "mysql", "goctl model driver. mysql or postgres")
