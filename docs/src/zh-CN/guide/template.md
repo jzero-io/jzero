@@ -43,6 +43,113 @@ jzero new project_name --local template_name
 jzero new project_name --home path_to_template
 ```
 
+## 模版渲染与变量
+
+`jzero new` 在生成项目时，会同时渲染模板内容和模板路径：
+
+* `.tpl` 文件内容会作为 Go `text/template` 渲染
+* 文件名和目录名也会作为模板渲染，因此路径里同样可以使用 `{{ .APP }}`、`{{ .Module }}` 这类变量
+* 如果文件名以 `.tpl.tpl` 结尾，只会去掉一层 `.tpl`，文件内容不会再次渲染，适合需要保留模板原文的场景
+
+例如下面这个模板文件路径：
+
+```text
+internal/{{ .APP | lower }}/{{ FormatStyle .Style "service_context.go.tpl" }}
+```
+
+在项目创建时会被渲染成真实目录和文件名。
+
+### 内置变量
+
+执行 `jzero new` 时，jzero 会向模板注入以下内置变量：
+
+| 变量 | 类型 | 说明 |
+| --- | --- | --- |
+| `APP` | `string` | 项目名，来自 `jzero new <name>` 或 `--name` |
+| `Module` | `string` | Go module 名称，来自 `--module`，未指定时默认与项目名一致 |
+| `GoVersion` | `string` | 当前 Go 版本 |
+| `GoArch` | `string` | 当前架构，如 `amd64`、`arm64` |
+| `DirName` | `string` | 输出目录名 |
+| `Style` | `string` | 文件命名风格，默认 `gozero` |
+| `Features` | `[]string` | `jzero new --features` 传入的特性列表 |
+| `Serverless` | `bool` | 是否以 serverless 模式创建项目 |
+
+例如：
+
+```text
+module {{ .Module }}
+
+{{ if has "model" .Features }}
+// enable model feature
+{{ end }}
+
+{{ if .Serverless }}
+// serverless mode
+{{ end }}
+```
+
+:::tip
+`jzero template build` 会自动把项目中的 `go.mod` module，以及 Go 代码里引用当前项目的 import 路径，改写成 `{{ .Module }}`。因此通过 `jzero template build` 构建出来的模板，至少可以直接复用 `Module` 变量。
+:::
+
+### 内置函数
+
+模板底层使用 Go `text/template`，除了 `and`、`or`、`not`、`index` 这类内置函数，还可以直接使用 [sprig](https://masterminds.github.io/sprig/) 提供的很多常用函数，例如 `lower`、`upper`、`default`、`has`、`dict` 等。除此之外，jzero 还额外注册了以下函数：
+
+| 函数 | 说明 |
+| --- | --- |
+| `FirstUpper(s)` | 首字母转大写 |
+| `FirstLower(s)` | 首字母转小写 |
+| `ToCamel(s)` | 将 `foo-bar`、`foo_bar`、`foo/bar` 转成驼峰 |
+| `FormatStyle(style, name)` | 按 `--style` 对文件名进行风格转换 |
+| `VersionCompare(v1, op, v2)` | 版本比较，支持 `>、<、>=、<=` |
+
+例如：
+
+```text
+{{ .APP | ToCamel | FirstUpper }}
+{{ FormatStyle .Style "service_context.go.tpl" }}
+{{ if (VersionCompare .GoVersion ">=" "1.24") }}toolchain go1.24.0{{ end }}
+```
+
+### 注入自定义模板变量
+
+可以通过全局参数 `--register-tpl-val key=value` 注入额外模板变量。注入后的值会合并到当前模板数据中，因此既可以在模板内容中使用，也可以在模板路径中使用。
+
+```shell
+jzero new myapi --local myapi \
+  --register-tpl-val company=acme \
+  --register-tpl-val owner=platform
+```
+
+模板中可以直接访问：
+
+```text
+# {{ .APP }}
+Company: {{ .company }}
+Owner: {{ .owner }}
+```
+
+也可以用于路径：
+
+```text
+internal/{{ .company }}/banner.txt.tpl
+```
+
+如果你希望长期复用这些变量，也可以写到 `.jzero.yaml`：
+
+```yaml
+register-tpl-val:
+  - company=acme
+  - owner=platform
+```
+
+注意：
+
+* 自定义注入变量与内置变量同名时，会覆盖原来的值
+* 当前参数按 `key=value` 解析，建议 value 中不要再包含 `=`
+* `--register-tpl-val` 是全局参数，不只 `jzero new` 可用；其他使用 jzero 模板渲染的命令也会额外合并这些变量，但不同命令自带的内置变量并不完全相同
+
 ## 实战: 构建属于自己的模版
 
 :::tip 可以将当前任意项目转换成 jzero 模板, 这非常 cool!
