@@ -227,6 +227,10 @@ func (ja *JzeroApi) cleanHandlersDir(genCodeApiFiles []string, genCodeApiSpecMap
 		}
 
 		for _, group := range apiSpec.Service.Groups {
+			if !shouldRewriteHandler(group) {
+				continue
+			}
+
 			groupAnnotation := group.GetAnnotation("group")
 			if groupAnnotation == "" {
 				continue
@@ -248,6 +252,11 @@ func (ja *JzeroApi) cleanHandlersDir(genCodeApiFiles []string, genCodeApiSpecMap
 		}
 	}
 	return eg.Wait()
+}
+
+func shouldRewriteHandler(group spec.Group) bool {
+	rewriteHandler := strings.TrimSpace(group.GetAnnotation("rewrite_handler"))
+	return rewriteHandler == "" || cast.ToBool(rewriteHandler)
 }
 
 // prepareTemplateDir 准备模板目录，返回临时目录路径

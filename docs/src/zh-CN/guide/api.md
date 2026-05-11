@@ -13,6 +13,7 @@ jzero 扩展了 api 语法, 支持了一下特性:
 
 * `go_package`: 将 go types 生成在定义的 package 中, 所以能支持不同 api 文件的 type 定义可以同名, 保持和 proto 中的 `go_package` 一致
 * `compact_handler`: 能将同一组路由的 handler 生成在同一个文件中, 减少文件的数量, 保持和 proto 的 server 模块一致
+* `rewrite_handler`: 控制生成代码时是否重写已存在的 handler 文件及其对应 logic 文件, 默认为 `true`; 设置为 `false` 可保留自定义 handler 和 logic 代码
 
 ## api 定义
 
@@ -124,5 +125,21 @@ service simpleapi {
 
 	@handler DeleteUserHandler
 	get /system/user/deleteUser (DeleteUserRequest) returns (DeleteUserResponse)
+}
+```
+
+## 保留自定义 handler 代码
+
+当 handler 需要自定义处理 `http.ResponseWriter` 或 `*http.Request` 时, 可以在路由组上设置 `rewrite_handler: false`. 再次执行 `jzero gen` 时, 已存在的 handler 文件及其对应 logic 文件会被保留, 缺失的文件仍可继续生成.
+
+```shell {4}
+@server (
+	prefix:          /api/v1
+	group:           system/webhook
+	rewrite_handler: false
+)
+service simpleapi {
+	@handler ReceiveWebhook
+	post /system/webhook/receive (WebhookRequest) returns (WebhookResponse)
 }
 ```
