@@ -1,6 +1,8 @@
 package genapi
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -79,7 +81,7 @@ func (l *Login) Login(req *types.LoginRequest) (resp *types.LoginResponse, err e
 	if string(data) != string(existingContent) {
 		t.Fatalf("patchLogic() should keep existing logic unchanged, got:\n%s", data)
 	}
-	if _, err = os.Stat(generatedPath); !os.IsNotExist(err) {
+	if _, err = os.Stat(generatedPath); !errors.Is(err, fs.ErrNotExist) {
 		t.Fatalf("patchLogic() should remove generated logic when final logic exists, stat err = %v", err)
 	}
 }

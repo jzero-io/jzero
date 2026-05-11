@@ -1,6 +1,8 @@
 package genapi
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -102,7 +104,7 @@ func TestPatchHandlerKeepsExistingHandlerWhenRewriteHandlerFalse(t *testing.T) {
 	if string(data) != string(existingContent) {
 		t.Fatalf("patchHandler() should keep existing handler unchanged, got:\n%s", data)
 	}
-	if _, err = os.Stat(generatedPath); !os.IsNotExist(err) {
+	if _, err = os.Stat(generatedPath); !errors.Is(err, fs.ErrNotExist) {
 		t.Fatalf("patchHandler() should remove generated handler when final handler exists, stat err = %v", err)
 	}
 }
