@@ -12,6 +12,7 @@ api is go-zero's self-developed domain-specific language (hereinafter referred t
 jzero has extended api syntax, supporting the following features:
 * `go_package`: Generates go types in defined packages, allowing different api files to have same-named type definitions, consistent with proto's `go_package`
 * `compact_handler`: Generates handlers of the same route group in one file, reducing file count, consistent with proto's server module
+* `rewrite_handler`: Controls whether existing handler files and their matching logic files are rewritten during code generation. The default is `true`; set it to `false` to keep custom handler and logic code.
 
 ## api definition
 
@@ -123,5 +124,21 @@ service simpleapi {
 
 	@handler DeleteUserHandler
 	get /system/user/deleteUser (DeleteUserRequest) returns (DeleteUserResponse)
+}
+```
+
+## Keep custom handler code
+
+When a handler needs custom `http.ResponseWriter` or `*http.Request` handling, set `rewrite_handler: false` on the route group. Existing handler files and their matching logic files will be kept when running `jzero gen`, while missing files can still be generated.
+
+```shell {4}
+@server (
+	prefix:          /api/v1
+	group:           system/webhook
+	rewrite_handler: false
+)
+service simpleapi {
+	@handler ReceiveWebhook
+	post /system/webhook/receive (WebhookRequest) returns (WebhookResponse)
 }
 ```

@@ -23,15 +23,16 @@ import (
 )
 
 type LogicFile struct {
-	Package      string
-	Group        string
-	Handler      string
-	New          bool // 是否是新生成的 logic 文件
-	Compact      bool // 是否合并 logic 文件
-	Path         string
-	DescFilepath string
-	RequestType  spec.Type
-	ResponseType spec.Type
+	Package        string
+	Group          string
+	Handler        string
+	New            bool // 是否是新生成的 logic 文件
+	Compact        bool // 是否合并 logic 文件
+	RewriteHandler bool
+	Path           string
+	DescFilepath   string
+	RequestType    spec.Type
+	ResponseType   spec.Type
 }
 
 func (ja *JzeroApi) getAllLogicFiles(apiFilepath string, apiSpec *spec.ApiSpec) ([]LogicFile, error) {
@@ -46,14 +47,15 @@ func (ja *JzeroApi) getAllLogicFiles(apiFilepath string, apiSpec *spec.ApiSpec) 
 			fp := filepath.Join(config.C.Wd(), "internal", "logic", group.GetAnnotation("group"), namingFormat+".go")
 
 			hf := LogicFile{
-				DescFilepath: apiFilepath,
-				Path:         fp,
-				Group:        group.GetAnnotation("group"),
-				New:          !pathx.FileExists(fp),
-				Compact:      cast.ToBool(group.GetAnnotation("compact_logic")),
-				Handler:      route.Handler,
-				RequestType:  route.RequestType,
-				ResponseType: route.ResponseType,
+				DescFilepath:   apiFilepath,
+				Path:           fp,
+				Group:          group.GetAnnotation("group"),
+				New:            !pathx.FileExists(fp),
+				Compact:        cast.ToBool(group.GetAnnotation("compact_logic")),
+				RewriteHandler: shouldRewriteHandler(group),
+				Handler:        route.Handler,
+				RequestType:    route.RequestType,
+				ResponseType:   route.ResponseType,
 			}
 			if goPackage, ok := apiSpec.Info.Properties["go_package"]; ok {
 				hf.Package = goPackage
@@ -75,6 +77,9 @@ func (ja *JzeroApi) patchLogic(file LogicFile, genCodeApiSpecMap map[string]*spe
 
 	if pathx.FileExists(newFilePath) {
 		_ = os.Remove(file.Path)
+		if !file.RewriteHandler {
+			return nil
+		}
 		file.Path = newFilePath
 	}
 

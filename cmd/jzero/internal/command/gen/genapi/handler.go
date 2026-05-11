@@ -28,12 +28,13 @@ import (
 )
 
 type HandlerFile struct {
-	Package     string
-	Group       string
-	Compact     bool
-	Handler     string
-	Path        string
-	ApiFilepath string
+	Package        string
+	Group          string
+	Compact        bool
+	Handler        string
+	RewriteHandler bool
+	Path           string
+	ApiFilepath    string
 }
 
 func (ja *JzeroApi) getAllHandlerFiles(apiFilepath string, apiSpec *spec.ApiSpec) ([]HandlerFile, error) {
@@ -48,11 +49,12 @@ func (ja *JzeroApi) getAllHandlerFiles(apiFilepath string, apiSpec *spec.ApiSpec
 			fp := filepath.Join(config.C.Wd(), "internal", "handler", group.GetAnnotation("group"), namingFormat+".go")
 
 			hf := HandlerFile{
-				ApiFilepath: apiFilepath,
-				Path:        fp,
-				Group:       group.GetAnnotation("group"),
-				Compact:     cast.ToBool(group.GetAnnotation("compact_handler")),
-				Handler:     route.Handler,
+				ApiFilepath:    apiFilepath,
+				Path:           fp,
+				Group:          group.GetAnnotation("group"),
+				Compact:        cast.ToBool(group.GetAnnotation("compact_handler")),
+				Handler:        route.Handler,
+				RewriteHandler: shouldRewriteHandler(group),
 			}
 			if goPackage, ok := apiSpec.Info.Properties["go_package"]; ok {
 				hf.Package = goPackage
@@ -73,6 +75,9 @@ func (ja *JzeroApi) patchHandler(file HandlerFile, genCodeApiSpecMap map[string]
 
 	if pathx.FileExists(newFilePath) {
 		_ = os.Remove(file.Path)
+		if !file.RewriteHandler {
+			return nil
+		}
 		file.Path = newFilePath
 	}
 
