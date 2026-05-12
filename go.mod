@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/a8m/envsubst v1.4.3
-	github.com/alicebob/miniredis/v2 v2.37.0
+	github.com/alicebob/miniredis/v2 v2.38.0
 	github.com/eddieowens/opts v0.1.0
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/golang-migrate/migrate/v4 v4.19.1
