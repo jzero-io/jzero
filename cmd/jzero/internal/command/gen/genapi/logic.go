@@ -29,6 +29,7 @@ type LogicFile struct {
 	New            bool // 是否是新生成的 logic 文件
 	Compact        bool // 是否合并 logic 文件
 	RewriteHandler bool
+	SSE            bool
 	Path           string
 	DescFilepath   string
 	RequestType    spec.Type
@@ -53,6 +54,7 @@ func (ja *JzeroApi) getAllLogicFiles(apiFilepath string, apiSpec *spec.ApiSpec) 
 				New:            !pathx.FileExists(fp),
 				Compact:        cast.ToBool(group.GetAnnotation("compact_logic")),
 				RewriteHandler: shouldRewriteHandler(group),
+				SSE:            cast.ToBool(group.GetAnnotation("sse")),
 				Handler:        route.Handler,
 				RequestType:    route.RequestType,
 				ResponseType:   route.ResponseType,
@@ -100,7 +102,7 @@ func (ja *JzeroApi) patchLogic(file LogicFile, genCodeApiSpecMap map[string]*spe
 	}
 
 	// change logic types
-	if _, ok := genCodeApiSpecMap[file.DescFilepath]; ok {
+	if _, ok := genCodeApiSpecMap[file.DescFilepath]; ok && !file.SSE {
 		if err = ja.changeLogicTypes(f, fset, file); err != nil {
 			console.Warning("[warning]: rewrite %s meet error %v", file.Path, err)
 		}
