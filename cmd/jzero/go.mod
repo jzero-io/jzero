@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/a8m/envsubst v1.4.3
 	github.com/dave/dst v0.27.3
-	github.com/go-git/go-git/v5 v5.19.1
+	github.com/go-git/go-git/v5 v5.19.2
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/hashicorp/go-version v1.9.0
 	github.com/iancoleman/orderedmap v0.3.0
@@ -126,7 +126,7 @@ require (
 	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
+	golang.org/x/text v0.39.0 // indirect
 	golang.org/x/tools/go/expect v0.1.1-deprecated // indirect
 	golang.org/x/tools/go/packages/packagestest v0.1.1-deprecated // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478 // indirect
