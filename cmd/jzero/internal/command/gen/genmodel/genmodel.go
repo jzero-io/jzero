@@ -39,11 +39,10 @@ type Conn struct {
 
 func (jm *JzeroModel) Gen(progressChan chan<- progress.Message) ([]string, error) {
 	var (
-		allTables     []string
-		err           error
-		genCodeTables []string
-		conns         []Conn
-		genFiles      []string
+		allTables []string
+		err       error
+		conns     []Conn
+		genFiles  []string
 	)
 
 	if !pathx.FileExists(config.C.SqlDir()) && !config.C.Gen.ModelDatasource {
@@ -192,7 +191,7 @@ func (jm *JzeroModel) Gen(progressChan chan<- progress.Message) ([]string, error
 		}
 		// For datasource mode, generate code for each table directly
 		var eg errgroup.Group
-		eg.SetLimit(len(allTables))
+		setModelConcurrencyLimit(&eg, len(allTables))
 		for _, tableName := range allTables {
 			eg.Go(func() error {
 				if progressChan != nil {
@@ -213,6 +212,7 @@ func (jm *JzeroModel) Gen(progressChan chan<- progress.Message) ([]string, error
 		return genFiles, nil
 	} else if len(genCodeSqlFiles) != 0 {
 		var eg errgroup.Group
+		setModelConcurrencyLimit(&eg, len(sqlFiles))
 		for _, f := range sqlFiles {
 			eg.Go(func() error {
 				tableParsers, err := ParseSql(filepath.Join(config.C.Wd(), f))
@@ -243,11 +243,10 @@ func (jm *JzeroModel) Gen(progressChan chan<- progress.Message) ([]string, error
 	}
 
 	var eg errgroup.Group
-	eg.SetLimit(len(genCodeSqlFiles))
+	setModelConcurrencyLimit(&eg, len(genCodeSqlFiles))
 	for _, f := range genCodeSqlFiles {
 		eg.Go(func() error {
 			tableParser := genCodeSqlSpecMap[f]
-			genCodeTables = append(genCodeTables, tableParser.Name)
 			if progressChan != nil {
 				displayName := fmt.Sprintf("%s (%s)", f, tableParser.Name)
 				progressChan <- progress.NewFile(displayName)
@@ -274,6 +273,18 @@ func (jm *JzeroModel) Gen(progressChan chan<- progress.Message) ([]string, error
 	}
 
 	return genFiles, nil
+}
+
+func setModelConcurrencyLimit(eg *errgroup.Group, taskCount int) {
+	if taskCount == 0 {
+		return
+	}
+
+	limit := config.C.Gen.ModelConcurrency
+	if limit <= 0 || limit > taskCount {
+		limit = taskCount
+	}
+	eg.SetLimit(limit)
 }
 
 func getAllTables(conns []Conn, driver string) ([]string, error) {

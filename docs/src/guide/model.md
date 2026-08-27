@@ -19,7 +19,19 @@ Currently supports two database types: mysql and postgres, where:
 
 * Supports multi-datasource code generation
 * Supports redis/custom cache
+* Supports configurable concurrency for SQL files and remote datasource tables
 * Dynamically adapts to multiple database types (mysql/postgres/sqlite), just modify configuration file to specify database driver, can switch between different databases without modifying any code
+
+## Concurrency Configuration
+
+Use `model-concurrency` to limit the number of concurrent model generation tasks. It applies to both SQL file and remote datasource modes. The default value `0` means unlimited concurrency.
+
+```yaml
+gen:
+  model-concurrency: 4
+```
+
+The equivalent command-line option is `jzero gen --model-concurrency 4`.
 
 ## Cache Configuration
 

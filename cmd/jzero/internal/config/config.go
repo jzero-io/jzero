@@ -114,6 +114,7 @@ type GenConfig struct {
 	ProtoInclude            []string `mapstructure:"proto-include"`
 	RpcClient               bool     `mapstructure:"rpc-client"`
 	ModelDriver             string   `mapstructure:"model-driver"`
+	ModelConcurrency        int      `mapstructure:"model-concurrency"`
 	ModelStrict             bool     `mapstructure:"model-strict"`
 	ModelIgnoreColumns      []string `mapstructure:"model-ignore-columns"`
 	ModelIgnoreColumnsTable []struct {

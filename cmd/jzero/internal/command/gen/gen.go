@@ -106,6 +106,7 @@ func GetCommand() *cobra.Command {
 		genCmd.Flags().BoolP("route2code", "", false, "is generate route2code")
 		genCmd.Flags().StringSliceP("proto-include", "", []string{}, "proto include path")
 		genCmd.Flags().StringP("model-driver", "", "mysql", "goctl model driver. mysql or postgres")
+		genCmd.Flags().IntP("model-concurrency", "", 0, "maximum concurrent model generation tasks; 0 means unlimited")
 		genCmd.Flags().BoolP("model-strict", "", false, "goctl model strict mode, see [https://go-zero.dev/docs/tutorials/cli/model]")
 		genCmd.Flags().StringSliceP("model-ignore-columns", "", []string{"create_at", "created_at", "create_time", "update_at", "updated_at", "update_time"}, "ignore columns of mysql model")
 		genCmd.Flags().StringP("model-schema", "", "", "model schema")

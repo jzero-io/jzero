@@ -20,7 +20,19 @@ jzero 支持通过 `desc/sql` 文件夹下的 sql ddl 文件和远程数据源�
 
 * 支持多数据源生成代码
 * 支持 redis/自定义缓存
+* 支持配置 SQL 文件和远程数据源表的生成并发数
 * 动态适配多数据库类型(mysql/postgres/sqlite), 仅修改配置文件指定数据库 driver 即可动态切换不同的数据库, 无需修改任何代码
+
+## 并发配置
+
+通过 `model-concurrency` 限制模型生成任务的并发数，同时作用于 SQL 文件和远程数据源模式。默认值 `0` 表示不限制并发数。
+
+```yaml
+gen:
+  model-concurrency: 4
+```
+
+对应的命令行参数为 `jzero gen --model-concurrency 4`。
 
 ## 缓存配置
 
